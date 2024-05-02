@@ -65,14 +65,22 @@ public class Main {
         double[] triangle = {
                 0.0,	 0.5, 1.5,
                 -0.5,	-0.5, 0,
-                0.5,	-0.5, 0
+                0.5,	-0.5, 0,
+
+                0.5,	 0.5, 0,
+                0.0,	-0.5, 0,
+                1.0,	-0.5, 0
         };
 
         //the color data (red, green, and blue)
         double[] color = {
-                0.0, 1.0, 0.0, //first vertex color
-                1.0, 0.0, 0.0, //second vertex color
-                0.0, 0.0, 1.0, //third vertex color
+                0.0, 1.0, 0.0,
+                1.0, 0.0, 0.0,
+                0.0, 0.0, 1.0,
+
+                0.0, 1.0, 0.0,
+                1.0, 0.0, 0.0,
+                0.0, 0.0, 1.0,
         };
 
         //the order to render the vertices
@@ -80,6 +88,9 @@ public class Main {
                 0,
                 1,
                 2,
+                3,
+                4,
+                5
         };
 
         //convert the vertex data arrays into ByteBuffers using a method I created down below
