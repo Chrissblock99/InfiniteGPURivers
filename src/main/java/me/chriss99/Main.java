@@ -1,23 +1,17 @@
 package me.chriss99;
 
-//import the OpenGL classes, Buffer utilities, and GLFW classes
 import org.lwjgl.opengl.*;
-        import org.lwjgl.BufferUtils;
+import org.lwjgl.BufferUtils;
+
 import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.system.MemoryUtil.NULL;
 
-//import all of the necessary OpenGL functions statically so they can be easily accessed
-        import static org.lwjgl.opengl.GL11.*;
-        import static org.lwjgl.opengl.GL15.*;
-        import static org.lwjgl.opengl.GL20.*;
-        import static org.lwjgl.opengl.GL30.*;
-
-//these are some extra imports for handling the shader files and Buffers
-        import java.io.File;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.ByteBuffer;
 import java.util.Scanner;
 
-import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Main {
 
@@ -33,18 +27,11 @@ public class Main {
         final int screenWidth = glfwGetVideoMode(glfwGetPrimaryMonitor()).width()/2;
         final int screenHeight = glfwGetVideoMode(glfwGetPrimaryMonitor()).height()/2;
 
-        //set the window to use opengl version 4.5
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-
-        //use the core opengl profile, instead of the compatibility one, to make sure you're only using current features
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-        //make this program work with newer versions of opengl
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-
-        //turn on window resizing
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
         //create a GLFW window and store its id in the window variable
         window = glfwCreateWindow(screenWidth, screenHeight, "GLFW OpenGL Window", NULL, 0);
@@ -293,30 +280,22 @@ public class Main {
     }
 
     public static ByteBuffer storeArrayInBuffer(double[] array) {
-
-        //8 bytes (64-bits) in a double, multiplied by the number of values in the array
         ByteBuffer buffer = BufferUtils.createByteBuffer(array.length * 8);
 
-        for(double i : array) {
+        for(double i : array)
             buffer.putDouble(i);
-        }
 
         buffer.position(0);
-
         return buffer;
     }
 
     public static ByteBuffer storeArrayInBuffer(int[] array) {
-
-        //8 bytes (64-bits) in a double, multiplied by the number of values in the array
         ByteBuffer buffer = BufferUtils.createByteBuffer(array.length * 4);
 
-        for(int i : array) {
+        for(int i : array)
             buffer.putInt(i);
-        }
 
         buffer.position(0);
-
         return buffer;
     }
 }
