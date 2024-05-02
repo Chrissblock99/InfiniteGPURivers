@@ -63,9 +63,9 @@ public class Main {
 
         //the vertex data (x and y)
         double[] triangle = {
-                0.0,	 0.5, //first x and y
-                -0.5,	-0.5, //second x and y
-                0.5,	-0.5, //third x and y
+                0.0,	 0.5, 1.5,
+                -0.5,	-0.5, 0,
+                0.5,	-0.5, 0
         };
 
         //the color data (red, green, and blue)
@@ -109,7 +109,7 @@ public class Main {
         glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
 
         //specifies information about the format of the VBO (number of values per vertex, data type, etc.)
-        glVertexAttribPointer(0, 2, GL_DOUBLE, false, 0, 0);
+        glVertexAttribPointer(0, 3, GL_DOUBLE, false, 0, 0);
 
         //enable vertex attribute array 0
         glEnableVertexAttribArray(0);
