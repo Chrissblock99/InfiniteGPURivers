@@ -18,12 +18,55 @@ public class Main {
     //a variable to hold the id of the GLFW window
     static long window;
 
+    static int vao;
+    static int coordVBO;
+    static int colorVBO;
+    static int indicesVBO;
+
+    static int vertexShader;
+    static int fragmentShader;
+    static int program;
+
+    static int colorMod;
+    static int positionMod;
+
     public static void main(String[] args) {
-
-        //start GLFW
         glfwInit();
+        createWindow();
+        setupData();
+        setupProgram();
 
-        //get the screen resolution of the user's monitor
+        loop();
+        System.out.println("Window closed");
+
+        cleanGL();
+    }
+
+    public static int loadShader(File file, int type) {
+        try {
+            Scanner sc = new Scanner(file);
+            StringBuilder data = new StringBuilder();
+
+            if(file.exists()) {
+                while(sc.hasNextLine()) {
+                    data.append(sc.nextLine()).append("\n");
+                }
+
+                sc.close();
+            }
+            int id = glCreateShader(type);
+            glShaderSource(id, data);
+            glCompileShader(id);
+            return id;
+        }
+
+        catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+    private static void createWindow() {
         final int screenWidth = glfwGetVideoMode(glfwGetPrimaryMonitor()).width()/2;
         final int screenHeight = glfwGetVideoMode(glfwGetPrimaryMonitor()).height()/2;
 
@@ -47,8 +90,10 @@ public class Main {
 
         //show the window
         glfwShowWindow(window);
+    }
 
-        //the vertex data (x and y)
+    static int[] index;
+    private static void setupData() {
         double[] triangle = {
                 0.0,	 0.5, 1.5,
                 -0.5,	-0.5, 0,
@@ -71,7 +116,7 @@ public class Main {
         };
 
         //the order to render the vertices
-        int[] index = {
+        index = new int[] {
                 0,
                 1,
                 2,
@@ -89,13 +134,13 @@ public class Main {
         //VBO: stores data (vertex coordinates, colors, indices, etc.) and a header that contains information about their format
 
         //tell the GPU to make a single vertex array and store the returned id into the VBO int
-        int vao = glGenVertexArrays();
+        vao = glGenVertexArrays();
 
         //set the current vertex array object
         glBindVertexArray(vao);
 
         //tell the gpu to make a VBO and store its ID in the 'coordVBO' varabile
-        int coordVBO = glGenBuffers();
+        coordVBO = glGenBuffers();
 
         //bind the 'coordVBO' VBO for use
         glBindBuffer(GL_ARRAY_BUFFER, coordVBO);
@@ -113,7 +158,7 @@ public class Main {
         glEnableVertexAttribArray(0);
 
         //create a second VBO for the colors
-        int colorVBO = glGenBuffers();
+        colorVBO = glGenBuffers();
 
         //bind the 'colorVBO' VBO for use
         glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
@@ -128,7 +173,7 @@ public class Main {
         glEnableVertexAttribArray(1);
 
         //create a third VBO for the indices (tells the GPU which vertices to render and when)
-        int indicesVBO = glGenBuffers();
+        indicesVBO = glGenBuffers();
 
         //bind the 'indicesVBO' for use
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesVBO);
@@ -141,15 +186,17 @@ public class Main {
 
         //unbind the currently bound VAO
         glBindVertexArray(0);
+    }
 
+    private static void setupProgram() {
         //load the vertex shader from the file using a method I wrote down below
-        int vertexShader = loadShader(new File("/home/chriss99/IdeaProjects/ogl_test2/src/main/java/me/chriss99/shader.vert"), GL_VERTEX_SHADER);
+        vertexShader = loadShader(new File("/home/chriss99/IdeaProjects/ogl_test2/src/main/java/me/chriss99/shader.vert"), GL_VERTEX_SHADER);
 
         //load the fragment shader from the file using a method I wrote down below
-        int fragmentShader = loadShader(new File("/home/chriss99/IdeaProjects/ogl_test2/src/main/java/me/chriss99/shader.frag"), GL_FRAGMENT_SHADER);
+        fragmentShader = loadShader(new File("/home/chriss99/IdeaProjects/ogl_test2/src/main/java/me/chriss99/shader.frag"), GL_FRAGMENT_SHADER);
 
         //create a program object and store its ID in the 'program' variable
-        int program = glCreateProgram();
+        program = glCreateProgram();
 
         //these method calls link shader program variables to attribute locations so that they can be modified in Java code
         glBindAttribLocation(program, 0, "position");
@@ -170,25 +217,21 @@ public class Main {
         System.out.println("Fragment Shader Compiled: " 	+ glGetShaderi(fragmentShader, 	GL_COMPILE_STATUS));
         System.out.println("Program Linked: " 				+ glGetProgrami(program, 		GL_LINK_STATUS));
         System.out.println("Program Validated: " 			+ glGetProgrami(program, 		GL_VALIDATE_STATUS));
-
-        //check for general OpenGL errors
-        int error = glGetError();
-        while(error != 0) {
-            System.out.println("OpenGL Error: " + error);
-            error = glGetError();
-        }
+        printErrors();
 
         //sets the background clear color to white
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
         //get the 'colorMod and 'positionMod' variables so I can change them while drawing to create the animation
-        int colorMod = glGetUniformLocation(program, "colorMod");
-        int positionMod = glGetUniformLocation(program, "positionMod");
-        float i = 0.0f;
+        colorMod = glGetUniformLocation(program, "colorMod");
+        positionMod = glGetUniformLocation(program, "positionMod");
 
         //set the current program
         glUseProgram(program);
+    }
 
+    private static void loop() {
+        float i = 0.0f;
         while(!glfwWindowShouldClose(window)) {
 
             //Animate the triangle by using sinusoids
@@ -222,9 +265,9 @@ public class Main {
             //poll for window events (resize, close, button presses, etc.)
             glfwPollEvents();
         }
+    }
 
-        System.out.println("Window closed");
-
+    private static void cleanGL() {
         //disable the vertex attribute arrays
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
@@ -232,6 +275,7 @@ public class Main {
         //delete the vbos and vao
         glDeleteBuffers(coordVBO);
         glDeleteBuffers(colorVBO);
+        glDeleteBuffers(indicesVBO);
         glDeleteVertexArrays(vao);
 
         //detach the shaders from the program object
@@ -240,6 +284,7 @@ public class Main {
 
         //delete the shaders now that they are deatched
         glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
 
         //stop using the shader program
         glUseProgram(0);
@@ -247,35 +292,14 @@ public class Main {
         //delete the program now that the shaders are detached and the program isn't being used
         glDeleteProgram(program);
 
-        //check for general OpenGL errors again to make sure the shutdown process worked
-        error = glGetError();
+        printErrors();
+    }
+
+    private static void printErrors() {
+        int error = glGetError();
         while(error != 0) {
             System.out.println("OpenGL Error: " + error);
             error = glGetError();
-        }
-    }
-
-    public static int loadShader(File file, int type) {
-        try {
-            Scanner sc = new Scanner(file);
-            StringBuilder data = new StringBuilder();
-
-            if(file.exists()) {
-                while(sc.hasNextLine()) {
-                    data.append(sc.nextLine()).append("\n");
-                }
-
-                sc.close();
-            }
-            int id = glCreateShader(type);
-            glShaderSource(id, data);
-            glCompileShader(id);
-            return id;
-        }
-
-        catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return -1;
         }
     }
 
