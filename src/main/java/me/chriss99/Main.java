@@ -27,8 +27,8 @@ public class Main {
     static int fragmentShader;
     static int program;
 
-    static int colorMod;
-    static int positionMod;
+    static int transformMatrix;
+    static CameraMatrix cameraMatrix = new CameraMatrix();
 
     public static void main(String[] args) {
         glfwInit();
@@ -95,13 +95,13 @@ public class Main {
     static int[] index;
     private static void setupData() {
         double[] triangle = {
-                0.0,	 0.5, 1.5,
-                -0.5,	-0.5, 0,
-                0.5,	-0.5, 0,
+                0.0,	 0.5, 2.5,
+                -0.5,	-0.5, 1,
+                0.5,	-0.5, 1,
 
-                0.5,	 0.5, 0,
-                0.0,	-0.5, 0,
-                1.0,	-0.5, 0
+                0.5,	 0.5, 1,
+                0.0,	-0.5, 1,
+                1.0,	-0.5, 1
         };
 
         //the color data (red, green, and blue)
@@ -223,29 +223,16 @@ public class Main {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
         //get the 'colorMod and 'positionMod' variables so I can change them while drawing to create the animation
-        colorMod = glGetUniformLocation(program, "colorMod");
-        positionMod = glGetUniformLocation(program, "positionMod");
+        transformMatrix = glGetUniformLocation(program, "transformMatrix");
 
         //set the current program
         glUseProgram(program);
     }
 
     private static void loop() {
-        float i = 0.0f;
         while(!glfwWindowShouldClose(window)) {
-
-            //Animate the triangle by using sinusoids
-            if(i > Math.PI * 2) {
-                i = 0.0f;
-            }
-
-            else {
-                i += 0.1f;
-            }
-
             //use the colorMod and positionMod variables to modify the fragment colors and positions to animate the triangle
-            glUniform4f(colorMod, (float)((Math.cos(i) + 1)/2), (float)((Math.sin(i) + 1)/2), (float)((Math.cos(i) + 1)/2), (float)((Math.sin(i) + 1)/2));
-            glUniform2f(positionMod, (float)((Math.cos(i) + 1)/2), (float)((Math.sin(i) + 1)/2));
+            glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
 
             //clear the window
             glClear(GL_COLOR_BUFFER_BIT);
