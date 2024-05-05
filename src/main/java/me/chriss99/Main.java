@@ -77,13 +77,14 @@ public class Main {
     static int[] index;
     private static void setupData() {
         double[] triangle = {
-                0.0,	 0.5, 2.5,
-                -0.5,	-0.5, 1,
-                0.5,	-0.5, 1,
-
-                0.5,	 0.5, 1,
-                0.0,	-0.5, 1,
-                1.0,	-0.5, 1
+                0, 0, 0,
+                1, 0, 0,
+                0, 1, 0,
+                1, 1, 0,
+                0, 1, 1,
+                1, 1, 1,
+                0, 0, 1,
+                1, 0, 1,
         };
 
         //the color data (red, green, and blue)
@@ -91,10 +92,11 @@ public class Main {
                 0.0, 1.0, 0.0,
                 1.0, 0.0, 0.0,
                 0.0, 0.0, 1.0,
-
                 0.0, 1.0, 0.0,
                 1.0, 0.0, 0.0,
                 0.0, 0.0, 1.0,
+                0.0, 1.0, 0.0,
+                1.0, 0.0, 0.0,
         };
 
         //the order to render the vertices
@@ -104,7 +106,9 @@ public class Main {
                 2,
                 3,
                 4,
-                5
+                5,
+                6,
+                7
         };
 
         //convert the vertex data arrays into ByteBuffers using a method I created down below
@@ -223,10 +227,7 @@ public class Main {
             glBindVertexArray(vao);
 
             //draw the current bound VAO/VBO using an index buffer
-            glDrawElements(GL_TRIANGLES, index.length, GL_UNSIGNED_INT, 0);
-
-            //unbind the vao if there's another one that will be used, just to get rid of any conflicts
-            glBindVertexArray(0);
+            glDrawElements(GL_TRIANGLE_STRIP, index.length, GL_UNSIGNED_INT, 0);
 
             //swap the frame to show the rendered image
             glfwSwapBuffers(window);
