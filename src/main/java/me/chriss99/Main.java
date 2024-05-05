@@ -225,8 +225,14 @@ public class Main {
             //clear the window
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+            //set the current vao to the one we made earlier with all of the data
+            glBindVertexArray(vao);
+
             //draw the current bound VAO/VBO using an index buffer
             glDrawElements(GL_TRIANGLE_STRIP, index.length, GL_UNSIGNED_INT, 0);
+
+            //unbind the vao if there's another one that will be used, just to get rid of any conflicts
+            glBindVertexArray(0);
 
             //swap the frame to show the rendered image
             glfwSwapBuffers(window);
