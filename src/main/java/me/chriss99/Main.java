@@ -40,6 +40,8 @@ public class Main {
         inputDeviceManager = new InputDeviceManager(window);
         movementController = new MovementController(inputDeviceManager, cameraMatrix);
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        glEnable(GL_CULL_FACE);
+        glEnable(GL_DEPTH_TEST);
 
         loop();
         System.out.println("Window closed");
@@ -221,10 +223,7 @@ public class Main {
             glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
 
             //clear the window
-            glClear(GL_COLOR_BUFFER_BIT);
-
-            //set the current vao to the one we made earlier with all of the data
-            glBindVertexArray(vao);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             //draw the current bound VAO/VBO using an index buffer
             glDrawElements(GL_TRIANGLE_STRIP, index.length, GL_UNSIGNED_INT, 0);
