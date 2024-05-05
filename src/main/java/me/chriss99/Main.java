@@ -47,30 +47,6 @@ public class Main {
         cleanGL();
     }
 
-    public static int loadShader(File file, int type) {
-        try {
-            Scanner sc = new Scanner(file);
-            StringBuilder data = new StringBuilder();
-
-            if(file.exists()) {
-                while(sc.hasNextLine()) {
-                    data.append(sc.nextLine()).append("\n");
-                }
-
-                sc.close();
-            }
-            int id = glCreateShader(type);
-            glShaderSource(id, data);
-            glCompileShader(id);
-            return id;
-        }
-
-        catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return -1;
-        }
-    }
-
     private static void createWindow() {
         final int screenWidth = glfwGetVideoMode(glfwGetPrimaryMonitor()).width()/2;
         final int screenHeight = glfwGetVideoMode(glfwGetPrimaryMonitor()).height()/2;
@@ -293,6 +269,30 @@ public class Main {
         while(error != 0) {
             System.out.println("OpenGL Error: " + error);
             error = glGetError();
+        }
+    }
+
+    public static int loadShader(File file, int type) {
+        try {
+            Scanner sc = new Scanner(file);
+            StringBuilder data = new StringBuilder();
+
+            if(file.exists()) {
+                while(sc.hasNextLine()) {
+                    data.append(sc.nextLine()).append("\n");
+                }
+
+                sc.close();
+            }
+            int id = glCreateShader(type);
+            glShaderSource(id, data);
+            glCompileShader(id);
+            return id;
+        }
+
+        catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return -1;
         }
     }
 
