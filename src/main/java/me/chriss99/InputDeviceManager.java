@@ -31,6 +31,9 @@ public class InputDeviceManager {
                 case GLFW_RELEASE -> runnables = keyReleaseRunnables.get(key);
             }
 
+            if (runnables == null)
+                return;
+
             for (Runnable runnable : runnables)
                 runnable.run();
         });
