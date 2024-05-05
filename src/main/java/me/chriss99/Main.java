@@ -28,13 +28,18 @@ public class Main {
     static int program;
 
     static int transformMatrix;
+    static InputDeviceManager inputDeviceManager = null;
     static CameraMatrix cameraMatrix = new CameraMatrix();
+    static MovementController movementController = null;
 
     public static void main(String[] args) {
         glfwInit();
         createWindow();
         setupData();
         setupProgram();
+        inputDeviceManager = new InputDeviceManager(window);
+        movementController = new MovementController(inputDeviceManager, cameraMatrix);
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
         loop();
         System.out.println("Window closed");
@@ -232,7 +237,7 @@ public class Main {
 
     private static void loop() {
         while(!glfwWindowShouldClose(window)) {
-            //use the colorMod and positionMod variables to modify the fragment colors and positions to animate the triangle
+            movementController.update();
             glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
 
             //clear the window
