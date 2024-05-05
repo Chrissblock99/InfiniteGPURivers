@@ -69,6 +69,7 @@ public class Main {
     private static void createWindow() {
         final int screenWidth = glfwGetVideoMode(glfwGetPrimaryMonitor()).width()/2;
         final int screenHeight = glfwGetVideoMode(glfwGetPrimaryMonitor()).height()/2;
+        cameraMatrix.aspectRatio = (float) screenHeight / (float) screenWidth;
 
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
