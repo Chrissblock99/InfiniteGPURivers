@@ -10,6 +10,8 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.ByteBuffer;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Scanner;
 
 
@@ -31,6 +33,8 @@ public class Main {
     static InputDeviceManager inputDeviceManager = null;
     static CameraMatrix cameraMatrix = new CameraMatrix();
     static MovementController movementController = null;
+
+    static double deltaTime = 1d/60d;
 
     public static void main(String[] args) {
         glfwInit();
@@ -218,6 +222,9 @@ public class Main {
     }
 
     private static void loop() {
+        double lastTime = glfwGetTime();
+        LinkedList<Double> frames = new LinkedList<>();
+
         while(!glfwWindowShouldClose(window)) {
             movementController.update();
             glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
@@ -239,6 +246,19 @@ public class Main {
 
             //poll for window events (resize, close, button presses, etc.)
             glfwPollEvents();
+
+
+            double currentTime = glfwGetTime();
+            frames.add(glfwGetTime());
+            Iterator<Double> iterator = frames.iterator();
+            for (int i = 0; i < frames.size(); i++)
+                if (currentTime - iterator.next() >= 1)
+                    iterator.remove();
+                else break;
+
+            deltaTime = currentTime - lastTime;
+            System.out.println(frames.size() + "   " + Math.round(1/deltaTime) + "   " + deltaTime*1000);
+            lastTime = currentTime;
         }
     }
 
