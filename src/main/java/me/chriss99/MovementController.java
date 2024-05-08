@@ -8,7 +8,7 @@ public class MovementController {
     private final CameraMatrix cameraMatrix;
     private final InputDeviceManager inputDeviceManager;
     private final Vector3f movementDirection = new Vector3f();
-    private float movementSpeed = 0.1f;
+    private float movementSpeed = 3f;
 
     public MovementController(InputDeviceManager inputDeviceManager, CameraMatrix cameraMatrix) {
         this.cameraMatrix = cameraMatrix;
@@ -52,7 +52,7 @@ public class MovementController {
     }
 
     public void update() {
-        cameraMatrix.position.add(new Vector3f(movementDirection).mul(movementSpeed).rotateY(-cameraMatrix.yaw));
+        cameraMatrix.position.add(new Vector3f(movementDirection).mul((float) (movementSpeed * Main.deltaTime)).rotateY(-cameraMatrix.yaw));
     }
 
     private static double log(double b, double x) {
