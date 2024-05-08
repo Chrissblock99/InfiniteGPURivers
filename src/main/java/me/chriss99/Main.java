@@ -46,6 +46,7 @@ public class Main {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
+        glfwSwapInterval(0);
 
         loop();
         System.out.println("Window closed");
