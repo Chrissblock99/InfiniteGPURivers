@@ -88,22 +88,22 @@ public class Main {
                 1, 0, 0,
                 0, 1, 0,
                 1, 1, 0,
-                0, 1, 1,
-                1, 1, 1,
                 0, 0, 1,
                 1, 0, 1,
+                0, 1, 1,
+                1, 1, 1,
         };
 
         //the color data (red, green, and blue)
         double[] color = {
-                0.0, 1.0, 0.0,
-                1.0, 0.0, 0.0,
-                0.0, 0.0, 1.0,
-                0.0, 1.0, 0.0,
-                1.0, 0.0, 0.0,
-                0.0, 0.0, 1.0,
-                0.0, 1.0, 0.0,
-                1.0, 0.0, 0.0,
+                1, 0, 0,
+                0, 0, 1,
+                0, 0, 1,
+                0, 1, 0,
+                1, 0, 0,
+                0, 0, 1,
+                0, 1, 0,
+                1, 0, 0,
         };
 
         //the order to render the vertices
@@ -112,10 +112,20 @@ public class Main {
                 1,
                 2,
                 3,
+                6,
+                7,
                 4,
                 5,
+                5, //hack
+                2, //hack
+                2,
                 6,
-                7
+                0,
+                4,
+                1,
+                5,
+                3,
+                7,
         };
 
         //convert the vertex data arrays into ByteBuffers using a method I created down below
