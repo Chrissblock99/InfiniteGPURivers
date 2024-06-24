@@ -124,7 +124,14 @@ public class Main {
                 7,
         };
 
+        int cubesNumber = 400;
+
         vaoList.add(new VAO(triangle, color, index));
+        for (int n = 0; n < cubesNumber-1; n++){
+            for (int i = 0; i < 8; i++)
+                triangle[i*3] += 2;
+            vaoList.add(new VAO(triangle, color, index));
+        }
     }
 
     private static void setupProgram() {
