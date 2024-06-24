@@ -49,6 +49,11 @@ public class MovementController {
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_I, () -> cameraMatrix.zNear += 0.05f);
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_J, () -> cameraMatrix.zFar -= 0.05f);
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_K, () -> cameraMatrix.zFar += 0.05f);
+
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_V, () -> {
+            Main.vSync = !Main.vSync;
+            Main.updateVSync();
+        });
     }
 
     public void update() {

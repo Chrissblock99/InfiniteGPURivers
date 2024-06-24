@@ -35,6 +35,7 @@ public class Main {
     static MovementController movementController = null;
 
     static double deltaTime = 1d/60d;
+    static boolean vSync = false;
 
     public static void main(String[] args) {
         glfwInit();
@@ -46,7 +47,7 @@ public class Main {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
-        glfwSwapInterval(0);
+        updateVSync();
 
         loop();
         System.out.println("Window closed");
@@ -296,6 +297,10 @@ public class Main {
         glDeleteProgram(program);
 
         printErrors();
+    }
+
+    public static void updateVSync() {
+        glfwSwapInterval(vSync ? 1 : 0);
     }
 
     private static void printErrors() {
