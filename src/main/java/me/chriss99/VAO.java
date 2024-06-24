@@ -15,9 +15,9 @@ public class VAO {
         this.vao = glGenVertexArrays();
         glBindVertexArray(vao);
 
-        ByteBuffer vertices = Main.storeArrayInBuffer(triangle);
-        ByteBuffer colors = Main.storeArrayInBuffer(color);
-        ByteBuffer indices = Main.storeArrayInBuffer(index);
+        ByteBuffer vertices = Util.storeArrayInBuffer(triangle);
+        ByteBuffer colors = Util.storeArrayInBuffer(color);
+        ByteBuffer indices = Util.storeArrayInBuffer(index);
 
         coordVBO = glGenBuffers();
         glBindBuffer(GL_ARRAY_BUFFER, coordVBO);

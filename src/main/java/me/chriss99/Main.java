@@ -1,7 +1,6 @@
 package me.chriss99;
 
 import org.lwjgl.opengl.*;
-import org.lwjgl.BufferUtils;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL30.*;
@@ -9,7 +8,6 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Scanner;
@@ -265,25 +263,5 @@ public class Main {
             e.printStackTrace();
             return -1;
         }
-    }
-
-    public static ByteBuffer storeArrayInBuffer(double[] array) {
-        ByteBuffer buffer = BufferUtils.createByteBuffer(array.length * 8);
-
-        for(double i : array)
-            buffer.putDouble(i);
-
-        buffer.position(0);
-        return buffer;
-    }
-
-    public static ByteBuffer storeArrayInBuffer(int[] array) {
-        ByteBuffer buffer = BufferUtils.createByteBuffer(array.length * 4);
-
-        for(int i : array)
-            buffer.putInt(i);
-
-        buffer.position(0);
-        return buffer;
     }
 }
