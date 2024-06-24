@@ -8,6 +8,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Scanner;
@@ -18,7 +19,7 @@ public class Main {
     //a variable to hold the id of the GLFW window
     static long window;
 
-    static VAO vao;
+    static final ArrayList<VAO> vaoList = new ArrayList<>();
 
     static int vertexShader;
     static int fragmentShader;
@@ -123,7 +124,7 @@ public class Main {
                 7,
         };
 
-        vao = new VAO(triangle, color, index);
+        vaoList.add(new VAO(triangle, color, index));
     }
 
     private static void setupProgram() {
@@ -171,9 +172,6 @@ public class Main {
         double lastTime = glfwGetTime();
         LinkedList<Double> frames = new LinkedList<>();
 
-        //set the current vao to the one we made earlier with all of the data
-        vao.bind();
-
         while(!glfwWindowShouldClose(window)) {
             movementController.update();
             glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
@@ -181,8 +179,12 @@ public class Main {
             //clear the window
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            //draw the current bound VAO/VBO using an index buffer
-            glDrawElements(GL_TRIANGLE_STRIP, vao.indexLength(), GL_UNSIGNED_INT, 0);
+            for (VAO vao : vaoList) {
+                vao.bind();
+
+                //draw the current bound VAO/VBO using an index buffer
+                glDrawElements(GL_TRIANGLE_STRIP, vao.indexLength(), GL_UNSIGNED_INT, 0);
+            }
 
             //swap the frame to show the rendered image
             glfwSwapBuffers(window);
@@ -210,7 +212,8 @@ public class Main {
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
 
-        vao.delete();
+        for (VAO vao : vaoList)
+            vao.delete();
 
         //detach the shaders from the program object
         glDetachShader(program, vertexShader);
