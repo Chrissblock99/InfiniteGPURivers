@@ -8,10 +8,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Scanner;
+import java.util.*;
 
 
 public class Main {
@@ -124,13 +121,18 @@ public class Main {
                 7,
         };
 
-        int cubesNumber = 400;
+        int cubesNumberX = 200;
+        int cubesNumberZ = 200;
 
-        vaoList.add(new VAO(triangle, color, index));
-        for (int n = 0; n < cubesNumber-1; n++){
-            for (int i = 0; i < 8; i++)
-                triangle[i*3] += 2;
-            vaoList.add(new VAO(triangle, color, index));
+        for (int x = 0; x < cubesNumberX; x++) {
+            for (int z = 0; z < cubesNumberZ; z++) {
+                double[] triangleCopy = Arrays.copyOf(triangle, triangle.length);
+                for (int i = 0; i < 8; i++) {
+                    triangleCopy[i * 3] += 2 * x;
+                    triangleCopy[i * 3 + 2] += 2 * z;
+                }
+                vaoList.add(new VAO(triangleCopy, color, index));
+            }
         }
     }
 
