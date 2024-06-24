@@ -20,10 +20,7 @@ public class Main {
     //a variable to hold the id of the GLFW window
     static long window;
 
-    static int vao;
-    static int coordVBO;
-    static int colorVBO;
-    static int indicesVBO;
+    static VAO vao;
 
     static int vertexShader;
     static int fragmentShader;
@@ -82,7 +79,6 @@ public class Main {
         glfwShowWindow(window);
     }
 
-    static int[] index;
     private static void setupData() {
         double[] triangle = {
                 0, 0, 0,
@@ -108,7 +104,7 @@ public class Main {
         };
 
         //the order to render the vertices
-        index = new int[] {
+        int[] index = new int[] {
                 0,
                 1,
                 2,
@@ -129,67 +125,7 @@ public class Main {
                 7,
         };
 
-        //convert the vertex data arrays into ByteBuffers using a method I created down below
-        ByteBuffer vertices = storeArrayInBuffer(triangle);
-        ByteBuffer colors = storeArrayInBuffer(color);
-        ByteBuffer indices = storeArrayInBuffer(index);
-
-        //VAO: stores pointers to all of the vbos to keep 'em organized
-        //VBO: stores data (vertex coordinates, colors, indices, etc.) and a header that contains information about their format
-
-        //tell the GPU to make a single vertex array and store the returned id into the VBO int
-        vao = glGenVertexArrays();
-
-        //set the current vertex array object
-        glBindVertexArray(vao);
-
-        //tell the gpu to make a VBO and store its ID in the 'coordVBO' varabile
-        coordVBO = glGenBuffers();
-
-        //bind the 'coordVBO' VBO for use
-        glBindBuffer(GL_ARRAY_BUFFER, coordVBO);
-
-        //we are currently inside the vertex array so this VBO is associated with 'coordVBO'
-        //uploads VBO data (in this case, coords) to the GPU, tells some information about the VBO so that it can work as efficiently as possible
-        //we are using STATIC_DRAW because "The data store contents will be speciÃ¯Â¬Âed once by the application...
-        //...and used many times as the source for GL drawing and image speciÃ¯Â¬Âcation commands."
-        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
-
-        //specifies information about the format of the VBO (number of values per vertex, data type, etc.)
-        glVertexAttribPointer(0, 3, GL_DOUBLE, false, 0, 0);
-
-        //enable vertex attribute array 0
-        glEnableVertexAttribArray(0);
-
-        //create a second VBO for the colors
-        colorVBO = glGenBuffers();
-
-        //bind the 'colorVBO' VBO for use
-        glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
-
-        //uploads VBO data (in this case, colors) to the GPU
-        glBufferData(GL_ARRAY_BUFFER, colors, GL_STATIC_DRAW);
-
-        //specifies information about the format of the VBO (number of values per vertex, data type, etc.)
-        glVertexAttribPointer(1, 3, GL_DOUBLE, false, 0, 0);
-
-        //enable vertex attribute array 1
-        glEnableVertexAttribArray(1);
-
-        //create a third VBO for the indices (tells the GPU which vertices to render and when)
-        indicesVBO = glGenBuffers();
-
-        //bind the 'indicesVBO' for use
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesVBO);
-
-        //uploads VBO data (in this case, colors) to the GPU
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
-
-        //unbind the last bound VBO
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        //unbind the currently bound VAO
-        glBindVertexArray(0);
+        vao = new VAO(triangle, color, index);
     }
 
     private static void setupProgram() {
@@ -238,7 +174,7 @@ public class Main {
         LinkedList<Double> frames = new LinkedList<>();
 
         //set the current vao to the one we made earlier with all of the data
-        glBindVertexArray(vao);
+        vao.bind();
 
         while(!glfwWindowShouldClose(window)) {
             movementController.update();
@@ -248,7 +184,7 @@ public class Main {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             //draw the current bound VAO/VBO using an index buffer
-            glDrawElements(GL_TRIANGLE_STRIP, index.length, GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLE_STRIP, vao.indexLength(), GL_UNSIGNED_INT, 0);
 
             //swap the frame to show the rendered image
             glfwSwapBuffers(window);
@@ -276,11 +212,7 @@ public class Main {
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
 
-        //delete the vbos and vao
-        glDeleteBuffers(coordVBO);
-        glDeleteBuffers(colorVBO);
-        glDeleteBuffers(indicesVBO);
-        glDeleteVertexArrays(vao);
+        vao.delete();
 
         //detach the shaders from the program object
         glDetachShader(program, vertexShader);
