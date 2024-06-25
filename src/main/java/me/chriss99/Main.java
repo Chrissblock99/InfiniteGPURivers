@@ -203,7 +203,7 @@ public class Main {
 
 
             double currentTime = glfwGetTime();
-            frames.add(glfwGetTime());
+            frames.add(currentTime);
             Iterator<Double> iterator = frames.iterator();
             for (int i = 0; i < frames.size(); i++)
                 if (currentTime - iterator.next() >= 1)
