@@ -121,8 +121,8 @@ public class Main {
                 7,
         };
 
-        int cubesNumberX = 200;
-        int cubesNumberZ = 200;
+        int cubesNumberX = 0;
+        int cubesNumberZ = 0;
 
         for (int x = 0; x < cubesNumberX; x++) {
             for (int z = 0; z < cubesNumberZ; z++) {
@@ -134,6 +134,8 @@ public class Main {
                 vaoList.add(new VAO(triangleCopy, color, index));
             }
         }
+
+        vaoList.add(VAOGenerator.heightMapToSimpleVAO(VAOGenerator.randomHeights(1000, 1000)));
     }
 
     private static void setupProgram() {
@@ -192,7 +194,7 @@ public class Main {
                 vao.bind();
 
                 //draw the current bound VAO/VBO using an index buffer
-                glDrawElements(GL_TRIANGLE_STRIP, vao.indexLength(), GL_UNSIGNED_INT, 0);
+                glDrawElements(GL_TRIANGLES, vao.indexLength(), GL_UNSIGNED_INT, 0);
             }
 
             //swap the frame to show the rendered image
