@@ -28,7 +28,7 @@ public class Main {
     static MovementController movementController = null;
 
     static double deltaTime = 1d/60d;
-    static boolean vSync = false;
+    static boolean vSync = true;
 
     public static void main(String[] args) {
         glfwInit();
