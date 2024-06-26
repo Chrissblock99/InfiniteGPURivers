@@ -35,8 +35,8 @@ public class VAOGenerator {
                 vertecies[vertexShift + 1] = heightMap[x][z];
                 vertecies[vertexShift + 2] = z;
 
-                color[vertexShift] = heightMap[x][z]/30*.9+.1;
-                color[vertexShift + 1] = heightMap[x][z]/30*.9+.1;
+                color[vertexShift] = heightMap[x][z]/30*.7+.3;
+                color[vertexShift + 1] = heightMap[x][z]/30*.8+.2;
                 color[vertexShift + 2] = heightMap[x][z]/30*.9+.1;
 
                 vertexShift += 3;
