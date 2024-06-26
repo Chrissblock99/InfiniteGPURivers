@@ -215,7 +215,8 @@ public class Main {
                 else break;
 
             deltaTime = currentTime - lastTime;
-            System.out.println(frames.size() + "   " + Math.round(1/deltaTime) + "   " + deltaTime*1000);
+            if (!vSync)
+                System.out.println(frames.size() + "   " + Math.round(1/deltaTime) + "   " + deltaTime*1000);
             lastTime = currentTime;
         }
     }
