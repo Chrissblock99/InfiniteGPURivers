@@ -137,6 +137,10 @@ public class Main {
 
         double[][] heightMap = VAOGenerator.pillar(100, 100);
 
+        HeightMapTransformer heightMapTransformer = new HeightMapTransformer();
+        for (int i = 0; i < 500; i++)
+            heightMapTransformer.simpleThermalErosion(heightMap);
+
         vaoList.add(VAOGenerator.heightMapToSimpleVAO(heightMap));
     }
 
