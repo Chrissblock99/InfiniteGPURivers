@@ -80,6 +80,17 @@ public class HeightMapTransformer {
     }
 
 
+    //  0
+    //1   2
+    //  3
+    private static final int[][] vonNeumannNeighbourhood = new int[][]{
+            { 0,  1},
+            {-1,  0},
+            { 1,  0},
+            { 0, -1}
+    };
+
+
     //0 1 2
     //3   4
     //5 6 7
