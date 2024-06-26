@@ -11,6 +11,16 @@ public class VAOGenerator {
         return heights;
     }
 
+    public static float[][] pillar(int xSize, int zSize) {
+        float[][] heights = new float[xSize][zSize];
+
+        for (int x = 0; x < xSize; x++)
+            for (int z = 0; z < zSize; z++)
+                heights[x][z] = (x > xSize*0.4 && x < xSize*0.6 && z > zSize*0.4 && z < zSize*0.6) ? 30 : 0;
+
+        return heights;
+    }
+
     public static VAO heightMapToSimpleVAO(float[][] heightMap) {
         double[] vertecies = new double[heightMap.length*heightMap[0].length*3];
         double[] color = new double[heightMap.length*heightMap[0].length*3];
@@ -25,9 +35,9 @@ public class VAOGenerator {
                 vertecies[vertexShift + 1] = heightMap[x][z];
                 vertecies[vertexShift + 2] = z;
 
-                color[vertexShift] = heightMap[x][z]/3;
-                color[vertexShift + 1] = heightMap[x][z]/3;
-                color[vertexShift + 2] = heightMap[x][z]/3;
+                color[vertexShift] = heightMap[x][z]/30*.9+.1;
+                color[vertexShift + 1] = heightMap[x][z]/30*.9+.1;
+                color[vertexShift + 2] = heightMap[x][z]/30*.9+.1;
 
                 vertexShift += 3;
 

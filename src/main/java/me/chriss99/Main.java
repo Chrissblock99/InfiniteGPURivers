@@ -135,7 +135,9 @@ public class Main {
             }
         }
 
-        vaoList.add(VAOGenerator.heightMapToSimpleVAO(VAOGenerator.randomHeights(1000, 1000)));
+        float[][] heightMap = VAOGenerator.pillar(100, 100);
+
+        vaoList.add(VAOGenerator.heightMapToSimpleVAO(heightMap));
     }
 
     private static void setupProgram() {
