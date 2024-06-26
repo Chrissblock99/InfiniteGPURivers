@@ -135,7 +135,7 @@ public class Main {
             }
         }
 
-        float[][] heightMap = VAOGenerator.pillar(100, 100);
+        double[][] heightMap = VAOGenerator.pillar(100, 100);
 
         vaoList.add(VAOGenerator.heightMapToSimpleVAO(heightMap));
     }

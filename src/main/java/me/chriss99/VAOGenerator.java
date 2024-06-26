@@ -1,18 +1,18 @@
 package me.chriss99;
 
 public class VAOGenerator {
-    public static float[][] randomHeights(int xSize, int zSize) {
-        float[][] heights = new float[xSize][zSize];
+    public static double[][] randomHeights(int xSize, int zSize) {
+        double[][] heights = new double[xSize][zSize];
 
         for (int x = 0; x < xSize; x++)
             for (int z = 0; z < zSize; z++)
-                heights[x][z] = (float) (Math.random()*3);
+                heights[x][z] = Math.random()*3;
 
         return heights;
     }
 
-    public static float[][] pillar(int xSize, int zSize) {
-        float[][] heights = new float[xSize][zSize];
+    public static double[][] pillar(int xSize, int zSize) {
+        double[][] heights = new double[xSize][zSize];
 
         for (int x = 0; x < xSize; x++)
             for (int z = 0; z < zSize; z++)
@@ -21,7 +21,7 @@ public class VAOGenerator {
         return heights;
     }
 
-    public static VAO heightMapToSimpleVAO(float[][] heightMap) {
+    public static VAO heightMapToSimpleVAO(double[][] heightMap) {
         double[] vertecies = new double[heightMap.length*heightMap[0].length*3];
         double[] color = new double[heightMap.length*heightMap[0].length*3];
         int[] index = new int[(heightMap.length-1)*(heightMap[0].length-1)*6];
