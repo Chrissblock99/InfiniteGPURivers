@@ -107,7 +107,7 @@ public class VAOGenerator {
 
         double[] color = new double[heightMap.length*heightMap[0].length*4*3];
         for (int i = 0; i < color.length; i++)
-            color[i] = Math.random();
+            color[i] = Math.random()*.5+.5;
 
         return new VAO(vertecies, color, index);
     }
