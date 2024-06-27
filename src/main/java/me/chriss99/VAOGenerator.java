@@ -78,7 +78,7 @@ public class VAOGenerator {
         return new VAO(vertecies, color, index);
     }
 
-    public static VAO heightMapToCubeVAO(float[][] heightMap) {
+    public static VAO heightMapToSquareVAO(double[][] heightMap) {
         double[] vertecies = new double[heightMap.length*heightMap[0].length*4*3];
         int[] index = new int[heightMap.length*heightMap[0].length*6];
 
