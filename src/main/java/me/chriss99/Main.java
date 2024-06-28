@@ -142,6 +142,15 @@ public class Main {
         }
 
         vaoList.add(VAOGenerator.heightMapToSimpleVAO(heightMap));
+
+
+        TerrainData terrainData = new TerrainData(heightMap);
+        for (int i = 0; i < 1; i++)
+            heightMapTransformer.simpleHydraulicErosion(terrainData);
+        //for (int x = 0; x < terrainData.xSize; x++)
+        //    System.out.println(Arrays.toString(terrainData.waterMap[x]));
+
+        vaoList.add(VAOGenerator.heightMapToSquareVAO(terrainData.addedHeights()));
     }
 
     private static void setupProgram() {
