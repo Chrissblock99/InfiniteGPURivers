@@ -105,6 +105,7 @@ public class HeightMapTransformer {
             { 1, -1}
     };
 
+    //pi = 3.06146745892 because of this (the simulation doesn't create perfect circles)
     private static final double[] inverseMooreNeighbourhoodDistances = new double[]{
             1/Math.sqrt(2),
             1,
