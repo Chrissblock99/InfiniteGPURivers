@@ -31,7 +31,7 @@ public class Main {
     static boolean vSync = true;
 
 
-    static double[][] heightMap = VAOGenerator.pillar(100, 100);
+    static TerrainData terrainData = new TerrainData(VAOGenerator.pillar(100, 100));
     static final HeightMapTransformer heightMapTransformer = new HeightMapTransformer();
     static boolean simulate = false;
 
@@ -141,16 +141,14 @@ public class Main {
             }
         }
 
-        vaoList.add(VAOGenerator.heightMapToSimpleVAO(heightMap));
+        vaoList.add(VAOGenerator.heightMapToSimpleVAO(terrainData.terrainMap));
+        vaoList.add(VAOGenerator.heightMapToSquareVAO(terrainData.addedHeights()));
 
-
-        TerrainData terrainData = new TerrainData(heightMap);
-        for (int i = 0; i < 1; i++)
-            heightMapTransformer.simpleHydraulicErosion(terrainData);
+        //for (int i = 0; i < 1; i++)
+        //    heightMapTransformer.simpleHydraulicErosion(terrainData);
         //for (int x = 0; x < terrainData.xSize; x++)
         //    System.out.println(Arrays.toString(terrainData.waterMap[x]));
 
-        vaoList.add(VAOGenerator.heightMapToSquareVAO(terrainData.addedHeights()));
     }
 
     private static void setupProgram() {
@@ -206,10 +204,11 @@ public class Main {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             if (simulate) {
-                heightMapTransformer.simpleThermalErosion(heightMap);
+                heightMapTransformer.simpleThermalErosion(terrainData.terrainMap);
 
                 vaoList.clear();
-                vaoList.add(VAOGenerator.heightMapToSimpleVAO(heightMap));
+                vaoList.add(VAOGenerator.heightMapToSimpleVAO(terrainData.terrainMap));
+                vaoList.add(VAOGenerator.heightMapToSquareVAO(terrainData.addedHeights()));
             }
 
             for (VAO vao : vaoList) {

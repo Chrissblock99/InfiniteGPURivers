@@ -56,14 +56,16 @@ public class MovementController {
         });
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_T, () -> Main.simulate = !Main.simulate);
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_R, () -> {
-            Main.heightMap = VAOGenerator.pillar(100, 100);
+            Main.terrainData = new TerrainData(VAOGenerator.pillar(100, 100));
             Main.vaoList.clear();
-            Main.vaoList.add(VAOGenerator.heightMapToSimpleVAO(Main.heightMap));
+            Main.vaoList.add(VAOGenerator.heightMapToSimpleVAO(Main.terrainData.terrainMap));
+            Main.vaoList.add(VAOGenerator.heightMapToSquareVAO(Main.terrainData.addedHeights()));
         });
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_F, () -> {
-            Main.heightMap = VAOGenerator.pillars(100, 100);
+            Main.terrainData = new TerrainData(VAOGenerator.pillars(100, 100));
             Main.vaoList.clear();
-            Main.vaoList.add(VAOGenerator.heightMapToSimpleVAO(Main.heightMap));
+            Main.vaoList.add(VAOGenerator.heightMapToSimpleVAO(Main.terrainData.terrainMap));
+            Main.vaoList.add(VAOGenerator.heightMapToSquareVAO(Main.terrainData.addedHeights()));
         });
     }
 
