@@ -34,7 +34,7 @@ public class HeightMapTransformer {
                 double steepNeighbourHeightDiffSum = 0;
 
                 for (int i = 0; i < mooreNeighbourhood.length; i++) {
-                    double heightDiff = heightMap[x][z]-heightMap[wrapOffsetCoordinate(x, heightMap.length, i, 0)][wrapOffsetCoordinate(z, heightMap[0].length, i, 1)];
+                    double heightDiff = heightMap[x][z]-heightMap[wrapOffsetCoordinateMoore(x, heightMap.length, i, 0)][wrapOffsetCoordinateMoore(z, heightMap[0].length, i, 1)];
                     if (heightDiff>maxHeightDiff)
                         maxHeightDiff = heightDiff;
 
@@ -53,7 +53,7 @@ public class HeightMapTransformer {
                     if (!neighborBelowTalusAngle[i])
                         continue;
 
-                    outflowPipes[x][z][i] = heightChange * (heightMap[x][z]-heightMap[wrapOffsetCoordinate(x, heightMap.length, i, 0)][wrapOffsetCoordinate(z, heightMap[0].length, i, 1)]) * inverseSteepNeighbourHeightDiffSum;
+                    outflowPipes[x][z][i] = heightChange * (heightMap[x][z]-heightMap[wrapOffsetCoordinateMoore(x, heightMap.length, i, 0)][wrapOffsetCoordinateMoore(z, heightMap[0].length, i, 1)]) * inverseSteepNeighbourHeightDiffSum;
                 }
 
                 if (!Arrays.equals(neighborBelowTalusAngle, new boolean[8]))
@@ -67,7 +67,7 @@ public class HeightMapTransformer {
         for (int z = 0; z < heightMap[0].length; z++)
             for (int x = 0; x < heightMap.length; x++)
                 for (int i = 0; i < mooreNeighbourhood.length; i++)
-                    heightMap[x][z] += outflowPipes[wrapOffsetCoordinate(x, heightMap.length, i, 0)][wrapOffsetCoordinate(z, heightMap[0].length, i, 1)][7-i];
+                    heightMap[x][z] += outflowPipes[wrapOffsetCoordinateMoore(x, heightMap.length, i, 0)][wrapOffsetCoordinateMoore(z, heightMap[0].length, i, 1)][7-i];
     }
 
     //TODO
@@ -75,8 +75,12 @@ public class HeightMapTransformer {
         return 1;
     }
 
-    private static int wrapOffsetCoordinate(int index, int length, int offset, int xz) {
+    private static int wrapOffsetCoordinateMoore(int index, int length, int offset, int xz) {
         return (index + mooreNeighbourhood[offset][xz] + length) % length;
+    }
+
+    private static int wrapOffsetCoordinateVonNeumann(int index, int length, int offset, int xz) {
+        return (index + vonNeumannNeighbourhood[offset][xz] + length) % length;
     }
 
 
