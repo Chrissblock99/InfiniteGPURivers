@@ -3,7 +3,9 @@ package me.chriss99;
 import java.util.Arrays;
 
 public class HeightMapTransformer {
-    double deltaT = 10; //[0.1;100]
+    double deltaTThermal = 10; //[0.1;100]
+    double deltaTWater = 0.02; //[0;0.05]
+
     double rainRate = 0.012; //[0;0.05]
     double evaporationRate = 0.015; //[0;0.05]
     double pipeCrossArea = 20; //[0.1;60]
@@ -45,7 +47,7 @@ public class HeightMapTransformer {
                     }
                 }
 
-                double heightChange = cellArea * deltaT * thermalErosionRate * terrainHardness(x, z) * maxHeightDiff*.5;
+                double heightChange = cellArea * deltaTThermal * thermalErosionRate * terrainHardness(x, z) * maxHeightDiff*.5;
                 double inverseSteepNeighbourHeightDiffSum = 1 / steepNeighbourHeightDiffSum;
 
                 //inverseSteepNeighbourHeightDiffSum CAN be Infinite, but in that case all differences are 0 and no one ever calculates anything
