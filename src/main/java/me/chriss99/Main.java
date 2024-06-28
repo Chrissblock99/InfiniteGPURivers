@@ -30,6 +30,12 @@ public class Main {
     static double deltaTime = 1d/60d;
     static boolean vSync = true;
 
+
+    static double[][] heightMap = VAOGenerator.pillar(100, 100);
+    static final HeightMapTransformer heightMapTransformer = new HeightMapTransformer();
+    static boolean simulate = false;
+
+
     public static void main(String[] args) {
         glfwInit();
         createWindow();
@@ -135,12 +141,6 @@ public class Main {
             }
         }
 
-        double[][] heightMap = VAOGenerator.pillar(100, 100);
-
-        HeightMapTransformer heightMapTransformer = new HeightMapTransformer();
-        for (int i = 0; i < 500; i++)
-            heightMapTransformer.simpleThermalErosion(heightMap);
-
         vaoList.add(VAOGenerator.heightMapToSimpleVAO(heightMap));
     }
 
@@ -195,6 +195,13 @@ public class Main {
 
             //clear the window
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            if (simulate) {
+                heightMapTransformer.simpleThermalErosion(heightMap);
+
+                vaoList.clear();
+                vaoList.add(VAOGenerator.heightMapToSimpleVAO(heightMap));
+            }
 
             for (VAO vao : vaoList) {
                 vao.bind();

@@ -54,6 +54,17 @@ public class MovementController {
             Main.vSync = !Main.vSync;
             Main.updateVSync();
         });
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_T, () -> Main.simulate = !Main.simulate);
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_R, () -> {
+            Main.heightMap = VAOGenerator.pillar(100, 100);
+            Main.vaoList.clear();
+            Main.vaoList.add(VAOGenerator.heightMapToSimpleVAO(Main.heightMap));
+        });
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_F, () -> {
+            Main.heightMap = VAOGenerator.pillars(100, 100);
+            Main.vaoList.clear();
+            Main.vaoList.add(VAOGenerator.heightMapToSimpleVAO(Main.heightMap));
+        });
     }
 
     public void update() {
