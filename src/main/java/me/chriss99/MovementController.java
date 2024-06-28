@@ -54,7 +54,12 @@ public class MovementController {
             Main.vSync = !Main.vSync;
             Main.updateVSync();
         });
-        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_T, () -> Main.simulate = !Main.simulate);
+
+
+
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_T, () -> Main.simulateThermal = !Main.simulateThermal);
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_H, () -> Main.simulateHydraulic = !Main.simulateHydraulic);
+
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_R, () -> {
             Main.terrainData = new TerrainData(VAOGenerator.pillar(100, 100));
             Main.vaoList.clear();
