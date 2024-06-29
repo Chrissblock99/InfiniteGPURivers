@@ -42,13 +42,9 @@ public class VAOGenerator {
         return heights;
     }
 
-    public static VAO heightMapToSimpleVAO(double[][] heightMap) {
+    public static double[] heightMapToSimpleVertexes(double[][] heightMap) {
         double[] vertecies = new double[heightMap.length*heightMap[0].length*3];
-        double[] color = new double[heightMap.length*heightMap[0].length*3];
-        int[] index = new int[(heightMap.length-1)*(heightMap[0].length-1)*6];
-
         int vertexShift = 0;
-        int indexShift = 0;
 
         for (int z = 0; z < heightMap[0].length; z++)
             for (int x = 0; x < heightMap.length; x++) {
@@ -56,11 +52,34 @@ public class VAOGenerator {
                 vertecies[vertexShift + 1] = heightMap[x][z];
                 vertecies[vertexShift + 2] = z;
 
+                vertexShift += 3;
+            }
+
+        return vertecies;
+    }
+
+    public static double[] heightMapToSimpleColors(double[][] heightMap) {
+        double[] color = new double[heightMap.length*heightMap[0].length*3];
+        int vertexShift = 0;
+
+        for (int z = 0; z < heightMap[0].length; z++)
+            for (int x = 0; x < heightMap.length; x++) {
                 color[vertexShift] = heightMap[x][z]/30*.7+.3;
                 color[vertexShift + 1] = heightMap[x][z]/30*.8+.2;
                 color[vertexShift + 2] = (x%2==0) ? .33 : 0 + ((z%2==0) ? .33 : 0);
 
                 vertexShift += 3;
+            }
+
+        return color;
+    }
+
+    public static int[] heightMapToSimpleIndex(double[][] heightMap) {
+        int[] index = new int[(heightMap.length-1)*(heightMap[0].length-1)*6];
+        int indexShift = 0;
+
+        for (int z = 0; z < heightMap[0].length; z++)
+            for (int x = 0; x < heightMap.length; x++) {
 
                 if (z == heightMap[0].length-1 || x == heightMap.length-1)
                     continue;
@@ -74,27 +93,48 @@ public class VAOGenerator {
                 indexShift += 6;
             }
 
-
-        return new VAO(vertecies, color, index);
+        return index;
     }
 
-    public static VAO heightMapToSquareVAO(double[][] heightMap) {
-        double[] vertecies = new double[heightMap.length*heightMap[0].length*4*3];
-        int[] index = new int[heightMap.length*heightMap[0].length*6];
+    public static VAO heightMapToSimpleVAO(double[][] heightMap) {
+        double[] vertexes = heightMapToSimpleVertexes(heightMap);
+        double[] color = heightMapToSimpleColors(heightMap);
+        int[] index = heightMapToSimpleIndex(heightMap);
 
+        return new VAO(vertexes, color, index);
+    }
+
+    public static double[] heightMapToSquareVertexes(double[][] heightMap) {
+        double[] vertexes = new double[heightMap.length*heightMap[0].length*4*3];
         int vertexShift = 0;
+
+        for (int z = 0; z < heightMap[0].length; z++)
+            for (int x = 0; x < heightMap.length; x++)
+                for (int n = 0; n < 4; n++) {
+                    vertexes[vertexShift] = x + ((n>1) ? 1:0) - .5;
+                    vertexes[vertexShift + 1] = heightMap[x][z];
+                    vertexes[vertexShift + 2] = z + ((n%2==0) ? 1:0) - .5;
+                    vertexShift += 3;
+                }
+
+        return vertexes;
+    }
+
+    public static double[] heightMapToSquareColors(double[][] heightMap) {
+        double[] color = new double[heightMap.length*heightMap[0].length*4*3];
+        for (int i = 0; i < color.length; i++)
+            color[i] = Math.random()*.5+.5;
+
+        return color;
+    }
+
+    public static int[] heightMapToSquareIndex(double[][] heightMap) {
+        int[] index = new int[heightMap.length*heightMap[0].length*6];
         int indexShift = 0;
         int indexShift2 = 0;
 
         for (int z = 0; z < heightMap[0].length; z++)
             for (int x = 0; x < heightMap.length; x++) {
-                for (int n = 0; n < 4; n++) {
-                    vertecies[vertexShift] = x + ((n>1) ? 1:0) - .5;
-                    vertecies[vertexShift + 1] = heightMap[x][z];
-                    vertecies[vertexShift + 2] = z + ((n%2==0) ? 1:0) - .5;
-                    vertexShift += 3;
-                }
-
                 index[indexShift+0] = indexShift2+0;
                 index[indexShift+1] = indexShift2+1;
                 index[indexShift+2] = indexShift2+2;
@@ -105,11 +145,15 @@ public class VAOGenerator {
                 indexShift2 += 4;
             }
 
-        double[] color = new double[heightMap.length*heightMap[0].length*4*3];
-        for (int i = 0; i < color.length; i++)
-            color[i] = Math.random()*.5+.5;
+        return index;
+    }
 
-        return new VAO(vertecies, color, index);
+    public static VAO heightMapToSquareVAO(double[][] heightMap) {
+        double[] vertexes = heightMapToSquareVertexes(heightMap);
+        double[] color = heightMapToSquareColors(heightMap);
+        int[] index = heightMapToSquareIndex(heightMap);
+
+        return new VAO(vertexes, color, index);
     }
 
     private static int indexOfXZFlattenedArray(int x, int z, int xSize) {
