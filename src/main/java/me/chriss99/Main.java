@@ -193,6 +193,7 @@ public class Main {
 
     private static void loop() {
         double lastTime = glfwGetTime();
+        double lastFramePrint = Double.NEGATIVE_INFINITY;
         LinkedList<Double> frames = new LinkedList<>();
 
         while(!glfwWindowShouldClose(window)) {
@@ -233,8 +234,10 @@ public class Main {
                 else break;
 
             deltaTime = currentTime - lastTime;
-            if (!vSync)
+            if (!vSync && currentTime - lastFramePrint > .5) {
                 System.out.println(frames.size() + "   " + Math.round(1/deltaTime) + "   " + deltaTime*1000);
+                lastFramePrint = currentTime;
+            }
             lastTime = currentTime;
         }
     }
