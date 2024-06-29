@@ -89,9 +89,9 @@ public class VAOGenerator {
         for (int z = 0; z < heightMap[0].length; z++)
             for (int x = 0; x < heightMap.length; x++) {
                 for (int n = 0; n < 4; n++) {
-                    vertecies[vertexShift] = x + ((n>1) ? 1:0);
+                    vertecies[vertexShift] = x + ((n>1) ? 1:0) - .5;
                     vertecies[vertexShift + 1] = heightMap[x][z];
-                    vertecies[vertexShift + 2] = z + ((n%2==0) ? 1:0);
+                    vertecies[vertexShift + 2] = z + ((n%2==0) ? 1:0) - .5;
                     vertexShift += 3;
                 }
 
