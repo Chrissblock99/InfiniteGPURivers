@@ -69,8 +69,6 @@ public class HeightMapTransformer {
                     //System.out.println();
                 }
 
-                terrainData.waterMap[x][z] -= totalOutFlow;
-
                 /*double totalOutflow = 0;
 
                 for (int i = 0; i < vonNeumannNeighbourhood.length; i++)
@@ -94,17 +92,17 @@ public class HeightMapTransformer {
                     totalOutflow *= flowScalar;
                     System.out.println(totalOutflow + " " + testTotalOutFlow);
                     System.out.println();
-                }
-
-                terrainData.waterMap[x][z] -= totalOutflow;*/
+                }*/
             }
     }
 
     private void applyWaterOutflow(TerrainData terrainData) {
         for (int z = 0; z < terrainData.zSize; z++)
             for (int x = 0; x < terrainData.xSize; x++)
-                for (int i = 0; i < vonNeumannNeighbourhood.length; i++)
+                for (int i = 0; i < vonNeumannNeighbourhood.length; i++) {
                     terrainData.waterMap[x][z] += terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, i, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, i, 1)][3-i];
+                    terrainData.waterMap[x][z] -= terrainData.waterOutFlowPipes[x][z][i];
+                }
     }
 
     private void evaporateWater(TerrainData terrainData) {
