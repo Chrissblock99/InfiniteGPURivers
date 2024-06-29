@@ -205,11 +205,7 @@ public class Main {
 
             if (simulateThermal) heightMapTransformer.simpleThermalErosion(terrainData.terrainMap);
             if (simulateHydraulic) heightMapTransformer.simpleHydraulicErosion(terrainData);
-            if (simulateThermal || simulateHydraulic) {
-                vaoList.clear();
-                vaoList.add(VAOGenerator.heightMapToSimpleVAO(terrainData.terrainMap));
-                vaoList.add(VAOGenerator.heightMapToSquareVAO(terrainData.addedHeights()));
-            }
+            if (simulateThermal || simulateHydraulic) updateTerrainVAOs();
 
             for (VAO vao : vaoList) {
                 vao.bind();
@@ -240,6 +236,13 @@ public class Main {
             }
             lastTime = currentTime;
         }
+    }
+
+    public static void updateTerrainVAOs() {
+        vaoList.iterator().forEachRemaining(VAO::delete);
+        vaoList.clear();
+        vaoList.add(VAOGenerator.heightMapToSimpleVAO(terrainData.terrainMap));
+        vaoList.add(VAOGenerator.heightMapToSquareVAO(terrainData.addedHeights()));
     }
 
     private static void cleanGL() {
