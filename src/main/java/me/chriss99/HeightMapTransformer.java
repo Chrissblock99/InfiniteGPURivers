@@ -147,9 +147,6 @@ public class HeightMapTransformer {
 
                     outflowPipes[x][z][i] = heightChange * (heightMap[x][z]-heightMap[wrapOffsetCoordinateMoore(x, heightMap.length, i, 0)][wrapOffsetCoordinateMoore(z, heightMap[0].length, i, 1)]) * inverseSteepNeighbourHeightDiffSum;
                 }
-
-                if (!Arrays.equals(neighborBelowTalusAngle, new boolean[8]))
-                    heightMap[x][z] -= heightChange;
             }
 
         return outflowPipes;
@@ -158,8 +155,10 @@ public class HeightMapTransformer {
     private void applyThermalOutflow(double[][] heightMap, double[][][] outflowPipes) {
         for (int z = 0; z < heightMap[0].length; z++)
             for (int x = 0; x < heightMap.length; x++)
-                for (int i = 0; i < mooreNeighbourhood.length; i++)
+                for (int i = 0; i < mooreNeighbourhood.length; i++) {
                     heightMap[x][z] += outflowPipes[wrapOffsetCoordinateMoore(x, heightMap.length, i, 0)][wrapOffsetCoordinateMoore(z, heightMap[0].length, i, 1)][7-i];
+                    heightMap[x][z] -= outflowPipes[x][z][i];
+                }
     }
 
     //TODO
