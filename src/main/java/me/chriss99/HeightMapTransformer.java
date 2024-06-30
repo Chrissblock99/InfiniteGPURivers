@@ -44,7 +44,7 @@ public class HeightMapTransformer {
     private void calculateWaterOutflow(TerrainData terrainData) {
         for (int z = 0; z < terrainData.zSize; z++)
             for (int x = 0; x < terrainData.xSize; x++) {
-                double totalOutFlow = 0;
+                /*double totalOutFlow = 0;
 
                 for (int i = 0; i < vonNeumannNeighbourhood.length; i++) {
                     double outFlow = Math.max(0, terrainData.waterOutFlowPipes[x][z][i] +
@@ -67,7 +67,7 @@ public class HeightMapTransformer {
                     totalOutFlow *= flowScalar;
                     //System.out.println(totalOutFlow + " " + testTotalOutFlow);
                     //System.out.println();
-                }
+                }*/
 
                 /*double totalOutflow = 0;
 
@@ -93,6 +93,10 @@ public class HeightMapTransformer {
                     System.out.println(totalOutflow + " " + testTotalOutFlow);
                     System.out.println();
                 }*/
+
+                for (int i = 0; i < vonNeumannNeighbourhood.length; i++)
+                    if (terrainData.heightDiffTo(x, z, vonNeumannNeighbourhood[i]) > 0)
+                        terrainData.waterOutFlowPipes[x][z][i] = terrainData.waterMap[x][z] * deltaTWater;
             }
     }
 
