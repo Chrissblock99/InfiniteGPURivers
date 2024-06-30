@@ -239,10 +239,10 @@ public class Main {
     }
 
     public static void updateTerrainVAOs() {
-        vaoList.iterator().forEachRemaining(VAO::delete);
-        vaoList.clear();
-        vaoList.add(VAOGenerator.heightMapToSimpleVAO(terrainData.terrainMap));
-        vaoList.add(VAOGenerator.heightMapToSquareVAO(terrainData.addedHeights()));
+        //TODO wont work when the size of the heightMap changes
+        vaoList.get(0).updatePositions(VAOGenerator.heightMapToSimpleVertexes(terrainData.terrainMap));
+        vaoList.get(0).updateColors(VAOGenerator.heightMapToSimpleColors(terrainData.terrainMap));
+        vaoList.get(1).updatePositions(VAOGenerator.heightMapToSquareVertexes(terrainData.addedHeights()));
     }
 
     private static void cleanGL() {

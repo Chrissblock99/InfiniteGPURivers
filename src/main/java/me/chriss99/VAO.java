@@ -40,6 +40,20 @@ public class VAO {
         indexLength = index.length;
     }
 
+    public void updatePositions(double[] positions) {
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, coordVBO);
+        ByteBuffer positionBuffer = Util.storeArrayInBuffer(positions);
+        glBufferData(GL_ARRAY_BUFFER, positionBuffer, GL_STREAM_DRAW);
+    }
+
+    public void updateColors(double[] colors) {
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, colorVBO);
+        ByteBuffer colorsBuffer = Util.storeArrayInBuffer(colors);
+        glBufferData(GL_ARRAY_BUFFER, colorsBuffer, GL_STREAM_DRAW);
+    }
+
     public void bind() {
         glBindVertexArray(vao);
     }
