@@ -143,7 +143,7 @@ public class Main {
         }
 
         vaoList.add(VAOGenerator.heightMapToSimpleVAO(terrainData.terrainMap));
-        vaoList.add(VAOGenerator.heightMapToSquareVAO(terrainData.addedHeights()));
+        vaoList.add(VAOGenerator.heightMapToCrossVAO(terrainData.addedHeights(), terrainData.waterOutFlowPipes));
 
         //for (int x = 0; x < terrainData.xSize; x++)
         //    System.out.println(Arrays.toString(terrainData.waterMap[x]));
@@ -242,7 +242,8 @@ public class Main {
         //TODO wont work when the size of the heightMap changes
         vaoList.get(0).updatePositions(VAOGenerator.heightMapToSimpleVertexes(terrainData.terrainMap));
         vaoList.get(0).updateColors(VAOGenerator.heightMapToSimpleColors(terrainData.terrainMap));
-        vaoList.get(1).updatePositions(VAOGenerator.heightMapToSquareVertexes(terrainData.addedHeights()));
+        vaoList.get(1).updatePositions(VAOGenerator.heightMapToCrossVertexes(terrainData.addedHeights()));
+        vaoList.get(1).updateColors(VAOGenerator.heightMapToCrossColors(terrainData.addedHeights(), terrainData.waterOutFlowPipes));
     }
 
     private static void cleanGL() {

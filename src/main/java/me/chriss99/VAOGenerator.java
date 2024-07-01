@@ -156,6 +156,112 @@ public class VAOGenerator {
         return new VAO(vertexes, color, index);
     }
 
+    public static double[] heightMapToCrossVertexes(double[][] heightMap) {
+        double[] vertexes = new double[heightMap.length*heightMap[0].length*9*3];
+        int vertexShift = 0;
+
+        for (int z = 0; z < heightMap[0].length; z++)
+            for (int x = 0; x < heightMap.length; x++) {
+                vertexes[vertexShift    ] = x + .5;
+                vertexes[vertexShift + 1] = heightMap[x][z];
+                vertexes[vertexShift + 2] = z + .5;
+
+                vertexes[vertexShift + 3] = x - .5;
+                vertexes[vertexShift + 4] = heightMap[x][z];
+                vertexes[vertexShift + 5] = z + .5;
+                vertexShift += 6;
+
+                vertexes[vertexShift    ] = x - .5;
+                vertexes[vertexShift + 1] = heightMap[x][z];
+                vertexes[vertexShift + 2] = z + .5;
+
+                vertexes[vertexShift + 3] = x - .5;
+                vertexes[vertexShift + 4] = heightMap[x][z];
+                vertexes[vertexShift + 5] = z - .5;
+                vertexShift += 6;
+
+                vertexes[vertexShift    ] = x + .5;
+                vertexes[vertexShift + 1] = heightMap[x][z];
+                vertexes[vertexShift + 2] = z - .5;
+
+                vertexes[vertexShift + 3] = x + .5;
+                vertexes[vertexShift + 4] = heightMap[x][z];
+                vertexes[vertexShift + 5] = z + .5;
+                vertexShift += 6;
+
+                vertexes[vertexShift    ] = x - .5;
+                vertexes[vertexShift + 1] = heightMap[x][z];
+                vertexes[vertexShift + 2] = z - .5;
+
+                vertexes[vertexShift + 3] = x + .5;
+                vertexes[vertexShift + 4] = heightMap[x][z];
+                vertexes[vertexShift + 5] = z - .5;
+                vertexShift += 6;
+
+                vertexes[vertexShift    ] = x;
+                vertexes[vertexShift + 1] = heightMap[x][z];
+                vertexes[vertexShift + 2] = z;
+                vertexShift += 3;
+            }
+
+        return vertexes;
+    }
+
+    public static double[] heightMapToCrossColors(double[][] heightMap, double[][][] outflowPipes) {
+        double[] color = new double[heightMap.length*heightMap[0].length*9*3];
+        int vertexShift = 0;
+
+        for (int z = 0; z < heightMap[0].length; z++)
+            for (int x = 0; x < heightMap.length; x++) {
+                for (int i = 0; i < 4; i++) {
+                    color[vertexShift    ] = -outflowPipes[x][z][i]*100;
+                    color[vertexShift + 1] =  outflowPipes[x][z][i]*100;
+                    color[vertexShift + 2] = 0;
+
+                    color[vertexShift + 3] = -outflowPipes[x][z][i]*100;
+                    color[vertexShift + 4] =  outflowPipes[x][z][i]*100;
+                    color[vertexShift + 5] = 0;
+                    vertexShift += 6;
+                }
+
+                color[vertexShift    ] = 0;
+                color[vertexShift + 1] = 0;
+                color[vertexShift + 2] = 0;
+                vertexShift += 3;
+            }
+
+        return color;
+    }
+
+    public static int[] heightMapToCrossIndex(double[][] heightMap) {
+        int[] index = new int[heightMap.length*heightMap[0].length*12];
+        int indexShift = 0;
+        int indexShift2 = 0;
+
+        for (int z = 0; z < heightMap[0].length; z++)
+            for (int x = 0; x < heightMap.length; x++) {
+                int indexShift3 = 0;
+                for (int i = 0; i < 4; i++) {
+                    index[indexShift] = indexShift2 + indexShift3;
+                    index[indexShift + 1] = indexShift2 + indexShift3 + 1;
+                    index[indexShift + 2] = indexShift2 + 8;
+                    indexShift3 += 2;
+                    indexShift += 3;
+                }
+                indexShift2 += 9;
+            }
+
+        return index;
+    }
+
+    public static VAO heightMapToCrossVAO(double[][] heightMap, double[][][] outflowPipes) {
+        double[] vertexes = heightMapToCrossVertexes(heightMap);
+        double[] color = heightMapToCrossColors(heightMap, outflowPipes);
+        int[] index = heightMapToCrossIndex(heightMap);
+
+        return new VAO(vertexes, color, index);
+    }
+
     private static int indexOfXZFlattenedArray(int x, int z, int xSize) {
         return x + z*xSize;
     }
