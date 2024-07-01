@@ -156,47 +156,29 @@ public class VAOGenerator {
         return new VAO(vertexes, color, index);
     }
 
+    private static final double[][] offsets = new double[][]{
+            { .5,  .5},
+            {-.5,  .5},
+            {-.5,  .5},
+            {-.5, -.5},
+            { .5, -.5},
+            { .5,  .5},
+            {-.5, -.5},
+            { .5, -.5}
+    };
+
     public static double[] heightMapToCrossVertexes(double[][] heightMap) {
         double[] vertexes = new double[heightMap.length*heightMap[0].length*9*3];
         int vertexShift = 0;
 
         for (int z = 0; z < heightMap[0].length; z++)
             for (int x = 0; x < heightMap.length; x++) {
-                vertexes[vertexShift    ] = x + .5;
-                vertexes[vertexShift + 1] = heightMap[x][z];
-                vertexes[vertexShift + 2] = z + .5;
-
-                vertexes[vertexShift + 3] = x - .5;
-                vertexes[vertexShift + 4] = heightMap[x][z];
-                vertexes[vertexShift + 5] = z + .5;
-                vertexShift += 6;
-
-                vertexes[vertexShift    ] = x - .5;
-                vertexes[vertexShift + 1] = heightMap[x][z];
-                vertexes[vertexShift + 2] = z + .5;
-
-                vertexes[vertexShift + 3] = x - .5;
-                vertexes[vertexShift + 4] = heightMap[x][z];
-                vertexes[vertexShift + 5] = z - .5;
-                vertexShift += 6;
-
-                vertexes[vertexShift    ] = x + .5;
-                vertexes[vertexShift + 1] = heightMap[x][z];
-                vertexes[vertexShift + 2] = z - .5;
-
-                vertexes[vertexShift + 3] = x + .5;
-                vertexes[vertexShift + 4] = heightMap[x][z];
-                vertexes[vertexShift + 5] = z + .5;
-                vertexShift += 6;
-
-                vertexes[vertexShift    ] = x - .5;
-                vertexes[vertexShift + 1] = heightMap[x][z];
-                vertexes[vertexShift + 2] = z - .5;
-
-                vertexes[vertexShift + 3] = x + .5;
-                vertexes[vertexShift + 4] = heightMap[x][z];
-                vertexes[vertexShift + 5] = z - .5;
-                vertexShift += 6;
+                for (int i = 0; i < 8; i++) {
+                    vertexes[vertexShift    ] = x + offsets[i][0];
+                    vertexes[vertexShift + 1] = heightMap[x][z];
+                    vertexes[vertexShift + 2] = z + offsets[i][1];
+                    vertexShift += 3;
+                }
 
                 vertexes[vertexShift    ] = x;
                 vertexes[vertexShift + 1] = heightMap[x][z];
@@ -213,15 +195,11 @@ public class VAOGenerator {
 
         for (int z = 0; z < heightMap[0].length; z++)
             for (int x = 0; x < heightMap.length; x++) {
-                for (int i = 0; i < 4; i++) {
-                    color[vertexShift    ] = -outflowPipes[x][z][i]*100;
-                    color[vertexShift + 1] =  outflowPipes[x][z][i]*100;
+                for (int i = 0; i < 8 ; i++) {
+                    color[vertexShift    ] = -outflowPipes[x][z][i/2];//Math.sqrt(-outflowPipes[x][z][i])*3;
+                    color[vertexShift + 1] =  outflowPipes[x][z][i/2];//Math.sqrt( outflowPipes[x][z][i])*3;
                     color[vertexShift + 2] = 0;
-
-                    color[vertexShift + 3] = -outflowPipes[x][z][i]*100;
-                    color[vertexShift + 4] =  outflowPipes[x][z][i]*100;
-                    color[vertexShift + 5] = 0;
-                    vertexShift += 6;
+                    vertexShift += 3;
                 }
 
                 color[vertexShift    ] = 0;
