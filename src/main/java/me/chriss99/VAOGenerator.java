@@ -196,15 +196,15 @@ public class VAOGenerator {
         for (int z = 0; z < heightMap[0].length; z++)
             for (int x = 0; x < heightMap.length; x++) {
                 for (int i = 0; i < 8 ; i++) {
-                    color[vertexShift    ] = -outflowPipes[x][z][i/2];//Math.sqrt(-outflowPipes[x][z][i])*3;
-                    color[vertexShift + 1] =  outflowPipes[x][z][i/2];//Math.sqrt( outflowPipes[x][z][i])*3;
+                    color[vertexShift    ] = Math.sqrt(-outflowPipes[x][z][i/2])*100;
+                    color[vertexShift + 1] = Math.sqrt( outflowPipes[x][z][i/2])*100;
                     color[vertexShift + 2] = 0;
                     vertexShift += 3;
                 }
 
-                color[vertexShift    ] = 0;
-                color[vertexShift + 1] = 0;
-                color[vertexShift + 2] = 0;
+                color[vertexShift    ] =  0;
+                color[vertexShift + 1] =  0;
+                color[vertexShift + 2] = .5;
                 vertexShift += 3;
             }
 
