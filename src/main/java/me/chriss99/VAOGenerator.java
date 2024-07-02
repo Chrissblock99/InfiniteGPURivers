@@ -1,5 +1,7 @@
 package me.chriss99;
 
+import org.joml.Vector2d;
+
 public class VAOGenerator {
     public static double[][] randomHeights(int xSize, int zSize) {
         double[][] heights = new double[xSize][zSize];
@@ -236,6 +238,64 @@ public class VAOGenerator {
         double[] vertexes = heightMapToCrossVertexes(heightMap);
         double[] color = heightMapToCrossColors(heightMap, outflowPipes);
         int[] index = heightMapToCrossIndex(heightMap);
+
+        return new VAO(vertexes, color, index);
+    }
+
+    public static double[] heightMapToVectorVertexes(double[][] heightMap, double[][][] vectorField) {
+        double[] vertexes = new double[heightMap.length*heightMap[0].length*3*3];
+        int vertexShift = 0;
+
+        for (int z = 0; z < heightMap[0].length; z++)
+            for (int x = 0; x < heightMap.length; x++) {
+                Vector2d vector = new Vector2d(vectorField[x][z][0], vectorField[x][z][1]);
+                double length = vector.length();
+                vector.normalize().mul(Math.sqrt(Math.sqrt(Math.sqrt(length))));
+
+                vertexes[vertexShift    ] = x - vector.y *.1;
+                vertexes[vertexShift + 1] = heightMap[x][z] + .1;
+                vertexes[vertexShift + 2] = z + vector.x *.1;
+                vertexShift += 3;
+
+                vertexes[vertexShift    ] = x + vector.y *.1;
+                vertexes[vertexShift + 1] = heightMap[x][z] + .1;
+                vertexes[vertexShift + 2] = z - vector.x *.1;
+                vertexShift += 3;
+
+                vertexes[vertexShift    ] = x + vector.x;
+                vertexes[vertexShift + 1] = heightMap[x][z] + .1;
+                vertexes[vertexShift + 2] = z + vector.y;
+                vertexShift += 3;
+            }
+
+        return vertexes;
+    }
+
+    public static double[] heightMapToVectorColors(double[][] heightMap) {
+        return new double[heightMap.length*heightMap[0].length*3*3];
+    }
+
+    public static int[] heightMapToVectorIndex(double[][] heightMap) {
+        int[] index = new int[heightMap.length*heightMap[0].length*3];
+        int indexShift = 0;
+        int indexShift2 = 0;
+
+        for (int z = 0; z < heightMap[0].length; z++)
+            for (int x = 0; x < heightMap.length; x++) {
+                index[indexShift  ] = indexShift2  ;
+                index[indexShift+1] = indexShift2+1;
+                index[indexShift+2] = indexShift2+2;
+                indexShift += 3;
+                indexShift2 += 3;
+            }
+
+        return index;
+    }
+
+    public static VAO heightMapToVectorVAO(double[][] heightMap, double[][][] vectorField) {
+        double[] vertexes = heightMapToVectorVertexes(heightMap, vectorField);
+        double[] color = heightMapToVectorColors(heightMap);
+        int[] index = heightMapToVectorIndex(heightMap);
 
         return new VAO(vertexes, color, index);
     }
