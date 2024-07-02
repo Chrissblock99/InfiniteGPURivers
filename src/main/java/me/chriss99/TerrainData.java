@@ -10,6 +10,7 @@ public class TerrainData {
     //public final double[][] hardnessMap;
 
     public final double[][][] waterOutFlowPipes;
+    public final double[][][] velocityField;
 
     public TerrainData(double[][] terrainMap) {
         this.xSize = terrainMap.length;
@@ -21,6 +22,7 @@ public class TerrainData {
         //hardnessMap = new double[xSize][zSize];
 
         waterOutFlowPipes = new double[xSize][zSize][4];
+        velocityField = new double[xSize][zSize][2];
     }
 
     public double heightAt(int x, int z) {
