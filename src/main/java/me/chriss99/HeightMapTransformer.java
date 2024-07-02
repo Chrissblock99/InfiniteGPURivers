@@ -26,6 +26,7 @@ public class HeightMapTransformer {
     public void simpleHydraulicErosion(TerrainData terrainData) {
         addWater(terrainData);
         calculateWaterOutflow(terrainData);
+        calculateVelocityField(terrainData);
         applyWaterOutflow(terrainData);
         evaporateWater(terrainData);
     }
@@ -122,10 +123,10 @@ public class HeightMapTransformer {
                 terrainData.velocityField[x][z][0] -= terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 2, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 2, 1)][1];
                 terrainData.velocityField[x][z][0] += terrainData.waterOutFlowPipes[x][z][2];
 
-                terrainData.velocityField[x][z][1] += terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 0, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 0, 1)][3];
-                terrainData.velocityField[x][z][1] -= terrainData.waterOutFlowPipes[x][z][0];
-                terrainData.velocityField[x][z][1] -= terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 3, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 3, 1)][0];
-                terrainData.velocityField[x][z][1] += terrainData.waterOutFlowPipes[x][z][3];
+                terrainData.velocityField[x][z][1] -= terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 0, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 0, 1)][3];
+                terrainData.velocityField[x][z][1] += terrainData.waterOutFlowPipes[x][z][0];
+                terrainData.velocityField[x][z][1] += terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 3, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 3, 1)][0];
+                terrainData.velocityField[x][z][1] -= terrainData.waterOutFlowPipes[x][z][3];
             }
     }
 
