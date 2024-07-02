@@ -106,6 +106,8 @@ public class HeightMapTransformer {
                 for (int i = 0; i < vonNeumannNeighbourhood.length; i++) {
                     terrainData.waterMap[x][z] += terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, i, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, i, 1)][3-i];
                     terrainData.waterMap[x][z] -= terrainData.waterOutFlowPipes[x][z][i];
+                    if (terrainData.waterOutFlowPipes[x][z][i] < 0)
+                        throw new IllegalStateException("WaterOutflow is negative!");
                 }
     }
 
