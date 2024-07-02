@@ -44,59 +44,62 @@ public class HeightMapTransformer {
     private void calculateWaterOutflow(TerrainData terrainData) {
         for (int z = 0; z < terrainData.zSize; z++)
             for (int x = 0; x < terrainData.xSize; x++) {
-                /*double totalOutFlow = 0;
+                double totalOutFlow = 0;
 
                 for (int i = 0; i < vonNeumannNeighbourhood.length; i++) {
                     double outFlow = Math.max(0, terrainData.waterOutFlowPipes[x][z][i] +
                             //the paper didn't mention to consider sediment height as well but im doing it anyway
-                            deltaTWater * pipeCrossArea * gravity * terrainData.heightDiffTo(x, z, vonNeumannNeighbourhood[i]) * inversePipeLength);
+                            deltaTWater * terrainData.heightDiffTo(x, z, vonNeumannNeighbourhood[i]));
                     terrainData.waterOutFlowPipes[x][z][i] = outFlow;
                     totalOutFlow += outFlow;
                 }
 
                 if (totalOutFlow > terrainData.waterMap[x][z]) {
                     //System.out.println(terrainData.waterMap[x][z] + " " + totalOutFlow);
-                    double flowScalar = terrainData.heightAt(x, z) * pipeLength * pipeLength / totalOutFlow;// / deltaTWater;
+                    double flowScalar = terrainData.waterMap[x][z] / totalOutFlow;// * deltaTWater;
                     for (int i = 0; i < vonNeumannNeighbourhood.length; i++)
                         terrainData.waterOutFlowPipes[x][z][i] *= flowScalar;
 
-                    double testTotalOutFlow = 0;
-                    for (int i = 0; i < vonNeumannNeighbourhood.length; i++)
-                        testTotalOutFlow += terrainData.waterOutFlowPipes[x][z][i];
+                    //double testTotalOutFlow = 0;
+                    //for (int i = 0; i < vonNeumannNeighbourhood.length; i++)
+                    //    testTotalOutFlow += terrainData.waterOutFlowPipes[x][z][i];
 
-                    totalOutFlow *= flowScalar;
+                    //totalOutFlow *= flowScalar;
+                    //System.out.println(flowScalar);
                     //System.out.println(totalOutFlow + " " + testTotalOutFlow);
                     //System.out.println();
-                }*/
+                }
 
                 /*double totalOutflow = 0;
 
-                for (int i = 0; i < vonNeumannNeighbourhood.length; i++)
-                    if (terrainData.heightDiffTo(x, z, vonNeumannNeighbourhood[i]) > 0) {
-                        double outflow = Math.max(0, terrainData.waterOutFlowPipes[x][z][i] + terrainData.waterMap[x][z]*.25 * deltaTWater);
+                for (int i = 0; i < vonNeumannNeighbourhood.length; i++) {
+                    double outflow = (terrainData.heightDiffTo(x, z, vonNeumannNeighbourhood[i]) > 0) ?
+                        Math.min(terrainData.heightDiffTo(x, z, vonNeumannNeighbourhood[i]), terrainData.heightAt(x, z)) * deltaTWater : 0;
 
-                        terrainData.waterOutFlowPipes[x][z][i] = outflow;
-                        totalOutflow += outflow;
-                    }
+                    terrainData.waterOutFlowPipes[x][z][i] = outflow;
+                    totalOutflow += outflow;
+                }
 
                 if (totalOutflow > terrainData.waterMap[x][z]) {
-                    System.out.println(terrainData.waterMap[x][z] + " " + totalOutflow);
-                    double flowScalar = terrainData.heightAt(x, z) * pipeLength * pipeLength / totalOutflow;// / deltaT;
+                    //System.out.println(terrainData.waterMap[x][z] + " " + totalOutflow);
+                    double flowScalar = terrainData.waterMap[x][z] * pipeLength * pipeLength / totalOutflow;
                     for (int i = 0; i < vonNeumannNeighbourhood.length; i++)
                         terrainData.waterOutFlowPipes[x][z][i] *= flowScalar;
 
-                    double testTotalOutFlow = 0;
-                    for (int i = 0; i < vonNeumannNeighbourhood.length; i++)
-                        testTotalOutFlow += terrainData.waterOutFlowPipes[x][z][i];
+                    //double testTotalOutFlow = 0;
+                    //for (int i = 0; i < vonNeumannNeighbourhood.length; i++)
+                    //    testTotalOutFlow += terrainData.waterOutFlowPipes[x][z][i];
 
-                    totalOutflow *= flowScalar;
-                    System.out.println(totalOutflow + " " + testTotalOutFlow);
-                    System.out.println();
+                    //totalOutflow *= flowScalar;
+                    //System.out.println(flowScalar);
+                    //System.out.println(totalOutflow + " " + testTotalOutFlow);
+                    //System.out.println();
                 }*/
 
-                for (int i = 0; i < vonNeumannNeighbourhood.length; i++)
+                /*for (int i = 0; i < vonNeumannNeighbourhood.length; i++)
                     if (terrainData.heightDiffTo(x, z, vonNeumannNeighbourhood[i]) > 0)
-                        terrainData.waterOutFlowPipes[x][z][i] = terrainData.waterMap[x][z] * deltaTWater;
+                        terrainData.waterOutFlowPipes[x][z][i] = terrainData.heightDiffTo(x, z, vonNeumannNeighbourhood[i]) * deltaTWater;
+                    else terrainData.waterOutFlowPipes[x][z][i] = 0;*/
             }
     }
 
