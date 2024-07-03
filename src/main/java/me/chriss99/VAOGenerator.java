@@ -2,6 +2,8 @@ package me.chriss99;
 
 import org.joml.Vector2d;
 
+import java.util.Arrays;
+
 public class VAOGenerator {
     public static double[][] randomHeights(int xSize, int zSize) {
         double[][] heights = new double[xSize][zSize];
@@ -249,22 +251,21 @@ public class VAOGenerator {
         for (int z = 0; z < heightMap[0].length; z++)
             for (int x = 0; x < heightMap.length; x++) {
                 Vector2d vector = new Vector2d(vectorField[x][z][0], vectorField[x][z][1]);
-                double length = vector.length();
-                vector.normalize().mul(Math.sqrt(Math.sqrt(Math.sqrt(length))));
+                vector.normalize().mul(.3);
 
-                vertexes[vertexShift    ] = x - vector.y *.1;
+                vertexes[vertexShift    ] = x - vector.y * .6 - vector.x;
                 vertexes[vertexShift + 1] = heightMap[x][z] + .1;
-                vertexes[vertexShift + 2] = z + vector.x *.1;
+                vertexes[vertexShift + 2] = z + vector.x * .6 - vector.y;
                 vertexShift += 3;
 
-                vertexes[vertexShift    ] = x + vector.y *.1;
+                vertexes[vertexShift    ] = x + vector.y * .6 - vector.x;
                 vertexes[vertexShift + 1] = heightMap[x][z] + .1;
-                vertexes[vertexShift + 2] = z - vector.x *.1;
+                vertexes[vertexShift + 2] = z - vector.x * .6 - vector.y;
                 vertexShift += 3;
 
-                vertexes[vertexShift    ] = x + vector.x;
+                vertexes[vertexShift    ] = x + vector.x * 1.5;
                 vertexes[vertexShift + 1] = heightMap[x][z] + .1;
-                vertexes[vertexShift + 2] = z + vector.y;
+                vertexes[vertexShift + 2] = z + vector.y * 1.5;
                 vertexShift += 3;
             }
 
@@ -272,7 +273,10 @@ public class VAOGenerator {
     }
 
     public static double[] heightMapToVectorColors(double[][] heightMap) {
-        return new double[heightMap.length*heightMap[0].length*3*3];
+        double[] color = new double[heightMap.length * heightMap[0].length * 3 * 3];
+        Arrays.fill(color, 1);
+
+        return color;
     }
 
     public static int[] heightMapToVectorIndex(double[][] heightMap) {
