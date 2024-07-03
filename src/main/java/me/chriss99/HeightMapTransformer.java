@@ -10,7 +10,7 @@ public class HeightMapTransformer {
     double evaporationRate = 0.015; //[0;0.05]
     double pipeCrossArea = 20; //[0.1;60]
     double gravity = 9.81; //[0.1;20]
-    double sedimentCapacity = 1; //[0.1;3]
+    double sedimentCapacityMultiplier = 1; //[0.1;3]
     double thermalErosionRate = 0.015; //[0;3]
     double soilSuspensionRate = 0.5; //[0.1;2]
     double sedimentDepositionRate = 1; //[0.1;3]
@@ -28,6 +28,9 @@ public class HeightMapTransformer {
         calculateWaterOutflow(terrainData);
         calculateVelocityField(terrainData);
         applyWaterOutflow(terrainData);
+        erosionAndDeposition(terrainData);
+        double[][][] sedimentOutflow = calculateSedimentOutflow(terrainData);
+        applySedimentOutflow(terrainData, sedimentOutflow);
         evaporateWater(terrainData);
     }
 
@@ -106,6 +109,62 @@ public class HeightMapTransformer {
             }
     }
 
+    private void erosionAndDeposition(TerrainData terrainData) {
+        for (int z = 0; z < terrainData.zSize; z++)
+            for (int x = 0; x < terrainData.xSize; x++) {
+                double sedimentCapacity = erosionDepthMultiplier(terrainData.waterMap[x][z] + terrainData.sedimentMap[x][z]) * sedimentCapacityMultiplier;
+                double unusedCapacity = sedimentCapacity - terrainData.sedimentMap[x][z];
+
+                double change = (unusedCapacity > 0) ?
+                        deltaTWater * terrainHardness(x, z) * soilSuspensionRate * unusedCapacity :
+                        deltaTWater * sedimentDepositionRate * unusedCapacity;
+                terrainData.terrainMap[x][z] -= change;
+                terrainData.sedimentMap[x][z] += change;
+            }
+    }
+
+    private double[][][] calculateSedimentOutflow(TerrainData terrainData) {
+        double[][][] sedimentOutflow = new double[terrainData.xSize][terrainData.zSize][4];
+
+        for (int z = 0; z < terrainData.zSize; z++)
+            for (int x = 0; x < terrainData.xSize; x++) {
+                double totalOutFlow = 0;
+
+                double velX = terrainData.velocityField[x][z][0];
+                double outFlowX = deltaTWater * Math.abs(velX);
+                if (velX != 0) {
+                    sedimentOutflow[x][z][(velX > 0) ? 2 : 1] = outFlowX;
+                    totalOutFlow += outFlowX;
+                }
+
+                double velY = terrainData.velocityField[x][z][1];
+                double outFlowZ = deltaTWater * Math.abs(velY);
+                if (velY != 0) {
+                    sedimentOutflow[x][z][(velY > 0) ? 0 : 3] = outFlowZ;
+                    totalOutFlow += outFlowZ;
+                }
+
+                if (totalOutFlow > terrainData.sedimentMap[x][z]) {
+                    double flowScalar = terrainData.sedimentMap[x][z] / totalOutFlow;
+                    for (int i = 0; i < vonNeumannNeighbourhood.length; i++)
+                        sedimentOutflow[x][z][i] *= flowScalar;
+                }
+            }
+
+        return sedimentOutflow;
+    }
+
+    private void applySedimentOutflow(TerrainData terrainData, double[][][] sedimentOutflow) {
+        for (int z = 0; z < terrainData.zSize; z++)
+            for (int x = 0; x < terrainData.xSize; x++)
+                for (int i = 0; i < vonNeumannNeighbourhood.length; i++) {
+                    terrainData.sedimentMap[x][z] += sedimentOutflow[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, i, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, i, 1)][3-i];
+                    terrainData.sedimentMap[x][z] -= sedimentOutflow[x][z][i];
+                    if (sedimentOutflow[x][z][i] < 0)
+                        throw new IllegalStateException("SedimentOutflow is negative!");
+                }
+    }
+
     private void evaporateWater(TerrainData terrainData) {
         double evaporationMultiplier = (1 - evaporationRate * deltaTWater);
         if (evaporationMultiplier < 0)
@@ -165,6 +224,13 @@ public class HeightMapTransformer {
     //TODO
     private double terrainHardness(int x, int z) {
         return 1;
+    }
+
+    double inverseMaxErosionDepth = 1/maxErosionDepth;
+    private double erosionDepthMultiplier(double depth) {
+        if (depth >= maxErosionDepth) return 1;
+        if (depth <= 0) return 0;
+        return inverseMaxErosionDepth*depth;
     }
 
     private static int wrapOffsetCoordinateMoore(int index, int length, int offset, int xz) {
