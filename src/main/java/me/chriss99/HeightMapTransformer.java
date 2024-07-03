@@ -28,9 +28,9 @@ public class HeightMapTransformer {
         calculateWaterOutflow(terrainData);
         calculateVelocityField(terrainData);
         applyWaterOutflow(terrainData);
-        erosionAndDeposition(terrainData);
-        double[][][] sedimentOutflow = calculateSedimentOutflow(terrainData);
-        applySedimentOutflow(terrainData, sedimentOutflow);
+        //erosionAndDeposition(terrainData);
+        //double[][][] sedimentOutflow = calculateSedimentOutflow(terrainData);
+        //applySedimentOutflow(terrainData, sedimentOutflow);
         evaporateWater(terrainData);
     }
 
