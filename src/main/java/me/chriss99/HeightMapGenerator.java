@@ -41,4 +41,14 @@ public class HeightMapGenerator {
 
         return heights;
     }
+
+    public static double[][] slope(int xSize, int zSize, double slope) {
+        double[][] heights = new double[xSize][zSize];
+
+        for (int z = 0; z < zSize; z++)
+            for (int x = 0; x < xSize; x++)
+                heights[x][z] = z * slope;
+
+        return heights;
+    }
 }
