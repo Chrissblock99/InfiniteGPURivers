@@ -39,9 +39,12 @@ public class HeightMapTransformer {
         applyThermalOutflow(heightMap, thermalOutflowPipes);
     }
 
+    boolean rain = false;
     private void addWater(TerrainData terrainData) {
-        if (Math.random()<.4)
-            terrainData.waterMap[(int) (Math.random() * terrainData.xSize)][(int) (Math.random() * terrainData.zSize)] = 2;
+        if (rain && Math.random()<.4)
+            terrainData.waterMap[(int) (Math.random() * terrainData.xSize)][(int) (Math.random() * terrainData.zSize)] += 2;
+
+        //terrainData.waterMap[25][80] += 2;
 
         //for (int z = 0; z < terrainData.zSize; z++)
         //    for (int x = 0; x < terrainData.xSize; x++)

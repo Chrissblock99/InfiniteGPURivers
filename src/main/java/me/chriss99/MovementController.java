@@ -59,6 +59,7 @@ public class MovementController {
 
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_T, () -> Main.simulateThermal = !Main.simulateThermal);
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_H, () -> Main.simulateHydraulic = !Main.simulateHydraulic);
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_G, () -> Main.heightMapTransformer.rain = !Main.heightMapTransformer.rain);
 
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_R, () -> {
             Main.terrainData = new TerrainData(HeightMapGenerator.pillar(100, 100));
