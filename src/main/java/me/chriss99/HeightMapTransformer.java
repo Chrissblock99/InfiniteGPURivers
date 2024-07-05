@@ -257,6 +257,13 @@ public class HeightMapTransformer {
         return new Vector3d(heights[1] - heights[2], 1, heights[3] - heights[0]).normalize();
     }
 
+    public Vector3d flow3dAt(TerrainData terrainData, int x, int z) {
+        Vector3d normal = normalAt(terrainData.addedHeights(), x, z);
+        Vector3d flowDir = new Vector3d(terrainData.velocityField[x][z][0], 0, terrainData.velocityField[x][z][1]);
+
+        return flowDir.cross(normal).cross(normal).mul(-1);
+    }
+
     private static int wrapOffsetCoordinateMoore(int index, int length, int offset, int xz) {
         return (index + mooreNeighbourhood[offset][xz] + length) % length;
     }
