@@ -246,12 +246,11 @@ public class HeightMapTransformer {
     }
 
     public Vector3d normalAt(double[][] heightMap, int x, int z) {
-        double right = wrapOffsetCoordinateMoore(x, heightMap.length, 1, 0);
-        double left = wrapOffsetCoordinateMoore(x, heightMap.length, 2, 0);
-        double bottom = wrapOffsetCoordinateMoore(z, heightMap[0].length, 3, 1);
-        double top = wrapOffsetCoordinateMoore(z, heightMap[0].length, 0, 1);
+        double[] heights = new double[4];
+        for (int i = 0; i < vonNeumannNeighbourhood.length; i++)
+            heights[i] = heightMap[wrapOffsetCoordinateVonNeumann(x, heightMap.length, i, 0)][wrapOffsetCoordinateVonNeumann(z, heightMap[0].length, i, 1)];
 
-        return new Vector3d(2*(right - left), -4, 2*(bottom - top)).normalize();
+        return new Vector3d(heights[1] - heights[2], 1, heights[3] - heights[0]).normalize();
     }
 
     private static int wrapOffsetCoordinateMoore(int index, int length, int offset, int xz) {
