@@ -37,9 +37,9 @@ public class HeightMapTransformer {
         evaporateWater(terrainData);
     }
 
-    public void simpleThermalErosion(double[][] heightMap) {
-        double[][][] thermalOutflowPipes = calculateThermalOutflow(heightMap);
-        applyThermalOutflow(heightMap, thermalOutflowPipes);
+    public void simpleThermalErosion(TerrainData terrainData) {
+        double[][][] thermalOutflowPipes = calculateThermalOutflow(terrainData);
+        applyThermalOutflow(terrainData, thermalOutflowPipes);
     }
 
     boolean rain = false;
@@ -188,17 +188,17 @@ public class HeightMapTransformer {
                 terrainData.waterMap[x][z] *= evaporationMultiplier;
     }
 
-    private double[][][] calculateThermalOutflow(double[][] heightMap) {
-        double[][][] outflowPipes = new double[heightMap.length][heightMap[0].length][8];
+    private double[][][] calculateThermalOutflow(TerrainData terrainData) {
+        double[][][] outflowPipes = new double[terrainData.xSize][terrainData.zSize][8];
 
-        for (int z = 0; z < heightMap[0].length; z++)
-            for (int x = 0; x < heightMap.length; x++) {
+        for (int z = 0; z < terrainData.zSize; z++)
+            for (int x = 0; x < terrainData.xSize; x++) {
                 double maxHeightDiff = -Double.MAX_VALUE;
                 boolean[] neighborBelowTalusAngle = new boolean[8];
                 double steepNeighbourHeightDiffSum = 0;
 
                 for (int i = 0; i < mooreNeighbourhood.length; i++) {
-                    double heightDiff = heightMap[x][z]-heightMap[wrapOffsetCoordinateMoore(x, heightMap.length, i, 0)][wrapOffsetCoordinateMoore(z, heightMap[0].length, i, 1)];
+                    double heightDiff = terrainData.terrainMap[x][z]-terrainData.terrainMap[wrapOffsetCoordinateMoore(x, terrainData.xSize, i, 0)][wrapOffsetCoordinateMoore(z, terrainData.zSize, i, 1)];
                     if (heightDiff>maxHeightDiff)
                         maxHeightDiff = heightDiff;
 
@@ -217,19 +217,19 @@ public class HeightMapTransformer {
                     if (!neighborBelowTalusAngle[i])
                         continue;
 
-                    outflowPipes[x][z][i] = heightChange * (heightMap[x][z]-heightMap[wrapOffsetCoordinateMoore(x, heightMap.length, i, 0)][wrapOffsetCoordinateMoore(z, heightMap[0].length, i, 1)]) * inverseSteepNeighbourHeightDiffSum;
+                    outflowPipes[x][z][i] = heightChange * (terrainData.terrainMap[x][z]-terrainData.terrainMap[wrapOffsetCoordinateMoore(x, terrainData.xSize, i, 0)][wrapOffsetCoordinateMoore(z, terrainData.zSize, i, 1)]) * inverseSteepNeighbourHeightDiffSum;
                 }
             }
 
         return outflowPipes;
     }
 
-    private void applyThermalOutflow(double[][] heightMap, double[][][] outflowPipes) {
-        for (int z = 0; z < heightMap[0].length; z++)
-            for (int x = 0; x < heightMap.length; x++)
+    private void applyThermalOutflow(TerrainData terrainData, double[][][] outflowPipes) {
+        for (int z = 0; z < terrainData.zSize; z++)
+            for (int x = 0; x < terrainData.xSize; x++)
                 for (int i = 0; i < mooreNeighbourhood.length; i++) {
-                    heightMap[x][z] += outflowPipes[wrapOffsetCoordinateMoore(x, heightMap.length, i, 0)][wrapOffsetCoordinateMoore(z, heightMap[0].length, i, 1)][7-i];
-                    heightMap[x][z] -= outflowPipes[x][z][i];
+                    terrainData.terrainMap[x][z] += outflowPipes[wrapOffsetCoordinateMoore(x, terrainData.xSize, i, 0)][wrapOffsetCoordinateMoore(z, terrainData.zSize, i, 1)][7-i];
+                    terrainData.terrainMap[x][z] -= outflowPipes[x][z][i];
                 }
     }
 
