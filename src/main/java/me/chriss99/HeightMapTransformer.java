@@ -109,12 +109,12 @@ public class HeightMapTransformer {
     private void calculateVelocityField(TerrainData terrainData) {
         for (int z = 0; z < terrainData.zSize; z++)
             for (int x = 0; x < terrainData.xSize; x++) {
-                terrainData.velocityField[x][z][0] += terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 1, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 1, 1)][2];
+                terrainData.velocityField[x][z][0]  = terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 1, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 1, 1)][2];
                 terrainData.velocityField[x][z][0] -= terrainData.waterOutFlowPipes[x][z][1];
                 terrainData.velocityField[x][z][0] -= terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 2, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 2, 1)][1];
                 terrainData.velocityField[x][z][0] += terrainData.waterOutFlowPipes[x][z][2];
 
-                terrainData.velocityField[x][z][1] += terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 3, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 3, 1)][0];
+                terrainData.velocityField[x][z][1]  = terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 3, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 3, 1)][0];
                 terrainData.velocityField[x][z][1] -= terrainData.waterOutFlowPipes[x][z][3];
                 terrainData.velocityField[x][z][1] -= terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 0, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 0, 1)][3];
                 terrainData.velocityField[x][z][1] += terrainData.waterOutFlowPipes[x][z][0];
