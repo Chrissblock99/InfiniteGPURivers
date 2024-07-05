@@ -51,4 +51,17 @@ public class HeightMapGenerator {
 
         return heights;
     }
+
+    public static double[][] slopeWithBarrier(int xSize, int zSize, double slope) {
+        double[][] heights = new double[xSize][zSize];
+
+        for (int z = 0; z < zSize; z++)
+            for (int x = 0; x < xSize; x++) {
+                heights[x][z] = z * slope;
+                if (x <= 50 && z <= 30)
+                    heights[x][z] += 10;
+            }
+
+        return heights;
+    }
 }
