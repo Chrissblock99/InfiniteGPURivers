@@ -274,17 +274,17 @@ public class VAOGenerator {
                 Vector3d normal = Main.heightMapTransformer.normalAt(heightMap, x, z);
 
                 vertexes[vertexShift    ] = x - normal.z * .3;
-                vertexes[vertexShift + 1] = heightMap[x][z];
+                vertexes[vertexShift + 1] = heightMap[x][z] + .1;
                 vertexes[vertexShift + 2] = z + normal.x * .3;
                 vertexShift += 3;
 
                 vertexes[vertexShift    ] = x + normal.z * .3;
-                vertexes[vertexShift + 1] = heightMap[x][z];
+                vertexes[vertexShift + 1] = heightMap[x][z] + .1;
                 vertexes[vertexShift + 2] = z - normal.x * .3;
                 vertexShift += 3;
 
                 vertexes[vertexShift    ] = x + normal.x;
-                vertexes[vertexShift + 1] = heightMap[x][z] + normal.y;
+                vertexes[vertexShift + 1] = heightMap[x][z] + normal.y + .1;
                 vertexes[vertexShift + 2] = z + normal.z;
                 vertexShift += 3;
             }
