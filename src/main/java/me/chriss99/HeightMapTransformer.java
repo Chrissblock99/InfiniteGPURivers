@@ -236,9 +236,9 @@ public class HeightMapTransformer {
 
     double inverseMaxErosionDepth = 1/maxErosionDepth;
     private double erosionDepthMultiplier(double depth) {
-        if (depth >= maxErosionDepth) return 1;
-        if (depth <= 0) return 0;
-        return inverseMaxErosionDepth*depth;
+        if (depth >= maxErosionDepth) return 0;
+        if (depth <= 0) return 1;
+        return 1 - inverseMaxErosionDepth*depth;
     }
 
     private static int wrapOffsetCoordinateMoore(int index, int length, int offset, int xz) {
