@@ -1,5 +1,8 @@
 package me.chriss99;
 
+import org.joml.Vector2d;
+import org.joml.Vector3d;
+
 import java.util.Arrays;
 
 public class HeightMapTransformer {
@@ -239,6 +242,15 @@ public class HeightMapTransformer {
         if (depth >= maxErosionDepth) return 0;
         if (depth <= 0) return 1;
         return 1 - inverseMaxErosionDepth*depth;
+    }
+
+    public Vector3d normalAt(double[][] heightMap, int x, int z) {
+        double right = wrapOffsetCoordinateMoore(x, heightMap.length, 1, 0);
+        double left = wrapOffsetCoordinateMoore(x, heightMap.length, 2, 0);
+        double bottom = wrapOffsetCoordinateMoore(z, heightMap[0].length, 3, 1);
+        double top = wrapOffsetCoordinateMoore(z, heightMap[0].length, 0, 1);
+
+        return new Vector3d(2*(right - left), -4, 2*(bottom - top)).normalize();
     }
 
     private static int wrapOffsetCoordinateMoore(int index, int length, int offset, int xz) {
