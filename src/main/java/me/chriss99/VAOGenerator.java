@@ -1,6 +1,8 @@
 package me.chriss99;
 
+import org.joml.Math;
 import org.joml.Vector2d;
+import org.joml.Vector3d;
 
 import java.util.Arrays;
 
@@ -257,6 +259,41 @@ public class VAOGenerator {
 
     public static VAO heightMapToVectorVAO(double[][] heightMap, double[][][] vectorField) {
         double[] vertexes = heightMapToVectorVertexes(heightMap, vectorField);
+        double[] color = heightMapToVectorColors(heightMap);
+        int[] index = heightMapToVectorIndex(heightMap);
+
+        return new VAO(vertexes, color, index);
+    }
+
+    public static double[] heightMapToNormalVertexes(double[][] heightMap) {
+        double[] vertexes = new double[heightMap.length*heightMap[0].length*3*3];
+        int vertexShift = 0;
+
+        for (int z = 0; z < heightMap[0].length; z++)
+            for (int x = 0; x < heightMap.length; x++) {
+                Vector3d normal = Main.heightMapTransformer.normalAt(heightMap, x, z);
+
+                vertexes[vertexShift    ] = x - normal.z * .3;
+                vertexes[vertexShift + 1] = heightMap[x][z];
+                vertexes[vertexShift + 2] = z + normal.x * .3;
+                vertexShift += 3;
+
+                vertexes[vertexShift    ] = x + normal.z * .3;
+                vertexes[vertexShift + 1] = heightMap[x][z];
+                vertexes[vertexShift + 2] = z - normal.x * .3;
+                vertexShift += 3;
+
+                vertexes[vertexShift    ] = x + normal.x;
+                vertexes[vertexShift + 1] = heightMap[x][z] + normal.y;
+                vertexes[vertexShift + 2] = z + normal.z;
+                vertexShift += 3;
+            }
+
+        return vertexes;
+    }
+
+    public static VAO heightMapToNormalVAO(double[][] heightMap) {
+        double[] vertexes = heightMapToNormalVertexes(heightMap);
         double[] color = heightMapToVectorColors(heightMap);
         int[] index = heightMapToVectorIndex(heightMap);
 
