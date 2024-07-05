@@ -26,7 +26,7 @@ public class TerrainData {
     }
 
     public double heightAt(int x, int z) {
-        return terrainMap[x][z] + waterMap[x][z] + sedimentMap[x][z];
+        return terrainMap[x][z] + waterMap[x][z];
     }
 
     public double heightDiffTo(int x, int z, int xOffset, int zOffset) {

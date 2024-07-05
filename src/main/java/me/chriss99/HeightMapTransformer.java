@@ -123,14 +123,15 @@ public class HeightMapTransformer {
     private void erosionAndDeposition(TerrainData terrainData) {
         for (int z = 0; z < terrainData.zSize; z++)
             for (int x = 0; x < terrainData.xSize; x++) {
-                double sedimentCapacity = erosionDepthMultiplier(terrainData.waterMap[x][z] + terrainData.sedimentMap[x][z]) * sedimentCapacityMultiplier;
+                double sedimentCapacity = erosionDepthMultiplier(terrainData.waterMap[x][z]) * sedimentCapacityMultiplier * new Vector2d(terrainData.velocityField[x][z]).length();
                 double unusedCapacity = sedimentCapacity - terrainData.sedimentMap[x][z];
 
                 double change = (unusedCapacity > 0) ?
                         deltaTWater * terrainHardness(x, z) * soilSuspensionRate * unusedCapacity :
                         deltaTWater * sedimentDepositionRate * unusedCapacity;
                 terrainData.terrainMap[x][z] -= change;
-                terrainData.sedimentMap[x][z] += change;
+                terrainData.sedimentMap[x][z] = Math.max(0, terrainData.sedimentMap[x][z] + change);
+                terrainData.waterMap[x][z] = Math.max(0, terrainData.waterMap[x][z] + change);
             }
     }
 
