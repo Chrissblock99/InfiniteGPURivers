@@ -7,6 +7,8 @@ public class TerrainData {
     public final double[][] terrainMap;
     public final double[][] waterMap;
     public final double[][] sedimentMap;
+    public final double[][] addedHeights;
+    public boolean addedHeightsCalculated = false;
     //public final double[][] hardnessMap;
 
     public final double[][][] waterOutFlowPipes;
@@ -19,6 +21,7 @@ public class TerrainData {
         this.terrainMap = terrainMap;
         waterMap = new double[xSize][zSize];
         sedimentMap = new double[xSize][zSize];
+        addedHeights = new double[xSize][zSize];
         //hardnessMap = new double[xSize][zSize];
 
         waterOutFlowPipes = new double[xSize][zSize][4];
@@ -38,12 +41,13 @@ public class TerrainData {
     }
 
     public double[][] addedHeights() {
-        double[][] allHeights = new double[xSize][zSize];
+        if (!addedHeightsCalculated) {
+            for (int z = 0; z < zSize; z++)
+                for (int x = 0; x < xSize; x++)
+                    addedHeights[x][z] = heightAt(x, z);
+            addedHeightsCalculated = true;
+        }
 
-        for (int z = 0; z < zSize; z++)
-            for (int x = 0; x < xSize; x++)
-                allHeights[x][z] += heightAt(x, z);
-
-        return allHeights;
+        return addedHeights;
     }
 }

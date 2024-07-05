@@ -103,6 +103,7 @@ public class HeightMapTransformer {
                     if (terrainData.waterOutFlowPipes[x][z][i] < 0)
                         throw new IllegalStateException("WaterOutflow is negative!");
                 }
+        terrainData.addedHeightsCalculated = false;
     }
 
     private void calculateVelocityField(TerrainData terrainData) {
@@ -133,6 +134,7 @@ public class HeightMapTransformer {
                 terrainData.sedimentMap[x][z] = Math.max(0, terrainData.sedimentMap[x][z] + change);
                 terrainData.waterMap[x][z] = Math.max(0, terrainData.waterMap[x][z] + change);
             }
+        terrainData.addedHeightsCalculated = false;
     }
 
     private double[][][] calculateSedimentOutflow(TerrainData terrainData) {
@@ -186,6 +188,7 @@ public class HeightMapTransformer {
         for (int z = 0; z < terrainData.zSize; z++)
             for (int x = 0; x < terrainData.xSize; x++)
                 terrainData.waterMap[x][z] *= evaporationMultiplier;
+        terrainData.addedHeightsCalculated = false;
     }
 
     private double[][][] calculateThermalOutflow(TerrainData terrainData) {
@@ -231,6 +234,7 @@ public class HeightMapTransformer {
                     terrainData.terrainMap[x][z] += outflowPipes[wrapOffsetCoordinateMoore(x, terrainData.xSize, i, 0)][wrapOffsetCoordinateMoore(z, terrainData.zSize, i, 1)][7-i];
                     terrainData.terrainMap[x][z] -= outflowPipes[x][z][i];
                 }
+        terrainData.addedHeightsCalculated = false;
     }
 
     //TODO
