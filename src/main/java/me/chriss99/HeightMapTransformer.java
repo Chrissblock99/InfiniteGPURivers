@@ -42,8 +42,9 @@ public class HeightMapTransformer {
     }
 
     public void simpleThermalErosion(TerrainData terrainData) {
-        double[][][] thermalOutflowPipes = calculateThermalOutflow(terrainData);
-        applyThermalOutflow(terrainData, thermalOutflowPipes);
+        multiThreadProcessor(terrainData, this::calculateThermalOutflow, 10);
+        multiThreadProcessor(terrainData, this::applyThermalOutflow, 10);
+        terrainData.addedHeightsCalculated = false;
     }
 
     boolean rain = false;
@@ -216,50 +217,37 @@ public class HeightMapTransformer {
         terrainData.addedHeightsCalculated = false;
     }
 
-    private double[][][] calculateThermalOutflow(TerrainData terrainData) {
-        double[][][] outflowPipes = new double[terrainData.xSize][terrainData.zSize][8];
+    private void calculateThermalOutflow(TerrainData terrainData, int x, int z) {
+        double maxHeightDiff = -Double.MAX_VALUE;
+        boolean[] neighborBelowTalusAngle = new boolean[8];
+        double steepNeighbourHeightDiffSum = 0;
 
-        for (int z = 0; z < terrainData.zSize; z++)
-            for (int x = 0; x < terrainData.xSize; x++) {
-                double maxHeightDiff = -Double.MAX_VALUE;
-                boolean[] neighborBelowTalusAngle = new boolean[8];
-                double steepNeighbourHeightDiffSum = 0;
+        for (int i = 0; i < mooreNeighbourhood.length; i++) {
+            double heightDiff = terrainData.terrainMap[x][z]-terrainData.terrainMap[wrapOffsetCoordinateMoore(x, terrainData.xSize, i, 0)][wrapOffsetCoordinateMoore(z, terrainData.zSize, i, 1)];
+            if (heightDiff>maxHeightDiff)
+                maxHeightDiff = heightDiff;
 
-                for (int i = 0; i < mooreNeighbourhood.length; i++) {
-                    double heightDiff = terrainData.terrainMap[x][z]-terrainData.terrainMap[wrapOffsetCoordinateMoore(x, terrainData.xSize, i, 0)][wrapOffsetCoordinateMoore(z, terrainData.zSize, i, 1)];
-                    if (heightDiff>maxHeightDiff)
-                        maxHeightDiff = heightDiff;
-
-                    double angle = heightDiff * inverseMooreNeighbourhoodDistances[i]; //this is normally in atan() but is only used for tan()
-                    if (heightDiff > 0 && angle > terrainHardness(x, z) * talusAngleTangentCoeff + talusAngleTangentBias) {
-                        neighborBelowTalusAngle[i] = true;
-                        steepNeighbourHeightDiffSum += heightDiff;
-                    }
-                }
-
-                double heightChange = cellArea * deltaTThermal * thermalErosionRate * terrainHardness(x, z) * maxHeightDiff*.5;
-                double inverseSteepNeighbourHeightDiffSum = 1 / steepNeighbourHeightDiffSum;
-
-                //inverseSteepNeighbourHeightDiffSum CAN be Infinite, but in that case all differences are 0 and no one ever calculates anything
-                for (int i = 0; i < mooreNeighbourhood.length; i++) {
-                    if (!neighborBelowTalusAngle[i])
-                        continue;
-
-                    outflowPipes[x][z][i] = heightChange * (terrainData.terrainMap[x][z]-terrainData.terrainMap[wrapOffsetCoordinateMoore(x, terrainData.xSize, i, 0)][wrapOffsetCoordinateMoore(z, terrainData.zSize, i, 1)]) * inverseSteepNeighbourHeightDiffSum;
-                }
+            double angle = heightDiff * inverseMooreNeighbourhoodDistances[i]; //this is normally in atan() but is only used for tan()
+            if (heightDiff > 0 && angle > terrainHardness(x, z) * talusAngleTangentCoeff + talusAngleTangentBias) {
+                neighborBelowTalusAngle[i] = true;
+                steepNeighbourHeightDiffSum += heightDiff;
             }
+        }
 
-        return outflowPipes;
+        double heightChange = cellArea * deltaTThermal * thermalErosionRate * terrainHardness(x, z) * maxHeightDiff*.5;
+        double inverseSteepNeighbourHeightDiffSum = 1 / steepNeighbourHeightDiffSum;
+
+        //inverseSteepNeighbourHeightDiffSum CAN be Infinite, but in that case all differences are 0 and no one ever calculates anything
+        for (int i = 0; i < mooreNeighbourhood.length; i++)
+            terrainData.thermalOutFlowPipes[x][z][i] = (neighborBelowTalusAngle[i]) ?
+                    heightChange * (terrainData.terrainMap[x][z]-terrainData.terrainMap[wrapOffsetCoordinateMoore(x, terrainData.xSize, i, 0)][wrapOffsetCoordinateMoore(z, terrainData.zSize, i, 1)]) * inverseSteepNeighbourHeightDiffSum : 0;
     }
 
-    private void applyThermalOutflow(TerrainData terrainData, double[][][] outflowPipes) {
-        for (int z = 0; z < terrainData.zSize; z++)
-            for (int x = 0; x < terrainData.xSize; x++)
-                for (int i = 0; i < mooreNeighbourhood.length; i++) {
-                    terrainData.terrainMap[x][z] += outflowPipes[wrapOffsetCoordinateMoore(x, terrainData.xSize, i, 0)][wrapOffsetCoordinateMoore(z, terrainData.zSize, i, 1)][7-i];
-                    terrainData.terrainMap[x][z] -= outflowPipes[x][z][i];
-                }
-        terrainData.addedHeightsCalculated = false;
+    private void applyThermalOutflow(TerrainData terrainData, int x, int z) {
+        for (int i = 0; i < mooreNeighbourhood.length; i++) {
+            terrainData.terrainMap[x][z] += terrainData.thermalOutFlowPipes[wrapOffsetCoordinateMoore(x, terrainData.xSize, i, 0)][wrapOffsetCoordinateMoore(z, terrainData.zSize, i, 1)][7-i];
+            terrainData.terrainMap[x][z] -= terrainData.thermalOutFlowPipes[x][z][i];
+        }
     }
 
     //TODO
