@@ -12,8 +12,8 @@ public class TerrainData {
     public boolean addedHeightsCalculated = false;
     //public final double[][] hardnessMap;
 
-    public final double[][][] waterOutFlowPipes;
-    public double[][][] thermalOutFlowPipes;
+    public final double[][][] waterOutflowPipes;
+    public double[][][] thermalOutflowPipes;
     public final double[][][] velocityField;
 
     public TerrainData(double[][] terrainMap) {
@@ -27,8 +27,8 @@ public class TerrainData {
         addedHeights = new double[xSize][zSize];
         //hardnessMap = new double[xSize][zSize];
 
-        waterOutFlowPipes = new double[xSize][zSize][4];
-        thermalOutFlowPipes = new double[xSize][zSize][8];
+        waterOutflowPipes = new double[xSize][zSize][4];
+        thermalOutflowPipes = new double[xSize][zSize][8];
         velocityField = new double[xSize][zSize][2];
     }
 

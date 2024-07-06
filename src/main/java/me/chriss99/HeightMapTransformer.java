@@ -65,17 +65,17 @@ public class HeightMapTransformer {
         double totalOutFlow = 0;
 
         for (int i = 0; i < vonNeumannNeighbourhood.length; i++) {
-            double outFlow = Math.max(0, terrainData.waterOutFlowPipes[x][z][i] +
+            double outFlow = Math.max(0, terrainData.waterOutflowPipes[x][z][i] +
                     //the paper didn't mention to consider sediment height as well but im doing it anyway
                     deltaTWater * terrainData.heightDiffTo(x, z, vonNeumannNeighbourhood[i]));
-            terrainData.waterOutFlowPipes[x][z][i] = outFlow;
+            terrainData.waterOutflowPipes[x][z][i] = outFlow;
             totalOutFlow += outFlow;
         }
 
         if (totalOutFlow > terrainData.waterMap[x][z]) {
             double flowScalar = terrainData.waterMap[x][z] / totalOutFlow;// * deltaTWater;
             for (int i = 0; i < vonNeumannNeighbourhood.length; i++)
-                terrainData.waterOutFlowPipes[x][z][i] *= flowScalar;
+                terrainData.waterOutflowPipes[x][z][i] *= flowScalar;
         }
 
         //generates the same velocityField when only simulating water flow in the long run, is a lot cleaner while doing so, but takes A LOT longer
@@ -98,25 +98,25 @@ public class HeightMapTransformer {
 
     private void applyWaterOutflow(TerrainData terrainData, int x, int z) {
         for (int i = 0; i < vonNeumannNeighbourhood.length; i++) {
-            terrainData.waterMap[x][z] += terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, i, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, i, 1)][3-i];
-            terrainData.waterMap[x][z] -= terrainData.waterOutFlowPipes[x][z][i];
+            terrainData.waterMap[x][z] += terrainData.waterOutflowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, i, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, i, 1)][3-i];
+            terrainData.waterMap[x][z] -= terrainData.waterOutflowPipes[x][z][i];
             //this needs to be done due to possible floating point imprecision
             terrainData.waterMap[x][z] = Math.max(0, terrainData.waterMap[x][z]);
-            if (terrainData.waterOutFlowPipes[x][z][i] < 0)
+            if (terrainData.waterOutflowPipes[x][z][i] < 0)
                 throw new IllegalStateException("WaterOutflow is negative!");
         }
     }
 
     private void calculateVelocityField(TerrainData terrainData, int x, int z) {
-        terrainData.velocityField[x][z][0]  = terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 1, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 1, 1)][2];
-        terrainData.velocityField[x][z][0] -= terrainData.waterOutFlowPipes[x][z][1];
-        terrainData.velocityField[x][z][0] -= terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 2, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 2, 1)][1];
-        terrainData.velocityField[x][z][0] += terrainData.waterOutFlowPipes[x][z][2];
+        terrainData.velocityField[x][z][0]  = terrainData.waterOutflowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 1, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 1, 1)][2];
+        terrainData.velocityField[x][z][0] -= terrainData.waterOutflowPipes[x][z][1];
+        terrainData.velocityField[x][z][0] -= terrainData.waterOutflowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 2, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 2, 1)][1];
+        terrainData.velocityField[x][z][0] += terrainData.waterOutflowPipes[x][z][2];
 
-        terrainData.velocityField[x][z][1]  = terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 3, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 3, 1)][0];
-        terrainData.velocityField[x][z][1] -= terrainData.waterOutFlowPipes[x][z][3];
-        terrainData.velocityField[x][z][1] -= terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 0, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 0, 1)][3];
-        terrainData.velocityField[x][z][1] += terrainData.waterOutFlowPipes[x][z][0];
+        terrainData.velocityField[x][z][1]  = terrainData.waterOutflowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 3, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 3, 1)][0];
+        terrainData.velocityField[x][z][1] -= terrainData.waterOutflowPipes[x][z][3];
+        terrainData.velocityField[x][z][1] -= terrainData.waterOutflowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 0, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 0, 1)][3];
+        terrainData.velocityField[x][z][1] += terrainData.waterOutflowPipes[x][z][0];
 
         //eliminates spikes when using push behaviour for sediment transportation
         //terrainData.velocityField[x][z][0] = terrainData.waterOutFlowPipes[x][z][2];
@@ -239,14 +239,14 @@ public class HeightMapTransformer {
 
         //inverseSteepNeighbourHeightDiffSum CAN be Infinite, but in that case all differences are 0 and no one ever calculates anything
         for (int i = 0; i < mooreNeighbourhood.length; i++)
-            terrainData.thermalOutFlowPipes[x][z][i] = (neighborBelowTalusAngle[i]) ?
+            terrainData.thermalOutflowPipes[x][z][i] = (neighborBelowTalusAngle[i]) ?
                     heightChange * (terrainData.terrainMap[x][z]-terrainData.terrainMap[wrapOffsetCoordinateMoore(x, terrainData.xSize, i, 0)][wrapOffsetCoordinateMoore(z, terrainData.zSize, i, 1)]) * inverseSteepNeighbourHeightDiffSum : 0;
     }
 
     private void applyThermalOutflow(TerrainData terrainData, int x, int z) {
         for (int i = 0; i < mooreNeighbourhood.length; i++) {
-            terrainData.terrainMap[x][z] += terrainData.thermalOutFlowPipes[wrapOffsetCoordinateMoore(x, terrainData.xSize, i, 0)][wrapOffsetCoordinateMoore(z, terrainData.zSize, i, 1)][7-i];
-            terrainData.terrainMap[x][z] -= terrainData.thermalOutFlowPipes[x][z][i];
+            terrainData.terrainMap[x][z] += terrainData.thermalOutflowPipes[wrapOffsetCoordinateMoore(x, terrainData.xSize, i, 0)][wrapOffsetCoordinateMoore(z, terrainData.zSize, i, 1)][7-i];
+            terrainData.terrainMap[x][z] -= terrainData.thermalOutflowPipes[x][z][i];
         }
     }
 
