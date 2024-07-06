@@ -142,8 +142,8 @@ public class Main {
             //clear the window
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            if (simulateThermal) heightMapTransformer.simpleThermalErosion(terrainData);
-            if (simulateHydraulic) heightMapTransformer.simpleHydraulicErosion(terrainData);
+            if (simulateThermal) heightMapTransformer.thermalErosion(terrainData);
+            if (simulateHydraulic) heightMapTransformer.hydraulicErosion(terrainData);
             if (simulateThermal || simulateHydraulic) updateTerrainVAOs();
 
             for (VAO vao : vaoList) {

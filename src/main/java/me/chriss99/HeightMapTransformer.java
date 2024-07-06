@@ -26,7 +26,7 @@ public class HeightMapTransformer {
     double pipeLength = 1; //only used for water
     double inversePipeLength = 1/pipeLength;
 
-    public void simpleHydraulicErosion(TerrainData terrainData) {
+    public void hydraulicErosion(TerrainData terrainData) {
         addWater(terrainData);
         multiThreadProcessor(terrainData, this::calculateWaterOutflow, 10);
         multiThreadProcessor(terrainData, this::calculateVelocityField, 10);
@@ -41,7 +41,7 @@ public class HeightMapTransformer {
         evaporateWater(terrainData);
     }
 
-    public void simpleThermalErosion(TerrainData terrainData) {
+    public void thermalErosion(TerrainData terrainData) {
         multiThreadProcessor(terrainData, this::calculateThermalOutflow, 10);
         multiThreadProcessor(terrainData, this::applyThermalOutflow, 10);
         terrainData.addedHeightsCalculated = false;
