@@ -86,7 +86,7 @@ public class Main {
         vaoList.add(VAOGenerator.heightMapToSimpleVAO(terrainData.terrainMap));
         vaoList.add(VAOGenerator.heightMapToCrossVAO(terrainData.addedHeights(), terrainData.waterOutFlowPipes));
         vaoList.add(VAOGenerator.heightMapToVectorVAO(terrainData.addedHeights(), terrainData.velocityField));
-        vaoList.add(VAOGenerator.heightMapToNormalVAO(terrainData.terrainMap));
+        //vaoList.add(VAOGenerator.heightMapToNormalVAO(terrainData.terrainMap));
 
         //for (int x = 0; x < terrainData.xSize; x++)
         //    System.out.println(Arrays.toString(terrainData.waterMap[x]));
@@ -188,7 +188,7 @@ public class Main {
         vaoList.get(1).updatePositions(VAOGenerator.heightMapToCrossVertexes(terrainData.addedHeights()));
         vaoList.get(1).updateColors(VAOGenerator.heightMapToCrossColors(terrainData.addedHeights(), terrainData.waterOutFlowPipes));
         vaoList.get(2).updatePositions(VAOGenerator.heightMapToVectorVertexes(terrainData.addedHeights(), terrainData.velocityField));
-        vaoList.get(3).updatePositions(VAOGenerator.heightMapToNormalVertexes(terrainData.terrainMap));
+        //vaoList.get(2).updatePositions(VAOGenerator.heightMapToNormalVertexes(terrainData.terrainMap));
     }
 
     private static void cleanGL() {
