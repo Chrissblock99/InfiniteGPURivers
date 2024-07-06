@@ -3,7 +3,7 @@ package me.chriss99;
 import org.joml.Vector2d;
 import org.joml.Vector3d;
 
-import java.util.Arrays;
+import java.util.LinkedList;
 
 public class HeightMapTransformer {
     double deltaTThermal = 1; //[0.1;100]
@@ -28,13 +28,16 @@ public class HeightMapTransformer {
 
     public void simpleHydraulicErosion(TerrainData terrainData) {
         addWater(terrainData);
-        calculateWaterOutflow(terrainData);
-        calculateVelocityField(terrainData);
-        applyWaterOutflow(terrainData);
-        erosionAndDeposition(terrainData);
+        multiThreadProcessor(terrainData, this::calculateWaterOutflow, 10);
+        multiThreadProcessor(terrainData, this::calculateVelocityField, 10);
+        multiThreadProcessor(terrainData, this::applyWaterOutflow, 10);
+        terrainData.addedHeightsCalculated = false;
+        multiThreadProcessor(terrainData, this::erosionAndDeposition, 10);
+        terrainData.addedHeightsCalculated = false;
         //double[][][] sedimentOutflow = calculateSedimentOutflow(terrainData);
         //applySedimentOutflow(terrainData, sedimentOutflow);
-        sedimentTransportation(terrainData);
+        multiThreadProcessor(terrainData, this::sedimentTransportation, 10);
+        terrainData.sedimentMap = terrainData.newSedimentMap;
         evaporateWater(terrainData);
     }
 
@@ -57,126 +60,106 @@ public class HeightMapTransformer {
         terrainData.addedHeightsCalculated = false;
     }
 
-    private void calculateWaterOutflow(TerrainData terrainData) {
-        for (int z = 0; z < terrainData.zSize; z++)
-            for (int x = 0; x < terrainData.xSize; x++) {
-                double totalOutFlow = 0;
+    private void calculateWaterOutflow(TerrainData terrainData, int x, int z) {
+        double totalOutFlow = 0;
 
-                for (int i = 0; i < vonNeumannNeighbourhood.length; i++) {
-                    double outFlow = Math.max(0, terrainData.waterOutFlowPipes[x][z][i] +
-                            //the paper didn't mention to consider sediment height as well but im doing it anyway
-                            deltaTWater * terrainData.heightDiffTo(x, z, vonNeumannNeighbourhood[i]));
-                    terrainData.waterOutFlowPipes[x][z][i] = outFlow;
-                    totalOutFlow += outFlow;
-                }
+        for (int i = 0; i < vonNeumannNeighbourhood.length; i++) {
+            double outFlow = Math.max(0, terrainData.waterOutFlowPipes[x][z][i] +
+                    //the paper didn't mention to consider sediment height as well but im doing it anyway
+                    deltaTWater * terrainData.heightDiffTo(x, z, vonNeumannNeighbourhood[i]));
+            terrainData.waterOutFlowPipes[x][z][i] = outFlow;
+            totalOutFlow += outFlow;
+        }
 
-                if (totalOutFlow > terrainData.waterMap[x][z]) {
-                    double flowScalar = terrainData.waterMap[x][z] / totalOutFlow;// * deltaTWater;
-                    for (int i = 0; i < vonNeumannNeighbourhood.length; i++)
-                        terrainData.waterOutFlowPipes[x][z][i] *= flowScalar;
-                }
+        if (totalOutFlow > terrainData.waterMap[x][z]) {
+            double flowScalar = terrainData.waterMap[x][z] / totalOutFlow;// * deltaTWater;
+            for (int i = 0; i < vonNeumannNeighbourhood.length; i++)
+                terrainData.waterOutFlowPipes[x][z][i] *= flowScalar;
+        }
 
-                //generates the same velocityField when only simulating water flow in the long run, is a lot cleaner while doing so, but takes A LOT longer
-                /*double totalOutflow = 0;
+        //generates the same velocityField when only simulating water flow in the long run, is a lot cleaner while doing so, but takes A LOT longer
+        /*double totalOutflow = 0;
 
-                for (int i = 0; i < vonNeumannNeighbourhood.length; i++) {
-                    double outflow = (terrainData.heightDiffTo(x, z, vonNeumannNeighbourhood[i]) > 0) ?
-                        Math.min(terrainData.heightDiffTo(x, z, vonNeumannNeighbourhood[i]), terrainData.heightAt(x, z)) * deltaTWater : 0;
+        for (int i = 0; i < vonNeumannNeighbourhood.length; i++) {
+            double outflow = (terrainData.heightDiffTo(x, z, vonNeumannNeighbourhood[i]) > 0) ?
+                Math.min(terrainData.heightDiffTo(x, z, vonNeumannNeighbourhood[i]), terrainData.heightAt(x, z)) * deltaTWater : 0;
 
-                    terrainData.waterOutFlowPipes[x][z][i] = outflow;
-                    totalOutflow += outflow;
-                }
+            terrainData.waterOutFlowPipes[x][z][i] = outflow;
+            totalOutflow += outflow;
+        }
 
-                if (totalOutflow > terrainData.waterMap[x][z]) {
-                    double flowScalar = terrainData.waterMap[x][z] * pipeLength * pipeLength / totalOutflow;
-                    for (int i = 0; i < vonNeumannNeighbourhood.length; i++)
-                        terrainData.waterOutFlowPipes[x][z][i] *= flowScalar;
-                }*/
-            }
+        if (totalOutflow > terrainData.waterMap[x][z]) {
+            double flowScalar = terrainData.waterMap[x][z] * pipeLength * pipeLength / totalOutflow;
+            for (int i = 0; i < vonNeumannNeighbourhood.length; i++)
+                terrainData.waterOutFlowPipes[x][z][i] *= flowScalar;
+        }*/
     }
 
-    private void applyWaterOutflow(TerrainData terrainData) {
-        for (int z = 0; z < terrainData.zSize; z++)
-            for (int x = 0; x < terrainData.xSize; x++)
-                for (int i = 0; i < vonNeumannNeighbourhood.length; i++) {
-                    terrainData.waterMap[x][z] += terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, i, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, i, 1)][3-i];
-                    terrainData.waterMap[x][z] -= terrainData.waterOutFlowPipes[x][z][i];
-                    //this needs to be done due to possible floating point imprecision
-                    terrainData.waterMap[x][z] = Math.max(0, terrainData.waterMap[x][z]);
-                    if (terrainData.waterOutFlowPipes[x][z][i] < 0)
-                        throw new IllegalStateException("WaterOutflow is negative!");
-                }
-        terrainData.addedHeightsCalculated = false;
+    private void applyWaterOutflow(TerrainData terrainData, int x, int z) {
+        for (int i = 0; i < vonNeumannNeighbourhood.length; i++) {
+            terrainData.waterMap[x][z] += terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, i, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, i, 1)][3-i];
+            terrainData.waterMap[x][z] -= terrainData.waterOutFlowPipes[x][z][i];
+            //this needs to be done due to possible floating point imprecision
+            terrainData.waterMap[x][z] = Math.max(0, terrainData.waterMap[x][z]);
+            if (terrainData.waterOutFlowPipes[x][z][i] < 0)
+                throw new IllegalStateException("WaterOutflow is negative!");
+        }
     }
 
-    private void calculateVelocityField(TerrainData terrainData) {
-        for (int z = 0; z < terrainData.zSize; z++)
-            for (int x = 0; x < terrainData.xSize; x++) {
-                terrainData.velocityField[x][z][0]  = terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 1, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 1, 1)][2];
-                terrainData.velocityField[x][z][0] -= terrainData.waterOutFlowPipes[x][z][1];
-                terrainData.velocityField[x][z][0] -= terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 2, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 2, 1)][1];
-                terrainData.velocityField[x][z][0] += terrainData.waterOutFlowPipes[x][z][2];
+    private void calculateVelocityField(TerrainData terrainData, int x, int z) {
+        terrainData.velocityField[x][z][0]  = terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 1, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 1, 1)][2];
+        terrainData.velocityField[x][z][0] -= terrainData.waterOutFlowPipes[x][z][1];
+        terrainData.velocityField[x][z][0] -= terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 2, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 2, 1)][1];
+        terrainData.velocityField[x][z][0] += terrainData.waterOutFlowPipes[x][z][2];
 
-                terrainData.velocityField[x][z][1]  = terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 3, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 3, 1)][0];
-                terrainData.velocityField[x][z][1] -= terrainData.waterOutFlowPipes[x][z][3];
-                terrainData.velocityField[x][z][1] -= terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 0, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 0, 1)][3];
-                terrainData.velocityField[x][z][1] += terrainData.waterOutFlowPipes[x][z][0];
+        terrainData.velocityField[x][z][1]  = terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 3, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 3, 1)][0];
+        terrainData.velocityField[x][z][1] -= terrainData.waterOutFlowPipes[x][z][3];
+        terrainData.velocityField[x][z][1] -= terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 0, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 0, 1)][3];
+        terrainData.velocityField[x][z][1] += terrainData.waterOutFlowPipes[x][z][0];
 
-                //eliminates spikes when using push behaviour for sediment transportation
-                //terrainData.velocityField[x][z][0] = terrainData.waterOutFlowPipes[x][z][2];
-                //terrainData.velocityField[x][z][0] -= terrainData.waterOutFlowPipes[x][z][1];
+        //eliminates spikes when using push behaviour for sediment transportation
+        //terrainData.velocityField[x][z][0] = terrainData.waterOutFlowPipes[x][z][2];
+        //terrainData.velocityField[x][z][0] -= terrainData.waterOutFlowPipes[x][z][1];
 
-                //terrainData.velocityField[x][z][1] = terrainData.waterOutFlowPipes[x][z][0];
-                //terrainData.velocityField[x][z][1] -= terrainData.waterOutFlowPipes[x][z][3];
-            }
+        //terrainData.velocityField[x][z][1] = terrainData.waterOutFlowPipes[x][z][0];
+        //terrainData.velocityField[x][z][1] -= terrainData.waterOutFlowPipes[x][z][3];
     }
 
-    private void erosionAndDeposition(TerrainData terrainData) {
-        for (int z = 0; z < terrainData.zSize; z++)
-            for (int x = 0; x < terrainData.xSize; x++) {
-                double sedimentCapacity = erosionDepthMultiplier(terrainData.waterMap[x][z]) * sedimentCapacityMultiplier * new Vector2d(terrainData.velocityField[x][z]).length();
-                double unusedCapacity = sedimentCapacity - terrainData.sedimentMap[x][z];
+    private void erosionAndDeposition(TerrainData terrainData, int x, int z) {
+        double sedimentCapacity = erosionDepthMultiplier(terrainData.waterMap[x][z]) * sedimentCapacityMultiplier * new Vector2d(terrainData.velocityField[x][z]).length();
+        double unusedCapacity = sedimentCapacity - terrainData.sedimentMap[x][z];
 
-                double change = (unusedCapacity > 0) ?
-                        deltaTWater * terrainHardness(x, z) * soilSuspensionRate * unusedCapacity :
-                        deltaTWater * sedimentDepositionRate * unusedCapacity;
-                terrainData.terrainMap[x][z] -= change;
-                terrainData.sedimentMap[x][z] = Math.max(0, terrainData.sedimentMap[x][z] + change);
-                terrainData.waterMap[x][z] = Math.max(0, terrainData.waterMap[x][z] + change);
-            }
-        terrainData.addedHeightsCalculated = false;
+        double change = (unusedCapacity > 0) ?
+                deltaTWater * terrainHardness(x, z) * soilSuspensionRate * unusedCapacity :
+                deltaTWater * sedimentDepositionRate * unusedCapacity;
+        terrainData.terrainMap[x][z] -= change;
+        terrainData.sedimentMap[x][z] = Math.max(0, terrainData.sedimentMap[x][z] + change);
+        terrainData.waterMap[x][z] = Math.max(0, terrainData.waterMap[x][z] + change);
     }
 
-    private void sedimentTransportation(TerrainData terrainData) {
-        double[][] newSedimentMap = new double[terrainData.xSize][terrainData.zSize];
+    private void sedimentTransportation(TerrainData terrainData, int x, int z) {
+        int[][] closestCells = new int[4][2];
+        //[2][3]
+        //[0][1]
+        double[] pullFrom = new double[]{x - terrainData.velocityField[x][z][0], z - terrainData.velocityField[x][z][1]};
 
-        for (int z = 0; z < terrainData.zSize; z++)
-            for (int x = 0; x < terrainData.xSize; x++) {
-                int[][] closestCells = new int[4][2];
-                //[2][3]
-                //[0][1]
-                double[] pullFrom = new double[]{x - terrainData.velocityField[x][z][0], z - terrainData.velocityField[x][z][1]};
+        closestCells[0] = new int[]{(int) Math.floor(pullFrom[0]), (int) Math.floor(pullFrom[1])};
+        closestCells[1] = new int[]{(int) Math.ceil (pullFrom[0]), (int) Math.floor(pullFrom[1])};
+        closestCells[2] = new int[]{(int) Math.floor(pullFrom[0]), (int) Math.ceil (pullFrom[1])};
+        closestCells[3] = new int[]{(int) Math.ceil (pullFrom[0]), (int) Math.ceil (pullFrom[1])};
 
-                closestCells[0] = new int[]{(int) Math.floor(pullFrom[0]), (int) Math.floor(pullFrom[1])};
-                closestCells[1] = new int[]{(int) Math.ceil (pullFrom[0]), (int) Math.floor(pullFrom[1])};
-                closestCells[2] = new int[]{(int) Math.floor(pullFrom[0]), (int) Math.ceil (pullFrom[1])};
-                closestCells[3] = new int[]{(int) Math.ceil (pullFrom[0]), (int) Math.ceil (pullFrom[1])};
-
-                for (int i = 0; i < 4; i++)
-                    closestCells[i] = new int[]{wrapNumber(closestCells[i][0], terrainData.xSize), wrapNumber(closestCells[i][1], terrainData.zSize)};
+        for (int i = 0; i < 4; i++)
+            closestCells[i] = new int[]{wrapNumber(closestCells[i][0], terrainData.xSize), wrapNumber(closestCells[i][1], terrainData.zSize)};
 
 
-                double[] interpolation = new double[]{pullFrom[0] % 1, pullFrom[1] % 1};
-                double[] heights = new double[4];
-                for (int i = 0; i < 4; i++)
-                    heights[i] = terrainData.sedimentMap[closestCells[i][0]][closestCells[i][1]];
+        double[] interpolation = new double[]{pullFrom[0] % 1, pullFrom[1] % 1};
+        double[] heights = new double[4];
+        for (int i = 0; i < 4; i++)
+            heights[i] = terrainData.sedimentMap[closestCells[i][0]][closestCells[i][1]];
 
-                double down = lerp(heights[0], heights[1], interpolation[0]);
-                double up   = lerp(heights[2], heights[3], interpolation[0]);
-                newSedimentMap[x][z] = lerp(down, up, interpolation[1]);
-            }
-
-        terrainData.sedimentMap = newSedimentMap;
+        double down = lerp(heights[0], heights[1], interpolation[0]);
+        double up   = lerp(heights[2], heights[3], interpolation[0]);
+        terrainData.newSedimentMap[x][z] = lerp(down, up, interpolation[1]);
     }
 
     private double[][][] calculateSedimentOutflow(TerrainData terrainData) {
@@ -320,6 +303,30 @@ public class HeightMapTransformer {
 
     private static double lerp(double a, double b, double t) {
         return (b - a) * t + a;
+    }
+
+    private static void multiThreadProcessor(TerrainData terrainData, TerrainDataProcessor processor, int threadNum) {
+        int step = (int) Math.ceil((double) terrainData.zSize / (double) threadNum);
+
+        LinkedList<Thread> threadList = new LinkedList<>();
+        for (int z = 0; z < terrainData.zSize; z += step) {
+            int zStart = z;
+            int zEnd = Math.min(z + step, terrainData.zSize);
+            Thread thread = new Thread(() -> {
+                for (int smallZ = zStart; smallZ < zEnd; smallZ++)
+                    for (int x = 0; x < terrainData.xSize; x++)
+                        processor.processAt(terrainData, x, smallZ);
+            });
+            thread.start();
+            threadList.add(thread);
+        }
+
+        while (!threadList.isEmpty())
+            threadList.removeIf((thread -> !thread.isAlive()));
+    }
+
+    private interface TerrainDataProcessor {
+        void processAt(TerrainData terrainData, int x, int z);
     }
 
 
