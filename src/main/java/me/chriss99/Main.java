@@ -142,8 +142,12 @@ public class Main {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             if (simulateErosion) {
+                double before = glfwGetTime();
                 heightMapTransformer.fullErosion(terrainData);
+                System.out.println("update: " + (glfwGetTime() - before));
+                before = glfwGetTime();
                 updateTerrainVAOs();
+                System.out.println("upload: " + (glfwGetTime() - before));
             }
 
             for (VAO vao : vaoList) {
