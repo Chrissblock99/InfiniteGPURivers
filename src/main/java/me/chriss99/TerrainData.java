@@ -6,7 +6,7 @@ public class TerrainData {
 
     public final double[][] terrainMap;
     public final double[][] waterMap;
-    public final double[][] sedimentMap;
+    public double[][] sedimentMap;
     public final double[][] addedHeights;
     public boolean addedHeightsCalculated = false;
     //public final double[][] hardnessMap;
