@@ -6,7 +6,7 @@ import org.joml.Vector3d;
 import java.util.Arrays;
 
 public class HeightMapTransformer {
-    double deltaTThermal = 10; //[0.1;100]
+    double deltaTThermal = 1; //[0.1;100]
     double deltaTWater = 0.02; //[0;0.05]
 
     double rainRate = 0.012; //[0;0.05]
@@ -15,7 +15,7 @@ public class HeightMapTransformer {
     double gravity = 9.81; //[0.1;20]
     double sedimentCapacityMultiplier = 1; //[0.1;3]
     double thermalErosionRate = 0.015; //[0;3]
-    double soilSuspensionRate = 0.5; //[0.1;2]
+    double soilSuspensionRate = 2; //[0.1;2]
     double sedimentDepositionRate = 1; //[0.1;3]
     double sedimentSofteningRate = 5; //[0;10]
     double maxErosionDepth = 10; //[0;40]
@@ -31,9 +31,9 @@ public class HeightMapTransformer {
         calculateWaterOutflow(terrainData);
         calculateVelocityField(terrainData);
         applyWaterOutflow(terrainData);
-        //erosionAndDeposition(terrainData);
-        //double[][][] sedimentOutflow = calculateSedimentOutflow(terrainData);
-        //applySedimentOutflow(terrainData, sedimentOutflow);
+        erosionAndDeposition(terrainData);
+        double[][][] sedimentOutflow = calculateSedimentOutflow(terrainData);
+        applySedimentOutflow(terrainData, sedimentOutflow);
         evaporateWater(terrainData);
     }
 
@@ -49,6 +49,7 @@ public class HeightMapTransformer {
 
         //terrainData.waterMap[25][80] += 2;
 
+        //if (rain)
         //for (int z = 0; z < terrainData.zSize; z++)
         //    for (int x = 0; x < terrainData.xSize; x++)
         //        terrainData.waterMap[x][z] += deltaTWater * rainRate;
@@ -118,6 +119,13 @@ public class HeightMapTransformer {
                 terrainData.velocityField[x][z][1] -= terrainData.waterOutFlowPipes[x][z][3];
                 terrainData.velocityField[x][z][1] -= terrainData.waterOutFlowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 0, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 0, 1)][3];
                 terrainData.velocityField[x][z][1] += terrainData.waterOutFlowPipes[x][z][0];
+
+                //eliminates spikes when using push behaviour for sediment transportation
+                //terrainData.velocityField[x][z][0] = terrainData.waterOutFlowPipes[x][z][2];
+                //terrainData.velocityField[x][z][0] -= terrainData.waterOutFlowPipes[x][z][1];
+
+                //terrainData.velocityField[x][z][1] = terrainData.waterOutFlowPipes[x][z][0];
+                //terrainData.velocityField[x][z][1] -= terrainData.waterOutFlowPipes[x][z][3];
             }
     }
 
@@ -145,14 +153,14 @@ public class HeightMapTransformer {
                 double totalOutFlow = 0;
 
                 double velX = terrainData.velocityField[x][z][0];
-                double outFlowX = deltaTWater * Math.abs(velX);
+                double outFlowX = Math.abs(velX);
                 if (velX != 0) {
                     sedimentOutflow[x][z][(velX > 0) ? 2 : 1] = outFlowX;
                     totalOutFlow += outFlowX;
                 }
 
                 double velY = terrainData.velocityField[x][z][1];
-                double outFlowZ = deltaTWater * Math.abs(velY);
+                double outFlowZ = Math.abs(velY);
                 if (velY != 0) {
                     sedimentOutflow[x][z][(velY > 0) ? 0 : 3] = outFlowZ;
                     totalOutFlow += outFlowZ;
