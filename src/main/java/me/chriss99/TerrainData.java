@@ -34,14 +34,6 @@ public class TerrainData {
         velocityField = new double[xSize][zSize][2];
     }
 
-    public static Vector3d normalAt(double[][] heightMap, int x, int z) {
-        double[] heights = new double[4];
-        for (int i = 0; i < HeightMapTransformer.vonNeumannNeighbourhood.length; i++)
-            heights[i] = heightMap[HeightMapTransformer.wrapOffsetCoordinateVonNeumann(x, heightMap.length, i, 0)][HeightMapTransformer.wrapOffsetCoordinateVonNeumann(z, heightMap[0].length, i, 1)];
-
-        return new Vector3d(heights[1] - heights[2], 1, heights[3] - heights[0]).normalize();
-    }
-
     public double heightAt(int x, int z) {
         return terrainMap[x][z] + waterMap[x][z];
     }
@@ -52,6 +44,14 @@ public class TerrainData {
 
     public double heightDiffTo(int x, int z, int[] offset) {
         return heightAt(x, z) - heightAt((x + offset[0] + xSize) % xSize, (z + offset[1] + zSize) % zSize);
+    }
+
+    public static Vector3d normalAt(double[][] heightMap, int x, int z) {
+        double[] heights = new double[4];
+        for (int i = 0; i < HeightMapTransformer.vonNeumannNeighbourhood.length; i++)
+            heights[i] = heightMap[HeightMapTransformer.wrapOffsetCoordinateVonNeumann(x, heightMap.length, i, 0)][HeightMapTransformer.wrapOffsetCoordinateVonNeumann(z, heightMap[0].length, i, 1)];
+
+        return new Vector3d(heights[1] - heights[2], 1, heights[3] - heights[0]).normalize();
     }
 
     public Vector3d flow3dAt(int x, int z) {
