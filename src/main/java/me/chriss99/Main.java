@@ -31,7 +31,7 @@ public class Main {
     static boolean vSync = true;
 
 
-    static TerrainData terrainData = new TerrainData(HeightMapGenerator.slope(100, 100, .2));
+    static TerrainData terrainData = new TerrainData(HeightMapGenerator.simplexHeights(100, 100, 0.03, 5));
     static final HeightMapTransformer heightMapTransformer = new HeightMapTransformer();
     static boolean simulateThermal = false;
     static boolean simulateHydraulic = false;

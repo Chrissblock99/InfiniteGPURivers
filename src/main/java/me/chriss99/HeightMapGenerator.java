@@ -64,4 +64,14 @@ public class HeightMapGenerator {
 
         return heights;
     }
+
+    public static double[][] simplexHeights(int xSize, int zSize, double freq, double amp) {
+        double[][] heights = new double[xSize][zSize];
+
+        for (int x = 0; x < xSize; x++)
+            for (int z = 0; z < zSize; z++)
+                heights[x][z] = SimplexNoise.noise(x * freq, z * freq) * amp;
+
+        return heights;
+    }
 }
