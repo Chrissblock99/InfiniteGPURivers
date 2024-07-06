@@ -134,6 +134,8 @@ public class Main {
         double lastFramePrint = Double.NEGATIVE_INFINITY;
         LinkedList<Double> frames = new LinkedList<>();
 
+        double eroderStart = 0;
+        Thread eroder = new Thread();
         while(!glfwWindowShouldClose(window)) {
             movementController.update();
             glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
@@ -141,13 +143,19 @@ public class Main {
             //clear the window
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            if (simulateErosion) {
+            if (simulateErosion && !eroder.isAlive()) {
+                System.out.println("update: " + (glfwGetTime() - eroderStart));
+
                 double before = glfwGetTime();
-                heightMapTransformer.fullErosion(terrainData);
-                System.out.println("update: " + (glfwGetTime() - before));
-                before = glfwGetTime();
                 updateTerrainVAOs();
                 System.out.println("upload: " + (glfwGetTime() - before));
+
+                eroderStart = glfwGetTime();
+                eroder = new Thread(() -> {
+                    for (int i = 0; i < 5; i++)
+                        heightMapTransformer.fullErosion(terrainData);
+                });
+                eroder.start();
             }
 
             for (VAO vao : vaoList) {
