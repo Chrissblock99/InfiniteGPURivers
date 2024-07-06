@@ -5,25 +5,19 @@ import org.joml.Vector2d;
 import java.util.LinkedList;
 
 public class HeightMapTransformer {
-    double deltaTThermal = 1; //[0.1;100]
-    double deltaTWater = 0.02; //[0;0.05]
+    double deltaT = 0.02; //[0;0.05]
 
     double rainRate = 0.012; //[0;0.05]
     double evaporationRate = 0.015; //[0;0.05]
-    double pipeCrossArea = 20; //[0.1;60]
-    double gravity = 9.81; //[0.1;20]
+    double waterFlowMultiplier = 1; //[0.1;2]
     double sedimentCapacityMultiplier = 1; //[0.1;3]
-    double thermalErosionRate = 0.015; //[0;3]
+    double thermalErosionRate = 0.75; //[0;3]
     double soilSuspensionRate = 0.5; //[0.1;2]
     double sedimentDepositionRate = 1; //[0.1;3]
     double sedimentSofteningRate = 5; //[0;10]
     double maxErosionDepth = 10; //[0;40]
     double talusAngleTangentCoeff = 0.8; //[0;1]
     double talusAngleTangentBias = 0.1; //[0;1]
-
-    double cellArea = 1;
-    double pipeLength = 1; //only used for water
-    double inversePipeLength = 1/pipeLength;
 
     public void fullErosion(TerrainData terrainData) {
         addWater(terrainData);
@@ -46,7 +40,7 @@ public class HeightMapTransformer {
     private void addWater(TerrainData terrainData) {
         for (int z = 0; z < terrainData.zSize; z++)
             for (int x = 0; x < terrainData.xSize; x++)
-                terrainData.waterMap[x][z] += deltaTWater * rainRate;
+                terrainData.waterMap[x][z] += deltaT * rainRate;
         terrainData.addedHeightsCalculated = false;
     }
 
@@ -56,7 +50,7 @@ public class HeightMapTransformer {
         for (int i = 0; i < vonNeumannNeighbourhood.length; i++) {
             double outFlow = Math.max(0, terrainData.waterOutflowPipes[x][z][i] +
                     //the paper didn't mention to consider sediment height as well but im doing it anyway
-                    deltaTWater * terrainData.heightDiffTo(x, z, vonNeumannNeighbourhood[i]));
+                    deltaT * terrainData.heightDiffTo(x, z, vonNeumannNeighbourhood[i]) * waterFlowMultiplier);
             terrainData.waterOutflowPipes[x][z][i] = outFlow;
             totalOutFlow += outFlow;
         }
@@ -120,8 +114,8 @@ public class HeightMapTransformer {
         double unusedCapacity = sedimentCapacity - terrainData.sedimentMap[x][z];
 
         double change = (unusedCapacity > 0) ?
-                deltaTWater * terrainHardness(x, z) * soilSuspensionRate * unusedCapacity :
-                deltaTWater * sedimentDepositionRate * unusedCapacity;
+                deltaT * terrainHardness(x, z) * soilSuspensionRate * unusedCapacity :
+                deltaT * sedimentDepositionRate * unusedCapacity;
         terrainData.terrainMap[x][z] -= change;
         terrainData.sedimentMap[x][z] = Math.max(0, terrainData.sedimentMap[x][z] + change);
         terrainData.waterMap[x][z] = Math.max(0, terrainData.waterMap[x][z] + change);
@@ -195,7 +189,7 @@ public class HeightMapTransformer {
     }
 
     private void evaporateWater(TerrainData terrainData) {
-        double evaporationMultiplier = (1 - evaporationRate * deltaTWater);
+        double evaporationMultiplier = (1 - evaporationRate * deltaT);
         if (evaporationMultiplier < 0)
             //happens when deltaT or evaporationRate are too high
             throw new IllegalStateException("The evaporation multiplier is negative! " + evaporationMultiplier + " Consider lowering deltaT or evaporationRate.");
@@ -223,7 +217,7 @@ public class HeightMapTransformer {
             }
         }
 
-        double heightChange = cellArea * deltaTThermal * thermalErosionRate * terrainHardness(x, z) * maxHeightDiff*.5;
+        double heightChange = deltaT * thermalErosionRate * terrainHardness(x, z) * maxHeightDiff*.5;
         double inverseSteepNeighbourHeightDiffSum = 1 / steepNeighbourHeightDiffSum;
 
         //inverseSteepNeighbourHeightDiffSum CAN be Infinite, but in that case all differences are 0 and no one ever calculates anything
