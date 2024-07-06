@@ -46,14 +46,7 @@ public class HeightMapTransformer {
         terrainData.addedHeightsCalculated = false;
     }
 
-    boolean rain = false;
     private void addWater(TerrainData terrainData) {
-        //if (rain && Math.random()<.4)
-        //    terrainData.waterMap[(int) (Math.random() * terrainData.xSize)][(int) (Math.random() * terrainData.zSize)] += 2;
-
-        //terrainData.waterMap[25][80] += 2;
-
-        if (rain)
         for (int z = 0; z < terrainData.zSize; z++)
             for (int x = 0; x < terrainData.xSize; x++)
                 terrainData.waterMap[x][z] += deltaTWater * rainRate;
