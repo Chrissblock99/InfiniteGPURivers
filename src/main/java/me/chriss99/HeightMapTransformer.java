@@ -25,25 +25,22 @@ public class HeightMapTransformer {
     double pipeLength = 1; //only used for water
     double inversePipeLength = 1/pipeLength;
 
-    public void hydraulicErosion(TerrainData terrainData) {
+    public void fullErosion(TerrainData terrainData) {
         addWater(terrainData);
         multiThreadProcessor(terrainData, this::calculateWaterOutflow, 10);
         multiThreadProcessor(terrainData, this::calculateVelocityField, 10);
         multiThreadProcessor(terrainData, this::applyWaterOutflow, 10);
         terrainData.addedHeightsCalculated = false;
+        multiThreadProcessor(terrainData, this::calculateThermalOutflow, 10);
         multiThreadProcessor(terrainData, this::erosionAndDeposition, 10);
         terrainData.addedHeightsCalculated = false;
         //double[][][] sedimentOutflow = calculateSedimentOutflow(terrainData);
         //applySedimentOutflow(terrainData, sedimentOutflow);
         multiThreadProcessor(terrainData, this::sedimentTransportation, 10);
         terrainData.sedimentMap = terrainData.newSedimentMap;
-        evaporateWater(terrainData);
-    }
-
-    public void thermalErosion(TerrainData terrainData) {
-        multiThreadProcessor(terrainData, this::calculateThermalOutflow, 10);
         multiThreadProcessor(terrainData, this::applyThermalOutflow, 10);
         terrainData.addedHeightsCalculated = false;
+        evaporateWater(terrainData);
     }
 
     private void addWater(TerrainData terrainData) {

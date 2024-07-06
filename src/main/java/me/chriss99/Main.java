@@ -33,8 +33,7 @@ public class Main {
 
     static TerrainData terrainData = new TerrainData(HeightMapGenerator.simplexHeights(512, 512, 0.006, 25));
     static final HeightMapTransformer heightMapTransformer = new HeightMapTransformer();
-    static boolean simulateThermal = false;
-    static boolean simulateHydraulic = false;
+    static boolean simulateErosion = false;
 
 
     public static void main(String[] args) {
@@ -142,9 +141,10 @@ public class Main {
             //clear the window
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            if (simulateThermal) heightMapTransformer.thermalErosion(terrainData);
-            if (simulateHydraulic) heightMapTransformer.hydraulicErosion(terrainData);
-            if (simulateThermal || simulateHydraulic) updateTerrainVAOs();
+            if (simulateErosion) {
+                heightMapTransformer.fullErosion(terrainData);
+                updateTerrainVAOs();
+            }
 
             for (VAO vao : vaoList) {
                 vao.bind();
