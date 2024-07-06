@@ -87,10 +87,6 @@ public class Main {
         vaoList.add(VAOGenerator.heightMapToCrossVAO(terrainData.addedHeights(), terrainData.waterOutFlowPipes));
         vaoList.add(VAOGenerator.heightMapToVectorVAO(terrainData.addedHeights(), terrainData.velocityField));
         //vaoList.add(VAOGenerator.heightMapToNormalVAO(terrainData.terrainMap));
-
-        //for (int x = 0; x < terrainData.xSize; x++)
-        //    System.out.println(Arrays.toString(terrainData.waterMap[x]));
-
     }
 
     private static void setupProgram() {
