@@ -54,6 +54,7 @@ public class HeightMapTransformer {
         for (int z = 0; z < terrainData.zSize; z++)
             for (int x = 0; x < terrainData.xSize; x++)
                 terrainData.waterMap[x][z] += deltaTWater * rainRate;
+        terrainData.addedHeightsCalculated = false;
     }
 
     private void calculateWaterOutflow(TerrainData terrainData) {
