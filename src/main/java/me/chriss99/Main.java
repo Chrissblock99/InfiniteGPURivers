@@ -83,65 +83,6 @@ public class Main {
     }
 
     private static void setupData() {
-        double[] triangle = {
-                0, 0, 0,
-                1, 0, 0,
-                0, 1, 0,
-                1, 1, 0,
-                0, 0, 1,
-                1, 0, 1,
-                0, 1, 1,
-                1, 1, 1,
-        };
-
-        //the color data (red, green, and blue)
-        double[] color = {
-                1, 0, 0,
-                0, 0, 1,
-                0, 0, 1,
-                0, 1, 0,
-                1, 0, 0,
-                0, 0, 1,
-                0, 1, 0,
-                1, 0, 0,
-        };
-
-        //the order to render the vertices
-        int[] index = new int[] {
-                0,
-                1,
-                2,
-                3,
-                6,
-                7,
-                4,
-                5,
-                5, //hack
-                2, //hack
-                2,
-                6,
-                0,
-                4,
-                1,
-                5,
-                3,
-                7,
-        };
-
-        int cubesNumberX = 0;
-        int cubesNumberZ = 0;
-
-        for (int x = 0; x < cubesNumberX; x++) {
-            for (int z = 0; z < cubesNumberZ; z++) {
-                double[] triangleCopy = Arrays.copyOf(triangle, triangle.length);
-                for (int i = 0; i < 8; i++) {
-                    triangleCopy[i * 3] += 2 * x;
-                    triangleCopy[i * 3 + 2] += 2 * z;
-                }
-                vaoList.add(new VAO(triangleCopy, color, index));
-            }
-        }
-
         vaoList.add(VAOGenerator.heightMapToSimpleVAO(terrainData.terrainMap));
         vaoList.add(VAOGenerator.heightMapToCrossVAO(terrainData.addedHeights(), terrainData.waterOutFlowPipes));
         vaoList.add(VAOGenerator.heightMapToVectorVAO(terrainData.addedHeights(), terrainData.velocityField));
