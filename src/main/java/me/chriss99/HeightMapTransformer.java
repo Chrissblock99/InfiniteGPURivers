@@ -15,7 +15,7 @@ public class HeightMapTransformer {
     double gravity = 9.81; //[0.1;20]
     double sedimentCapacityMultiplier = 1; //[0.1;3]
     double thermalErosionRate = 0.015; //[0;3]
-    double soilSuspensionRate = 2; //[0.1;2]
+    double soilSuspensionRate = 0.5; //[0.1;2]
     double sedimentDepositionRate = 1; //[0.1;3]
     double sedimentSofteningRate = 5; //[0;10]
     double maxErosionDepth = 10; //[0;40]
@@ -45,15 +45,15 @@ public class HeightMapTransformer {
 
     boolean rain = false;
     private void addWater(TerrainData terrainData) {
-        if (rain && Math.random()<.4)
-            terrainData.waterMap[(int) (Math.random() * terrainData.xSize)][(int) (Math.random() * terrainData.zSize)] += 2;
+        //if (rain && Math.random()<.4)
+        //    terrainData.waterMap[(int) (Math.random() * terrainData.xSize)][(int) (Math.random() * terrainData.zSize)] += 2;
 
         //terrainData.waterMap[25][80] += 2;
 
-        //if (rain)
-        //for (int z = 0; z < terrainData.zSize; z++)
-        //    for (int x = 0; x < terrainData.xSize; x++)
-        //        terrainData.waterMap[x][z] += deltaTWater * rainRate;
+        if (rain)
+        for (int z = 0; z < terrainData.zSize; z++)
+            for (int x = 0; x < terrainData.xSize; x++)
+                terrainData.waterMap[x][z] += deltaTWater * rainRate;
     }
 
     private void calculateWaterOutflow(TerrainData terrainData) {
