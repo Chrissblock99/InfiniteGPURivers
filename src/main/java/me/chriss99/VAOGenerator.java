@@ -271,7 +271,7 @@ public class VAOGenerator {
 
         for (int z = 0; z < heightMap[0].length; z++)
             for (int x = 0; x < heightMap.length; x++) {
-                Vector3d normal = Main.heightMapTransformer.normalAt(heightMap, x, z);
+                Vector3d normal = TerrainData.normalAt(heightMap, x, z);
 
                 vertexes[vertexShift    ] = x - normal.z * .3;
                 vertexes[vertexShift + 1] = heightMap[x][z] + .1;

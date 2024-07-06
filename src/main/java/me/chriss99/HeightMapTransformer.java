@@ -1,7 +1,6 @@
 package me.chriss99;
 
 import org.joml.Vector2d;
-import org.joml.Vector3d;
 
 import java.util.LinkedList;
 
@@ -262,34 +261,19 @@ public class HeightMapTransformer {
         return 1 - inverseMaxErosionDepth*depth;
     }
 
-    public Vector3d normalAt(double[][] heightMap, int x, int z) {
-        double[] heights = new double[4];
-        for (int i = 0; i < vonNeumannNeighbourhood.length; i++)
-            heights[i] = heightMap[wrapOffsetCoordinateVonNeumann(x, heightMap.length, i, 0)][wrapOffsetCoordinateVonNeumann(z, heightMap[0].length, i, 1)];
-
-        return new Vector3d(heights[1] - heights[2], 1, heights[3] - heights[0]).normalize();
-    }
-
-    public Vector3d flow3dAt(TerrainData terrainData, int x, int z) {
-        Vector3d normal = normalAt(terrainData.addedHeights(), x, z);
-        Vector3d flowDir = new Vector3d(terrainData.velocityField[x][z][0], 0, terrainData.velocityField[x][z][1]);
-
-        return flowDir.cross(normal).cross(normal).mul(-1);
-    }
-
-    private static int wrapOffsetCoordinateMoore(int index, int length, int offset, int xz) {
+    public static int wrapOffsetCoordinateMoore(int index, int length, int offset, int xz) {
         return wrapNumber(index + mooreNeighbourhood[offset][xz], length);
     }
 
-    private static int wrapOffsetCoordinateVonNeumann(int index, int length, int offset, int xz) {
+    public static int wrapOffsetCoordinateVonNeumann(int index, int length, int offset, int xz) {
         return wrapNumber(index + vonNeumannNeighbourhood[offset][xz], length);
     }
 
-    private static int wrapNumber(int num, int length) {
+    public static int wrapNumber(int num, int length) {
         return (num + length) % length;
     }
 
-    private static double lerp(double a, double b, double t) {
+    public static double lerp(double a, double b, double t) {
         return (b - a) * t + a;
     }
 
@@ -321,7 +305,7 @@ public class HeightMapTransformer {
     //  0
     //1   2
     //  3
-    private static final int[][] vonNeumannNeighbourhood = new int[][]{
+    public static final int[][] vonNeumannNeighbourhood = new int[][]{
             { 0,  1},
             {-1,  0},
             { 1,  0},
@@ -332,7 +316,7 @@ public class HeightMapTransformer {
     //0 1 2
     //3   4
     //5 6 7
-    private static final int[][] mooreNeighbourhood = new int[][]{
+    public static final int[][] mooreNeighbourhood = new int[][]{
             {-1,  1},
             { 0,  1},
             { 1,  1},
@@ -344,7 +328,7 @@ public class HeightMapTransformer {
     };
 
     //pi = 3.06146745892 because of this (the simulation doesn't create perfect circles)
-    private static final double[] inverseMooreNeighbourhoodDistances = new double[]{
+    public static final double[] inverseMooreNeighbourhoodDistances = new double[]{
             1/Math.sqrt(2),
             1,
             1/Math.sqrt(2),
