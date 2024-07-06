@@ -273,11 +273,15 @@ public class HeightMapTransformer {
     }
 
     private static int wrapOffsetCoordinateMoore(int index, int length, int offset, int xz) {
-        return (index + mooreNeighbourhood[offset][xz] + length) % length;
+        return wrapNumber(index + mooreNeighbourhood[offset][xz], length);
     }
 
     private static int wrapOffsetCoordinateVonNeumann(int index, int length, int offset, int xz) {
-        return (index + vonNeumannNeighbourhood[offset][xz] + length) % length;
+        return wrapNumber(index + vonNeumannNeighbourhood[offset][xz], length);
+    }
+
+    private static int wrapNumber(int num, int length) {
+        return (num + length) % length;
     }
 
 
