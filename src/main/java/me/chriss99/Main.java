@@ -134,7 +134,6 @@ public class Main {
         double lastFramePrint = Double.NEGATIVE_INFINITY;
         LinkedList<Double> frames = new LinkedList<>();
 
-        double eroderStart = 0;
         Thread eroder = new Thread();
         while(!glfwWindowShouldClose(window)) {
             movementController.update();
@@ -144,13 +143,7 @@ public class Main {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             if (simulateErosion && !eroder.isAlive()) {
-                System.out.println("update: " + (glfwGetTime() - eroderStart));
-
-                double before = glfwGetTime();
                 updateTerrainVAOs();
-                System.out.println("upload: " + (glfwGetTime() - before));
-
-                eroderStart = glfwGetTime();
                 eroder = new Thread(() -> {
                     for (int i = 0; i < 5; i++)
                         heightMapTransformer.fullErosion(terrainData);
