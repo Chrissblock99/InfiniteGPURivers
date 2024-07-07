@@ -109,7 +109,7 @@ public class Main {
         //link the program (whatever that does)
         glLinkProgram(program);
 
-        //validate the program to make sure it wont blow up the program
+        //validate the program to make sure it won't blow up the program
         glValidateProgram(program);
 
         //check for compilation errors
@@ -122,7 +122,7 @@ public class Main {
         //sets the background clear color to white
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-        //get the 'colorMod and 'positionMod' variables so I can change them while drawing to create the animation
+        //get the 'colorMod and 'positionMod' variables, so I can change them while drawing to create the animation
         transformMatrix = glGetUniformLocation(program, "transformMatrix");
 
         //set the current program
@@ -204,7 +204,7 @@ public class Main {
         glDetachShader(program, vertexShader);
         glDetachShader(program, fragmentShader);
 
-        //delete the shaders now that they are deatched
+        //delete the shaders now that they are detached
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
 
