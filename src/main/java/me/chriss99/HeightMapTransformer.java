@@ -22,18 +22,18 @@ public class HeightMapTransformer {
 
     public void fullErosion(TerrainData terrainData) {
         addWater(terrainData);
-        multiThreadProcessor(terrainData, this::calculateWaterOutflow, 10);
-        multiThreadProcessor(terrainData, this::calculateVelocityField, 10);
-        multiThreadProcessor(terrainData, this::applyWaterOutflow, 10);
+        multiThreadProcessor(terrainData, this::calculateWaterOutflow, 17);
+        multiThreadProcessor(terrainData, this::calculateVelocityField, 17);
+        multiThreadProcessor(terrainData, this::applyWaterOutflow, 17);
         terrainData.addedHeightsCalculated = false;
-        multiThreadProcessor(terrainData, this::calculateThermalOutflow, 10);
-        multiThreadProcessor(terrainData, this::erosionAndDeposition, 10);
+        multiThreadProcessor(terrainData, this::calculateThermalOutflow, 17);
+        multiThreadProcessor(terrainData, this::erosionAndDeposition, 17);
         terrainData.addedHeightsCalculated = false;
         //double[][][] sedimentOutflow = calculateSedimentOutflow(terrainData);
         //applySedimentOutflow(terrainData, sedimentOutflow);
-        multiThreadProcessor(terrainData, this::sedimentTransportation, 10);
+        multiThreadProcessor(terrainData, this::sedimentTransportation, 17);
         terrainData.sedimentMap = terrainData.newSedimentMap;
-        multiThreadProcessor(terrainData, this::applyThermalOutflow, 10);
+        multiThreadProcessor(terrainData, this::applyThermalOutflow, 17);
         terrainData.addedHeightsCalculated = false;
         evaporateWater(terrainData);
     }
