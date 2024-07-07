@@ -18,6 +18,7 @@ public class HeightMapTransformer {
     double maxErosionDepth = 10; //[0;40]
     double talusAngleTangentCoeff = 0.8; //[0;1]
     double talusAngleTangentBias = 0.1; //[0;1]
+    double minimumHardness = 0.25; //[0;1]
 
     public void fullErosion(TerrainData terrainData) {
         addWater(terrainData);
@@ -119,6 +120,8 @@ public class HeightMapTransformer {
         terrainData.terrainMap[x][z] -= change;
         terrainData.sedimentMap[x][z] = Math.max(0, terrainData.sedimentMap[x][z] + change);
         terrainData.waterMap[x][z] = Math.max(0, terrainData.waterMap[x][z] + change);
+
+        terrainData.hardnessMap[x][z] = Math.max(minimumHardness, terrainData.hardnessMap[x][z] - sedimentSofteningRate * change);
     }
 
     private void sedimentTransportation(TerrainData terrainData, int x, int z) {
