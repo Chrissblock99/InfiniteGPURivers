@@ -82,8 +82,8 @@ public class Main {
     }
 
     private static void setupData() {
-        vaoList.add(VAOGenerator.heightMapToSimpleVAO(terrainData.terrainMap));
-        vaoList.add(VAOGenerator.heightMapToCrossVAO(terrainData.addedHeights(), terrainData.waterOutflowPipes));
+        vaoList.add(VAOGenerator.heightMapToSimpleVAO(terrainData.terrainMap, -100, 100, false));
+        vaoList.add(VAOGenerator.heightMapToSimpleVAO(terrainData.addedHeights(), -100, 100, true));
         //vaoList.add(VAOGenerator.heightMapToVectorVAO(terrainData.addedHeights(), terrainData.velocityField));
         //vaoList.add(VAOGenerator.heightMapToNormalVAO(terrainData.terrainMap));
     }
@@ -184,10 +184,10 @@ public class Main {
 
     public static void updateTerrainVAOs() {
         //TODO wont work when the size of the heightMap changes
-        vaoList.get(0).updatePositions(VAOGenerator.heightMapToSimpleVertexes(terrainData.terrainMap));
-        vaoList.get(0).updateColors(VAOGenerator.heightMapToSimpleColors(terrainData.terrainMap));
-        vaoList.get(1).updatePositions(VAOGenerator.heightMapToCrossVertexes(terrainData.addedHeights()));
-        vaoList.get(1).updateColors(VAOGenerator.heightMapToCrossColors(terrainData.addedHeights(), terrainData.waterOutflowPipes));
+        vaoList.get(0).updatePositions(VAOGenerator.heightMapToSimpleVertexes(terrainData.terrainMap, false));
+        vaoList.get(0).updateColors(VAOGenerator.heightMapToSimpleColors(terrainData.terrainMap, -100, 100, false));
+        vaoList.get(1).updatePositions(VAOGenerator.heightMapToSimpleVertexes(terrainData.addedHeights(), true));
+        vaoList.get(1).updateColors(VAOGenerator.heightMapToSimpleColors(terrainData.addedHeights(), -100, 100, true));
         //vaoList.get(2).updatePositions(VAOGenerator.heightMapToVectorVertexes(terrainData.addedHeights(), terrainData.velocityField));
         //vaoList.get(2).updatePositions(VAOGenerator.heightMapToNormalVertexes(terrainData.terrainMap));
     }

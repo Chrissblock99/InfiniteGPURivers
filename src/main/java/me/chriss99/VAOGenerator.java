@@ -7,14 +7,14 @@ import org.joml.Vector3d;
 import java.util.Arrays;
 
 public class VAOGenerator {
-    public static double[] heightMapToSimpleVertexes(double[][] heightMap) {
+    public static double[] heightMapToSimpleVertexes(double[][] heightMap, boolean water) {
         double[] vertecies = new double[heightMap.length*heightMap[0].length*3];
         int vertexShift = 0;
 
         for (int z = 0; z < heightMap[0].length; z++)
             for (int x = 0; x < heightMap.length; x++) {
                 vertecies[vertexShift] = x;
-                vertecies[vertexShift + 1] = heightMap[x][z];
+                vertecies[vertexShift + 1] = heightMap[x][z] - ((water) ? .03 : 0);
                 vertecies[vertexShift + 2] = z;
 
                 vertexShift += 3;
@@ -23,15 +23,23 @@ public class VAOGenerator {
         return vertecies;
     }
 
-    public static double[] heightMapToSimpleColors(double[][] heightMap) {
+    public static double[] heightMapToSimpleColors(double[][] heightMap, double min, double max, boolean water) {
         double[] color = new double[heightMap.length*heightMap[0].length*3];
         int vertexShift = 0;
 
         for (int z = 0; z < heightMap[0].length; z++)
             for (int x = 0; x < heightMap.length; x++) {
-                color[vertexShift] = heightMap[x][z]/30*.7+.3;
-                color[vertexShift + 1] = heightMap[x][z]/30*.8+.2;
-                color[vertexShift + 2] = (x%2==0) ? .33 : 0 + ((z%2==0) ? .33 : 0);
+                double gradient = (heightMap[x][z] - min) / (max - min);
+
+                if (!water) {
+                    color[vertexShift  ] = gradient*.7+.3;
+                    color[vertexShift+1] = gradient*.8+.2;
+                    color[vertexShift+2] = (x%2==0) ? .33 : 0 + ((z%2==0) ? .33 : 0);
+                } else {
+                    color[vertexShift  ] = 0;
+                    color[vertexShift+1] = (x%2==0) ? .33 : 0 + ((z%2==0) ? .33 : 0);
+                    color[vertexShift+2] = gradient;
+                }
 
                 vertexShift += 3;
             }
@@ -61,9 +69,9 @@ public class VAOGenerator {
         return index;
     }
 
-    public static VAO heightMapToSimpleVAO(double[][] heightMap) {
-        double[] vertexes = heightMapToSimpleVertexes(heightMap);
-        double[] color = heightMapToSimpleColors(heightMap);
+    public static VAO heightMapToSimpleVAO(double[][] heightMap, double min, double max, boolean water) {
+        double[] vertexes = heightMapToSimpleVertexes(heightMap, water);
+        double[] color = heightMapToSimpleColors(heightMap, min, max, water);
         int[] index = heightMapToSimpleIndex(heightMap);
 
         return new VAO(vertexes, color, index);
