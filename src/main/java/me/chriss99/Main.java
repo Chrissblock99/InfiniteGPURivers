@@ -31,7 +31,7 @@ public class Main {
     static boolean vSync = true;
 
 
-    static TerrainData terrainData = new TerrainData(HeightMapGenerator.simplexHeights(512, 512, 0.006, 25));
+    static TerrainData terrainData = new TerrainData(HeightMapGenerator.simplexFbm(1000, 1000, 8, 0.0015, 60, 2, .5));
     static final HeightMapTransformer heightMapTransformer = new HeightMapTransformer();
     static boolean simulateErosion = false;
 
