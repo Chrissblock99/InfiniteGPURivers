@@ -2,6 +2,8 @@ package me.chriss99;
 
 import org.joml.Vector3d;
 
+import java.util.Arrays;
+
 public class TerrainData {
     public final int xSize;
     public final int zSize;
@@ -12,7 +14,7 @@ public class TerrainData {
     public double[][] newSedimentMap;
     public final double[][] addedHeights;
     public boolean addedHeightsCalculated = false;
-    //public final double[][] hardnessMap;
+    public final double[][] hardnessMap;
 
     public final double[][][] waterOutflowPipes;
     public double[][][] thermalOutflowPipes;
@@ -27,7 +29,9 @@ public class TerrainData {
         sedimentMap = new double[xSize][zSize];
         newSedimentMap = new double[xSize][zSize];
         addedHeights = new double[xSize][zSize];
-        //hardnessMap = new double[xSize][zSize];
+        hardnessMap = new double[xSize][zSize];
+        for (int x = 0; x < xSize; x++)
+            Arrays.fill(hardnessMap[x], 1);
 
         waterOutflowPipes = new double[xSize][zSize][4];
         thermalOutflowPipes = new double[xSize][zSize][8];

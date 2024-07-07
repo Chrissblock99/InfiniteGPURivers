@@ -114,7 +114,7 @@ public class HeightMapTransformer {
         double unusedCapacity = sedimentCapacity - terrainData.sedimentMap[x][z];
 
         double change = (unusedCapacity > 0) ?
-                deltaT * terrainHardness(x, z) * soilSuspensionRate * unusedCapacity :
+                deltaT * terrainData.hardnessMap[x][z] * soilSuspensionRate * unusedCapacity :
                 deltaT * sedimentDepositionRate * unusedCapacity;
         terrainData.terrainMap[x][z] -= change;
         terrainData.sedimentMap[x][z] = Math.max(0, terrainData.sedimentMap[x][z] + change);
@@ -211,13 +211,13 @@ public class HeightMapTransformer {
                 maxHeightDiff = heightDiff;
 
             double angle = heightDiff * inverseMooreNeighbourhoodDistances[i]; //this is normally in atan() but is only used for tan()
-            if (heightDiff > 0 && angle > terrainHardness(x, z) * talusAngleTangentCoeff + talusAngleTangentBias) {
+            if (heightDiff > 0 && angle > terrainData.hardnessMap[x][z] * talusAngleTangentCoeff + talusAngleTangentBias) {
                 neighborBelowTalusAngle[i] = true;
                 steepNeighbourHeightDiffSum += heightDiff;
             }
         }
 
-        double heightChange = deltaT * thermalErosionRate * terrainHardness(x, z) * maxHeightDiff*.5;
+        double heightChange = deltaT * thermalErosionRate * terrainData.hardnessMap[x][z] * maxHeightDiff*.5;
         double inverseSteepNeighbourHeightDiffSum = 1 / steepNeighbourHeightDiffSum;
 
         //inverseSteepNeighbourHeightDiffSum CAN be Infinite, but in that case all differences are 0 and no one ever calculates anything
@@ -231,11 +231,6 @@ public class HeightMapTransformer {
             terrainData.terrainMap[x][z] += terrainData.thermalOutflowPipes[wrapOffsetCoordinateMoore(x, terrainData.xSize, i, 0)][wrapOffsetCoordinateMoore(z, terrainData.zSize, i, 1)][7-i];
             terrainData.terrainMap[x][z] -= terrainData.thermalOutflowPipes[x][z][i];
         }
-    }
-
-    //TODO
-    private double terrainHardness(int x, int z) {
-        return 1;
     }
 
     double inverseMaxErosionDepth = 1/maxErosionDepth;
