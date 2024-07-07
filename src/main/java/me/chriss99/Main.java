@@ -84,7 +84,7 @@ public class Main {
     private static void setupData() {
         vaoList.add(VAOGenerator.heightMapToSimpleVAO(terrainData.terrainMap));
         vaoList.add(VAOGenerator.heightMapToCrossVAO(terrainData.addedHeights(), terrainData.waterOutflowPipes));
-        vaoList.add(VAOGenerator.heightMapToVectorVAO(terrainData.addedHeights(), terrainData.velocityField));
+        //vaoList.add(VAOGenerator.heightMapToVectorVAO(terrainData.addedHeights(), terrainData.velocityField));
         //vaoList.add(VAOGenerator.heightMapToNormalVAO(terrainData.terrainMap));
     }
 
@@ -188,7 +188,7 @@ public class Main {
         vaoList.get(0).updateColors(VAOGenerator.heightMapToSimpleColors(terrainData.terrainMap));
         vaoList.get(1).updatePositions(VAOGenerator.heightMapToCrossVertexes(terrainData.addedHeights()));
         vaoList.get(1).updateColors(VAOGenerator.heightMapToCrossColors(terrainData.addedHeights(), terrainData.waterOutflowPipes));
-        vaoList.get(2).updatePositions(VAOGenerator.heightMapToVectorVertexes(terrainData.addedHeights(), terrainData.velocityField));
+        //vaoList.get(2).updatePositions(VAOGenerator.heightMapToVectorVertexes(terrainData.addedHeights(), terrainData.velocityField));
         //vaoList.get(2).updatePositions(VAOGenerator.heightMapToNormalVertexes(terrainData.terrainMap));
     }
 
