@@ -74,4 +74,41 @@ public class HeightMapGenerator {
 
         return heights;
     }
+
+    public static double[][] simplexFbm(int xSize, int zSize, int octaves, double freq, double amp, double lacunarity, double persistence) {
+        double[][] heights = new double[xSize][zSize];
+
+        for (int x = 0; x < xSize; x++)
+            for (int z = 0; z < zSize; z++) {
+                double localFreq = freq;
+                double localAmp = amp;
+
+                for (int i = 0; i < octaves; i++) {
+                    heights[x][z] += SimplexNoise.noise(x * localFreq, z * localFreq) * localAmp;
+                    localFreq *= lacunarity;
+                    localAmp *= persistence;
+                }
+            }
+
+        return heights;
+    }
+
+    public static double[][] simplexFbm(int xSize, int zSize, int octaves, double freq, double amp, double lacunarity, double persistence, double slope) {
+        double[][] heights = new double[xSize][zSize];
+
+        for (int x = 0; x < xSize; x++)
+            for (int z = 0; z < zSize; z++) {
+                double localFreq = freq;
+                double localAmp = amp;
+
+                for (int i = 0; i < octaves; i++) {
+                    heights[x][z] += SimplexNoise.noise(x * localFreq, z * localFreq) * localAmp;
+                    localFreq *= lacunarity;
+                    localAmp *= persistence;
+                }
+                heights[x][z] += z * slope;
+            }
+
+        return heights;
+    }
 }
