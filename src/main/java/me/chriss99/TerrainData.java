@@ -58,16 +58,6 @@ public class TerrainData {
         return new Vector3d(heights[1] - heights[2], 1, heights[3] - heights[0]).normalize();
     }
 
-    public Vector3d flow3dAt(int x, int z) {
-        Vector3d normal = normalAt(addedHeights, x, z);
-        Vector3d flowDir = new Vector3d(velocityField[x][z][0], 0, velocityField[x][z][1]);
-        double length = flowDir.length();
-        if (length == 0)
-            return flowDir;
-
-        return flowDir.cross(normal).cross(normal).normalize().mul(-length);
-    }
-
     public double[][] addedHeights() {
         if (!addedHeightsCalculated) {
             for (int z = 0; z < zSize; z++)

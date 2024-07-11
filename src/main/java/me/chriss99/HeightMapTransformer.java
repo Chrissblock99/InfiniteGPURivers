@@ -1,7 +1,6 @@
 package me.chriss99;
 
 import org.joml.Vector2d;
-import org.joml.Vector3d;
 
 import java.util.LinkedList;
 
@@ -113,14 +112,6 @@ public class HeightMapTransformer {
 
     private void erosionAndDeposition(TerrainData terrainData, int x, int z) {
         double sedimentCapacity = erosionDepthMultiplier(terrainData.waterMap[x][z]) * sedimentCapacityMultiplier * new Vector2d(terrainData.velocityField[x][z]).length();
-
-        Vector3d flowDir = terrainData.flow3dAt(x, z);
-        if (flowDir.length() != 0)
-            flowDir.normalize();
-        Vector3d invNormal = TerrainData.normalAt(terrainData.terrainMap, x, z).mul(-1);
-        double multiplier = Math.max(0, flowDir.dot(invNormal)) + 1;
-        sedimentCapacity *= multiplier;
-
         double unusedCapacity = sedimentCapacity - terrainData.sedimentMap[x][z];
 
         double change = (unusedCapacity > 0) ?
