@@ -221,6 +221,7 @@ public class Main {
     }
 
     private static void cleanGL() {
+        glUseProgram(renderProgram);
         //disable the vertex attribute arrays
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
@@ -236,11 +237,20 @@ public class Main {
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
 
-        //stop using the shader program
-        glUseProgram(0);
 
+
+        glUseProgram(computeProgram);
+
+        glDetachShader(computeProgram, computeShader);
+
+        glDeleteShader(computeShader);
+
+
+
+        glUseProgram(0);
         //delete the program now that the shaders are detached and the program isn't being used
         glDeleteProgram(renderProgram);
+        glDeleteProgram(computeProgram);
 
         printErrors();
     }
