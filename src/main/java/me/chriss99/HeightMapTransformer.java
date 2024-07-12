@@ -32,7 +32,6 @@ public class HeightMapTransformer {
         terrainData.addedHeightsCalculated = false;
         double[][][] sedimentOutflow = calculateSedimentOutflow(terrainData);
         applySedimentOutflow(terrainData, sedimentOutflow);
-        //multiThreadProcessor(terrainData, this::sedimentTransportation, 17);
         terrainData.sedimentMap = terrainData.newSedimentMap;
         multiThreadProcessor(terrainData, this::applyThermalOutflow, 17);
         terrainData.addedHeightsCalculated = false;
@@ -103,31 +102,6 @@ public class HeightMapTransformer {
         double voided = terrainData.sedimentMap[x][z] * voidSediment;
         terrainData.sedimentMap[x][z] -= voided;
         terrainData.waterMap[x][z] -= voided;
-    }
-
-    private void sedimentTransportation(TerrainData terrainData, int x, int z) {
-        int[][] closestCells = new int[4][2];
-        //[2][3]
-        //[0][1]
-        double[] pullFrom = new double[]{x - terrainData.velocityField[x][z][0], z - terrainData.velocityField[x][z][1]};
-
-        closestCells[0] = new int[]{(int) Math.floor(pullFrom[0]), (int) Math.floor(pullFrom[1])};
-        closestCells[1] = new int[]{(int) Math.ceil (pullFrom[0]), (int) Math.floor(pullFrom[1])};
-        closestCells[2] = new int[]{(int) Math.floor(pullFrom[0]), (int) Math.ceil (pullFrom[1])};
-        closestCells[3] = new int[]{(int) Math.ceil (pullFrom[0]), (int) Math.ceil (pullFrom[1])};
-
-        for (int i = 0; i < 4; i++)
-            closestCells[i] = new int[]{wrapNumber(closestCells[i][0], terrainData.xSize), wrapNumber(closestCells[i][1], terrainData.zSize)};
-
-
-        double[] interpolation = new double[]{pullFrom[0] % 1, pullFrom[1] % 1};
-        double[] heights = new double[4];
-        for (int i = 0; i < 4; i++)
-            heights[i] = terrainData.sedimentMap[closestCells[i][0]][closestCells[i][1]];
-
-        double down = lerp(heights[0], heights[1], interpolation[0]);
-        double up   = lerp(heights[2], heights[3], interpolation[0]);
-        terrainData.newSedimentMap[x][z] = lerp(down, up, interpolation[1]);
     }
 
     private double[][][] calculateSedimentOutflow(TerrainData terrainData) {
@@ -226,10 +200,6 @@ public class HeightMapTransformer {
 
     public static int wrapNumber(int num, int length) {
         return (num + length) % length;
-    }
-
-    public static double lerp(double a, double b, double t) {
-        return (b - a) * t + a;
     }
 
     private static void multiThreadProcessor(TerrainData terrainData, TerrainDataProcessor processor, int threadNum) {
