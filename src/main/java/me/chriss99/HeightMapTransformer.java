@@ -85,13 +85,6 @@ public class HeightMapTransformer {
         terrainData.velocityField[x][z][1] -= terrainData.waterOutflowPipes[x][z][3];
         terrainData.velocityField[x][z][1] -= terrainData.waterOutflowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, 0, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, 0, 1)][3];
         terrainData.velocityField[x][z][1] += terrainData.waterOutflowPipes[x][z][0];
-
-        //eliminates spikes when using push behaviour for sediment transportation
-        //terrainData.velocityField[x][z][0] = terrainData.waterOutFlowPipes[x][z][2];
-        //terrainData.velocityField[x][z][0] -= terrainData.waterOutFlowPipes[x][z][1];
-
-        //terrainData.velocityField[x][z][1] = terrainData.waterOutFlowPipes[x][z][0];
-        //terrainData.velocityField[x][z][1] -= terrainData.waterOutFlowPipes[x][z][3];
     }
 
     private void erosionAndDeposition(TerrainData terrainData, int x, int z) {
