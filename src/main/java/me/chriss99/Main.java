@@ -20,7 +20,7 @@ public class Main {
 
     static int vertexShader;
     static int fragmentShader;
-    static int program;
+    static int renderProgram;
 
     static int computeShader;
     static int computeProgram;
@@ -44,7 +44,7 @@ public class Main {
         createWindow();
         setupData();
         setupComputeProgram();
-        setupProgram();
+        setupRenderProgram();
         inputDeviceManager = new InputDeviceManager(window);
         movementController = new MovementController(inputDeviceManager, cameraMatrix);
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -92,7 +92,7 @@ public class Main {
         //vaoList.add(VAOGenerator.heightMapToNormalVAO(terrainData.terrainMap));
     }
 
-    private static void setupProgram() {
+    private static void setupRenderProgram() {
         //load the vertex shader from the file using a method I wrote down below
         vertexShader = loadShader(new File("/home/chriss99/IdeaProjects/ogl_test2/src/main/java/me/chriss99/shader.vert"), GL_VERTEX_SHADER);
 
@@ -100,37 +100,37 @@ public class Main {
         fragmentShader = loadShader(new File("/home/chriss99/IdeaProjects/ogl_test2/src/main/java/me/chriss99/shader.frag"), GL_FRAGMENT_SHADER);
 
         //create a program object and store its ID in the 'program' variable
-        program = glCreateProgram();
+        renderProgram = glCreateProgram();
 
         //these method calls link shader program variables to attribute locations so that they can be modified in Java code
-        glBindAttribLocation(program, 0, "position");
-        glBindAttribLocation(program, 1, "color");
+        glBindAttribLocation(renderProgram, 0, "position");
+        glBindAttribLocation(renderProgram, 1, "color");
 
         //attach the vertex and fragment shaders to the program
-        glAttachShader(program, vertexShader);
-        glAttachShader(program, fragmentShader);
+        glAttachShader(renderProgram, vertexShader);
+        glAttachShader(renderProgram, fragmentShader);
 
         //link the program (whatever that does)
-        glLinkProgram(program);
+        glLinkProgram(renderProgram);
 
         //validate the program to make sure it won't blow up the program
-        glValidateProgram(program);
+        glValidateProgram(renderProgram);
 
         //check for compilation errors
         System.out.println("Vertex Shader Compiled: " 		+ glGetShaderi(vertexShader, 	GL_COMPILE_STATUS));
         System.out.println("Fragment Shader Compiled: " 	+ glGetShaderi(fragmentShader, 	GL_COMPILE_STATUS));
-        System.out.println("Program Linked: " 				+ glGetProgrami(program, 		GL_LINK_STATUS));
-        System.out.println("Program Validated: " 			+ glGetProgrami(program, 		GL_VALIDATE_STATUS));
+        System.out.println("Program Linked: " 				+ glGetProgrami(renderProgram, 		GL_LINK_STATUS));
+        System.out.println("Program Validated: " 			+ glGetProgrami(renderProgram, 		GL_VALIDATE_STATUS));
         printErrors();
 
         //sets the background clear color to white
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
         //get the 'colorMod and 'positionMod' variables, so I can change them while drawing to create the animation
-        transformMatrix = glGetUniformLocation(program, "transformMatrix");
+        transformMatrix = glGetUniformLocation(renderProgram, "transformMatrix");
 
         //set the current program
-        glUseProgram(program);
+        glUseProgram(renderProgram);
     }
 
     private static void setupComputeProgram() {
@@ -229,8 +229,8 @@ public class Main {
             vao.delete();
 
         //detach the shaders from the program object
-        glDetachShader(program, vertexShader);
-        glDetachShader(program, fragmentShader);
+        glDetachShader(renderProgram, vertexShader);
+        glDetachShader(renderProgram, fragmentShader);
 
         //delete the shaders now that they are detached
         glDeleteShader(vertexShader);
@@ -240,7 +240,7 @@ public class Main {
         glUseProgram(0);
 
         //delete the program now that the shaders are detached and the program isn't being used
-        glDeleteProgram(program);
+        glDeleteProgram(renderProgram);
 
         printErrors();
     }
