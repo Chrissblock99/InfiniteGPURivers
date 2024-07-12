@@ -62,23 +62,6 @@ public class HeightMapTransformer {
             for (int i = 0; i < vonNeumannNeighbourhood.length; i++)
                 terrainData.waterOutflowPipes[x][z][i] *= flowScalar;
         }
-
-        //generates the same velocityField when only simulating water flow in the long run, is a lot cleaner while doing so, but takes A LOT longer
-        /*double totalOutflow = 0;
-
-        for (int i = 0; i < vonNeumannNeighbourhood.length; i++) {
-            double outflow = (terrainData.heightDiffTo(x, z, vonNeumannNeighbourhood[i]) > 0) ?
-                Math.min(terrainData.heightDiffTo(x, z, vonNeumannNeighbourhood[i]), terrainData.heightAt(x, z)) * deltaTWater : 0;
-
-            terrainData.waterOutFlowPipes[x][z][i] = outflow;
-            totalOutflow += outflow;
-        }
-
-        if (totalOutflow > terrainData.waterMap[x][z]) {
-            double flowScalar = terrainData.waterMap[x][z] * pipeLength * pipeLength / totalOutflow;
-            for (int i = 0; i < vonNeumannNeighbourhood.length; i++)
-                terrainData.waterOutFlowPipes[x][z][i] *= flowScalar;
-        }*/
     }
 
     private void applyWaterOutflow(TerrainData terrainData, int x, int z) {
