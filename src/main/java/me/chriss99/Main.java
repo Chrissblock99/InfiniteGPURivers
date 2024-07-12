@@ -3,7 +3,7 @@ package me.chriss99;
 import org.lwjgl.opengl.*;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.opengl.GL45.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 import java.io.File;
