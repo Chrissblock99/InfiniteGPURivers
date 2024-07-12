@@ -19,6 +19,7 @@ public class HeightMapTransformer {
     double talusAngleTangentCoeff = 0.8; //[0;1]
     double talusAngleTangentBias = 0.1; //[0;1]
     double minimumHardness = 0.25; //[0;1]
+    double voidSediment = 0.3; //[0;1]
 
     public void fullErosion(TerrainData terrainData) {
         addWater(terrainData);
@@ -29,9 +30,9 @@ public class HeightMapTransformer {
         multiThreadProcessor(terrainData, this::calculateThermalOutflow, 17);
         multiThreadProcessor(terrainData, this::erosionAndDeposition, 17);
         terrainData.addedHeightsCalculated = false;
-        //double[][][] sedimentOutflow = calculateSedimentOutflow(terrainData);
-        //applySedimentOutflow(terrainData, sedimentOutflow);
-        multiThreadProcessor(terrainData, this::sedimentTransportation, 17);
+        double[][][] sedimentOutflow = calculateSedimentOutflow(terrainData);
+        applySedimentOutflow(terrainData, sedimentOutflow);
+        //multiThreadProcessor(terrainData, this::sedimentTransportation, 17);
         terrainData.sedimentMap = terrainData.newSedimentMap;
         multiThreadProcessor(terrainData, this::applyThermalOutflow, 17);
         terrainData.addedHeightsCalculated = false;
@@ -122,6 +123,10 @@ public class HeightMapTransformer {
         terrainData.waterMap[x][z] = Math.max(0, terrainData.waterMap[x][z] + change);
 
         terrainData.hardnessMap[x][z] = Math.max(minimumHardness, terrainData.hardnessMap[x][z] - sedimentSofteningRate * change);
+
+        double voided = terrainData.sedimentMap[x][z] * voidSediment;
+        terrainData.sedimentMap[x][z] -= voided;
+        terrainData.waterMap[x][z] -= voided;
     }
 
     private void sedimentTransportation(TerrainData terrainData, int x, int z) {
@@ -156,18 +161,10 @@ public class HeightMapTransformer {
             for (int x = 0; x < terrainData.xSize; x++) {
                 double totalOutFlow = 0;
 
-                double velX = terrainData.velocityField[x][z][0];
-                double outFlowX = Math.abs(velX);
-                if (velX != 0) {
-                    sedimentOutflow[x][z][(velX > 0) ? 2 : 1] = outFlowX;
-                    totalOutFlow += outFlowX;
-                }
-
-                double velY = terrainData.velocityField[x][z][1];
-                double outFlowZ = Math.abs(velY);
-                if (velY != 0) {
-                    sedimentOutflow[x][z][(velY > 0) ? 0 : 3] = outFlowZ;
-                    totalOutFlow += outFlowZ;
+                for (int i = 0; i < vonNeumannNeighbourhood.length; i++) {
+                    double outFlow = (terrainData.terrainHeightDiffTo(x, z, vonNeumannNeighbourhood[i]) >= 0) ? terrainData.waterOutflowPipes[x][z][i] : 0;
+                    sedimentOutflow[x][z][i] = outFlow;
+                    totalOutFlow += outFlow;
                 }
 
                 if (totalOutFlow > terrainData.sedimentMap[x][z]) {

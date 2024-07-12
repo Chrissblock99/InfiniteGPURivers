@@ -50,6 +50,10 @@ public class TerrainData {
         return heightAt(x, z) - heightAt((x + offset[0] + xSize) % xSize, (z + offset[1] + zSize) % zSize);
     }
 
+    public double terrainHeightDiffTo(int x, int z, int[] offset) {
+        return terrainMap[x][z] - terrainMap[(x + offset[0] + xSize) % xSize][(z + offset[1] + zSize) % zSize];
+    }
+
     public static Vector3d normalAt(double[][] heightMap, int x, int z) {
         double[] heights = new double[4];
         for (int i = 0; i < HeightMapTransformer.vonNeumannNeighbourhood.length; i++)
