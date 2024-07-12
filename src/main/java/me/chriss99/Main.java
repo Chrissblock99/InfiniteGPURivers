@@ -22,6 +22,9 @@ public class Main {
     static int fragmentShader;
     static int program;
 
+    static int computeShader;
+    static int computeProgram;
+
     static int transformMatrix;
     static InputDeviceManager inputDeviceManager = null;
     static CameraMatrix cameraMatrix = new CameraMatrix();
@@ -40,6 +43,7 @@ public class Main {
         glfwInit();
         createWindow();
         setupData();
+        setupComputeProgram();
         setupProgram();
         inputDeviceManager = new InputDeviceManager(window);
         movementController = new MovementController(inputDeviceManager, cameraMatrix);
@@ -127,6 +131,30 @@ public class Main {
 
         //set the current program
         glUseProgram(program);
+    }
+
+    private static void setupComputeProgram() {
+        computeShader = loadShader(new File("/home/chriss99/IdeaProjects/ogl_test2/src/main/java/me/chriss99/shader.comp"), GL_COMPUTE_SHADER);
+
+        //create a program object and store its ID in the 'program' variable
+        computeProgram = glCreateProgram();
+
+        glAttachShader(computeProgram, computeShader);
+
+        //link the program (whatever that does)
+        glLinkProgram(computeProgram);
+
+        //validate the program to make sure it won't blow up the program
+        glValidateProgram(computeProgram);
+
+        //check for compilation errors
+        System.out.println("Compute Shader Compiled: "   	+ glGetShaderi(computeShader, 	GL_COMPILE_STATUS));
+        System.out.println("Program Linked: " 				+ glGetProgrami(computeProgram, 		GL_LINK_STATUS));
+        System.out.println("Program Validated: " 			+ glGetProgrami(computeProgram, 		GL_VALIDATE_STATUS));
+        printErrors();
+
+        //set the current program
+        glUseProgram(computeProgram);
     }
 
     private static void loop() {
