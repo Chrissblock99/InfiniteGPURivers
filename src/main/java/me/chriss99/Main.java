@@ -128,9 +128,6 @@ public class Main {
 
         //get the 'colorMod and 'positionMod' variables, so I can change them while drawing to create the animation
         transformMatrix = glGetUniformLocation(renderProgram, "transformMatrix");
-
-        //set the current program
-        glUseProgram(renderProgram);
     }
 
     private static void setupComputeProgram() {
@@ -152,9 +149,6 @@ public class Main {
         System.out.println("Program Linked: " 				+ glGetProgrami(computeProgram, 		GL_LINK_STATUS));
         System.out.println("Program Validated: " 			+ glGetProgrami(computeProgram, 		GL_VALIDATE_STATUS));
         printErrors();
-
-        //set the current program
-        glUseProgram(computeProgram);
     }
 
     private static void loop() {
@@ -164,6 +158,8 @@ public class Main {
 
         Thread eroder = new Thread();
         while(!glfwWindowShouldClose(window)) {
+            glUseProgram(renderProgram);
+
             movementController.update();
             glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
 
