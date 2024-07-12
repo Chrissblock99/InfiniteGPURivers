@@ -30,8 +30,8 @@ public class HeightMapTransformer {
         multiThreadProcessor(terrainData, this::calculateThermalOutflow, 17);
         multiThreadProcessor(terrainData, this::erosionAndDeposition, 17);
         terrainData.addedHeightsCalculated = false;
-        calculateSedimentOutflow(terrainData);
-        applySedimentOutflow(terrainData);
+        multiThreadProcessor(terrainData, this::calculateSedimentOutflow, 17);
+        multiThreadProcessor(terrainData, this::applySedimentOutflow, 17);
         terrainData.sedimentMap = terrainData.newSedimentMap;
         multiThreadProcessor(terrainData, this::applyThermalOutflow, 17);
         terrainData.addedHeightsCalculated = false;
@@ -104,34 +104,29 @@ public class HeightMapTransformer {
         terrainData.waterMap[x][z] -= voided;
     }
 
-    private void calculateSedimentOutflow(TerrainData terrainData) {
-        for (int z = 0; z < terrainData.zSize; z++)
-            for (int x = 0; x < terrainData.xSize; x++) {
-                double totalOutFlow = 0;
+    private void calculateSedimentOutflow(TerrainData terrainData, int x, int z) {
+        double totalOutFlow = 0;
 
-                for (int i = 0; i < vonNeumannNeighbourhood.length; i++) {
-                    double outFlow = (terrainData.terrainHeightDiffTo(x, z, vonNeumannNeighbourhood[i]) >= 0) ? terrainData.waterOutflowPipes[x][z][i] : 0;
-                    terrainData.sedimentOutflowPipes[x][z][i] = outFlow;
-                    totalOutFlow += outFlow;
-                }
+        for (int i = 0; i < vonNeumannNeighbourhood.length; i++) {
+            double outFlow = (terrainData.terrainHeightDiffTo(x, z, vonNeumannNeighbourhood[i]) >= 0) ? terrainData.waterOutflowPipes[x][z][i] : 0;
+            terrainData.sedimentOutflowPipes[x][z][i] = outFlow;
+            totalOutFlow += outFlow;
+        }
 
-                if (totalOutFlow > terrainData.sedimentMap[x][z]) {
-                    double flowScalar = terrainData.sedimentMap[x][z] / totalOutFlow;
-                    for (int i = 0; i < vonNeumannNeighbourhood.length; i++)
-                        terrainData.sedimentOutflowPipes[x][z][i] *= flowScalar;
-                }
-            }
+        if (totalOutFlow > terrainData.sedimentMap[x][z]) {
+            double flowScalar = terrainData.sedimentMap[x][z] / totalOutFlow;
+            for (int i = 0; i < vonNeumannNeighbourhood.length; i++)
+                terrainData.sedimentOutflowPipes[x][z][i] *= flowScalar;
+        }
     }
 
-    private void applySedimentOutflow(TerrainData terrainData) {
-        for (int z = 0; z < terrainData.zSize; z++)
-            for (int x = 0; x < terrainData.xSize; x++)
-                for (int i = 0; i < vonNeumannNeighbourhood.length; i++) {
-                    terrainData.sedimentMap[x][z] += terrainData.sedimentOutflowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, i, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, i, 1)][3-i];
-                    terrainData.sedimentMap[x][z] -= terrainData.sedimentOutflowPipes[x][z][i];
-                    if (terrainData.sedimentOutflowPipes[x][z][i] < 0)
-                        throw new IllegalStateException("SedimentOutflow is negative!");
-                }
+    private void applySedimentOutflow(TerrainData terrainData, int x, int z) {
+        for (int i = 0; i < vonNeumannNeighbourhood.length; i++) {
+            terrainData.sedimentMap[x][z] += terrainData.sedimentOutflowPipes[wrapOffsetCoordinateVonNeumann(x, terrainData.xSize, i, 0)][wrapOffsetCoordinateVonNeumann(z, terrainData.zSize, i, 1)][3-i];
+            terrainData.sedimentMap[x][z] -= terrainData.sedimentOutflowPipes[x][z][i];
+            if (terrainData.sedimentOutflowPipes[x][z][i] < 0)
+                throw new IllegalStateException("SedimentOutflow is negative!");
+        }
     }
 
     private void evaporateWater(TerrainData terrainData) {
