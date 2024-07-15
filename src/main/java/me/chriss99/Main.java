@@ -203,11 +203,10 @@ public class Main {
 
 
             glUseProgram(computeProgram);
-
             glDispatchCompute(2, 2, 1);
+            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
             ByteBuffer byteBuffer = BufferUtils.createByteBuffer(16*4);
-            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
             glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, byteBuffer);
             for (int i = 0; i < 16; i++)
                 System.out.print(byteBuffer.getFloat(i*4) + ", ");
