@@ -1,6 +1,7 @@
 #version 450 core
 layout(local_size_x = 1, local_size_y = 1) in;
+layout(binding = 1, rgba16f) uniform writeonly image2D myImage;
 
 void main() {
-
+    imageStore(myImage, ivec2(gl_GlobalInvocationID.xy), vec4(gl_GlobalInvocationID.xy, 3, 4));
 }

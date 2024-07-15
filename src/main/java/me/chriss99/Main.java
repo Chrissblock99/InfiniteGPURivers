@@ -1,5 +1,6 @@
 package me.chriss99;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.*;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -8,6 +9,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.nio.ByteBuffer;
 import java.util.*;
 
 
@@ -24,6 +26,9 @@ public class Main {
 
     static int computeShader;
     static int computeProgram;
+
+    static int texture;
+    static int textureLocation;
 
     static int transformMatrix;
     static InputDeviceManager inputDeviceManager = null;
@@ -90,6 +95,12 @@ public class Main {
         vaoList.add(VAOGenerator.heightMapToSimpleVAO(terrainData.addedHeights(), -100, 100, true));
         //vaoList.add(VAOGenerator.heightMapToVectorVAO(terrainData.addedHeights(), terrainData.velocityField));
         //vaoList.add(VAOGenerator.heightMapToNormalVAO(terrainData.terrainMap));
+
+        texture = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA16F, 2, 2);
+        glActiveTexture(GL_TEXTURE0);
+        glBindImageTexture(1, texture, 0, false, 0, GL_WRITE_ONLY, GL_RGBA16F);
     }
 
     private static void setupRenderProgram() {
@@ -149,6 +160,10 @@ public class Main {
         System.out.println("Program Linked: " 				+ glGetProgrami(computeProgram, 		GL_LINK_STATUS));
         System.out.println("Program Validated: " 			+ glGetProgrami(computeProgram, 		GL_VALIDATE_STATUS));
         printErrors();
+
+        textureLocation = glGetUniformLocation(computeProgram, "myImage");
+        glUseProgram(computeProgram);
+        glUniform1i(textureLocation, 1);
     }
 
     private static void loop() {
@@ -184,6 +199,21 @@ public class Main {
 
             //swap the frame to show the rendered image
             glfwSwapBuffers(window);
+
+
+
+            glUseProgram(computeProgram);
+
+            glDispatchCompute(2, 2, 1);
+
+            ByteBuffer byteBuffer = BufferUtils.createByteBuffer(16*4);
+            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+            glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, byteBuffer);
+            for (int i = 0; i < 16; i++)
+                System.out.print(byteBuffer.getFloat(i*4) + ", ");
+            System.out.println();
+
+
 
             //poll for window events (resize, close, button presses, etc.)
             glfwPollEvents();
