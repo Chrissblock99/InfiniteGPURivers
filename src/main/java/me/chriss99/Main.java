@@ -113,14 +113,10 @@ public class Main {
         glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA16F, 2, 2);
         glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 2, 2, GL_RGBA, GL_FLOAT, imageData);
 
-        glBindImageTexture(1, texture, 0, false, 0, GL_READ_WRITE, GL_RGBA16F);
-
         texture2 = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, texture2);
         glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA16F, 2, 2);
         glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 2, 2, GL_RGBA, GL_FLOAT, imageData);
-
-        glBindImageTexture(2, texture2, 0, false, 0, GL_READ_WRITE, GL_RGBA16F);
     }
 
     private static void setupRenderProgram() {
@@ -181,10 +177,13 @@ public class Main {
         System.out.println("Program Validated: " 			+ glGetProgrami(computeProgram, 		GL_VALIDATE_STATUS));
         printErrors();
 
-        textureLocation = glGetUniformLocation(computeProgram, "myImage");
         glUseProgram(computeProgram);
+
+        glBindImageTexture(1, texture, 0, false, 0, GL_READ_WRITE, GL_RGBA16F);
+        textureLocation = glGetUniformLocation(computeProgram, "myImage");
         glUniform1i(textureLocation, 1);
 
+        glBindImageTexture(2, texture2, 0, false, 0, GL_READ_WRITE, GL_RGBA16F);
         texture2Location = glGetUniformLocation(computeProgram, "myImage2");
         glUniform1i(texture2Location, 2);
     }
