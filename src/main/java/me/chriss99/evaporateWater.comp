@@ -1,0 +1,12 @@
+#version 450 core
+layout(local_size_x = 1, local_size_y = 1) in;
+layout(binding = 1, r16f) restrict uniform image2D waterMap;
+
+const float deltaT = 0.02; //[0;0.05]
+const float evaporationRate = 0.015; //[0;0.05]
+const float evaporationMultiplier = (1 - evaporationRate * deltaT);
+
+void main() {
+    vec4 waterHeight = imageLoad(waterMap, ivec2(gl_GlobalInvocationID));
+    imageStore(waterMap, ivec2(gl_GlobalInvocationID.xy), waterHeight * evaporationMultiplier);
+}

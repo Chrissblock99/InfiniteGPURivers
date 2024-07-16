@@ -23,6 +23,7 @@ public class GPUTerrainEroder {
     private final ComputeProgram addWater;
     //private final ComputeProgram calcWaterOutflow;
     //private final ComputeProgram applyWaterOutflow;
+    private final ComputeProgram evaporateWater;
 
     public GPUTerrainEroder(int width, int height) {
         this.width = width;
@@ -42,15 +43,21 @@ public class GPUTerrainEroder {
         addWater = new ComputeProgram("addWater");
         //calcWaterOutflow = new ComputeProgram("calcWaterOutflow");
         //applyWaterOutflow = new ComputeProgram("applyWaterOutflow");
+        evaporateWater = new ComputeProgram("evaporateWater");
 
 
 
         waterMap.bindUniformImage(addWater.program, 1, "waterMap", GL_READ_WRITE);
         //texture2.bindUniformImage(computeProgram, 2, "myImage2", GL_READ_WRITE);
+        waterMap.bindUniformImage(evaporateWater.program, 1, "waterMap", GL_READ_WRITE);
     }
 
     public void erosionStep() {
         glUseProgram(addWater.program);
+        glDispatchCompute(width, height, 1);
+        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+        glUseProgram(evaporateWater.program);
         glDispatchCompute(width, height, 1);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
     }
@@ -66,5 +73,6 @@ public class GPUTerrainEroder {
 
     public void delete() {
         addWater.delete();
+        evaporateWater.delete();
     }
 }
