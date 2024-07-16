@@ -29,6 +29,8 @@ public class Main {
 
     static int texture;
     static int textureLocation;
+    static int texture2;
+    static int texture2Location;
 
     static int transformMatrix;
     static InputDeviceManager inputDeviceManager = null;
@@ -111,8 +113,14 @@ public class Main {
         glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA16F, 2, 2);
         glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 2, 2, GL_RGBA, GL_FLOAT, imageData);
 
-        glActiveTexture(GL_TEXTURE0);
         glBindImageTexture(1, texture, 0, false, 0, GL_READ_WRITE, GL_RGBA16F);
+
+        texture2 = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, texture2);
+        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA16F, 2, 2);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 2, 2, GL_RGBA, GL_FLOAT, imageData);
+
+        glBindImageTexture(2, texture2, 0, false, 0, GL_READ_WRITE, GL_RGBA16F);
     }
 
     private static void setupRenderProgram() {
@@ -176,6 +184,9 @@ public class Main {
         textureLocation = glGetUniformLocation(computeProgram, "myImage");
         glUseProgram(computeProgram);
         glUniform1i(textureLocation, 1);
+
+        texture2Location = glGetUniformLocation(computeProgram, "myImage2");
+        glUniform1i(texture2Location, 2);
     }
 
     private static void loop() {
@@ -219,9 +230,17 @@ public class Main {
             glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
             ByteBuffer byteBuffer = BufferUtils.createByteBuffer(16*4);
+
+            glBindTexture(GL_TEXTURE_2D, texture);
             glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, byteBuffer);
             for (int i = 0; i < 16; i++)
                 System.out.print(byteBuffer.getFloat(i*4) + ", ");
+
+            glBindTexture(GL_TEXTURE_2D, texture2);
+            glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, byteBuffer);
+            for (int i = 0; i < 16; i++)
+                System.out.print(byteBuffer.getFloat(i*4) + ", ");
+
             System.out.println();
 
 
