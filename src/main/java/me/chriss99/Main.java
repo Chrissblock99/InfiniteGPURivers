@@ -300,10 +300,10 @@ public class Main {
         glfwSwapInterval(vSync ? 1 : 0);
     }
 
-    private static void printErrors() {
+    public static void printErrors() {
         int error = glGetError();
         while(error != 0) {
-            System.out.println("OpenGL Error: " + error);
+            new RuntimeException("OpenGL Error: " + error).printStackTrace();
             error = glGetError();
         }
     }
