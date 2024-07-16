@@ -31,6 +31,7 @@ public class Texture {
     }
 
     public void uploadData(int xOffset, int yOffset, int width, int height, int format, int type, ByteBuffer data) {
+        glBindTexture(GL_TEXTURE_2D, texture);
         glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, width, height, format, type, data);
     }
 
