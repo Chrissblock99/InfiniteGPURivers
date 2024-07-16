@@ -62,6 +62,8 @@ public class GPUTerrainEroder {
         waterOutflowPipes.bindUniformImage(calcWaterOutflow.program, 4, "waterOutflowPipes", GL_READ_WRITE);
 
         waterMap.bindUniformImage(evaporateWater.program, 1, "waterMap", GL_READ_WRITE);
+
+        Main.printErrors();
     }
 
     public void erosionStep() {
