@@ -96,9 +96,21 @@ public class Main {
         //vaoList.add(VAOGenerator.heightMapToVectorVAO(terrainData.addedHeights(), terrainData.velocityField));
         //vaoList.add(VAOGenerator.heightMapToNormalVAO(terrainData.terrainMap));
 
+        ByteBuffer imageData = BufferUtils.createByteBuffer(2*2*4*4);
+        imageData.putFloat(1);
+        imageData.position(4*4);
+        imageData.putFloat(1);
+        imageData.position(8*4);
+        imageData.putFloat(1);
+        imageData.position(12*4);
+        imageData.putFloat(1);
+        imageData.position(0);
+
         texture = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, texture);
         glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA16F, 2, 2);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 2, 2, GL_RGBA, GL_FLOAT, imageData);
+
         glActiveTexture(GL_TEXTURE0);
         glBindImageTexture(1, texture, 0, false, 0, GL_READ_WRITE, GL_RGBA16F);
     }
