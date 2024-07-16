@@ -6,7 +6,6 @@ import static org.lwjgl.opengl.GL45.*;
 
 public class Texture {
     final int texture;
-    int location;
 
     final int internalFormat;
     final int width;
@@ -26,7 +25,7 @@ public class Texture {
         glUseProgram(program);
 
         glBindImageTexture(bindingUnit, texture, 0, false, 0, access, internalFormat);
-        location = glGetUniformLocation(program, name);
+        int location = glGetUniformLocation(program, name);
         glUniform1i(location, bindingUnit);
     }
 
