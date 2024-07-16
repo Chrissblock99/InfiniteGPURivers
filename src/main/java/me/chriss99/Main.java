@@ -109,8 +109,8 @@ public class Main {
         texture = new Texture(GL_RGBA16F, 2, 2);
         texture.uploadFullData(GL_RGBA, GL_FLOAT, imageData);
 
-        texture2 = new Texture(GL_RGBA16F, 2, 2);
-        texture2.uploadFullData(GL_RGBA, GL_FLOAT, imageData);
+        texture2 = new Texture(GL_R16F, 2, 2);
+        texture2.uploadFullData(GL_RED, GL_FLOAT, imageData);
     }
 
     private static void setupRenderProgram() {
@@ -220,9 +220,10 @@ public class Main {
             texture.downloadData(GL_RGBA, GL_FLOAT, byteBuffer);
             for (int i = 0; i < 16; i++)
                 System.out.print(byteBuffer.getFloat(i*4) + ", ");
+            System.out.print("         ");
 
-            texture2.downloadData(GL_RGBA, GL_FLOAT, byteBuffer);
-            for (int i = 0; i < 16; i++)
+            texture2.downloadData(GL_RED, GL_FLOAT, byteBuffer);
+            for (int i = 0; i < 4; i++)
                 System.out.print(byteBuffer.getFloat(i*4) + ", ");
 
             System.out.println();
