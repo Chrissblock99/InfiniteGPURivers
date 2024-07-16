@@ -57,17 +57,17 @@ public class GPUTerrainEroder {
     }
 
     public void erosionStep() {
-        glUseProgram(addWater.program);
-        glDispatchCompute(width, height, 1);
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        int[] programs = {
+                addWater.program,
+                calcWaterOutflow.program,
+                evaporateWater.program
+        };
 
-        glUseProgram(calcWaterOutflow.program);
-        glDispatchCompute(width, height, 1);
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
-        glUseProgram(evaporateWater.program);
-        glDispatchCompute(width, height, 1);
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        for (int i : programs) {
+            glUseProgram(i);
+            glDispatchCompute(width, height, 1);
+            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        }
     }
 
     public void printResults() {
