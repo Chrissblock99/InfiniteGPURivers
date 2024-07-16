@@ -1,6 +1,5 @@
 package me.chriss99;
 
-import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.*;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -9,7 +8,6 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.nio.ByteBuffer;
 import java.util.*;
 
 
@@ -24,11 +22,7 @@ public class Main {
     static int fragmentShader;
     static int renderProgram;
 
-    static int computeShader;
-    static int computeProgram;
-
-    static Texture texture;
-    static Texture texture2;
+    static GPUTerrainEroder gpuTerrainEroder;
 
     static int transformMatrix;
     static InputDeviceManager inputDeviceManager = null;
@@ -48,7 +42,7 @@ public class Main {
         glfwInit();
         createWindow();
         setupData();
-        setupComputeProgram();
+        gpuTerrainEroder = new GPUTerrainEroder(2, 4);
         setupRenderProgram();
         inputDeviceManager = new InputDeviceManager(window);
         movementController = new MovementController(inputDeviceManager, cameraMatrix);
@@ -95,22 +89,6 @@ public class Main {
         vaoList.add(VAOGenerator.heightMapToSimpleVAO(terrainData.addedHeights(), -100, 100, true));
         //vaoList.add(VAOGenerator.heightMapToVectorVAO(terrainData.addedHeights(), terrainData.velocityField));
         //vaoList.add(VAOGenerator.heightMapToNormalVAO(terrainData.terrainMap));
-
-        ByteBuffer imageData = BufferUtils.createByteBuffer(2*2*4*4);
-        imageData.putFloat(1);
-        imageData.position(4*4);
-        imageData.putFloat(1);
-        imageData.position(8*4);
-        imageData.putFloat(1);
-        imageData.position(12*4);
-        imageData.putFloat(1);
-        imageData.position(0);
-
-        texture = new Texture(GL_RGBA16F, 2, 2);
-        texture.uploadFullData(GL_RGBA, GL_FLOAT, imageData);
-
-        texture2 = new Texture(GL_R16F, 2, 2);
-        texture2.uploadFullData(GL_RED, GL_FLOAT, imageData);
     }
 
     private static void setupRenderProgram() {
@@ -151,30 +129,6 @@ public class Main {
         transformMatrix = glGetUniformLocation(renderProgram, "transformMatrix");
     }
 
-    private static void setupComputeProgram() {
-        computeShader = loadShader(new File("/home/chriss99/IdeaProjects/ogl_test2/src/main/java/me/chriss99/shader.comp"), GL_COMPUTE_SHADER);
-
-        //create a program object and store its ID in the 'program' variable
-        computeProgram = glCreateProgram();
-
-        glAttachShader(computeProgram, computeShader);
-
-        //link the program (whatever that does)
-        glLinkProgram(computeProgram);
-
-        //validate the program to make sure it won't blow up the program
-        glValidateProgram(computeProgram);
-
-        //check for compilation errors
-        System.out.println("Compute Shader Compiled: "   	+ glGetShaderi(computeShader, 	GL_COMPILE_STATUS));
-        System.out.println("Program Linked: " 				+ glGetProgrami(computeProgram, 		GL_LINK_STATUS));
-        System.out.println("Program Validated: " 			+ glGetProgrami(computeProgram, 		GL_VALIDATE_STATUS));
-        printErrors();
-
-        texture.bindUniformImage(computeProgram, 1, "myImage", GL_READ_WRITE);
-        texture2.bindUniformImage(computeProgram, 2, "myImage2", GL_READ_WRITE);
-    }
-
     private static void loop() {
         double lastTime = glfwGetTime();
         double lastFramePrint = Double.NEGATIVE_INFINITY;
@@ -209,26 +163,8 @@ public class Main {
             //swap the frame to show the rendered image
             glfwSwapBuffers(window);
 
-
-
-            glUseProgram(computeProgram);
-            glDispatchCompute(2, 2, 1);
-            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
-            ByteBuffer byteBuffer = BufferUtils.createByteBuffer(16*4);
-
-            texture.downloadData(GL_RGBA, GL_FLOAT, byteBuffer);
-            for (int i = 0; i < 16; i++)
-                System.out.print(byteBuffer.getFloat(i*4) + ", ");
-            System.out.print("         ");
-
-            texture2.downloadData(GL_RED, GL_FLOAT, byteBuffer);
-            for (int i = 0; i < 4; i++)
-                System.out.print(byteBuffer.getFloat(i*4) + ", ");
-
-            System.out.println();
-
-
+            gpuTerrainEroder.erosionStep();
+            gpuTerrainEroder.printResults();
 
             //poll for window events (resize, close, button presses, etc.)
             glfwPollEvents();
@@ -278,22 +214,14 @@ public class Main {
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
 
-
-
-        glUseProgram(computeProgram);
-
-        glDetachShader(computeProgram, computeShader);
-
-        glDeleteShader(computeShader);
-
-
-
         glUseProgram(0);
         //delete the program now that the shaders are detached and the program isn't being used
         glDeleteProgram(renderProgram);
-        glDeleteProgram(computeProgram);
 
         printErrors();
+
+
+        gpuTerrainEroder.delete();
     }
 
     public static void updateVSync() {
