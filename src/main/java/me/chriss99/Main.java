@@ -27,10 +27,8 @@ public class Main {
     static int computeShader;
     static int computeProgram;
 
-    static int texture;
-    static int textureLocation;
-    static int texture2;
-    static int texture2Location;
+    static Texture texture;
+    static Texture texture2;
 
     static int transformMatrix;
     static InputDeviceManager inputDeviceManager = null;
@@ -108,15 +106,11 @@ public class Main {
         imageData.putFloat(1);
         imageData.position(0);
 
-        texture = glGenTextures();
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA16F, 2, 2);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 2, 2, GL_RGBA, GL_FLOAT, imageData);
+        texture = new Texture(GL_RGBA16F, 2, 2);
+        texture.uploadFullData(GL_RGBA, GL_FLOAT, imageData);
 
-        texture2 = glGenTextures();
-        glBindTexture(GL_TEXTURE_2D, texture2);
-        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA16F, 2, 2);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 2, 2, GL_RGBA, GL_FLOAT, imageData);
+        texture2 = new Texture(GL_RGBA16F, 2, 2);
+        texture2.uploadFullData(GL_RGBA, GL_FLOAT, imageData);
     }
 
     private static void setupRenderProgram() {
@@ -177,15 +171,8 @@ public class Main {
         System.out.println("Program Validated: " 			+ glGetProgrami(computeProgram, 		GL_VALIDATE_STATUS));
         printErrors();
 
-        glUseProgram(computeProgram);
-
-        glBindImageTexture(1, texture, 0, false, 0, GL_READ_WRITE, GL_RGBA16F);
-        textureLocation = glGetUniformLocation(computeProgram, "myImage");
-        glUniform1i(textureLocation, 1);
-
-        glBindImageTexture(2, texture2, 0, false, 0, GL_READ_WRITE, GL_RGBA16F);
-        texture2Location = glGetUniformLocation(computeProgram, "myImage2");
-        glUniform1i(texture2Location, 2);
+        texture.bindUniformImage(computeProgram, 1, "myImage", GL_READ_WRITE);
+        texture2.bindUniformImage(computeProgram, 2, "myImage2", GL_READ_WRITE);
     }
 
     private static void loop() {
@@ -230,13 +217,11 @@ public class Main {
 
             ByteBuffer byteBuffer = BufferUtils.createByteBuffer(16*4);
 
-            glBindTexture(GL_TEXTURE_2D, texture);
-            glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, byteBuffer);
+            texture.downloadData(GL_RGBA, GL_FLOAT, byteBuffer);
             for (int i = 0; i < 16; i++)
                 System.out.print(byteBuffer.getFloat(i*4) + ", ");
 
-            glBindTexture(GL_TEXTURE_2D, texture2);
-            glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, byteBuffer);
+            texture2.downloadData(GL_RGBA, GL_FLOAT, byteBuffer);
             for (int i = 0; i < 16; i++)
                 System.out.print(byteBuffer.getFloat(i*4) + ", ");
 
