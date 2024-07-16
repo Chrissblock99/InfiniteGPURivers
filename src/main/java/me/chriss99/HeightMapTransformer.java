@@ -32,7 +32,6 @@ public class HeightMapTransformer {
         terrainData.addedHeightsCalculated = false;
         multiThreadProcessor(terrainData, this::calculateSedimentOutflow, 17);
         multiThreadProcessor(terrainData, this::applySedimentOutflow, 17);
-        terrainData.sedimentMap = terrainData.newSedimentMap;
         multiThreadProcessor(terrainData, this::applyThermalOutflow, 17);
         terrainData.addedHeightsCalculated = false;
         evaporateWater(terrainData);

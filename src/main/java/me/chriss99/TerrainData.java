@@ -11,7 +11,6 @@ public class TerrainData {
     public final double[][] terrainMap;
     public final double[][] waterMap;
     public double[][] sedimentMap;
-    public double[][] newSedimentMap;
     public final double[][] addedHeights;
     public boolean addedHeightsCalculated = false;
     public final double[][] hardnessMap;
@@ -28,7 +27,6 @@ public class TerrainData {
         this.terrainMap = terrainMap;
         waterMap = new double[xSize][zSize];
         sedimentMap = new double[xSize][zSize];
-        newSedimentMap = new double[xSize][zSize];
         addedHeights = new double[xSize][zSize];
         hardnessMap = new double[xSize][zSize];
         for (int x = 0; x < xSize; x++)
