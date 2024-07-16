@@ -100,7 +100,7 @@ public class Main {
         glBindTexture(GL_TEXTURE_2D, texture);
         glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA16F, 2, 2);
         glActiveTexture(GL_TEXTURE0);
-        glBindImageTexture(1, texture, 0, false, 0, GL_WRITE_ONLY, GL_RGBA16F);
+        glBindImageTexture(1, texture, 0, false, 0, GL_READ_WRITE, GL_RGBA16F);
     }
 
     private static void setupRenderProgram() {
