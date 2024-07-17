@@ -116,6 +116,23 @@ public class GPUTerrainEroder {
         return new double[][][]{terrainMap, addedMap};
     }
 
+    public double[][][] downloadWaterOutflow() {
+        ByteBuffer byteBuffer = BufferUtils.createByteBuffer(width*height*4*4);
+        waterOutflowPipes.downloadData(GL_RGBA, GL_FLOAT, byteBuffer);
+        double[][][] waterOutflow = new double[width][height][4];
+
+        for (int i = 0; i < width*height; i++) {
+            int x = i % width;
+            int z = (i - x) / width;
+            waterOutflow[x][z][0] = byteBuffer.getFloat(i*4*4);
+            waterOutflow[x][z][1] = byteBuffer.getFloat(i*4*4 + 4);
+            waterOutflow[x][z][2] = byteBuffer.getFloat(i*4*4 + 8);
+            waterOutflow[x][z][3] = byteBuffer.getFloat(i*4*4 + 12);
+        }
+
+        return waterOutflow;
+    }
+
     public void printResults() {
         ByteBuffer byteBuffer = BufferUtils.createByteBuffer(width*height*4*4);
 
