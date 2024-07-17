@@ -1,0 +1,15 @@
+#version 450 core
+layout(local_size_x = 1, local_size_y = 1) in;
+layout(binding = 0, r16f) restrict writeonly uniform image2D terrainMap;
+layout(binding = 1, r16f) restrict writeonly uniform image2D waterMap;
+layout(binding = 2, r16f) restrict writeonly uniform image2D sedimentMap;
+layout(binding = 3, r16f) restrict writeonly uniform image2D hardnessMap;
+layout(binding = 4, rgba16f) restrict writeonly uniform image2D waterOutflowPipes;
+
+void main() {
+    imageStore(terrainMap, ivec2(gl_GlobalInvocationID.xy), vec4(0));
+    imageStore(waterMap, ivec2(gl_GlobalInvocationID.xy), vec4(0));
+    imageStore(sedimentMap, ivec2(gl_GlobalInvocationID.xy), vec4(0));
+    imageStore(hardnessMap, ivec2(gl_GlobalInvocationID.xy), vec4(1));
+    imageStore(waterOutflowPipes, ivec2(gl_GlobalInvocationID.xy), vec4(0));
+}
