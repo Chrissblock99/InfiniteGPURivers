@@ -41,8 +41,8 @@ public class Main {
     public static void main(String[] args) {
         glfwInit();
         createWindow();
+        gpuTerrainEroder = new GPUTerrainEroder(30, 30);
         setupData();
-        gpuTerrainEroder = new GPUTerrainEroder(2, 4);
         setupRenderProgram();
         inputDeviceManager = new InputDeviceManager(window);
         movementController = new MovementController(inputDeviceManager, cameraMatrix);
