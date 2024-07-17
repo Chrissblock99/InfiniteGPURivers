@@ -58,15 +58,6 @@ public class MovementController {
 
 
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_T, () -> Main.simulateErosion = !Main.simulateErosion);
-
-        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_R, () -> {
-            Main.terrainData = new TerrainData(HeightMapGenerator.pillar(100, 100));
-            Main.updateTerrainVAOs();
-        });
-        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_F, () -> {
-            Main.terrainData = new TerrainData(HeightMapGenerator.pillars(100, 100));
-            Main.updateTerrainVAOs();
-        });
     }
 
     public void update() {
