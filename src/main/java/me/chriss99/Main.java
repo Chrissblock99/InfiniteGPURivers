@@ -42,7 +42,8 @@ public class Main {
         glfwInit();
         createWindow();
         gpuTerrainEroder = new GPUTerrainEroder(30, 30);
-        setupData(terrainData.terrainMap, terrainData.addedHeights());
+        double[][][] map = gpuTerrainEroder.downloadMap();
+        setupData(map[0], map[1]);
         setupRenderProgram();
         inputDeviceManager = new InputDeviceManager(window);
         movementController = new MovementController(inputDeviceManager, cameraMatrix);
@@ -164,7 +165,8 @@ public class Main {
             glfwSwapBuffers(window);
 
             gpuTerrainEroder.erosionStep();
-            gpuTerrainEroder.printResults();
+            double[][][] map = gpuTerrainEroder.downloadMap();
+            updateTerrainVAOs(map[0], map[1]);
 
             //poll for window events (resize, close, button presses, etc.)
             glfwPollEvents();
