@@ -42,7 +42,7 @@ public class Main {
         glfwInit();
         createWindow();
         gpuTerrainEroder = new GPUTerrainEroder(30, 30);
-        setupData();
+        setupData(terrainData.terrainMap, terrainData.addedHeights());
         setupRenderProgram();
         inputDeviceManager = new InputDeviceManager(window);
         movementController = new MovementController(inputDeviceManager, cameraMatrix);
@@ -84,9 +84,9 @@ public class Main {
         glfwShowWindow(window);
     }
 
-    private static void setupData() {
-        vaoList.add(VAOGenerator.heightMapToSimpleVAO(terrainData.terrainMap, -100, 100, false));
-        vaoList.add(VAOGenerator.heightMapToSimpleVAO(terrainData.addedHeights(), -100, 100, true));
+    private static void setupData(double[][] terrainMap, double[][] addedMap) {
+        vaoList.add(VAOGenerator.heightMapToSimpleVAO(terrainMap, -100, 100, false));
+        vaoList.add(VAOGenerator.heightMapToSimpleVAO(addedMap, -100, 100, true));
         //vaoList.add(VAOGenerator.heightMapToVectorVAO(terrainData.addedHeights(), terrainData.velocityField));
         //vaoList.add(VAOGenerator.heightMapToNormalVAO(terrainData.terrainMap));
     }
@@ -145,7 +145,7 @@ public class Main {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             if (simulateErosion && !eroder.isAlive()) {
-                updateTerrainVAOs();
+                updateTerrainVAOs(terrainData.terrainMap, terrainData.addedHeights());
                 eroder = new Thread(() -> {
                     for (int i = 0; i < 5; i++)
                         heightMapTransformer.fullErosion(terrainData);
@@ -187,12 +187,12 @@ public class Main {
         }
     }
 
-    public static void updateTerrainVAOs() {
+    public static void updateTerrainVAOs(double[][] terrainMap, double[][] addedMap) {
         //TODO wont work when the size of the heightMap changes
-        vaoList.get(0).updatePositions(VAOGenerator.heightMapToSimpleVertexes(terrainData.terrainMap, false));
-        vaoList.get(0).updateColors(VAOGenerator.heightMapToSimpleColors(terrainData.terrainMap, -100, 100, false));
-        vaoList.get(1).updatePositions(VAOGenerator.heightMapToSimpleVertexes(terrainData.addedHeights(), true));
-        vaoList.get(1).updateColors(VAOGenerator.heightMapToSimpleColors(terrainData.addedHeights(), -100, 100, true));
+        vaoList.get(0).updatePositions(VAOGenerator.heightMapToSimpleVertexes(terrainMap, false));
+        vaoList.get(0).updateColors(VAOGenerator.heightMapToSimpleColors(terrainMap, -100, 100, false));
+        vaoList.get(1).updatePositions(VAOGenerator.heightMapToSimpleVertexes(addedMap, true));
+        vaoList.get(1).updateColors(VAOGenerator.heightMapToSimpleColors(addedMap, -100, 100, true));
         //vaoList.get(2).updatePositions(VAOGenerator.heightMapToVectorVertexes(terrainData.addedHeights(), terrainData.velocityField));
         //vaoList.get(2).updatePositions(VAOGenerator.heightMapToNormalVertexes(terrainData.terrainMap));
     }
