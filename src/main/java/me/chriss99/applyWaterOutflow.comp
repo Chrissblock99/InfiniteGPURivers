@@ -1,0 +1,28 @@
+#version 450 core
+layout(local_size_x = 1, local_size_y = 1) in;
+layout(binding = 1, r16f) restrict uniform image2D waterMap;
+layout(binding = 4, rgba16f) restrict readonly uniform image2D waterOutflowPipes;
+
+
+const ivec2 vonNeumannNeighbourhood[4] = ivec2[](
+    ivec2( 0,  1),
+    ivec2(-1,  0),
+    ivec2( 1,  0),
+    ivec2( 0, -1)
+);
+
+void main() {
+    float waterHeight = imageLoad(waterMap, ivec2(gl_GlobalInvocationID)).x;
+
+    vec4 outflow = imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID));
+    float up =     imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[0]).w;
+    float left =   imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[1]).z;
+    float right =  imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[2]).y;
+    float down =   imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[3]).x;
+
+    waterHeight -= outflow.x + outflow.y + outflow.z + outflow.w;
+    waterHeight += up + left + right + down;
+    waterHeight = max(0, waterHeight);
+
+    imageStore(waterMap, ivec2(gl_GlobalInvocationID), vec4(waterHeight));
+}
