@@ -117,7 +117,7 @@ public class Main {
         //validate the program to make sure it won't blow up the program
         glValidateProgram(renderProgram);
 
-        //check for compilation errors
+        System.out.println("Stats for render program: ");
         System.out.println("Vertex Shader Compiled: " 		+ glGetShaderi(vertexShader, 	GL_COMPILE_STATUS));
         System.out.println("Fragment Shader Compiled: " 	+ glGetShaderi(fragmentShader, 	GL_COMPILE_STATUS));
         System.out.println("Program Linked: " 				+ glGetProgrami(renderProgram, 		GL_LINK_STATUS));
