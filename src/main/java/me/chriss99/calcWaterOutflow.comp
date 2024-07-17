@@ -17,34 +17,24 @@ const ivec2 vonNeumannNeighbourhood[4] = ivec2[](
 void main() {
     float waterHeight = imageLoad(waterMap, ivec2(gl_GlobalInvocationID)).x;
     float addedHeight = waterHeight + imageLoad(terrainMap, ivec2(gl_GlobalInvocationID)).x;
-    float addedHeights[4];
+    float heightDiffs[4];
     for (int i = 0; i < 4; i++)
-        addedHeights[i] =
-        imageLoad(waterMap, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[i]).x +
-        imageLoad(terrainMap, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[i]).x;
+        heightDiffs[i] = addedHeight -
+            (imageLoad(waterMap, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[i]).x +
+            imageLoad(terrainMap, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[i]).x);
+    vec4 heightDiff = vec4(heightDiffs[0], heightDiffs[1], heightDiffs[2], heightDiffs[3]);
 
-    vec4 outflowVec = imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID));
-    float waterOutflowPipesArray[4] = float[](outflowVec.x, outflowVec.y, outflowVec.z, outflowVec.w);
+    vec4 outflow = imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID));
 
 
 
-    float totalOutFlow = 0;
+    outflow = max(vec4(0), outflow + vec4(deltaT) * heightDiff * waterFlowMultiplier);
 
-    //TODO this can probably be optimized by using componentwise max, keeping the outflow as a vector and packing the adjacent water heights into a vector aswell
-    for (int i = 0; i < 4; i++) {
-        float outFlow = max(0, waterOutflowPipesArray[i] +
-                deltaT * (addedHeight - addedHeights[i]) * waterFlowMultiplier);
-        waterOutflowPipesArray[i] = outFlow;
-        //and adding this together is possible with a scalar product of the vector and a vec(1)          (probably a bad idea)
-        totalOutFlow += outFlow;
-    }
-
-    outflowVec = vec4(waterOutflowPipesArray[0], waterOutflowPipesArray[1], waterOutflowPipesArray[2], waterOutflowPipesArray[3]);
-
+    float totalOutFlow = outflow.x + outflow.y + outflow.z + outflow.w;
     if (totalOutFlow > waterHeight) {
         float flowScalar = waterHeight / totalOutFlow;
-        outflowVec *= flowScalar;
+        outflow *= flowScalar;
     }
 
-    imageStore(waterOutflowPipes, ivec2(gl_GlobalInvocationID), outflowVec);
+    imageStore(waterOutflowPipes, ivec2(gl_GlobalInvocationID), outflow);
 }
