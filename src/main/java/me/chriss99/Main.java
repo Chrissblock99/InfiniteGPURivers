@@ -88,7 +88,7 @@ public class Main {
     private static void setupData(double[][] terrainMap, double[][] addedMap) {
         vaoList.add(VAOGenerator.heightMapToSimpleVAO(terrainMap, -100, 100, false));
         vaoList.add(VAOGenerator.heightMapToSimpleVAO(addedMap, -100, 100, true));
-        vaoList.add(VAOGenerator.heightMapToCrossVAO(addedMap, gpuTerrainEroder.downloadWaterOutflow()));
+        //vaoList.add(VAOGenerator.heightMapToCrossVAO(addedMap, gpuTerrainEroder.downloadWaterOutflow()));
         //vaoList.add(VAOGenerator.heightMapToVectorVAO(terrainData.addedHeights(), terrainData.velocityField));
         //vaoList.add(VAOGenerator.heightMapToNormalVAO(terrainData.terrainMap));
     }
@@ -200,8 +200,8 @@ public class Main {
         vaoList.get(0).updateColors(VAOGenerator.heightMapToSimpleColors(terrainMap, -100, 100, false));
         vaoList.get(1).updatePositions(VAOGenerator.heightMapToSimpleVertexes(addedMap, true));
         vaoList.get(1).updateColors(VAOGenerator.heightMapToSimpleColors(addedMap, -100, 100, true));
-        vaoList.get(2).updatePositions(VAOGenerator.heightMapToCrossVertexes(addedMap));
-        vaoList.get(2).updateColors(VAOGenerator.heightMapToCrossColors(addedMap, gpuTerrainEroder.downloadWaterOutflow()));
+        //vaoList.get(2).updatePositions(VAOGenerator.heightMapToCrossVertexes(addedMap));
+        //vaoList.get(2).updateColors(VAOGenerator.heightMapToCrossColors(addedMap, gpuTerrainEroder.downloadWaterOutflow()));
         //vaoList.get(2).updatePositions(VAOGenerator.heightMapToVectorVertexes(terrainData.addedHeights(), terrainData.velocityField));
         //vaoList.get(2).updatePositions(VAOGenerator.heightMapToNormalVertexes(terrainData.terrainMap));
     }
