@@ -41,7 +41,7 @@ public class Main {
     public static void main(String[] args) {
         glfwInit();
         createWindow();
-        gpuTerrainEroder = new GPUTerrainEroder(30, 30);
+        gpuTerrainEroder = new GPUTerrainEroder(100, 100);
         double[][][] map = gpuTerrainEroder.downloadMap();
         setupData(map[0], map[1]);
         setupRenderProgram();
