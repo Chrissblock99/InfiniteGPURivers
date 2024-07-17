@@ -16,9 +16,12 @@ const ivec2 vonNeumannNeighbourhood[4] = ivec2[](
 
 void main() {
     float waterHeight = imageLoad(waterMap, ivec2(gl_GlobalInvocationID)).x;
-    float waterHeights[4];
+    float addedHeight = waterHeight + imageLoad(terrainMap, ivec2(gl_GlobalInvocationID)).x;
+    float addedHeights[4];
     for (int i = 0; i < 4; i++)
-        waterHeights[i] = imageLoad(waterMap, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[i]).x;
+        addedHeights[i] =
+        imageLoad(waterMap, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[i]).x +
+        imageLoad(terrainMap, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[i]).x;
 
     vec4 outflowVec = imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID));
     float waterOutflowPipesArray[4] = float[](outflowVec.x, outflowVec.y, outflowVec.z, outflowVec.w);
@@ -30,7 +33,7 @@ void main() {
     //TODO this can probably be optimized by using componentwise max, keeping the outflow as a vector and packing the adjacent water heights into a vector aswell
     for (int i = 0; i < 4; i++) {
         float outFlow = max(0, waterOutflowPipesArray[i] +
-                deltaT * (waterHeight - waterHeights[i]) * waterFlowMultiplier);
+                deltaT * (addedHeight - addedHeights[i]) * waterFlowMultiplier);
         waterOutflowPipesArray[i] = outFlow;
         //and adding this together is possible with a scalar product of the vector and a vec(1)          (probably a bad idea)
         totalOutFlow += outFlow;
