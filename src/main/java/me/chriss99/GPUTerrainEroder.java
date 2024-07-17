@@ -17,12 +17,12 @@ public class GPUTerrainEroder {
 
     private final Texture waterOutflowPipes;
     private final Texture thermalOutflowPipes;
-    private final Texture velocityField;
     private final Texture sedimentOutflowPipes;
 
     private final ComputeProgram addWater;
     private final ComputeProgram calcWaterOutflow;
     private final ComputeProgram applyWaterOutflow;
+    private final ComputeProgram erosionDeposition;
     private final ComputeProgram evaporateWater;
 
     private final ComputeProgram initTextures;
@@ -39,13 +39,13 @@ public class GPUTerrainEroder {
 
         waterOutflowPipes = new Texture(GL_RGBA16F, width, height);
         thermalOutflowPipes = new Texture(GL_RGBA32F, width, height);
-        velocityField = new Texture(GL_RG16F, width, height);
         sedimentOutflowPipes = new Texture(GL_RGBA16F, width, height);
 
 
         addWater = new ComputeProgram("addWater");
         calcWaterOutflow = new ComputeProgram("calcWaterOutflow");
         applyWaterOutflow = new ComputeProgram("applyWaterOutflow");
+        erosionDeposition = new ComputeProgram("erosionDeposition");
         evaporateWater = new ComputeProgram("evaporateWater");
 
 
@@ -53,6 +53,7 @@ public class GPUTerrainEroder {
                 addWater,
                 calcWaterOutflow,
                 applyWaterOutflow,
+                erosionDeposition,
                 evaporateWater
         };
 
@@ -65,6 +66,12 @@ public class GPUTerrainEroder {
 
         waterMap.bindUniformImage(applyWaterOutflow.program, 1, "waterMap", GL_READ_WRITE);
         waterOutflowPipes.bindUniformImage(applyWaterOutflow.program, 4, "waterOutflowPipes", GL_READ_ONLY);
+
+        terrainMap.bindUniformImage(erosionDeposition.program, 0, "terrainMap", GL_READ_WRITE);
+        waterMap.bindUniformImage(erosionDeposition.program, 1, "waterMap", GL_READ_WRITE);
+        sedimentMap.bindUniformImage(erosionDeposition.program, 2, "sedimentMap", GL_READ_WRITE);
+        hardnessMap.bindUniformImage(erosionDeposition.program, 3, "hardnessMap", GL_READ_WRITE);
+        waterOutflowPipes.bindUniformImage(erosionDeposition.program, 4, "waterOutflowPipes", GL_READ_ONLY);
 
         waterMap.bindUniformImage(evaporateWater.program, 1, "waterMap", GL_READ_WRITE);
 
