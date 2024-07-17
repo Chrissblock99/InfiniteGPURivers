@@ -145,14 +145,22 @@ public class Main {
             //clear the window
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            if (simulateErosion && !eroder.isAlive()) {
+            /*if (simulateErosion && !eroder.isAlive()) {
                 updateTerrainVAOs(terrainData.terrainMap, terrainData.addedHeights());
                 eroder = new Thread(() -> {
                     for (int i = 0; i < 5; i++)
                         heightMapTransformer.fullErosion(terrainData);
                 });
                 eroder.start();
+            }*/
+
+            if (simulateErosion) {
+                gpuTerrainEroder.erosionStep();
+                double[][][] map = gpuTerrainEroder.downloadMap();
+                updateTerrainVAOs(map[0], map[1]);
             }
+
+            glUseProgram(renderProgram);
 
             for (VAO vao : vaoList) {
                 vao.bind();
@@ -163,10 +171,6 @@ public class Main {
 
             //swap the frame to show the rendered image
             glfwSwapBuffers(window);
-
-            gpuTerrainEroder.erosionStep();
-            double[][][] map = gpuTerrainEroder.downloadMap();
-            updateTerrainVAOs(map[0], map[1]);
 
             //poll for window events (resize, close, button presses, etc.)
             glfwPollEvents();
