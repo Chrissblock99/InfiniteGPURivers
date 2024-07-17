@@ -51,7 +51,7 @@ void main() {
     float hardness = imageLoad(hardnessMap, ivec2(gl_GlobalInvocationID)).x;
 
 
-    float sedimentCapacity = erosionDepthMultiplier(waterHeight) * sedimentCapacityMultiplier * velocity.length();
+    float sedimentCapacity = erosionDepthMultiplier(waterHeight) * sedimentCapacityMultiplier * length(velocity);
     float unusedCapacity = sedimentCapacity - sedimentHeight;
 
     float change = (unusedCapacity > 0) ?
