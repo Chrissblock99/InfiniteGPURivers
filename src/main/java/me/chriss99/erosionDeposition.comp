@@ -1,10 +1,10 @@
 #version 450 core
 layout(local_size_x = 1, local_size_y = 1) in;
-layout(binding = 0, r16f) restrict uniform image2D terrainMap;
-layout(binding = 1, r16f) restrict uniform image2D waterMap;
-layout(binding = 2, r16f) restrict uniform image2D sedimentMap;
-layout(binding = 3, r16f) restrict uniform image2D hardnessMap;
-layout(binding = 4, rgba16f) restrict readonly uniform image2D waterOutflowPipes;
+layout(binding = 0, r32f) restrict uniform image2D terrainMap;
+layout(binding = 1, r32f) restrict uniform image2D waterMap;
+layout(binding = 2, r32f) restrict uniform image2D sedimentMap;
+layout(binding = 3, r32f) restrict uniform image2D hardnessMap;
+layout(binding = 4, rgba32f) restrict readonly uniform image2D waterOutflowPipes;
 
 const float deltaT = 0.02; //[0;0.05]
 const float sedimentCapacityMultiplier = 1; //[0.1;3]

@@ -34,14 +34,14 @@ public class GPUTerrainEroder {
         this.width = width;
         this.height = height;
 
-        terrainMap = new Texture(GL_R16F, width, height);
-        waterMap = new Texture(GL_R16F, width, height);
-        sedimentMap = new Texture(GL_R16F, width, height);
-        hardnessMap = new Texture(GL_R16F, width, height);
+        terrainMap = new Texture(GL_R32F, width, height);
+        waterMap = new Texture(GL_R32F, width, height);
+        sedimentMap = new Texture(GL_R32F, width, height);
+        hardnessMap = new Texture(GL_R32F, width, height);
 
-        waterOutflowPipes = new Texture(GL_RGBA16F, width, height);
+        waterOutflowPipes = new Texture(GL_RGBA32F, width, height);
         thermalOutflowPipes = new Texture(GL_RGBA32F, width, height);
-        sedimentOutflowPipes = new Texture(GL_RGBA16F, width, height);
+        sedimentOutflowPipes = new Texture(GL_RGBA32F, width, height);
 
 
         addWater = new ComputeProgram("addWater");
