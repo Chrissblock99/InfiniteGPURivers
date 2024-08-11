@@ -3,7 +3,7 @@ layout(local_size_x = 1, local_size_y = 1) in;
 layout(binding = 0, r32f) restrict readonly uniform image2D terrainMap;
 layout(binding = 2, r32f) restrict readonly uniform image2D sedimentMap;
 layout(binding = 4, rgba32f) restrict readonly uniform image2D waterOutflowPipes;
-layout(binding = 6, rgba32f) restrict writeonly uniform image2D sedimentOutflowPipes;
+layout(binding = 5, rgba32f) restrict writeonly uniform image2D sedimentOutflowPipes;
 
 
 const ivec2 vonNeumannNeighbourhood[4] = ivec2[](

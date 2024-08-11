@@ -1,7 +1,7 @@
 #version 450 core
 layout(local_size_x = 1, local_size_y = 1) in;
 layout(binding = 2, r32f) restrict uniform image2D sedimentMap;
-layout(binding = 6, rgba32f) restrict readonly uniform image2D SedimentOutflowPipes;
+layout(binding = 5, rgba32f) restrict readonly uniform image2D SedimentOutflowPipes;
 
 
 const ivec2 vonNeumannNeighbourhood[4] = ivec2[](

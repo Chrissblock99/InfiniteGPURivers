@@ -16,8 +16,10 @@ public class GPUTerrainEroder {
     private final Texture hardnessMap;
 
     private final Texture waterOutflowPipes;
-    private final Texture thermalOutflowPipes;
     private final Texture sedimentOutflowPipes;
+
+    private final Texture thermalOutflowPipes1;
+    private final Texture thermalOutflowPipes2;
 
     private final ComputeProgram addWater;
     private final ComputeProgram calcWaterOutflow;
@@ -40,8 +42,10 @@ public class GPUTerrainEroder {
         hardnessMap = new Texture(GL_R32F, width, height);
 
         waterOutflowPipes = new Texture(GL_RGBA32F, width, height);
-        thermalOutflowPipes = new Texture(GL_RGBA32F, width, height);
         sedimentOutflowPipes = new Texture(GL_RGBA32F, width, height);
+
+        thermalOutflowPipes1 = new Texture(GL_RGBA32F, width, height);
+        thermalOutflowPipes2 = new Texture(GL_RGBA32F, width, height);
 
 
         addWater = new ComputeProgram("addWater");
@@ -82,10 +86,10 @@ public class GPUTerrainEroder {
         terrainMap.bindUniformImage(calcSedimentOutflow.program, 0, "terrainMap", GL_READ_ONLY);
         sedimentMap.bindUniformImage(calcSedimentOutflow.program, 2, "sedimentMap", GL_READ_ONLY);
         waterOutflowPipes.bindUniformImage(calcSedimentOutflow.program, 4, "waterOutflowPipes", GL_READ_ONLY);
-        sedimentOutflowPipes.bindUniformImage(calcSedimentOutflow.program, 6, "sedimentOutflowPipes", GL_WRITE_ONLY);
+        sedimentOutflowPipes.bindUniformImage(calcSedimentOutflow.program, 5, "sedimentOutflowPipes", GL_WRITE_ONLY);
 
         sedimentMap.bindUniformImage(applySedimentOutflow.program, 2, "sedimentMap", GL_READ_WRITE);
-        sedimentOutflowPipes.bindUniformImage(applySedimentOutflow.program, 6, "sedimentOutflowPipes", GL_READ_ONLY);
+        sedimentOutflowPipes.bindUniformImage(applySedimentOutflow.program, 5, "sedimentOutflowPipes", GL_READ_ONLY);
 
         waterMap.bindUniformImage(evaporateWater.program, 1, "waterMap", GL_READ_WRITE);
 
