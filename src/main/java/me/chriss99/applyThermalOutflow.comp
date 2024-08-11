@@ -1,0 +1,37 @@
+#version 450 core
+layout(local_size_x = 1, local_size_y = 1) in;
+layout(binding = 0, r32f) restrict uniform image2D terrainMap;
+layout(binding = 6, rgba32f) restrict readonly uniform image2D thermalOutflowPipes1;
+layout(binding = 7, rgba32f) restrict readonly uniform image2D thermalOutflowPipes2;
+
+
+const ivec2 mooreNeighbourhood[8] = ivec2[](
+    ivec2(-1,  1),
+    ivec2( 0,  1),
+    ivec2( 1,  1),
+    ivec2(-1,  0),
+    ivec2( 1,  0),
+    ivec2(-1, -1),
+    ivec2( 0, -1),
+    ivec2( 1, -1)
+);
+
+
+void main() {
+    float terrainHeight = imageLoad(terrainMap, ivec2(gl_GlobalInvocationID)).x;
+
+    vec4 outflow1 = imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID));
+    vec4 outflow2 = imageLoad(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID));
+    terrainHeight -= outflow1.x + outflow1.y + outflow1.z + outflow1.w + outflow2.x + outflow2.y + outflow2.z + outflow2.w;
+
+    terrainHeight += imageLoad(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[0]).w;
+    terrainHeight += imageLoad(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[1]).z;
+    terrainHeight += imageLoad(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[2]).y;
+    terrainHeight += imageLoad(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[3]).x;
+    terrainHeight += imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[4]).w;
+    terrainHeight += imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[5]).z;
+    terrainHeight += imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[6]).y;
+    terrainHeight += imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[7]).x;
+
+    imageStore(terrainMap, ivec2(gl_GlobalInvocationID), vec4(terrainHeight));
+}
