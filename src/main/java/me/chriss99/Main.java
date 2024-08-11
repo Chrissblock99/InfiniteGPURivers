@@ -23,6 +23,7 @@ public class Main {
     static int renderProgram;
 
     static GPUTerrainEroder gpuTerrainEroder;
+    static boolean simulateErosion = false;
 
     static int transformMatrix;
     static InputDeviceManager inputDeviceManager = null;
@@ -31,11 +32,6 @@ public class Main {
 
     static double deltaTime = 1d/60d;
     static boolean vSync = true;
-
-
-    static TerrainData terrainData = new TerrainData(HeightMapGenerator.simplexFbm(1000, 1000, 8, 0.0015, 60, 2, .5));
-    static final HeightMapTransformer heightMapTransformer = new HeightMapTransformer();
-    static boolean simulateErosion = false;
 
 
     public static void main(String[] args) {
@@ -136,7 +132,6 @@ public class Main {
         double lastFramePrint = Double.NEGATIVE_INFINITY;
         LinkedList<Double> frames = new LinkedList<>();
 
-        Thread eroder = new Thread();
         while(!glfwWindowShouldClose(window)) {
             glUseProgram(renderProgram);
 
@@ -145,15 +140,6 @@ public class Main {
 
             //clear the window
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            /*if (simulateErosion && !eroder.isAlive()) {
-                updateTerrainVAOs(terrainData.terrainMap, terrainData.addedHeights());
-                eroder = new Thread(() -> {
-                    for (int i = 0; i < 5; i++)
-                        heightMapTransformer.fullErosion(terrainData);
-                });
-                eroder.start();
-            }*/
 
             if (simulateErosion) {
                 gpuTerrainEroder.erosionStep();
