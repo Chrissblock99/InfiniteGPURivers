@@ -1,0 +1,69 @@
+#version 450 core
+layout(local_size_x = 1, local_size_y = 1) in;
+layout(binding = 0, r32f) restrict readonly uniform image2D terrainMap;
+layout(binding = 3, r32f) restrict readonly uniform image2D hardnessMap;
+layout(binding = 6, rgba32f) restrict writeonly uniform image2D thermalOutflowPipes1;
+layout(binding = 7, rgba32f) restrict writeonly uniform image2D thermalOutflowPipes2;
+
+const float deltaT = 0.02; //[0;0.05]
+const float thermalErosionRate = 0.75; //[0;3]
+const float talusAngleTangentCoeff = 0.8; //[0;1]
+const float talusAngleTangentBias = 0.1; //[0;1]
+
+
+const ivec2 mooreNeighbourhood[8] = ivec2[](
+    ivec2(-1,  1),
+    ivec2( 0,  1),
+    ivec2( 1,  1),
+    ivec2(-1,  0),
+    ivec2( 1,  0),
+    ivec2(-1, -1),
+    ivec2( 0, -1),
+    ivec2( 1, -1)
+);
+
+const float inverseMooreNeighbourhoodDistances[8] = float[](
+    1/sqrt(2),
+    1,
+    1/sqrt(2),
+    1,
+    1,
+    1/sqrt(2),
+    1,
+    1/sqrt(2)
+);
+
+
+void main() {
+    float terrainHeight = imageLoad(terrainMap, ivec2(gl_GlobalInvocationID)).x;
+    float hardness = imageLoad(hardnessMap, ivec2(gl_GlobalInvocationID)).x;
+    float heightDiffs[8];
+    for (int i = 0; i < 8; i++)
+        heightDiffs[i] = terrainHeight - imageLoad(terrainMap, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[i]).x;
+
+
+    float maxHeightDiff = -1/0;  //This equates to negative infinity
+    bool neighborBelowTalusAngle[8] = bool[](false, false, false, false, false, false, false, false);
+    float steepNeighbourHeightDiffSum = 0;
+
+    for (int i = 0; i < 8; i++) {
+        maxHeightDiff = max(maxHeightDiff, heightDiffs[i]);
+
+        float angle = heightDiffs[i] * inverseMooreNeighbourhoodDistances[i]; //this is normally in atan() but is only used for tan()
+        if (heightDiffs[i] > 0 && angle > hardness * talusAngleTangentCoeff + talusAngleTangentBias) {
+            neighborBelowTalusAngle[i] = true;
+            steepNeighbourHeightDiffSum += heightDiffs[i];
+        }
+    }
+
+    float heightChange = deltaT * thermalErosionRate * hardness * maxHeightDiff*.5;
+    float inverseSteepNeighbourHeightDiffSum = 1 / steepNeighbourHeightDiffSum;
+
+    //inverseSteepNeighbourHeightDiffSum CAN be Infinite, but in that case all differences are 0 and no one ever calculates anything
+    for (int i = 0; i < 8; i++)
+        heightDiffs[i] = (neighborBelowTalusAngle[i]) ?
+            heightChange * heightDiffs[i] * inverseSteepNeighbourHeightDiffSum : 0;
+
+    imageStore(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID), vec4(heightDiffs[0], heightDiffs[1], heightDiffs[2], heightDiffs[3]));
+    imageStore(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID), vec4(heightDiffs[4], heightDiffs[5], heightDiffs[6], heightDiffs[7]));
+}
