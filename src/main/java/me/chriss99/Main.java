@@ -142,7 +142,8 @@ public class Main {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             if (simulateErosion) {
-                gpuTerrainEroder.erosionStep();
+                for (int i = 0; i < 100; i++)
+                    gpuTerrainEroder.erosionStep();
                 double[][][] map = gpuTerrainEroder.downloadMap();
                 updateTerrainVAOs(map[0], map[1]);
             }
