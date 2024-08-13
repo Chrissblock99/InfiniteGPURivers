@@ -34,7 +34,8 @@ vec2 grad2(int hash) {
 }
 
 int permutate(int i, int seed) {
-    return permA[(i + seed * 5 + 134) % 265];
+    //& 0xff is equivalent to mod(a, 156)
+    return permA[(i + seed * 5 + 134) & 0xff];
 }
 
 const float F2 = 0.366025403;
