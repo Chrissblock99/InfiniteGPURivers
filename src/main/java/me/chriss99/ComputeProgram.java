@@ -18,10 +18,18 @@ public class ComputeProgram {
         glLinkProgram(program);
         glValidateProgram(program);
 
+
+        int compile =  glGetShaderi(shader,   GL_COMPILE_STATUS);
+        int link =     glGetProgrami(program, GL_LINK_STATUS);
+        int validate = glGetProgrami(program, GL_VALIDATE_STATUS);
+
+        if (compile == 1 && link == 1 && validate == 1)
+            return;
+
         System.out.println("Stats for compute shader: " + name);
-        System.out.println("Compute Shader Compiled: "   	+ glGetShaderi(shader, 	GL_COMPILE_STATUS));
-        System.out.println("Program Linked: " 				+ glGetProgrami(program, 		GL_LINK_STATUS));
-        System.out.println("Program Validated: " 			+ glGetProgrami(program, 		GL_VALIDATE_STATUS));
+        System.out.println("Compute Shader Compiled: "  + compile);
+        System.out.println("Program Linked: " 			+ link);
+        System.out.println("Program Validated: " 		+ validate);
         printErrors();
     }
 
