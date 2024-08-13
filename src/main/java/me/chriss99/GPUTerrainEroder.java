@@ -103,8 +103,8 @@ public class GPUTerrainEroder {
         sedimentOutflowPipes.bindUniformImage(applySedimentOutflow.program, 5, "sedimentOutflowPipes", GL_READ_ONLY);
 
         terrainMap.bindUniformImage(applyThermalOutflow.program, 0, "terrainMap", GL_READ_WRITE);
-        thermalOutflowPipes1.bindUniformImage(applyThermalOutflow.program, 6, "thermalOutflowPipes1", GL_WRITE_ONLY);
-        thermalOutflowPipes2.bindUniformImage(applyThermalOutflow.program, 7, "thermalOutflowPipes2", GL_WRITE_ONLY);
+        thermalOutflowPipes1.bindUniformImage(applyThermalOutflow.program, 6, "thermalOutflowPipes1", GL_READ_ONLY);
+        thermalOutflowPipes2.bindUniformImage(applyThermalOutflow.program, 7, "thermalOutflowPipes2", GL_READ_ONLY);
 
         waterMap.bindUniformImage(evaporateWater.program, 1, "waterMap", GL_READ_WRITE);
 
