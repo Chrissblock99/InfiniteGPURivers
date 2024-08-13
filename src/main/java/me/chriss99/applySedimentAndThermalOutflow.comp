@@ -1,9 +1,18 @@
 #version 450 core
 layout(local_size_x = 1, local_size_y = 1) in;
 layout(binding = 0, r32f) restrict uniform image2D terrainMap;
+layout(binding = 2, r32f) restrict uniform image2D sedimentMap;
+layout(binding = 5, rgba32f) restrict readonly uniform image2D SedimentOutflowPipes;
 layout(binding = 6, rgba32f) restrict readonly uniform image2D thermalOutflowPipes1;
 layout(binding = 7, rgba32f) restrict readonly uniform image2D thermalOutflowPipes2;
 
+
+const ivec2 vonNeumannNeighbourhood[4] = ivec2[](
+    ivec2( 0,  1),
+    ivec2(-1,  0),
+    ivec2( 1,  0),
+    ivec2( 0, -1)
+);
 
 const ivec2 mooreNeighbourhood[8] = ivec2[](
     ivec2(-1,  1),
@@ -19,7 +28,22 @@ const ivec2 mooreNeighbourhood[8] = ivec2[](
 
 void main() {
     float terrainHeight = imageLoad(terrainMap, ivec2(gl_GlobalInvocationID)).x;
+    float sedimentHeight = imageLoad(sedimentMap, ivec2(gl_GlobalInvocationID)).x;
 
+
+    //sediment
+    vec4 outflow = imageLoad(SedimentOutflowPipes, ivec2(gl_GlobalInvocationID));
+    float up =     imageLoad(SedimentOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[0]).w;
+    float left =   imageLoad(SedimentOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[1]).z;
+    float right =  imageLoad(SedimentOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[2]).y;
+    float down =   imageLoad(SedimentOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[3]).x;
+
+    sedimentHeight -= outflow.x + outflow.y + outflow.z + outflow.w;
+    sedimentHeight += up + left + right + down;
+    sedimentHeight = max(0, sedimentHeight);
+
+
+    //thermal
     vec4 outflow1 = imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID));
     vec4 outflow2 = imageLoad(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID));
     terrainHeight -= outflow1.x + outflow1.y + outflow1.z + outflow1.w + outflow2.x + outflow2.y + outflow2.z + outflow2.w;
@@ -33,5 +57,7 @@ void main() {
     terrainHeight += imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[6]).y;
     terrainHeight += imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[7]).x;
 
+
     imageStore(terrainMap, ivec2(gl_GlobalInvocationID), vec4(terrainHeight));
+    imageStore(sedimentMap, ivec2(gl_GlobalInvocationID), vec4(sedimentHeight));
 }
