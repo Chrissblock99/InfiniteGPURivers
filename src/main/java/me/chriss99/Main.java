@@ -30,9 +30,10 @@ public class Main {
     static int gradientShader;
     static int tesselationProgram;
     static int tessTransformMatrix;
+    static int waterUniform;
 
-    static int xSize = 1000;
-    static int zSize = 1000;
+    static int xSize = 500;
+    static int zSize = 500;
     static GPUTerrainEroder gpuTerrainEroder;
     static int vao;
     static int vertexes;
@@ -184,6 +185,7 @@ public class Main {
 
         //get the 'colorMod and 'positionMod' variables, so I can change them while drawing to create the animation
         tessTransformMatrix = glGetUniformLocation(tesselationProgram, "transformMatrix");
+        waterUniform = glGetUniformLocation(tesselationProgram, "water");
     }
 
     private static void loop() {
@@ -198,13 +200,17 @@ public class Main {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             if (simulateErosion) {
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < 10; i++)
                     gpuTerrainEroder.erosionStep();
             }
 
             glUseProgram(tesselationProgram);
             glUniformMatrix4fv(tessTransformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
             glBindVertexArray(vao);
+
+            glUniform1i(waterUniform, 0);
+            glDrawArrays(GL_PATCHES, 0, xSize/100*zSize/100*4);
+            glUniform1i(waterUniform, 1);
             glDrawArrays(GL_PATCHES, 0, xSize/100*zSize/100*4);
 
             glUseProgram(renderProgram);
