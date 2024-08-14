@@ -308,6 +308,30 @@ public class VAOGenerator {
         return new VAO(vertexes, color, index);
     }
 
+    public static double[] tesselationGridVertexesTest(int xSize, int zSize, double step) {
+        double[] vertexes = new double[xSize*zSize*8];
+        int i = 0;
+
+        for (int z = 0; z < zSize; z++)
+            for (int x = 0; x < xSize; x++) {
+                vertexes[i] = x*step;
+                vertexes[i+1] = z*step;
+
+                vertexes[i+2] = (x+1)*step;
+                vertexes[i+3] = z*step;
+
+                vertexes[i+4] = x*step;
+                vertexes[i+5] = (z+1)*step;
+
+                vertexes[i+6] = (x+1)*step;
+                vertexes[i+7] = (z+1)*step;
+
+                i += 8;
+            }
+
+        return vertexes;
+    }
+
     private static int indexOfXZFlattenedArray(int x, int z, int xSize) {
         return x + z*xSize;
     }

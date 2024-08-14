@@ -8,6 +8,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.nio.ByteBuffer;
 import java.util.*;
 
 
@@ -21,11 +22,20 @@ public class Main {
     static int vertexShader;
     static int fragmentShader;
     static int renderProgram;
+    static int renderTransformMatrix;
+
+    static int passThroughShader;
+    static int tessControlShader;
+    static int tessEvaluationShader;
+    static int gradientShader;
+    static int tesselationProgram;
+    static int tessTransformMatrix;
 
     static GPUTerrainEroder gpuTerrainEroder;
+    static int vao;
+    static int vertexes;
     static boolean simulateErosion = false;
 
-    static int transformMatrix;
     static InputDeviceManager inputDeviceManager = null;
     static CameraMatrix cameraMatrix = new CameraMatrix();
     static MovementController movementController = null;
@@ -38,9 +48,9 @@ public class Main {
         glfwInit();
         createWindow();
         gpuTerrainEroder = new GPUTerrainEroder(500, 500);
-        double[][][] map = gpuTerrainEroder.downloadMap();
-        setupData(map[0], map[1]);
+        setupData();
         setupRenderProgram();
+        setupTesselationProgram();
         inputDeviceManager = new InputDeviceManager(window);
         movementController = new MovementController(inputDeviceManager, cameraMatrix);
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -81,12 +91,17 @@ public class Main {
         glfwShowWindow(window);
     }
 
-    private static void setupData(double[][] terrainMap, double[][] addedMap) {
-        vaoList.add(VAOGenerator.heightMapToSimpleVAO(terrainMap, -100, 100, false));
-        vaoList.add(VAOGenerator.heightMapToSimpleVAO(addedMap, -100, 100, true));
-        //vaoList.add(VAOGenerator.heightMapToCrossVAO(addedMap, gpuTerrainEroder.downloadWaterOutflow()));
-        //vaoList.add(VAOGenerator.heightMapToVectorVAO(terrainData.addedHeights(), terrainData.velocityField));
-        //vaoList.add(VAOGenerator.heightMapToNormalVAO(terrainData.terrainMap));
+    private static void setupData() {
+        vao = glGenVertexArrays();
+        glBindVertexArray(vao);
+
+        ByteBuffer vertices = Util.storeArrayInBuffer(VAOGenerator.tesselationGridVertexesTest(5, 5, 100));
+
+        vertexes = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, vertexes);
+        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 2, GL_DOUBLE, false, 0, 0);
+        glEnableVertexAttribArray(0);
     }
 
     private static void setupRenderProgram() {
@@ -124,7 +139,49 @@ public class Main {
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
         //get the 'colorMod and 'positionMod' variables, so I can change them while drawing to create the animation
-        transformMatrix = glGetUniformLocation(renderProgram, "transformMatrix");
+        renderTransformMatrix = glGetUniformLocation(renderProgram, "transformMatrix");
+    }
+
+    private static void setupTesselationProgram() {
+        glPatchParameteri(GL_PATCH_VERTICES, 4);
+
+        passThroughShader = loadShader(new File("/home/chriss99/IdeaProjects/ogl_test2/src/main/java/me/chriss99/passThrough.vert"), GL_VERTEX_SHADER);
+        tessControlShader = loadShader(new File("/home/chriss99/IdeaProjects/ogl_test2/src/main/java/me/chriss99/tess.tesc"), GL_TESS_CONTROL_SHADER);
+        tessEvaluationShader = loadShader(new File("/home/chriss99/IdeaProjects/ogl_test2/src/main/java/me/chriss99/tess.tese"), GL_TESS_EVALUATION_SHADER);
+        gradientShader = loadShader(new File("/home/chriss99/IdeaProjects/ogl_test2/src/main/java/me/chriss99/gradient.frag"), GL_FRAGMENT_SHADER);
+
+        //create a program object and store its ID in the 'program' variable
+        tesselationProgram = glCreateProgram();
+
+        //these method calls link shader program variables to attribute locations so that they can be modified in Java code
+        glBindAttribLocation(tesselationProgram, 0, "position");
+
+        //attach the vertex and fragment shaders to the program
+        glAttachShader(tesselationProgram, passThroughShader);
+        glAttachShader(tesselationProgram, tessControlShader);
+        glAttachShader(tesselationProgram, tessEvaluationShader);
+        glAttachShader(tesselationProgram, gradientShader);
+
+        //link the program (whatever that does)
+        glLinkProgram(tesselationProgram);
+
+        //validate the program to make sure it won't blow up the program
+        glValidateProgram(tesselationProgram);
+
+        System.out.println("Stats for render program: ");
+        System.out.println("Vertex Shader Compiled: " 		+ glGetShaderi(passThroughShader, 	    GL_COMPILE_STATUS));
+        System.out.println("Control Shader Compiled: " 		+ glGetShaderi(tessControlShader, 	    GL_COMPILE_STATUS));
+        System.out.println("Evaluation Shader Compiled: " 	+ glGetShaderi(tessEvaluationShader, 	GL_COMPILE_STATUS));
+        System.out.println("Fragment Shader Compiled: " 	+ glGetShaderi(gradientShader, 	        GL_COMPILE_STATUS));
+        System.out.println("Program Linked: " 				+ glGetProgrami(tesselationProgram, 	GL_LINK_STATUS));
+        System.out.println("Program Validated: " 			+ glGetProgrami(tesselationProgram, 	GL_VALIDATE_STATUS));
+        printErrors();
+
+        //sets the background clear color to white
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+        //get the 'colorMod and 'positionMod' variables, so I can change them while drawing to create the animation
+        tessTransformMatrix = glGetUniformLocation(tesselationProgram, "transformMatrix");
     }
 
     private static void loop() {
@@ -132,51 +189,24 @@ public class Main {
         double lastFramePrint = Double.NEGATIVE_INFINITY;
         LinkedList<Double> frames = new LinkedList<>();
 
-        double count = 0;
-        double addedErosionTime = 0;
-        double addedDownloadUploadTime = 0;
-        double addedTotalTime = 0;
-
         while(!glfwWindowShouldClose(window)) {
-            glUseProgram(renderProgram);
-
             movementController.update();
-            glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
 
             //clear the window
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             if (simulateErosion) {
-                double before = glfwGetTime();
-
                 for (int i = 0; i < 100; i++)
                     gpuTerrainEroder.erosionStep();
-
-                addedErosionTime += glfwGetTime() - before;
-                count++;
-                double after = glfwGetTime();
-
-                double[][][] map = gpuTerrainEroder.downloadMap();
-                updateTerrainVAOs(map[0], map[1]);
-
-                addedDownloadUploadTime += glfwGetTime() - after;
-                count++;
-                addedTotalTime += glfwGetTime() - before;
-                count++;
-
-
-                double invCount = 1/count;
-                double erosion = addedErosionTime * invCount;
-                double downUp = addedDownloadUploadTime * invCount;
-                double total = addedTotalTime * invCount;
-
-                System.out.println(
-                        "Total: " + total + "s" + System.lineSeparator() +
-                        "Erosion: " + erosion + "s " + (erosion/total)*100 + "%" + System.lineSeparator() +
-                        "DownUp: " + downUp + "s " + (downUp/total)*100 + "%");
             }
 
+            glUseProgram(tesselationProgram);
+            glUniformMatrix4fv(tessTransformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
+            glBindVertexArray(vao);
+            glDrawArrays(GL_PATCHES, 0, 5*5*8);
+
             glUseProgram(renderProgram);
+            glUniformMatrix4fv(renderTransformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
 
             for (VAO vao : vaoList) {
                 vao.bind();
@@ -209,20 +239,7 @@ public class Main {
         }
     }
 
-    public static void updateTerrainVAOs(double[][] terrainMap, double[][] addedMap) {
-        //TODO wont work when the size of the heightMap changes
-        vaoList.get(0).updatePositions(VAOGenerator.heightMapToSimpleVertexes(terrainMap, false));
-        vaoList.get(0).updateColors(VAOGenerator.heightMapToSimpleColors(terrainMap, -100, 100, false));
-        vaoList.get(1).updatePositions(VAOGenerator.heightMapToSimpleVertexes(addedMap, true));
-        vaoList.get(1).updateColors(VAOGenerator.heightMapToSimpleColors(addedMap, -100, 100, true));
-        //vaoList.get(2).updatePositions(VAOGenerator.heightMapToCrossVertexes(addedMap));
-        //vaoList.get(2).updateColors(VAOGenerator.heightMapToCrossColors(addedMap, gpuTerrainEroder.downloadWaterOutflow()));
-        //vaoList.get(2).updatePositions(VAOGenerator.heightMapToVectorVertexes(terrainData.addedHeights(), terrainData.velocityField));
-        //vaoList.get(2).updatePositions(VAOGenerator.heightMapToNormalVertexes(terrainData.terrainMap));
-    }
-
     private static void cleanGL() {
-        glUseProgram(renderProgram);
         //disable the vertex attribute arrays
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
@@ -230,6 +247,7 @@ public class Main {
         for (VAO vao : vaoList)
             vao.delete();
 
+        glUseProgram(renderProgram);
         //detach the shaders from the program object
         glDetachShader(renderProgram, vertexShader);
         glDetachShader(renderProgram, fragmentShader);
@@ -241,6 +259,24 @@ public class Main {
         glUseProgram(0);
         //delete the program now that the shaders are detached and the program isn't being used
         glDeleteProgram(renderProgram);
+
+
+        glUseProgram(tesselationProgram);
+        //detach the shaders from the program object
+        glDetachShader(tesselationProgram, passThroughShader);
+        glDetachShader(tesselationProgram, tessControlShader);
+        glDetachShader(tesselationProgram, tessEvaluationShader);
+        glDetachShader(tesselationProgram, gradientShader);
+
+        //delete the shaders now that they are detached
+        glDeleteShader(passThroughShader);
+        glDeleteShader(tessControlShader);
+        glDeleteShader(tessEvaluationShader);
+        glDeleteShader(gradientShader);
+
+        glUseProgram(0);
+        //delete the program now that the shaders are detached and the program isn't being used
+        glDeleteProgram(tesselationProgram);
 
         printErrors();
 
