@@ -132,6 +132,11 @@ public class Main {
         double lastFramePrint = Double.NEGATIVE_INFINITY;
         LinkedList<Double> frames = new LinkedList<>();
 
+        double count = 0;
+        double addedErosionTime = 0;
+        double addedDownloadUploadTime = 0;
+        double addedTotalTime = 0;
+
         while(!glfwWindowShouldClose(window)) {
             glUseProgram(renderProgram);
 
@@ -142,10 +147,33 @@ public class Main {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             if (simulateErosion) {
+                double before = glfwGetTime();
+
                 for (int i = 0; i < 100; i++)
                     gpuTerrainEroder.erosionStep();
+
+                addedErosionTime += glfwGetTime() - before;
+                count++;
+                double after = glfwGetTime();
+
                 double[][][] map = gpuTerrainEroder.downloadMap();
                 updateTerrainVAOs(map[0], map[1]);
+
+                addedDownloadUploadTime += glfwGetTime() - after;
+                count++;
+                addedTotalTime += glfwGetTime() - before;
+                count++;
+
+
+                double invCount = 1/count;
+                double erosion = addedErosionTime * invCount;
+                double downUp = addedDownloadUploadTime * invCount;
+                double total = addedTotalTime * invCount;
+
+                System.out.println(
+                        "Total: " + total + "s" + System.lineSeparator() +
+                        "Erosion: " + erosion + "s " + (erosion/total)*100 + "%" + System.lineSeparator() +
+                        "DownUp: " + downUp + "s " + (downUp/total)*100 + "%");
             }
 
             glUseProgram(renderProgram);
