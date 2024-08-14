@@ -144,11 +144,6 @@ public class Main {
             //clear the window
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            if (simulateErosion) {
-                for (int i = 0; i < 10; i++)
-                    gpuTerrainEroder.erosionStep();
-            }
-
             tesselationProgram.use();
             glUniformMatrix4fv(tessTransformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
             glBindVertexArray(vao);
@@ -170,6 +165,10 @@ public class Main {
 
             //swap the frame to show the rendered image
             glfwSwapBuffers(window);
+
+            if (simulateErosion)
+                for (int i = 0; i < 10; i++)
+                    gpuTerrainEroder.erosionStep();
 
             //poll for window events (resize, close, button presses, etc.)
             glfwPollEvents();
