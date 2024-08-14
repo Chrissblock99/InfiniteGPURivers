@@ -114,7 +114,7 @@ public class GPUTerrainEroder {
         hardnessMap.bindUniformImage(initTextures.program, 3, "hardnessMap", GL_WRITE_ONLY);
         waterOutflowPipes.bindUniformImage(initTextures.program, 4, "waterOutflowPipes", GL_WRITE_ONLY);
 
-        glUseProgram(initTextures.program);
+        initTextures.use();
         glDispatchCompute(width, height, 1);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
@@ -123,7 +123,7 @@ public class GPUTerrainEroder {
 
     public void erosionStep() {
         for (ComputeProgram program : erosionPrograms) {
-            glUseProgram(program.program);
+            program.use();
             glDispatchCompute(width, height, 1);
             glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
         }

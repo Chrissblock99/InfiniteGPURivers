@@ -6,8 +6,6 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL45.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.nio.ByteBuffer;
 import java.util.*;
 
@@ -19,16 +17,10 @@ public class Main {
 
     static final ArrayList<VAO> vaoList = new ArrayList<>();
 
-    static int vertexShader;
-    static int fragmentShader;
-    static int renderProgram;
+    static GLProgram renderProgram;
     static int renderTransformMatrix;
 
-    static int passThroughShader;
-    static int tessControlShader;
-    static int tessEvaluationShader;
-    static int gradientShader;
-    static int tesselationProgram;
+    static GLProgram tesselationProgram;
     static int tessTransformMatrix;
     static int waterUniform;
 
@@ -90,6 +82,8 @@ public class Main {
         //make the opengl screen 1600 pixels wide and 900 pixels tall.
         glViewport(0, 0, screenWidth, screenHeight);
 
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
         //show the window
         glfwShowWindow(window);
     }
@@ -108,84 +102,35 @@ public class Main {
     }
 
     private static void setupRenderProgram() {
-        //load the vertex shader from the file using a method I wrote down below
-        vertexShader = loadShader(new File("/home/chriss99/IdeaProjects/ogl_test2/src/main/java/me/chriss99/shader.vert"), GL_VERTEX_SHADER);
+        renderProgram = new GLProgram();
 
-        //load the fragment shader from the file using a method I wrote down below
-        fragmentShader = loadShader(new File("/home/chriss99/IdeaProjects/ogl_test2/src/main/java/me/chriss99/shader.frag"), GL_FRAGMENT_SHADER);
+        renderProgram.addShader("shader.vert", GL_VERTEX_SHADER);
+        renderProgram.addShader("shader.frag", GL_FRAGMENT_SHADER);
 
-        //create a program object and store its ID in the 'program' variable
-        renderProgram = glCreateProgram();
+        renderProgram.bindAttribute(0, "position");
+        renderProgram.bindAttribute(1, "color");
 
-        //these method calls link shader program variables to attribute locations so that they can be modified in Java code
-        glBindAttribLocation(renderProgram, 0, "position");
-        glBindAttribLocation(renderProgram, 1, "color");
+        renderProgram.validate();
 
-        //attach the vertex and fragment shaders to the program
-        glAttachShader(renderProgram, vertexShader);
-        glAttachShader(renderProgram, fragmentShader);
-
-        //link the program (whatever that does)
-        glLinkProgram(renderProgram);
-
-        //validate the program to make sure it won't blow up the program
-        glValidateProgram(renderProgram);
-
-        System.out.println("Stats for render program: ");
-        System.out.println("Vertex Shader Compiled: " 		+ glGetShaderi(vertexShader, 	GL_COMPILE_STATUS));
-        System.out.println("Fragment Shader Compiled: " 	+ glGetShaderi(fragmentShader, 	GL_COMPILE_STATUS));
-        System.out.println("Program Linked: " 				+ glGetProgrami(renderProgram, 		GL_LINK_STATUS));
-        System.out.println("Program Validated: " 			+ glGetProgrami(renderProgram, 		GL_VALIDATE_STATUS));
-        printErrors();
-
-        //sets the background clear color to white
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-        //get the 'colorMod and 'positionMod' variables, so I can change them while drawing to create the animation
-        renderTransformMatrix = glGetUniformLocation(renderProgram, "transformMatrix");
+        renderTransformMatrix = renderProgram.getUniform("transformMatrix");
     }
 
     private static void setupTesselationProgram() {
         glPatchParameteri(GL_PATCH_VERTICES, 4);
 
-        passThroughShader = loadShader(new File("/home/chriss99/IdeaProjects/ogl_test2/src/main/java/me/chriss99/passThrough.vert"), GL_VERTEX_SHADER);
-        tessControlShader = loadShader(new File("/home/chriss99/IdeaProjects/ogl_test2/src/main/java/me/chriss99/tess.tesc"), GL_TESS_CONTROL_SHADER);
-        tessEvaluationShader = loadShader(new File("/home/chriss99/IdeaProjects/ogl_test2/src/main/java/me/chriss99/tess.tese"), GL_TESS_EVALUATION_SHADER);
-        gradientShader = loadShader(new File("/home/chriss99/IdeaProjects/ogl_test2/src/main/java/me/chriss99/gradient.frag"), GL_FRAGMENT_SHADER);
+        tesselationProgram = new GLProgram();
 
-        //create a program object and store its ID in the 'program' variable
-        tesselationProgram = glCreateProgram();
+        tesselationProgram.addShader("passThrough.vert", GL_VERTEX_SHADER);
+        tesselationProgram.addShader("tess.tesc", GL_TESS_CONTROL_SHADER);
+        tesselationProgram.addShader("tess.tese", GL_TESS_EVALUATION_SHADER);
+        tesselationProgram.addShader("gradient.frag", GL_FRAGMENT_SHADER);
 
-        //these method calls link shader program variables to attribute locations so that they can be modified in Java code
-        glBindAttribLocation(tesselationProgram, 0, "position");
+        tesselationProgram.bindAttribute(0, "position");
 
-        //attach the vertex and fragment shaders to the program
-        glAttachShader(tesselationProgram, passThroughShader);
-        glAttachShader(tesselationProgram, tessControlShader);
-        glAttachShader(tesselationProgram, tessEvaluationShader);
-        glAttachShader(tesselationProgram, gradientShader);
+        tesselationProgram.validate();
 
-        //link the program (whatever that does)
-        glLinkProgram(tesselationProgram);
-
-        //validate the program to make sure it won't blow up the program
-        glValidateProgram(tesselationProgram);
-
-        System.out.println("Stats for render program: ");
-        System.out.println("Vertex Shader Compiled: " 		+ glGetShaderi(passThroughShader, 	    GL_COMPILE_STATUS));
-        System.out.println("Control Shader Compiled: " 		+ glGetShaderi(tessControlShader, 	    GL_COMPILE_STATUS));
-        System.out.println("Evaluation Shader Compiled: " 	+ glGetShaderi(tessEvaluationShader, 	GL_COMPILE_STATUS));
-        System.out.println("Fragment Shader Compiled: " 	+ glGetShaderi(gradientShader, 	        GL_COMPILE_STATUS));
-        System.out.println("Program Linked: " 				+ glGetProgrami(tesselationProgram, 	GL_LINK_STATUS));
-        System.out.println("Program Validated: " 			+ glGetProgrami(tesselationProgram, 	GL_VALIDATE_STATUS));
-        printErrors();
-
-        //sets the background clear color to white
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-        //get the 'colorMod and 'positionMod' variables, so I can change them while drawing to create the animation
-        tessTransformMatrix = glGetUniformLocation(tesselationProgram, "transformMatrix");
-        waterUniform = glGetUniformLocation(tesselationProgram, "water");
+        tessTransformMatrix = tesselationProgram.getUniform("transformMatrix");
+        waterUniform = tesselationProgram.getUniform("water");
     }
 
     private static void loop() {
@@ -204,7 +149,7 @@ public class Main {
                     gpuTerrainEroder.erosionStep();
             }
 
-            glUseProgram(tesselationProgram);
+            tesselationProgram.use();
             glUniformMatrix4fv(tessTransformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
             glBindVertexArray(vao);
 
@@ -213,7 +158,7 @@ public class Main {
             glUniform1i(waterUniform, 1);
             glDrawArrays(GL_PATCHES, 0, xSize/100*zSize/100*4);
 
-            glUseProgram(renderProgram);
+            renderProgram.use();
             glUniformMatrix4fv(renderTransformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
 
             for (VAO vao : vaoList) {
@@ -255,41 +200,11 @@ public class Main {
         for (VAO vao : vaoList)
             vao.delete();
 
-        glUseProgram(renderProgram);
-        //detach the shaders from the program object
-        glDetachShader(renderProgram, vertexShader);
-        glDetachShader(renderProgram, fragmentShader);
-
-        //delete the shaders now that they are detached
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
-
-        glUseProgram(0);
-        //delete the program now that the shaders are detached and the program isn't being used
-        glDeleteProgram(renderProgram);
-
-
-        glUseProgram(tesselationProgram);
-        //detach the shaders from the program object
-        glDetachShader(tesselationProgram, passThroughShader);
-        glDetachShader(tesselationProgram, tessControlShader);
-        glDetachShader(tesselationProgram, tessEvaluationShader);
-        glDetachShader(tesselationProgram, gradientShader);
-
-        //delete the shaders now that they are detached
-        glDeleteShader(passThroughShader);
-        glDeleteShader(tessControlShader);
-        glDeleteShader(tessEvaluationShader);
-        glDeleteShader(gradientShader);
-
-        glUseProgram(0);
-        //delete the program now that the shaders are detached and the program isn't being used
-        glDeleteProgram(tesselationProgram);
-
-        printErrors();
-
+        renderProgram.delete();
+        tesselationProgram.delete();
 
         gpuTerrainEroder.delete();
+        printErrors();
     }
 
     public static void updateVSync() {
@@ -301,30 +216,6 @@ public class Main {
         while(error != 0) {
             new RuntimeException("OpenGL Error: " + error).printStackTrace();
             error = glGetError();
-        }
-    }
-
-    public static int loadShader(File file, int type) {
-        try {
-            Scanner sc = new Scanner(file);
-            StringBuilder data = new StringBuilder();
-
-            if(file.exists()) {
-                while(sc.hasNextLine()) {
-                    data.append(sc.nextLine()).append("\n");
-                }
-
-                sc.close();
-            }
-            int id = glCreateShader(type);
-            glShaderSource(id, data);
-            glCompileShader(id);
-            return id;
-        }
-
-        catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return -1;
         }
     }
 }
