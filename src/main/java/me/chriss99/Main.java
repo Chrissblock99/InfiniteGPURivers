@@ -31,6 +31,8 @@ public class Main {
     static int tesselationProgram;
     static int tessTransformMatrix;
 
+    static int xSize = 1000;
+    static int zSize = 1000;
     static GPUTerrainEroder gpuTerrainEroder;
     static int vao;
     static int vertexes;
@@ -47,7 +49,7 @@ public class Main {
     public static void main(String[] args) {
         glfwInit();
         createWindow();
-        gpuTerrainEroder = new GPUTerrainEroder(500, 500);
+        gpuTerrainEroder = new GPUTerrainEroder(xSize, zSize);
         setupData();
         setupRenderProgram();
         setupTesselationProgram();
@@ -95,7 +97,7 @@ public class Main {
         vao = glGenVertexArrays();
         glBindVertexArray(vao);
 
-        ByteBuffer vertices = Util.storeArrayInBuffer(VAOGenerator.tesselationGridVertexesTest(5, 5, 100));
+        ByteBuffer vertices = Util.storeArrayInBuffer(VAOGenerator.tesselationGridVertexesTest(xSize/100, zSize/100, 100));
 
         vertexes = glGenBuffers();
         glBindBuffer(GL_ARRAY_BUFFER, vertexes);
@@ -203,7 +205,7 @@ public class Main {
             glUseProgram(tesselationProgram);
             glUniformMatrix4fv(tessTransformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
             glBindVertexArray(vao);
-            glDrawArrays(GL_PATCHES, 0, 5*5*8);
+            glDrawArrays(GL_PATCHES, 0, xSize/100*zSize/100*4);
 
             glUseProgram(renderProgram);
             glUniformMatrix4fv(renderTransformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
