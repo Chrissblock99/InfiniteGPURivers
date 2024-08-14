@@ -38,7 +38,7 @@ public class Texture2D {
         uploadData(0, 0, width, height, format, type, data);
     }
 
-    public void downloadData(int format, int type, ByteBuffer buffer) {
+    public void downloadFullData(int format, int type, ByteBuffer buffer) {
         glBindTexture(GL_TEXTURE_2D, texture);
         glGetTexImage(GL_TEXTURE_2D, 0, format, type, buffer);
     }
