@@ -10,16 +10,16 @@ public class GPUTerrainEroder {
     private final int width;
     private final int height;
 
-    private final Texture terrainMap;
-    private final Texture waterMap;
-    private final Texture sedimentMap;
-    private final Texture hardnessMap;
+    private final Texture2D terrainMap;
+    private final Texture2D waterMap;
+    private final Texture2D sedimentMap;
+    private final Texture2D hardnessMap;
 
-    private final Texture waterOutflowPipes;
-    private final Texture sedimentOutflowPipes;
+    private final Texture2D waterOutflowPipes;
+    private final Texture2D sedimentOutflowPipes;
 
-    private final Texture thermalOutflowPipes1;
-    private final Texture thermalOutflowPipes2;
+    private final Texture2D thermalOutflowPipes1;
+    private final Texture2D thermalOutflowPipes2;
 
     private final ComputeProgram addWater;
     private final ComputeProgram calcWaterOutflow;
@@ -37,16 +37,16 @@ public class GPUTerrainEroder {
         this.width = width;
         this.height = height;
 
-        terrainMap = new Texture(GL_R32F, width, height);
-        waterMap = new Texture(GL_R32F, width, height);
-        sedimentMap = new Texture(GL_R32F, width, height);
-        hardnessMap = new Texture(GL_R32F, width, height);
+        terrainMap = new Texture2D(GL_R32F, width, height);
+        waterMap = new Texture2D(GL_R32F, width, height);
+        sedimentMap = new Texture2D(GL_R32F, width, height);
+        hardnessMap = new Texture2D(GL_R32F, width, height);
 
-        waterOutflowPipes = new Texture(GL_RGBA32F, width, height);
-        sedimentOutflowPipes = new Texture(GL_RGBA32F, width, height);
+        waterOutflowPipes = new Texture2D(GL_RGBA32F, width, height);
+        sedimentOutflowPipes = new Texture2D(GL_RGBA32F, width, height);
 
-        thermalOutflowPipes1 = new Texture(GL_RGBA32F, width, height);
-        thermalOutflowPipes2 = new Texture(GL_RGBA32F, width, height);
+        thermalOutflowPipes1 = new Texture2D(GL_RGBA32F, width, height);
+        thermalOutflowPipes2 = new Texture2D(GL_RGBA32F, width, height);
 
 
         addWater = new ComputeProgram("addWater");

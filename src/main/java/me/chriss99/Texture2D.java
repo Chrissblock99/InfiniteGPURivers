@@ -4,14 +4,14 @@ import java.nio.ByteBuffer;
 
 import static org.lwjgl.opengl.GL45.*;
 
-public class Texture {
+public class Texture2D {
     final int texture;
 
     final int internalFormat;
     final int width;
     final int height;
 
-    public Texture(int internalFormat, int width, int height) {
+    public Texture2D(int internalFormat, int width, int height) {
         this.internalFormat = internalFormat;
         this.width = width;
         this.height = height;
