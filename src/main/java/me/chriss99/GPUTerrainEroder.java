@@ -169,27 +169,6 @@ public class GPUTerrainEroder {
         return waterOutflow;
     }
 
-    public void printResults() {
-        ByteBuffer byteBuffer = BufferUtils.createByteBuffer(width*height*4*4);
-
-        terrainMap.downloadData(GL_RED, GL_FLOAT, byteBuffer);
-        for (int i = 0; i < width*height; i++)
-            System.out.print(byteBuffer.getFloat(i*4) + ", ");
-        System.out.println();
-
-        waterMap.downloadData(GL_RED, GL_FLOAT, byteBuffer);
-        for (int i = 0; i < width*height; i++)
-            System.out.print(byteBuffer.getFloat(i*4) + ", ");
-        System.out.println();
-
-        waterOutflowPipes.downloadData(GL_RGBA, GL_FLOAT, byteBuffer);
-        for (int i = 0; i < width*height*4; i++)
-            System.out.print(byteBuffer.getFloat(i*4) + ", ");
-        System.out.println();
-
-        System.out.println();
-    }
-
     public void delete() {
         initTextures.delete();
         for (ComputeProgram program : erosionPrograms)
