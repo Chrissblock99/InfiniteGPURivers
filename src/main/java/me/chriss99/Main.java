@@ -167,8 +167,7 @@ public class Main {
             glfwSwapBuffers(window);
 
             if (simulateErosion)
-                for (int i = 0; i < 10; i++)
-                    gpuTerrainEroder.erosionStep();
+                gpuTerrainEroder.erosionSteps(100);
 
             //poll for window events (resize, close, button presses, etc.)
             glfwPollEvents();

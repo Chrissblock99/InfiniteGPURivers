@@ -22,6 +22,7 @@ public class GPUTerrainEroder {
     private final Texture2D thermalOutflowPipes2;
 
     private final ComputeProgram addWater;
+    private final ComputeProgram evaporateAndAddWater;
     private final ComputeProgram calcWaterOutflow;
     private final ComputeProgram applyWaterOutflow;
     private final ComputeProgram calcThermalOutflow;
@@ -50,6 +51,7 @@ public class GPUTerrainEroder {
 
 
         addWater = new ComputeProgram("addWater");
+        evaporateAndAddWater = new ComputeProgram("evaporateAndAddWater");
         calcWaterOutflow = new ComputeProgram("calcWaterOutflow");
         applyWaterOutflow = new ComputeProgram("applyWaterOutflow");
         calcThermalOutflow = new ComputeProgram("calcThermalOutflow");
@@ -60,18 +62,18 @@ public class GPUTerrainEroder {
 
 
         erosionPrograms = new ComputeProgram[]{
-                addWater,
                 calcWaterOutflow,
                 applyWaterOutflow,
                 calcThermalOutflow,
                 erosionDeposition,
                 calcSedimentOutflow,
                 applySedimentAndThermalOutflow,
-                evaporateWater
         };
 
 
         waterMap.bindUniformImage(addWater.program, 1, "waterMap", GL_READ_WRITE);
+
+        waterMap.bindUniformImage(evaporateAndAddWater.program, 1, "waterMap", GL_READ_WRITE);
 
         terrainMap.bindUniformImage(calcWaterOutflow.program, 0, "terrainMap", GL_READ_ONLY);
         waterMap.bindUniformImage(calcWaterOutflow.program, 1, "waterMap", GL_READ_ONLY);
@@ -121,12 +123,24 @@ public class GPUTerrainEroder {
         Main.printErrors();
     }
 
-    public void erosionStep() {
-        for (ComputeProgram program : erosionPrograms) {
-            program.use();
-            glDispatchCompute(width, height, 1);
-            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+    public void erosionSteps(int steps) {
+        if (steps == 0)
+            return;
+
+        execShader(addWater);
+        for (int i = 0; i < steps; i++) {
+            for (ComputeProgram program : erosionPrograms)
+                execShader(program);
+            if (i+1 < steps)
+                execShader(evaporateAndAddWater);
         }
+        execShader(evaporateWater);
+    }
+
+    private void execShader(ComputeProgram program) {
+        program.use();
+        glDispatchCompute(width, height, 1);
+        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
     }
 
     public double[][][] downloadMap() {
