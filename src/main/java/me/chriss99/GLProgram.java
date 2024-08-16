@@ -17,7 +17,7 @@ public class GLProgram {
     }
 
     public void addShader(String name, int type) {
-        int shader = loadShader(new File("/home/chriss99/IdeaProjects/ogl_test2/src/main/java/me/chriss99/" + name), type);
+        int shader = loadShader(new File("/home/chriss99/IdeaProjects/ogl_test2/src/main/java/me/chriss99/shader/" + name), type);
         if (glGetShaderi(shader,  GL_COMPILE_STATUS) != 1)
             System.out.println("Shader " + name + " did not compile!");
 
