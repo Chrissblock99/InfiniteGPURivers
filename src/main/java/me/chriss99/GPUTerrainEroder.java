@@ -45,6 +45,7 @@ public class GPUTerrainEroder {
     private final ComputeProgram applyWaterOutflowAndErosionDeposition;
     private final ComputeProgram calcSedimentOutflow;
     private final ComputeProgram applySedimentAndThermalOutflow;
+    private final ComputeProgram applySedimentThermalOutflowEvaporateAndAddWater;
     private final ComputeProgram evaporateWater;
 
     private final ComputeProgram initTextures;
@@ -72,14 +73,14 @@ public class GPUTerrainEroder {
         applyWaterOutflowAndErosionDeposition = new ComputeProgram("applyWaterOutflowAndErosionDeposition");
         calcSedimentOutflow = new ComputeProgram("calcSedimentOutflow");
         applySedimentAndThermalOutflow = new ComputeProgram("applySedimentAndThermalOutflow");
+        applySedimentThermalOutflowEvaporateAndAddWater = new ComputeProgram("applySedimentThermalOutflowEvaporateAndAddWater");
         evaporateWater = new ComputeProgram("evaporateWater");
 
 
         erosionPrograms = new ComputeProgram[]{
                 calcWaterAndThermalOutflow,
                 applyWaterOutflowAndErosionDeposition,
-                calcSedimentOutflow,
-                applySedimentAndThermalOutflow,
+                calcSedimentOutflow
         };
 
 
@@ -111,6 +112,13 @@ public class GPUTerrainEroder {
         thermalOutflowPipes1.bindUniformImage(applySedimentAndThermalOutflow.program, 6, "thermalOutflowPipes1", GL_READ_ONLY);
         thermalOutflowPipes2.bindUniformImage(applySedimentAndThermalOutflow.program, 7, "thermalOutflowPipes2", GL_READ_ONLY);
 
+        terrainMap.bindUniformImage(applySedimentThermalOutflowEvaporateAndAddWater.program, 0, "terrainMap", GL_READ_WRITE);
+        waterMap.bindUniformImage(applySedimentThermalOutflowEvaporateAndAddWater.program, 1, "waterMap", GL_READ_WRITE);
+        sedimentMap.bindUniformImage(applySedimentThermalOutflowEvaporateAndAddWater.program, 2, "sedimentMap", GL_READ_WRITE);
+        sedimentOutflowPipes.bindUniformImage(applySedimentThermalOutflowEvaporateAndAddWater.program, 5, "sedimentOutflowPipes", GL_READ_ONLY);
+        thermalOutflowPipes1.bindUniformImage(applySedimentThermalOutflowEvaporateAndAddWater.program, 6, "thermalOutflowPipes1", GL_READ_ONLY);
+        thermalOutflowPipes2.bindUniformImage(applySedimentThermalOutflowEvaporateAndAddWater.program, 7, "thermalOutflowPipes2", GL_READ_ONLY);
+
         waterMap.bindUniformImage(evaporateWater.program, 1, "waterMap", GL_READ_WRITE);
 
 
@@ -139,7 +147,8 @@ public class GPUTerrainEroder {
             for (ComputeProgram program : erosionPrograms)
                 execShader(program);
             if (i+1 < steps)
-                execShader(evaporateAndAddWater);
+                execShader(applySedimentThermalOutflowEvaporateAndAddWater);
+            else execShader(applySedimentAndThermalOutflow);
         }
         execShader(evaporateWater);
     }
