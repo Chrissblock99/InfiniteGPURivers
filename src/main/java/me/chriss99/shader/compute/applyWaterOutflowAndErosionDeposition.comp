@@ -32,24 +32,35 @@ float erosionDepthMultiplier(float depth) {
 }
 
 void main() {
-    vec2 velocity = vec2(0);
-
     vec4 outflow = imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID));
-    velocity.x -= outflow.y;
-    velocity.x += outflow.z;
-    velocity.y += outflow.x;
-    velocity.y -= outflow.w;
-
-    velocity.x += imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[1]).z;
-    velocity.x -= imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[2]).y;
-    velocity.y -= imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[0]).w;
-    velocity.y += imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[3]).x;
+    float up =     imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[0]).w;
+    float left =   imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[1]).z;
+    float right =  imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[2]).y;
+    float down =   imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[3]).x;
 
     float terrainHeight = imageLoad(terrainMap, ivec2(gl_GlobalInvocationID)).x;
     float waterHeight = imageLoad(waterMap, ivec2(gl_GlobalInvocationID)).x;
     float sedimentHeight = imageLoad(sedimentMap, ivec2(gl_GlobalInvocationID)).x;
     float hardness = imageLoad(hardnessMap, ivec2(gl_GlobalInvocationID)).x;
 
+
+    //waterOutFlow
+    waterHeight -= outflow.x + outflow.y + outflow.z + outflow.w;
+    waterHeight += up + left + right + down;
+    waterHeight = max(0, waterHeight);
+
+
+    //erosionDeposition
+    vec2 velocity = vec2(0);
+    velocity.x -= outflow.y;
+    velocity.x += outflow.z;
+    velocity.y += outflow.x;
+    velocity.y -= outflow.w;
+
+    velocity.x += left;
+    velocity.x -= right;
+    velocity.y -= up;
+    velocity.y += down;
 
     float sedimentCapacity = erosionDepthMultiplier(waterHeight) * sedimentCapacityMultiplier * length(velocity);
     float unusedCapacity = sedimentCapacity - sedimentHeight;
