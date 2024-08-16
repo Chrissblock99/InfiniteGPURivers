@@ -7,6 +7,24 @@ import java.nio.ByteBuffer;
 import static org.lwjgl.opengl.GL45.*;
 
 public class GPUTerrainEroder {
+    /*
+    double deltaT = 0.02; //[0;0.05]
+
+    double rainRate = 0.012; //[0;0.05]
+    double evaporationRate = 0.015; //[0;0.05]
+    double waterFlowMultiplier = 1; //[0.1;2]
+    double sedimentCapacityMultiplier = 1; //[0.1;3]
+    double thermalErosionRate = 0.75; //[0;3]
+    double soilSuspensionRate = 0.5; //[0.1;2]
+    double sedimentDepositionRate = 1; //[0.1;3]
+    double sedimentSofteningRate = 5; //[0;10]
+    double maxErosionDepth = 10; //[0;40]
+    double talusAngleTangentCoeff = 0.8; //[0;1]
+    double talusAngleTangentBias = 0.1; //[0;1]
+    double minimumHardness = 0.25; //[0;1]
+    double voidSediment = 0.3; //[0;1]
+    */
+
     private final int width;
     private final int height;
 
