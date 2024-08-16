@@ -41,9 +41,8 @@ public class GPUTerrainEroder {
 
     private final ComputeProgram addWater;
     private final ComputeProgram evaporateAndAddWater;
-    private final ComputeProgram calcWaterOutflow;
+    private final ComputeProgram calcWaterAndThermalOutflow;
     private final ComputeProgram applyWaterOutflow;
-    private final ComputeProgram calcThermalOutflow;
     private final ComputeProgram erosionDeposition;
     private final ComputeProgram calcSedimentOutflow;
     private final ComputeProgram applySedimentAndThermalOutflow;
@@ -70,9 +69,8 @@ public class GPUTerrainEroder {
 
         addWater = new ComputeProgram("addWater");
         evaporateAndAddWater = new ComputeProgram("evaporateAndAddWater");
-        calcWaterOutflow = new ComputeProgram("calcWaterOutflow");
+        calcWaterAndThermalOutflow = new ComputeProgram("calcWaterAndThermalOutflow");
         applyWaterOutflow = new ComputeProgram("applyWaterOutflow");
-        calcThermalOutflow = new ComputeProgram("calcThermalOutflow");
         erosionDeposition = new ComputeProgram("erosionDeposition");
         calcSedimentOutflow = new ComputeProgram("calcSedimentOutflow");
         applySedimentAndThermalOutflow = new ComputeProgram("applySedimentAndThermalOutflow");
@@ -80,9 +78,8 @@ public class GPUTerrainEroder {
 
 
         erosionPrograms = new ComputeProgram[]{
-                calcWaterOutflow,
+                calcWaterAndThermalOutflow,
                 applyWaterOutflow,
-                calcThermalOutflow,
                 erosionDeposition,
                 calcSedimentOutflow,
                 applySedimentAndThermalOutflow,
@@ -93,17 +90,15 @@ public class GPUTerrainEroder {
 
         waterMap.bindUniformImage(evaporateAndAddWater.program, 1, "waterMap", GL_READ_WRITE);
 
-        terrainMap.bindUniformImage(calcWaterOutflow.program, 0, "terrainMap", GL_READ_ONLY);
-        waterMap.bindUniformImage(calcWaterOutflow.program, 1, "waterMap", GL_READ_ONLY);
-        waterOutflowPipes.bindUniformImage(calcWaterOutflow.program, 4, "waterOutflowPipes", GL_READ_WRITE);
+        terrainMap.bindUniformImage(calcWaterAndThermalOutflow.program, 0, "terrainMap", GL_READ_ONLY);
+        waterMap.bindUniformImage(calcWaterAndThermalOutflow.program, 1, "waterMap", GL_READ_ONLY);
+        hardnessMap.bindUniformImage(calcWaterAndThermalOutflow.program, 3, "hardnessMap", GL_READ_ONLY);
+        waterOutflowPipes.bindUniformImage(calcWaterAndThermalOutflow.program, 4, "waterOutflowPipes", GL_READ_WRITE);
+        thermalOutflowPipes1.bindUniformImage(calcWaterAndThermalOutflow.program, 6, "thermalOutflowPipes1", GL_WRITE_ONLY);
+        thermalOutflowPipes2.bindUniformImage(calcWaterAndThermalOutflow.program, 7, "thermalOutflowPipes2", GL_WRITE_ONLY);
 
         waterMap.bindUniformImage(applyWaterOutflow.program, 1, "waterMap", GL_READ_WRITE);
         waterOutflowPipes.bindUniformImage(applyWaterOutflow.program, 4, "waterOutflowPipes", GL_READ_ONLY);
-
-        terrainMap.bindUniformImage(calcThermalOutflow.program, 0, "terrainMap", GL_READ_ONLY);
-        hardnessMap.bindUniformImage(calcThermalOutflow.program, 3, "hardnessMap", GL_READ_ONLY);
-        thermalOutflowPipes1.bindUniformImage(calcThermalOutflow.program, 6, "thermalOutflowPipes1", GL_WRITE_ONLY);
-        thermalOutflowPipes2.bindUniformImage(calcThermalOutflow.program, 7, "thermalOutflowPipes2", GL_WRITE_ONLY);
 
         terrainMap.bindUniformImage(erosionDeposition.program, 0, "terrainMap", GL_READ_WRITE);
         waterMap.bindUniformImage(erosionDeposition.program, 1, "waterMap", GL_READ_WRITE);
