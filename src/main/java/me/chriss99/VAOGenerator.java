@@ -279,7 +279,7 @@ public class VAOGenerator {
 
         for (int z = 0; z < heightMap[0].length; z++)
             for (int x = 0; x < heightMap.length; x++) {
-                Vector3d normal = TerrainData.normalAt(heightMap, x, z);
+                Vector3d normal = normalAt(heightMap, x, z);
 
                 vertexes[vertexShift    ] = x - normal.z * .3;
                 vertexes[vertexShift + 1] = heightMap[x][z] + .1;
@@ -334,5 +334,31 @@ public class VAOGenerator {
 
     private static int indexOfXZFlattenedArray(int x, int z, int xSize) {
         return x + z*xSize;
+    }
+
+    public static Vector3d normalAt(double[][] heightMap, int x, int z) {
+        double[] heights = new double[4];
+        for (int i = 0; i < vonNeumannNeighbourhood.length; i++)
+            heights[i] = heightMap[wrapOffsetCoordinateVonNeumann(x, heightMap.length, i, 0)][wrapOffsetCoordinateVonNeumann(z, heightMap[0].length, i, 1)];
+
+        return new Vector3d(heights[1] - heights[2], 1, heights[3] - heights[0]).normalize();
+    }
+
+    public static int wrapOffsetCoordinateVonNeumann(int index, int length, int offset, int xz) {
+        return wrapNumber(index + vonNeumannNeighbourhood[offset][xz], length);
+    }
+
+    //  0
+    //1   2
+    //  3
+    public static final int[][] vonNeumannNeighbourhood = new int[][]{
+            { 0,  1},
+            {-1,  0},
+            { 1,  0},
+            { 0, -1}
+    };
+
+    public static int wrapNumber(int num, int length) {
+        return (num + length) % length;
     }
 }
