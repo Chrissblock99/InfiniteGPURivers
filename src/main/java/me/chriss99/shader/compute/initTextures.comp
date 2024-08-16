@@ -144,6 +144,8 @@ vec3 simplexNoiseDeriv(vec2 p, int seed, bool deriv) {
 }
 // end - credit to Stefan Gustavson AKA stegu
 
+const int seed = 0;
+
 const int octaves = 8;
 const float freq = 0.0015;
 const float amp = 60;
@@ -157,7 +159,7 @@ void main() {
     float localAmp = amp;
 
     for (int i = 0; i < octaves; i++) {
-        height += simplexNoiseDeriv(vec2(gl_GlobalInvocationID) * localFreq, i, false).z * localAmp;
+        height += simplexNoiseDeriv(vec2(gl_GlobalInvocationID) * localFreq, seed + i, false).z * localAmp;
         localFreq *= lacunarity;
         localAmp *= persistence;
     }
