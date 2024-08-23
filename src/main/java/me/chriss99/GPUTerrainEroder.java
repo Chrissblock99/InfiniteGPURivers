@@ -40,7 +40,6 @@ public class GPUTerrainEroder {
     private final Texture2D thermalOutflowPipes2;
 
     private final ComputeProgram addWater;
-    private final ComputeProgram evaporateAndAddWater;
     private final ComputeProgram calcWaterAndThermalOutflow;
     private final ComputeProgram applyWaterOutflowAndErosionDeposition;
     private final ComputeProgram calcSedimentOutflow;
@@ -68,7 +67,6 @@ public class GPUTerrainEroder {
 
 
         addWater = new ComputeProgram("addWater");
-        evaporateAndAddWater = new ComputeProgram("evaporateAndAddWater");
         calcWaterAndThermalOutflow = new ComputeProgram("calcWaterAndThermalOutflow");
         applyWaterOutflowAndErosionDeposition = new ComputeProgram("applyWaterOutflowAndErosionDeposition");
         calcSedimentOutflow = new ComputeProgram("calcSedimentOutflow");
@@ -85,8 +83,6 @@ public class GPUTerrainEroder {
 
 
         waterMap.bindUniformImage(addWater.program, 1, "waterMap", GL_READ_WRITE);
-
-        waterMap.bindUniformImage(evaporateAndAddWater.program, 1, "waterMap", GL_READ_WRITE);
 
         terrainMap.bindUniformImage(calcWaterAndThermalOutflow.program, 0, "terrainMap", GL_READ_ONLY);
         waterMap.bindUniformImage(calcWaterAndThermalOutflow.program, 1, "waterMap", GL_READ_ONLY);
