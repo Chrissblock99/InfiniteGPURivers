@@ -26,6 +26,8 @@ public class Main {
 
     static int xSize = 500;
     static int zSize = 500;
+    static int simulationStepsPerFrame = 5;
+
     static GPUTerrainEroder gpuTerrainEroder;
     static int vao;
     static int vertexes;
@@ -167,7 +169,7 @@ public class Main {
             glfwSwapBuffers(window);
 
             if (simulateErosion)
-                gpuTerrainEroder.erosionSteps(100);
+                gpuTerrainEroder.erosionSteps(simulationStepsPerFrame);
 
             //poll for window events (resize, close, button presses, etc.)
             glfwPollEvents();
