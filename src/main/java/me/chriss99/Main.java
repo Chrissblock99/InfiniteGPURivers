@@ -20,9 +20,13 @@ public class Main {
     static GLProgram renderProgram;
     static int renderTransformMatrix;
 
-    static GLProgram tesselationProgram;
+    static GLProgram tessProgram;
     static int tessTransformMatrix;
-    static int waterUniform;
+    static int tessWaterUniform;
+
+    static GLProgram niceTessProgram;
+    static int niceTessTransformMatrix;
+    static int niceTessWaterUniform;
 
     static int xSize = 500;
     static int zSize = 500;
@@ -46,8 +50,11 @@ public class Main {
         createWindow();
         gpuTerrainEroder = new GPUTerrainEroder(xSize, zSize);
         setupData();
+
         setupRenderProgram();
         setupTesselationProgram();
+        setupNiceTesselationProgram();
+
         inputDeviceManager = new InputDeviceManager(window);
         movementController = new MovementController(inputDeviceManager, cameraMatrix);
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -120,19 +127,38 @@ public class Main {
     private static void setupTesselationProgram() {
         glPatchParameteri(GL_PATCH_VERTICES, 4);
 
-        tesselationProgram = new GLProgram();
+        tessProgram = new GLProgram();
 
-        tesselationProgram.addShader("passThrough.vert", GL_VERTEX_SHADER);
-        tesselationProgram.addShader("tess.tesc", GL_TESS_CONTROL_SHADER);
-        tesselationProgram.addShader("tess.tese", GL_TESS_EVALUATION_SHADER);
-        tesselationProgram.addShader("gradient.frag", GL_FRAGMENT_SHADER);
+        tessProgram.addShader("passThrough.vert", GL_VERTEX_SHADER);
+        tessProgram.addShader("tess.tesc", GL_TESS_CONTROL_SHADER);
+        tessProgram.addShader("tess.tese", GL_TESS_EVALUATION_SHADER);
+        tessProgram.addShader("gradient.frag", GL_FRAGMENT_SHADER);
 
-        tesselationProgram.bindAttribute(0, "position");
+        tessProgram.bindAttribute(0, "position");
 
-        tesselationProgram.validate();
+        tessProgram.validate();
 
-        tessTransformMatrix = tesselationProgram.getUniform("transformMatrix");
-        waterUniform = tesselationProgram.getUniform("water");
+        tessTransformMatrix = tessProgram.getUniform("transformMatrix");
+        tessWaterUniform = tessProgram.getUniform("water");
+    }
+
+    private static void setupNiceTesselationProgram() {
+        glPatchParameteri(GL_PATCH_VERTICES, 4);
+
+        niceTessProgram = new GLProgram();
+
+        niceTessProgram.addShader("passThrough.vert", GL_VERTEX_SHADER);
+        niceTessProgram.addShader("tess.tesc", GL_TESS_CONTROL_SHADER);
+        niceTessProgram.addShader("niceTess.tese", GL_TESS_EVALUATION_SHADER);
+        niceTessProgram.addShader("normals.geom", GL_GEOMETRY_SHADER);
+        niceTessProgram.addShader("different.frag", GL_FRAGMENT_SHADER);
+
+        niceTessProgram.bindAttribute(0, "position");
+
+        niceTessProgram.validate();
+
+        niceTessTransformMatrix = niceTessProgram.getUniform("transformMatrix");
+        niceTessWaterUniform = niceTessProgram.getUniform("water");
     }
 
     private static void loop() {
@@ -146,13 +172,16 @@ public class Main {
             //clear the window
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            tesselationProgram.use();
+            niceTessProgram.use();
             glUniformMatrix4fv(tessTransformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
+            glUniformMatrix4fv(niceTessTransformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
             glBindVertexArray(vao);
 
-            glUniform1i(waterUniform, 0);
+            glUniform1i(tessWaterUniform, 0);
+            glUniform1i(niceTessWaterUniform, 0);
             glDrawArrays(GL_PATCHES, 0, xSize/100*zSize/100*4);
-            glUniform1i(waterUniform, 1);
+            glUniform1i(tessWaterUniform, 1);
+            glUniform1i(niceTessWaterUniform, 1);
             glDrawArrays(GL_PATCHES, 0, xSize/100*zSize/100*4);
 
             renderProgram.use();
@@ -201,7 +230,7 @@ public class Main {
             vao.delete();
 
         renderProgram.delete();
-        tesselationProgram.delete();
+        tessProgram.delete();
 
         gpuTerrainEroder.delete();
         printErrors();
