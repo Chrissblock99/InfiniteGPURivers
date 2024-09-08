@@ -31,6 +31,9 @@ public class TessProgram extends RenderProgram {
             addShader("niceTess.tese", GL_TESS_EVALUATION_SHADER);
             addShader("normals.geom", GL_GEOMETRY_SHADER);
             addShader("different.frag", GL_FRAGMENT_SHADER);
+
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         }
 
         bindAttribute(0, "position");

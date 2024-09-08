@@ -13,5 +13,5 @@ void main(void) {
     float exposedness = dot(normal, normalize(vec3(1, -1, 1)));
     exposedness = exposedness*.5+.5;
 
-    FragColor = vec4(color * exposedness, 1.0);
+    FragColor = vec4(color * exposedness, water ? 0.6 : 1.0);
 }
