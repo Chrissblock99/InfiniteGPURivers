@@ -41,4 +41,11 @@ public class VAOListProgram extends RenderProgram {
             glDrawElements(GL_TRIANGLES, vao.indexLength(), GL_UNSIGNED_INT, 0);
         }
     }
+
+    @Override
+    public void delete() {
+        for (VAO vao : vaoList)
+            vao.delete();
+        super.delete();
+    }
 }

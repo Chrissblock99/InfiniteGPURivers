@@ -15,8 +15,6 @@ public class Main {
     //a variable to hold the id of the GLFW window
     static long window;
 
-    static final ArrayList<VAO> vaoList = new ArrayList<>();
-
     static RenderProgram vaoListProgram;
     static RenderProgram tessProgram;
     static RenderProgram niceTessProgram;
@@ -151,9 +149,6 @@ public class Main {
         //disable the vertex attribute arrays
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
-
-        for (VAO vao : vaoList)
-            vao.delete();
 
         vaoListProgram.delete();
         tessProgram.delete();
