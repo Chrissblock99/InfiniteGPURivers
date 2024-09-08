@@ -15,6 +15,7 @@ public class Main {
     //a variable to hold the id of the GLFW window
     static long window;
 
+    static boolean niceRender = true;
     static RenderProgram vaoListProgram;
     static RenderProgram tessProgram;
     static RenderProgram niceTessProgram;
@@ -114,8 +115,10 @@ public class Main {
             //clear the window
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            niceTessProgram.render();
-
+            if (niceRender)
+                niceTessProgram.render();
+            else
+                tessProgram.render();
             vaoListProgram.render();
 
             //swap the frame to show the rendered image

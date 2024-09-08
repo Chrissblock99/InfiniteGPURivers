@@ -58,6 +58,7 @@ public class MovementController {
 
 
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_T, () -> Main.simulateErosion = !Main.simulateErosion);
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_G, () -> Main.niceRender = !Main.niceRender);
     }
 
     public void update() {
