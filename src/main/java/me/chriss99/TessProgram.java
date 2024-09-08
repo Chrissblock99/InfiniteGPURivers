@@ -14,6 +14,7 @@ public class TessProgram extends RenderProgram {
     private final int zSize;
 
     private final int transformMatrix;
+    private final int cameraPos;
     private final int waterUniform;
 
     public TessProgram(CameraMatrix cameraMatrix, int vao, int xSize, int zSize, boolean niceLooking) {
@@ -40,6 +41,7 @@ public class TessProgram extends RenderProgram {
         validate();
 
         transformMatrix = getUniform("transformMatrix");
+        cameraPos = getUniform("cameraPos");
         waterUniform = getUniform("water");
     }
 
@@ -47,6 +49,7 @@ public class TessProgram extends RenderProgram {
     public void render() {
         use();
         glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
+        glUniform3f(cameraPos, cameraMatrix.position.x, cameraMatrix.position.y, cameraMatrix.position.z);
         glBindVertexArray(vao);
 
         glUniform1i(waterUniform, 0);
