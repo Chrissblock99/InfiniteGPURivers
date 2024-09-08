@@ -174,14 +174,14 @@ public class Main {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             niceTessProgram.use();
-            glUniformMatrix4fv(tessTransformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
+            //glUniformMatrix4fv(tessTransformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
             glUniformMatrix4fv(niceTessTransformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
             glBindVertexArray(vao);
 
-            glUniform1i(tessWaterUniform, 0);
+            //glUniform1i(tessWaterUniform, 0);
             glUniform1i(niceTessWaterUniform, 0);
             glDrawArrays(GL_PATCHES, 0, xSize/100*zSize/100*4);
-            glUniform1i(tessWaterUniform, 1);
+            //glUniform1i(tessWaterUniform, 1);
             glUniform1i(niceTessWaterUniform, 1);
             glDrawArrays(GL_PATCHES, 0, xSize/100*zSize/100*4);
 
