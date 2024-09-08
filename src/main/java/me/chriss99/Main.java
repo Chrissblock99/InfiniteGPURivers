@@ -17,16 +17,9 @@ public class Main {
 
     static final ArrayList<VAO> vaoList = new ArrayList<>();
 
-    static GLProgram renderProgram;
-    static int renderTransformMatrix;
-
-    static GLProgram tessProgram;
-    static int tessTransformMatrix;
-    static int tessWaterUniform;
-
-    static GLProgram niceTessProgram;
-    static int niceTessTransformMatrix;
-    static int niceTessWaterUniform;
+    static RenderProgram vaoListProgram;
+    static RenderProgram tessProgram;
+    static RenderProgram niceTessProgram;
 
     static int xSize = 500;
     static int zSize = 500;
@@ -51,9 +44,10 @@ public class Main {
         gpuTerrainEroder = new GPUTerrainEroder(xSize, zSize);
         setupData();
 
-        setupRenderProgram();
-        setupTesselationProgram();
-        setupNiceTesselationProgram();
+        vaoListProgram = new VAOListProgram(cameraMatrix, List.of(/*VAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
+        glPatchParameteri(GL_PATCH_VERTICES, 4);
+        tessProgram = new TessProgram(cameraMatrix, vao, xSize, zSize, false);
+        niceTessProgram = new TessProgram(cameraMatrix, vao, xSize, zSize, true);
 
         inputDeviceManager = new InputDeviceManager(window);
         movementController = new MovementController(inputDeviceManager, cameraMatrix);
@@ -111,57 +105,6 @@ public class Main {
         glEnableVertexAttribArray(0);
     }
 
-    private static void setupRenderProgram() {
-        renderProgram = new GLProgram();
-
-        renderProgram.addShader("shader.vert", GL_VERTEX_SHADER);
-        renderProgram.addShader("shader.frag", GL_FRAGMENT_SHADER);
-
-        renderProgram.bindAttribute(0, "position");
-        renderProgram.bindAttribute(1, "color");
-
-        renderProgram.validate();
-
-        renderTransformMatrix = renderProgram.getUniform("transformMatrix");
-    }
-
-    private static void setupTesselationProgram() {
-        glPatchParameteri(GL_PATCH_VERTICES, 4);
-
-        tessProgram = new GLProgram();
-
-        tessProgram.addShader("passThrough.vert", GL_VERTEX_SHADER);
-        tessProgram.addShader("tess.tesc", GL_TESS_CONTROL_SHADER);
-        tessProgram.addShader("tess.tese", GL_TESS_EVALUATION_SHADER);
-        tessProgram.addShader("gradient.frag", GL_FRAGMENT_SHADER);
-
-        tessProgram.bindAttribute(0, "position");
-
-        tessProgram.validate();
-
-        tessTransformMatrix = tessProgram.getUniform("transformMatrix");
-        tessWaterUniform = tessProgram.getUniform("water");
-    }
-
-    private static void setupNiceTesselationProgram() {
-        glPatchParameteri(GL_PATCH_VERTICES, 4);
-
-        niceTessProgram = new GLProgram();
-
-        niceTessProgram.addShader("passThrough.vert", GL_VERTEX_SHADER);
-        niceTessProgram.addShader("tess.tesc", GL_TESS_CONTROL_SHADER);
-        niceTessProgram.addShader("niceTess.tese", GL_TESS_EVALUATION_SHADER);
-        niceTessProgram.addShader("normals.geom", GL_GEOMETRY_SHADER);
-        niceTessProgram.addShader("different.frag", GL_FRAGMENT_SHADER);
-
-        niceTessProgram.bindAttribute(0, "position");
-
-        niceTessProgram.validate();
-
-        niceTessTransformMatrix = niceTessProgram.getUniform("transformMatrix");
-        niceTessWaterUniform = niceTessProgram.getUniform("water");
-    }
-
     private static void loop() {
         double lastTime = glfwGetTime();
         double lastFramePrint = Double.NEGATIVE_INFINITY;
@@ -173,27 +116,9 @@ public class Main {
             //clear the window
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            niceTessProgram.use();
-            //glUniformMatrix4fv(tessTransformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
-            glUniformMatrix4fv(niceTessTransformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
-            glBindVertexArray(vao);
+            niceTessProgram.render();
 
-            //glUniform1i(tessWaterUniform, 0);
-            glUniform1i(niceTessWaterUniform, 0);
-            glDrawArrays(GL_PATCHES, 0, xSize/100*zSize/100*4);
-            //glUniform1i(tessWaterUniform, 1);
-            glUniform1i(niceTessWaterUniform, 1);
-            glDrawArrays(GL_PATCHES, 0, xSize/100*zSize/100*4);
-
-            renderProgram.use();
-            glUniformMatrix4fv(renderTransformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
-
-            for (VAO vao : vaoList) {
-                vao.bind();
-
-                //draw the current bound VAO/VBO using an index buffer
-                glDrawElements(GL_TRIANGLES, vao.indexLength(), GL_UNSIGNED_INT, 0);
-            }
+            vaoListProgram.render();
 
             //swap the frame to show the rendered image
             glfwSwapBuffers(window);
@@ -230,8 +155,9 @@ public class Main {
         for (VAO vao : vaoList)
             vao.delete();
 
-        renderProgram.delete();
+        vaoListProgram.delete();
         tessProgram.delete();
+        niceTessProgram.delete();
 
         gpuTerrainEroder.delete();
         printErrors();
