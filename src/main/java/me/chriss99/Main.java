@@ -20,8 +20,8 @@ public class Main {
     static RenderProgram tessProgram;
     static RenderProgram niceTessProgram;
 
-    static int xSize = 500;
-    static int zSize = 500;
+    static int xSize = 8*64;
+    static int zSize = 8*64;
     static int simulationStepsPerFrame = 5;
 
     static GPUTerrainEroder gpuTerrainEroder;
@@ -95,7 +95,7 @@ public class Main {
         vao = glGenVertexArrays();
         glBindVertexArray(vao);
 
-        ByteBuffer vertices = Util.storeArrayInBuffer(VAOGenerator.tesselationGridVertexesTest(xSize/100, zSize/100, 100));
+        ByteBuffer vertices = Util.storeArrayInBuffer(VAOGenerator.tesselationGridVertexesTest(xSize/64, zSize/64, 64));
 
         vertexes = glGenBuffers();
         glBindBuffer(GL_ARRAY_BUFFER, vertexes);

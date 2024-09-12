@@ -53,8 +53,8 @@ public class TessProgram extends RenderProgram {
         glBindVertexArray(vao);
 
         glUniform1i(waterUniform, 0);
-        glDrawArrays(GL_PATCHES, 0, xSize/100*zSize/100*4);
+        glDrawArrays(GL_PATCHES, 0, xSize/64*zSize/64*4);
         glUniform1i(waterUniform, 1);
-        glDrawArrays(GL_PATCHES, 0, xSize/100*zSize/100*4);
+        glDrawArrays(GL_PATCHES, 0, xSize/64*zSize/64*4);
     }
 }
