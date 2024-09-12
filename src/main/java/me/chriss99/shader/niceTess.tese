@@ -15,8 +15,10 @@ void main() {
 
 
     float height = imageLoad(terrainMap, ivec2(position)).x;
-    if (water)
-        height += imageLoad(waterMap, ivec2(position)).x - .03;
+    if (water) {
+        float waterHeight = imageLoad(waterMap, ivec2(position)).x - .03;
+        height += waterHeight - ((waterHeight <= 0) ? .1 : 0);
+    }
 
     gl_Position =  vec4(position.x, height, position.y, 1);
 }
