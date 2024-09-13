@@ -25,7 +25,7 @@ public class InfiniteWorld {
     }
 
     public int[][] readWriteArea(int x, int y, int[][] data, boolean write) {
-        int width = data.length;;
+        int width = data.length;
         int height = data[0].length;
 
         int chunkX = x/100;
