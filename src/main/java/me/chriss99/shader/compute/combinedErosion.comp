@@ -1,0 +1,327 @@
+#version 450 core
+layout(local_size_x = 1, local_size_y = 1) in;
+layout(binding = 0, r32f) restrict uniform image2D terrainMap;
+layout(binding = 1, r32f) restrict uniform image2D waterMap;
+layout(binding = 2, r32f) restrict uniform image2D sedimentMap;
+layout(binding = 3, r32f) restrict uniform image2D hardnessMap;
+layout(binding = 4, rgba32f) restrict uniform image2D waterOutflowPipes;
+layout(binding = 5, rgba32f) restrict uniform image2D sedimentOutflowPipes;
+layout(binding = 6, rgba32f) restrict uniform image2D thermalOutflowPipes1;
+layout(binding = 7, rgba32f) restrict uniform image2D thermalOutflowPipes2;
+
+uniform int stepType;
+
+const float deltaT = 0.02; //[0;0.05]
+
+const float rainRate = 0.012; //[0;0.05]
+const float evaporationRate = 0.015; //[0;0.05]
+const float waterFlowMultiplier = 1; //[0.1;2]
+const float sedimentCapacityMultiplier = 1; //[0.1;3]
+const float thermalErosionRate = 0.75; //[0;3]
+const float soilSuspensionRate = 0.5; //[0.1;2]
+const float sedimentDepositionRate = 1; //[0.1;3]
+const float sedimentSofteningRate = 5; //[0;10]
+const float maxErosionDepth = 10; //[0;40]
+const float talusAngleTangentCoeff = 0.8; //[0;1]
+const float talusAngleTangentBias = 0.1; //[0;1]
+const float minimumHardness = 0.25; //[0;1]
+const float voidSediment = 0.3; //[0;1]
+
+
+const ivec2 vonNeumannNeighbourhood[4] = ivec2[](
+    ivec2( 0,  1),
+    ivec2(-1,  0),
+    ivec2( 1,  0),
+    ivec2( 0, -1)
+);
+
+const ivec2 mooreNeighbourhood[8] = ivec2[](
+    ivec2(-1,  1),
+    ivec2( 0,  1),
+    ivec2( 1,  1),
+    ivec2(-1,  0),
+    ivec2( 1,  0),
+    ivec2(-1, -1),
+    ivec2( 0, -1),
+    ivec2( 1, -1)
+);
+
+const float inverseMooreNeighbourhoodDistances[8] = float[](
+    1/sqrt(2),
+    1,
+    1/sqrt(2),
+    1,
+    1,
+    1/sqrt(2),
+    1,
+    1/sqrt(2)
+);
+
+
+void addWater() {
+    vec4 waterHeight = imageLoad(waterMap, ivec2(gl_GlobalInvocationID));
+    imageStore(waterMap, ivec2(gl_GlobalInvocationID.xy), waterHeight + deltaT*rainRate);
+}
+
+void applySedimentAndThermalOutflow() {
+    float terrainHeight = imageLoad(terrainMap, ivec2(gl_GlobalInvocationID)).x;
+    float sedimentHeight = imageLoad(sedimentMap, ivec2(gl_GlobalInvocationID)).x;
+
+
+    //sediment
+    vec4 outflow = imageLoad(sedimentOutflowPipes, ivec2(gl_GlobalInvocationID));
+    float up =     imageLoad(sedimentOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[0]).w;
+    float left =   imageLoad(sedimentOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[1]).z;
+    float right =  imageLoad(sedimentOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[2]).y;
+    float down =   imageLoad(sedimentOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[3]).x;
+
+    sedimentHeight -= outflow.x + outflow.y + outflow.z + outflow.w;
+    sedimentHeight += up + left + right + down;
+    sedimentHeight = max(0, sedimentHeight);
+
+
+    //thermal
+    vec4 outflow1 = imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID));
+    vec4 outflow2 = imageLoad(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID));
+    terrainHeight -= outflow1.x + outflow1.y + outflow1.z + outflow1.w + outflow2.x + outflow2.y + outflow2.z + outflow2.w;
+
+    terrainHeight += imageLoad(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[0]).w;
+    terrainHeight += imageLoad(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[1]).z;
+    terrainHeight += imageLoad(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[2]).y;
+    terrainHeight += imageLoad(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[3]).x;
+    terrainHeight += imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[4]).w;
+    terrainHeight += imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[5]).z;
+    terrainHeight += imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[6]).y;
+    terrainHeight += imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[7]).x;
+
+
+    imageStore(terrainMap, ivec2(gl_GlobalInvocationID), vec4(terrainHeight));
+    imageStore(sedimentMap, ivec2(gl_GlobalInvocationID), vec4(sedimentHeight));
+}
+
+const float evaporationMultiplier = (1 - evaporationRate * deltaT);
+const float rain = deltaT * rainRate;
+
+void applySedimentThermalOutflowEvaporateAndAddWater() {
+    float terrainHeight = imageLoad(terrainMap, ivec2(gl_GlobalInvocationID)).x;
+    float sedimentHeight = imageLoad(sedimentMap, ivec2(gl_GlobalInvocationID)).x;
+    vec4 waterHeight = imageLoad(waterMap, ivec2(gl_GlobalInvocationID));
+
+
+    //sediment
+    vec4 outflow = imageLoad(sedimentOutflowPipes, ivec2(gl_GlobalInvocationID));
+    float up =     imageLoad(sedimentOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[0]).w;
+    float left =   imageLoad(sedimentOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[1]).z;
+    float right =  imageLoad(sedimentOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[2]).y;
+    float down =   imageLoad(sedimentOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[3]).x;
+
+    sedimentHeight -= outflow.x + outflow.y + outflow.z + outflow.w;
+    sedimentHeight += up + left + right + down;
+    sedimentHeight = max(0, sedimentHeight);
+
+
+    //thermal
+    vec4 outflow1 = imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID));
+    vec4 outflow2 = imageLoad(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID));
+    terrainHeight -= outflow1.x + outflow1.y + outflow1.z + outflow1.w + outflow2.x + outflow2.y + outflow2.z + outflow2.w;
+
+    terrainHeight += imageLoad(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[0]).w;
+    terrainHeight += imageLoad(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[1]).z;
+    terrainHeight += imageLoad(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[2]).y;
+    terrainHeight += imageLoad(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[3]).x;
+    terrainHeight += imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[4]).w;
+    terrainHeight += imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[5]).z;
+    terrainHeight += imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[6]).y;
+    terrainHeight += imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[7]).x;
+
+
+    //evaporateAndAddWater
+    waterHeight *= evaporationMultiplier;
+    waterHeight += rain;
+
+
+
+    imageStore(terrainMap, ivec2(gl_GlobalInvocationID), vec4(terrainHeight));
+    imageStore(sedimentMap, ivec2(gl_GlobalInvocationID), vec4(sedimentHeight));
+    imageStore(waterMap, ivec2(gl_GlobalInvocationID.xy), waterHeight);
+}
+
+const float inverseMaxErosionDepth = 1.0 / maxErosionDepth;
+float erosionDepthMultiplier(float depth) {
+    if (depth >= maxErosionDepth) return 0;
+    if (depth <= 0) return 1;
+    return 1 - inverseMaxErosionDepth*depth;
+}
+
+void applyWaterOutflowAndErosionDeposition() {
+    vec4 outflow = imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID));
+    float up =     imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[0]).w;
+    float left =   imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[1]).z;
+    float right =  imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[2]).y;
+    float down =   imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[3]).x;
+
+    float terrainHeight = imageLoad(terrainMap, ivec2(gl_GlobalInvocationID)).x;
+    float waterHeight = imageLoad(waterMap, ivec2(gl_GlobalInvocationID)).x;
+    float sedimentHeight = imageLoad(sedimentMap, ivec2(gl_GlobalInvocationID)).x;
+    float hardness = imageLoad(hardnessMap, ivec2(gl_GlobalInvocationID)).x;
+
+
+    //waterOutFlow
+    waterHeight -= outflow.x + outflow.y + outflow.z + outflow.w;
+    waterHeight += up + left + right + down;
+    waterHeight = max(0, waterHeight);
+
+
+    //erosionDeposition
+    vec2 velocity = vec2(0);
+    velocity.x -= outflow.y;
+    velocity.x += outflow.z;
+    velocity.y += outflow.x;
+    velocity.y -= outflow.w;
+
+    velocity.x += left;
+    velocity.x -= right;
+    velocity.y -= up;
+    velocity.y += down;
+
+    float sedimentCapacity = erosionDepthMultiplier(waterHeight) * sedimentCapacityMultiplier * length(velocity);
+    float unusedCapacity = sedimentCapacity - sedimentHeight;
+
+    float change = (unusedCapacity > 0) ?
+    deltaT * hardness * soilSuspensionRate * unusedCapacity :
+    deltaT * sedimentDepositionRate * unusedCapacity;
+    terrainHeight -= change;
+    sedimentHeight = max(0, sedimentHeight + change);
+    waterHeight    = max(0, waterHeight    + change);
+
+    hardness = max(minimumHardness, hardness - sedimentSofteningRate * change);
+
+    float voided = sedimentHeight * voidSediment;
+    sedimentHeight -= voided;
+    waterHeight -= voided;
+
+
+    imageStore(terrainMap,  ivec2(gl_GlobalInvocationID), vec4(terrainHeight));
+    imageStore(waterMap,    ivec2(gl_GlobalInvocationID), vec4(waterHeight));
+    imageStore(sedimentMap, ivec2(gl_GlobalInvocationID), vec4(sedimentHeight));
+    imageStore(hardnessMap, ivec2(gl_GlobalInvocationID), vec4(hardness));
+}
+
+void calcSedimentOutflow() {
+    float sedimentHeight = imageLoad(sedimentMap, ivec2(gl_GlobalInvocationID)).x;
+    float terrainHeight  = imageLoad(terrainMap,  ivec2(gl_GlobalInvocationID)).x;
+    float heightDiffs[4];
+    for (int i = 0; i < 4; i++)
+    heightDiffs[i] = terrainHeight -
+    imageLoad(terrainMap, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[i]).x;
+
+    vec4 waterOutflow = imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID));
+    float waterOutflows[4] = float[](waterOutflow.x, waterOutflow.y, waterOutflow.z, waterOutflow.w);
+
+    float totalOutflow = 0;
+
+    float sedimentOutflows[4];
+    for (int i = 0; i < 4; i++) {
+        float sedimentOutflow = (heightDiffs[i] >= 0) ? waterOutflows[i] : 0;
+        sedimentOutflows[i] = sedimentOutflow;
+        totalOutflow += sedimentOutflow;
+    }
+
+    vec4 sedimentOutflow = vec4(sedimentOutflows[0], sedimentOutflows[1], sedimentOutflows[2], sedimentOutflows[3]);
+    if (totalOutflow > sedimentHeight) {
+        float flowScalar = sedimentHeight / totalOutflow;
+        sedimentOutflow *= flowScalar;
+    }
+
+    imageStore(sedimentOutflowPipes, ivec2(gl_GlobalInvocationID), sedimentOutflow);
+}
+
+void calcWaterAndThermalOutflow() {
+    float terrainHeight = imageLoad(terrainMap, ivec2(gl_GlobalInvocationID)).x;
+    float hardness = imageLoad(hardnessMap, ivec2(gl_GlobalInvocationID)).x;
+    float heightDiffs[8];
+    for (int i = 0; i < 8; i++)
+    heightDiffs[i] = terrainHeight - imageLoad(terrainMap, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[i]).x;
+
+
+    float waterHeight = imageLoad(waterMap, ivec2(gl_GlobalInvocationID)).x;
+    float addedHeight = terrainHeight + waterHeight;
+    float waterHeights[4];
+    for (int i = 0; i < 4; i++)
+    waterHeights[i] = imageLoad(waterMap, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[i]).x;
+    vec4 waterHeightDiffs = vec4(waterHeight) -
+    vec4(waterHeights[0], waterHeights[1], waterHeights[2], waterHeights[3]) +
+    vec4(heightDiffs[1], heightDiffs[3], heightDiffs[4], heightDiffs[6]);
+
+    vec4 outflow = imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID));
+
+
+    //water
+    outflow = max(vec4(0), outflow + vec4(deltaT) * waterHeightDiffs * waterFlowMultiplier);
+
+    float totalOutFlow = outflow.x + outflow.y + outflow.z + outflow.w;
+    if (totalOutFlow > waterHeight) {
+        float flowScalar = waterHeight / totalOutFlow;
+        outflow *= flowScalar;
+    }
+
+
+    //thermal
+    float maxHeightDiff = -1/0;  //This equates to negative infinity
+    bool neighborBelowTalusAngle[8] = bool[](false, false, false, false, false, false, false, false);
+    float steepNeighbourHeightDiffSum = 0;
+
+    for (int i = 0; i < 8; i++) {
+        maxHeightDiff = max(maxHeightDiff, heightDiffs[i]);
+
+        float angle = heightDiffs[i] * inverseMooreNeighbourhoodDistances[i]; //this is normally in atan() but is only used for tan()
+        if (heightDiffs[i] > 0 && angle > hardness * talusAngleTangentCoeff + talusAngleTangentBias) {
+            neighborBelowTalusAngle[i] = true;
+            steepNeighbourHeightDiffSum += heightDiffs[i];
+        }
+    }
+
+    float heightChange = deltaT * thermalErosionRate * hardness * maxHeightDiff*.5;
+    float inverseSteepNeighbourHeightDiffSum = 1 / steepNeighbourHeightDiffSum;
+
+    //inverseSteepNeighbourHeightDiffSum CAN be Infinite, but in that case all differences are 0 and no one ever calculates anything
+    for (int i = 0; i < 8; i++)
+    heightDiffs[i] = (neighborBelowTalusAngle[i]) ?
+    heightChange * heightDiffs[i] * inverseSteepNeighbourHeightDiffSum : 0;
+
+
+    imageStore(waterOutflowPipes, ivec2(gl_GlobalInvocationID), outflow);
+    imageStore(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID), vec4(heightDiffs[0], heightDiffs[1], heightDiffs[2], heightDiffs[3]));
+    imageStore(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID), vec4(heightDiffs[4], heightDiffs[5], heightDiffs[6], heightDiffs[7]));
+}
+
+void evaporateWater() {
+    vec4 waterHeight = imageLoad(waterMap, ivec2(gl_GlobalInvocationID));
+    imageStore(waterMap, ivec2(gl_GlobalInvocationID.xy), waterHeight * evaporationMultiplier);
+}
+
+void main() {
+    switch (stepType) {
+        case 1:
+            addWater();
+            break;
+        case 2:
+            calcWaterAndThermalOutflow();
+            break;
+        case 3:
+            applyWaterOutflowAndErosionDeposition();
+            break;
+        case 4:
+            calcSedimentOutflow();
+            break;
+        case 5:
+            applySedimentAndThermalOutflow();
+            break;
+        case 6:
+            applySedimentThermalOutflowEvaporateAndAddWater();
+            break;
+        case 7:
+            evaporateWater();
+            break;
+    }
+}
