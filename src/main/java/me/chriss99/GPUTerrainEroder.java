@@ -48,6 +48,7 @@ public class GPUTerrainEroder {
     private final ComputeProgram evaporateWater;
 
     private final ComputeProgram initTextures;
+    private final int initTexturesrcPos;
     private final ComputeProgram[] erosionPrograms;
 
     public GPUTerrainEroder(int width, int height) {
@@ -126,6 +127,9 @@ public class GPUTerrainEroder {
         sedimentMap.bindUniformImage(initTextures.program, 2, "sedimentMap", GL_WRITE_ONLY);
         hardnessMap.bindUniformImage(initTextures.program, 3, "hardnessMap", GL_WRITE_ONLY);
         waterOutflowPipes.bindUniformImage(initTextures.program, 4, "waterOutflowPipes", GL_WRITE_ONLY);
+
+        initTexturesrcPos = initTextures.getUniform("srcPos");
+        glUniform2i(initTexturesrcPos, 0, 0);
 
         initTextures.use();
         glDispatchCompute(width, height, 1);
