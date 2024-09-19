@@ -10,8 +10,10 @@ import static org.lwjgl.opengl.GL40.GL_PATCHES;
 
 public class TerrainVAOListProgram extends RenderProgram {
     private final CameraMatrix cameraMatrix;
+
     private final int transformMatrix;
     private final int cameraPos;
+    private final int waterUniform;
 
     private final List<TerrainVAO> vaoList;
 
@@ -29,6 +31,7 @@ public class TerrainVAOListProgram extends RenderProgram {
 
         transformMatrix = getUniform("transformMatrix");
         cameraPos = getUniform("cameraPos");
+        waterUniform = getUniform("water");
     }
 
     @Override
@@ -40,6 +43,7 @@ public class TerrainVAOListProgram extends RenderProgram {
         glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
         glUniform3f(cameraPos, cameraMatrix.position.x, cameraMatrix.position.y, cameraMatrix.position.z);
 
+        glUniform1i(waterUniform, 1);
         for (TerrainVAO vao : vaoList) {
             vao.bind();
 
