@@ -3,7 +3,7 @@ package me.chriss99.program;
 import me.chriss99.CameraMatrix;
 import me.chriss99.TerrainVAO;
 
-import java.util.List;
+import java.util.LinkedList;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
@@ -16,11 +16,11 @@ public class TerrainVAOListProgram extends RenderProgram {
     private final int cameraPos;
     private final int waterUniform;
 
-    private final List<TerrainVAO> vaoList;
+    public final LinkedList<TerrainVAO> terrainVAOs = new LinkedList<>();
+    public final LinkedList<TerrainVAO> waterVAOs = new LinkedList<>();
 
-    public TerrainVAOListProgram(CameraMatrix cameraMatrix, List<TerrainVAO> vaoList) {
+    public TerrainVAOListProgram(CameraMatrix cameraMatrix) {
         this.cameraMatrix = cameraMatrix;
-        this.vaoList = vaoList;
 
         addShader("terrain/passThrough.vert", GL_VERTEX_SHADER);
         addShader("tesselation/normals.geom", GL_GEOMETRY_SHADER);
@@ -37,24 +37,30 @@ public class TerrainVAOListProgram extends RenderProgram {
 
     @Override
     public void render() {
-        if (vaoList.isEmpty())
+        if (terrainVAOs.isEmpty() && waterVAOs.isEmpty())
             return;
 
         use();
         glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
         glUniform3f(cameraPos, cameraMatrix.position.x, cameraMatrix.position.y, cameraMatrix.position.z);
 
-        glUniform1i(waterUniform, 1);
-        for (TerrainVAO vao : vaoList) {
+        glUniform1i(waterUniform, 0);
+        for (TerrainVAO vao : terrainVAOs) {
             vao.bind();
-
+            glDrawElements(GL_TRIANGLES, vao.indexLength(), GL_UNSIGNED_INT, 0);
+        }
+        glUniform1i(waterUniform, 1);
+        for (TerrainVAO vao : waterVAOs) {
+            vao.bind();
             glDrawElements(GL_TRIANGLES, vao.indexLength(), GL_UNSIGNED_INT, 0);
         }
     }
 
     @Override
     public void delete() {
-        for (TerrainVAO vao : vaoList)
+        for (TerrainVAO vao : terrainVAOs)
+            vao.delete();
+        for (TerrainVAO vao : waterVAOs)
             vao.delete();
         super.delete();
     }

@@ -18,7 +18,7 @@ public class Main {
 
     static boolean niceRender = true;
     static RenderProgram vaoListProgram;
-    static RenderProgram terrainVAOListProgram;
+    static TerrainVAOListProgram terrainVAOListProgram;
     static RenderProgram tessProgram;
     static RenderProgram niceTessProgram;
 
@@ -43,10 +43,12 @@ public class Main {
         glfwInit();
         createWindow();
         gpuTerrainEroder = new GPUTerrainEroder(xSize, zSize);
-        setupData();
 
         vaoListProgram = new VAOListProgram(cameraMatrix, List.of(/*VAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
-        terrainVAOListProgram = new TerrainVAOListProgram(cameraMatrix, List.of(TerrainVAOGenerator.heightMapToSimpleVAO(new float[][]{{0, 0, 0}, {0, 1, 0}, {0, 1, 0}})));
+        terrainVAOListProgram = new TerrainVAOListProgram(cameraMatrix);
+
+        setupData();
+
         glPatchParameteri(GL_PATCH_VERTICES, 4);
         tessProgram = new TessProgram(cameraMatrix, vao, xSize, zSize, false);
         niceTessProgram = new TessProgram(cameraMatrix, vao, xSize, zSize, true);
@@ -105,6 +107,10 @@ public class Main {
         glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
         glVertexAttribPointer(0, 2, GL_DOUBLE, false, 0, 0);
         glEnableVertexAttribArray(0);
+
+
+        terrainVAOListProgram.terrainVAOs.add(TerrainVAOGenerator.heightMapToSimpleVAO(new float[][]{{0, 0, 0}, {0, 1, 0}, {0, 1, 1}}));
+        terrainVAOListProgram.waterVAOs.add(TerrainVAOGenerator.heightMapToSimpleVAO(new float[][]{{0, 0, 0}, {0, 1, 0}, {0, 1, 2}}));
     }
 
     private static void loop() {
