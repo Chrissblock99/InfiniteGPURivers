@@ -4,15 +4,15 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 public class CameraMatrix {
-    float aspectRatio = 1;
-    float FOV = 90;
-    float zNear = 0;
-    float zFar = 20000;
+    public float aspectRatio = 1;
+    public float FOV = 90;
+    public float zNear = 0;
+    public float zFar = 20000;
 
-    Vector3f position = new Vector3f();
-    float yaw = 0;
-    float pitch = 0;
-    float roll = 0;
+    public Vector3f position = new Vector3f();
+    public float yaw = 0;
+    public float pitch = 0;
+    public float roll = 0;
 
     public Matrix4f generateMatrix() {
         Matrix4f viewMatrix = new Matrix4f();
