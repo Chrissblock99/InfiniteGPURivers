@@ -1,4 +1,4 @@
-package me.chriss99;
+package me.chriss99.program;
 
 import java.io.File;
 import java.io.FileNotFoundException;

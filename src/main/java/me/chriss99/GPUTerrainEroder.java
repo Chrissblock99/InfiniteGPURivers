@@ -1,5 +1,6 @@
 package me.chriss99;
 
+import me.chriss99.program.ComputeProgram;
 import org.lwjgl.BufferUtils;
 
 import java.nio.ByteBuffer;

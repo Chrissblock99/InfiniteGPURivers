@@ -1,4 +1,7 @@
-package me.chriss99;
+package me.chriss99.program;
+
+import me.chriss99.CameraMatrix;
+import me.chriss99.VAO;
 
 import java.util.List;
 

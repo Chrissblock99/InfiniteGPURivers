@@ -1,5 +1,6 @@
 package me.chriss99;
 
+import me.chriss99.program.*;
 import org.lwjgl.opengl.*;
 
 import static org.lwjgl.glfw.GLFW.*;

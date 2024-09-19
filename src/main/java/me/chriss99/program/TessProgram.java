@@ -1,4 +1,6 @@
-package me.chriss99;
+package me.chriss99.program;
+
+import me.chriss99.CameraMatrix;
 
 import static org.lwjgl.opengl.GL11.glDrawArrays;
 import static org.lwjgl.opengl.GL20.*;
