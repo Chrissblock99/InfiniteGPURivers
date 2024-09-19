@@ -24,4 +24,8 @@ public class Util {
         buffer.position(0);
         return buffer;
     }
+
+    static int indexOfXZFlattenedArray(int x, int z, int xSize) {
+        return x + z*xSize;
+    }
 }

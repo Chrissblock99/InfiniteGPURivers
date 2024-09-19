@@ -57,12 +57,12 @@ public class VAOGenerator {
                 if (z == heightMap[0].length-1 || x == heightMap.length-1)
                     continue;
 
-                index[indexShift+0] = indexOfXZFlattenedArray(x, z, heightMap.length);
-                index[indexShift+1] = indexOfXZFlattenedArray(x+1, z, heightMap.length);
-                index[indexShift+2] = indexOfXZFlattenedArray(x, z+1, heightMap.length);
-                index[indexShift+3] = indexOfXZFlattenedArray(x+1, z, heightMap.length);
-                index[indexShift+4] = indexOfXZFlattenedArray(x+1, z+1, heightMap.length);
-                index[indexShift+5] = indexOfXZFlattenedArray(x, z+1, heightMap.length);
+                index[indexShift+0] = Util.indexOfXZFlattenedArray(x, z, heightMap.length);
+                index[indexShift+1] = Util.indexOfXZFlattenedArray(x+1, z, heightMap.length);
+                index[indexShift+2] = Util.indexOfXZFlattenedArray(x, z+1, heightMap.length);
+                index[indexShift+3] = Util.indexOfXZFlattenedArray(x+1, z, heightMap.length);
+                index[indexShift+4] = Util.indexOfXZFlattenedArray(x+1, z+1, heightMap.length);
+                index[indexShift+5] = Util.indexOfXZFlattenedArray(x, z+1, heightMap.length);
                 indexShift += 6;
             }
 
@@ -330,10 +330,6 @@ public class VAOGenerator {
             }
 
         return vertexes;
-    }
-
-    private static int indexOfXZFlattenedArray(int x, int z, int xSize) {
-        return x + z*xSize;
     }
 
     public static Vector3d normalAt(double[][] heightMap, int x, int z) {
