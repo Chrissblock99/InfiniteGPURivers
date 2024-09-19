@@ -23,15 +23,15 @@ public class TessProgram extends RenderProgram {
         this.xSize = xSize;
         this.zSize = zSize;
 
-        addShader("passThrough.vert", GL_VERTEX_SHADER);
-        addShader("tess.tesc", GL_TESS_CONTROL_SHADER);
+        addShader("tesselation/passThrough.vert", GL_VERTEX_SHADER);
+        addShader("tesselation/tess.tesc", GL_TESS_CONTROL_SHADER);
         if (!niceLooking) {
-            addShader("tess.tese", GL_TESS_EVALUATION_SHADER);
-            addShader("gradient.frag", GL_FRAGMENT_SHADER);
+            addShader("tesselation/tess.tese", GL_TESS_EVALUATION_SHADER);
+            addShader("tesselation/gradient.frag", GL_FRAGMENT_SHADER);
         } else {
-            addShader("niceTess.tese", GL_TESS_EVALUATION_SHADER);
-            addShader("normals.geom", GL_GEOMETRY_SHADER);
-            addShader("different.frag", GL_FRAGMENT_SHADER);
+            addShader("tesselation/niceTess.tese", GL_TESS_EVALUATION_SHADER);
+            addShader("tesselation/normals.geom", GL_GEOMETRY_SHADER);
+            addShader("tesselation/different.frag", GL_FRAGMENT_SHADER);
 
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
