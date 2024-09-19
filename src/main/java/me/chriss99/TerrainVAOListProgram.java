@@ -4,9 +4,7 @@ import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL32.GL_GEOMETRY_SHADER;
-import static org.lwjgl.opengl.GL40.GL_PATCHES;
 
 public class TerrainVAOListProgram extends RenderProgram {
     private final CameraMatrix cameraMatrix;
