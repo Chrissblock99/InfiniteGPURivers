@@ -15,6 +15,16 @@ public class Util {
         return buffer;
     }
 
+    public static ByteBuffer storeArrayInBuffer(float[] array) {
+        ByteBuffer buffer = BufferUtils.createByteBuffer(array.length * 4);
+
+        for(float i : array)
+            buffer.putFloat(i);
+
+        buffer.position(0);
+        return buffer;
+    }
+
     public static ByteBuffer storeArrayInBuffer(int[] array) {
         ByteBuffer buffer = BufferUtils.createByteBuffer(array.length * 4);
 
