@@ -17,6 +17,7 @@ public class Main {
 
     static boolean niceRender = true;
     static RenderProgram vaoListProgram;
+    static RenderProgram terrainVAOListProgram;
     static RenderProgram tessProgram;
     static RenderProgram niceTessProgram;
 
@@ -44,6 +45,7 @@ public class Main {
         setupData();
 
         vaoListProgram = new VAOListProgram(cameraMatrix, List.of(/*VAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
+        terrainVAOListProgram = new TerrainVAOListProgram(cameraMatrix, List.of(TerrainVAOGenerator.heightMapToSimpleVAO(new float[][]{{0, 0, 0}, {0, 1, 0}, {0, 1, 0}})));
         glPatchParameteri(GL_PATCH_VERTICES, 4);
         tessProgram = new TessProgram(cameraMatrix, vao, xSize, zSize, false);
         niceTessProgram = new TessProgram(cameraMatrix, vao, xSize, zSize, true);
@@ -116,6 +118,7 @@ public class Main {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             vaoListProgram.render();
+            terrainVAOListProgram.render();
             if (niceRender)
                 niceTessProgram.render();
             else
