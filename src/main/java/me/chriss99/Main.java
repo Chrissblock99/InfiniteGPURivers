@@ -107,10 +107,19 @@ public class Main {
         glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
         glVertexAttribPointer(0, 2, GL_DOUBLE, false, 0, 0);
         glEnableVertexAttribArray(0);
+    }
 
+    private static void updateData() {
+        for (TerrainVAO vao : terrainVAOListProgram.terrainVAOs)
+            vao.delete();
+        terrainVAOListProgram.terrainVAOs.clear();
+        for (TerrainVAO vao : terrainVAOListProgram.waterVAOs)
+            vao.delete();
+        terrainVAOListProgram.waterVAOs.clear();
 
-        terrainVAOListProgram.terrainVAOs.add(TerrainVAOGenerator.heightMapToSimpleVAO(new float[][]{{0, 0, 0}, {0, 1, 0}, {0, 1, 1}}));
-        terrainVAOListProgram.waterVAOs.add(TerrainVAOGenerator.heightMapToSimpleVAO(new float[][]{{0, 0, 0}, {0, 1, 0}, {0, 1, 2}}));
+        float[][][] map = gpuTerrainEroder.downloadMap();
+        terrainVAOListProgram.terrainVAOs.add(TerrainVAOGenerator.heightMapToSimpleVAO(map[0]));
+        terrainVAOListProgram.waterVAOs.add(TerrainVAOGenerator.heightMapToSimpleVAO(map[1]));
     }
 
     private static void loop() {
@@ -118,18 +127,26 @@ public class Main {
         double lastFramePrint = Double.NEGATIVE_INFINITY;
         LinkedList<Double> frames = new LinkedList<>();
 
+        double lastUpdate = 0;
+        updateData();
+
         while(!glfwWindowShouldClose(window)) {
             movementController.update();
 
             //clear the window
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+            if (simulateErosion && lastTime - lastUpdate >= .5) {
+                lastUpdate = lastTime;
+                updateData();
+            }
+
             vaoListProgram.render();
             terrainVAOListProgram.render();
-            if (niceRender)
+            /*if (niceRender)
                 niceTessProgram.render();
             else
-                tessProgram.render();
+                tessProgram.render();*/
 
             //swap the frame to show the rendered image
             glfwSwapBuffers(window);
