@@ -177,7 +177,10 @@ public class GPUTerrainEroder {
         for (int i = 0; i < width*height; i++) {
             int x = i % width;
             int z = (i - x) / width;
-            addedMap[x][z] = byteBuffer.getFloat(i*4) + terrainMap[x][z];
+
+            float waterHeight = byteBuffer.getFloat(i*4) + terrainMap[x][z] - .03f;
+            waterHeight -= (waterHeight <= 0) ? .1f : 0;
+            addedMap[x][z] = waterHeight;
         }
 
         return new float[][][]{terrainMap, addedMap};
