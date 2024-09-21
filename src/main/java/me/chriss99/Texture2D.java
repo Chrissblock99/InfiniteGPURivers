@@ -38,6 +38,12 @@ public class Texture2D {
         uploadData(0, 0, width, height, format, type, data);
     }
 
+    public void downloadData(int xOffset, int yOffset, int width, int height, int format, int type, ByteBuffer buffer) {
+        glBindTexture(GL_TEXTURE_2D, texture);
+        //excuse me the docs say that I have to use "GL_TEXTURE_2D" instead of "texture"
+        glGetTextureSubImage(texture, 0, xOffset, yOffset, 0, width, height, 1, format, type, buffer);
+    }
+
     public void downloadFullData(int format, int type, ByteBuffer buffer) {
         glBindTexture(GL_TEXTURE_2D, texture);
         glGetTexImage(GL_TEXTURE_2D, 0, format, type, buffer);

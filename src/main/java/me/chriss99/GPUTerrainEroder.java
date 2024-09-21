@@ -161,26 +161,30 @@ public class GPUTerrainEroder {
     }
 
     public float[][][] downloadMap() {
+        return downloadMapPart(0, 0, width, height);
+    }
+
+    public float[][][] downloadMapPart(int x, int y, int width, int height) {
         ByteBuffer byteBuffer = BufferUtils.createByteBuffer(width*height*4);
-        terrainMap.downloadFullData(GL_RED, GL_FLOAT, byteBuffer);
+        terrainMap.downloadData(x, y, width, height, GL_RED, GL_FLOAT, byteBuffer);
         float[][] terrainMap = new float[width][height];
 
         for (int i = 0; i < width*height; i++) {
-            int x = i % width;
-            int z = (i - x) / width;
-            terrainMap[x][z] = byteBuffer.getFloat(i*4);
+            int cX = i % width;
+            int cZ = (i - cX) / width;
+            terrainMap[cX][cZ] = byteBuffer.getFloat(i*4);
         }
 
-        waterMap.downloadFullData(GL_RED, GL_FLOAT, byteBuffer);
+        waterMap.downloadData(x, y, width, height, GL_RED, GL_FLOAT, byteBuffer);
         float[][] addedMap = new float[width][height];
 
         for (int i = 0; i < width*height; i++) {
-            int x = i % width;
-            int z = (i - x) / width;
+            int cX = i % width;
+            int cZ = (i - cX) / width;
 
-            float waterHeight = byteBuffer.getFloat(i*4) + terrainMap[x][z] - .03f;
+            float waterHeight = byteBuffer.getFloat(i*4) + terrainMap[cX][cZ] - .03f;
             waterHeight -= (waterHeight <= 0) ? .1f : 0;
-            addedMap[x][z] = waterHeight;
+            addedMap[cX][cZ] = waterHeight;
         }
 
         return new float[][][]{terrainMap, addedMap};
