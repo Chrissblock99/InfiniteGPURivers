@@ -17,13 +17,13 @@ import static org.lwjgl.opengl.GL42.glMemoryBarrier;
 import static org.lwjgl.opengl.GL43.glDispatchCompute;
 
 public class TerrainGenerator {
-    public static Chunk generateChunk(Vector2i srcPos) {
+    public static Chunk generateChunk(Vector2i chunkPos) {
         Texture2D terrainMap = new Texture2D(GL_R32F, 100, 100);
         ComputeProgram genHeightMap = new ComputeProgram("genHeightMap");
         int srcPosUniform = genHeightMap.getUniform("srcPos");
 
         terrainMap.bindUniformImage(genHeightMap.program, 0, "terrainMap", GL_WRITE_ONLY);
-        glUniform2i(srcPosUniform, srcPos.x, srcPos.y);
+        glUniform2i(srcPosUniform, chunkPos.x*100, chunkPos.y*100);
 
         genHeightMap.use();
         glDispatchCompute(100, 100, 1);
