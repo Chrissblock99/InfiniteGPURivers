@@ -49,12 +49,11 @@ public class GPUTerrainEroder {
     private final ComputeProgram evaporateWater;
 
     private final ComputeProgram initTextures;
-    private final int initTexturesrcPos;
     private final ComputeProgram[] erosionPrograms;
 
-    public GPUTerrainEroder(int width, int height) {
-        this.width = width;
-        this.height = height;
+    public GPUTerrainEroder(float[][][] map) {
+        this.width = map[0].length;
+        this.height = map[0][0].length;
 
         terrainMap = new Texture2D(GL_R32F, width, height);
         waterMap = new Texture2D(GL_R32F, width, height);
@@ -121,16 +120,14 @@ public class GPUTerrainEroder {
 
 
 
+        uploadMap(map);
+
         initTextures = new ComputeProgram("initTextures");
 
-        terrainMap.bindUniformImage(initTextures.program, 0, "terrainMap", GL_WRITE_ONLY);
         waterMap.bindUniformImage(initTextures.program, 1, "waterMap", GL_WRITE_ONLY);
         sedimentMap.bindUniformImage(initTextures.program, 2, "sedimentMap", GL_WRITE_ONLY);
         hardnessMap.bindUniformImage(initTextures.program, 3, "hardnessMap", GL_WRITE_ONLY);
         waterOutflowPipes.bindUniformImage(initTextures.program, 4, "waterOutflowPipes", GL_WRITE_ONLY);
-
-        initTexturesrcPos = initTextures.getUniform("srcPos");
-        glUniform2i(initTexturesrcPos, 0, 0);
 
         initTextures.use();
         glDispatchCompute(width, height, 1);
@@ -188,6 +185,35 @@ public class GPUTerrainEroder {
         }
 
         return new float[][][]{terrainMap, addedMap};
+    }
+
+    public void uploadMap(float[][][] map) {
+        uploadMapPart(0, 0, map);
+    }
+
+    public void uploadMapPart(int x, int y, float[][][] map) {
+        int width = map[0].length;
+        int height = map[0][0].length;
+
+        ByteBuffer byteBuffer = BufferUtils.createByteBuffer(width*height*4);
+
+        for (int i = 0; i < width*height; i++) {
+            int cX = i % width;
+            int cZ = (i - cX) / width;
+            byteBuffer.putFloat(i*4, map[0][cX][cZ]);
+        }
+        terrainMap.uploadData(x, y, width, height, GL_RED, GL_FLOAT, byteBuffer);
+
+        for (int i = 0; i < width*height; i++) {
+            int cX = i % width;
+            int cZ = (i - cX) / width;
+
+            //TODO: this might be broken
+            float waterHeight = map[1][cX][cZ];
+            waterHeight += (waterHeight <= 0) ? .1f : 0;
+            byteBuffer.putFloat(i*4, waterHeight - map[0][cX][cZ] + .3f);
+        }
+        waterMap.uploadData(x, y, width, height, GL_RED, GL_FLOAT, byteBuffer);
     }
 
     public float[][][] downloadWaterOutflow() {

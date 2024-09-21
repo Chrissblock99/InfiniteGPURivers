@@ -1,6 +1,7 @@
 package me.chriss99;
 
 import me.chriss99.program.*;
+import org.joml.Vector2i;
 import org.lwjgl.opengl.*;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -42,7 +43,8 @@ public class Main {
     public static void main(String[] args) {
         glfwInit();
         createWindow();
-        gpuTerrainEroder = new GPUTerrainEroder(xSize, zSize);
+        float[][] heightMap = TerrainGenerator.generateChunk(new Vector2i(0, 0)).data();
+        gpuTerrainEroder = new GPUTerrainEroder(new float[][][]{heightMap, heightMap});
 
         vaoListProgram = new VAOListProgram(cameraMatrix, List.of(/*VAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
         terrainVAOListProgram = new TerrainVAOListProgram(cameraMatrix);
