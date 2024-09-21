@@ -1,7 +1,7 @@
 package me.chriss99;
 
 import me.chriss99.program.*;
-import org.joml.Vector2i;
+import me.chriss99.worldmanagement.InfiniteWorld;
 import org.lwjgl.opengl.*;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -23,6 +23,8 @@ public class Main {
     static RenderProgram tessProgram;
     static RenderProgram niceTessProgram;
 
+    static InfiniteWorld terrainStorage;
+
     static int xSize = 8*64;
     static int zSize = 8*64;
     static int simulationStepsPerFrame = 5;
@@ -43,7 +45,8 @@ public class Main {
     public static void main(String[] args) {
         glfwInit();
         createWindow();
-        float[][] heightMap = TerrainGenerator.generateChunk(new Vector2i(0, 0)).data();
+        terrainStorage = new InfiniteWorld("testT", TerrainGenerator::generateChunk);
+        float[][] heightMap = terrainStorage.readArea(0, 0, xSize, zSize);
         gpuTerrainEroder = new GPUTerrainEroder(new float[][][]{heightMap, heightMap});
 
         vaoListProgram = new VAOListProgram(cameraMatrix, List.of(/*VAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
