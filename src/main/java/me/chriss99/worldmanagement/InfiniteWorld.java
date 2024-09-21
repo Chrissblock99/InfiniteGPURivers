@@ -16,15 +16,15 @@ public class InfiniteWorld {
         this.chunkGenerator = chunkGenerator;
     }
 
-    public int[][] readArea(int x, int y, int width, int height) {
-        return readWriteArea(x, y, new int[width][height], false);
+    public float[][] readArea(int x, int y, int width, int height) {
+        return readWriteArea(x, y, new float[width][height], false);
     }
 
-    public void writeArea(int x, int y, int[][] data) {
+    public void writeArea(int x, int y, float[][] data) {
         readWriteArea(x, y, data, true);
     }
 
-    public int[][] readWriteArea(int x, int y, int[][] data, boolean write) {
+    public float[][] readWriteArea(int x, int y, float[][] data, boolean write) {
         int width = data.length;
         int height = data[0].length;
 
@@ -43,13 +43,13 @@ public class InfiniteWorld {
                 int currentChunkMaxY = Math.min(currentChunkY*100 +99, y+height-1)%100;
 
                 for (int i = currentChunkMinX; i <= currentChunkMaxX; i++) {
-                    int[] src = currentChunk.data()[i];
+                    float[] src = currentChunk.data()[i];
                     int srcPos = currentChunkMinY;
-                    int[] dest = data[currentChunkX*100 + i - x];
+                    float[] dest = data[currentChunkX*100 + i - x];
                     int destPos = currentChunkY*100 + currentChunkMinY - y;
 
                     if (write) {
-                        int[] tempArray = src;
+                        float[] tempArray = src;
                         src = dest;
                         dest = tempArray;
 

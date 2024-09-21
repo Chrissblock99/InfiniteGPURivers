@@ -68,11 +68,11 @@ public class RegionFileManager {
 
         for (int i = 0; i < chunkNum; i++) {
             Vector2i chunkCoord = new Vector2i(buffer.getInt(), buffer.getInt());
-            int[][] data = new int[100][100];
+            float[][] data = new float[100][100];
 
             for (int x = 0; x < 100; x++)
                 for (int y = 0; y < 100; y++)
-                    data[x][y] = buffer.getInt();
+                    data[x][y] = buffer.getFloat();
 
             region.addChunk(chunkCoord, new Chunk(data));
         }
@@ -86,11 +86,11 @@ public class RegionFileManager {
         for (Map.Entry<Vector2i, Chunk> entry : region.getAllChunks()) {
             buffer.putInt(entry.getKey().x);
             buffer.putInt(entry.getKey().y);
-            int[][] data = entry.getValue().data();
+            float[][] data = entry.getValue().data();
 
             for (int x = 0; x < 100; x++)
                 for (int y = 0; y < 100; y++)
-                    buffer.putInt(data[x][y]);
+                    buffer.putFloat(data[x][y]);
         }
 
         return buffer.array();
