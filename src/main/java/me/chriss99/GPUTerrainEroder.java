@@ -230,7 +230,12 @@ public class GPUTerrainEroder {
 
     public void delete() {
         initTextures.delete();
+
+        addWater.delete();
         for (ComputeProgram program : erosionPrograms)
             program.delete();
+        applySedimentAndThermalOutflow.delete();
+        applySedimentThermalOutflowEvaporateAndAddWater.delete();
+        evaporateWater.delete();
     }
 }
