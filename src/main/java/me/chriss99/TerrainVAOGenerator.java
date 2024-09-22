@@ -30,12 +30,12 @@ public class TerrainVAOGenerator {
                 if (z == height-1 || x == width-1)
                     continue;
 
-                index[indexShift+0] = Util.indexOfXZFlattenedArray(x, z, height);
-                index[indexShift+1] = Util.indexOfXZFlattenedArray(x+1, z+1, height);
-                index[indexShift+2] = Util.indexOfXZFlattenedArray(x, z+1, height);
-                index[indexShift+3] = Util.indexOfXZFlattenedArray(x, z, height);
-                index[indexShift+4] = Util.indexOfXZFlattenedArray(x+1, z, height);
-                index[indexShift+5] = Util.indexOfXZFlattenedArray(x+1, z+1, height);
+                index[indexShift+0] = Util.indexOfXZFlattenedArray(x, z, width);
+                index[indexShift+1] = Util.indexOfXZFlattenedArray(x+1, z+1, width);
+                index[indexShift+2] = Util.indexOfXZFlattenedArray(x, z+1, width);
+                index[indexShift+3] = Util.indexOfXZFlattenedArray(x, z, width);
+                index[indexShift+4] = Util.indexOfXZFlattenedArray(x+1, z, width);
+                index[indexShift+5] = Util.indexOfXZFlattenedArray(x+1, z+1, width);
                 indexShift += 6;
             }
 
