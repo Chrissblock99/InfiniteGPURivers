@@ -29,8 +29,8 @@ public class InfiniteWorld {
         int width = data.length;
         int height = data[0].length;
 
-        int chunkX = x/100;
-        int chunkY = y/100;
+        int chunkX = Util.properIntDivide(x, 100);
+        int chunkY = Util.properIntDivide(y, 100);
         int chunksX = (x+width-1)/100 - chunkX + 1;
         int chunksY = (y+height-1)/100 - chunkY + 1;
 
