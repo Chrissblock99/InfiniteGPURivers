@@ -157,7 +157,7 @@ void main() {
     float localAmp = amp;
 
     for (int i = 0; i < octaves; i++) {
-        height += simplexNoiseDeriv(vec2(gl_GlobalInvocationID.xy + srcPos) * localFreq, seed + i, false).z * localAmp;
+        height += simplexNoiseDeriv(vec2(gl_GlobalInvocationID.xy + vec2(srcPos)) * localFreq, seed + i, false).z * localAmp;
         localFreq *= lacunarity;
         localAmp *= persistence;
     }

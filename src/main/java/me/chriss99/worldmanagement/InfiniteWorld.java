@@ -1,5 +1,6 @@
 package me.chriss99.worldmanagement;
 
+import me.chriss99.Util;
 import org.joml.Vector2i;
 
 import java.util.HashMap;
@@ -37,10 +38,10 @@ public class InfiniteWorld {
             for (int currentChunkY = chunkY; currentChunkY < chunkY+chunksY; currentChunkY++) {
                 Chunk currentChunk = getChunk(currentChunkX, currentChunkY);
 
-                int currentChunkMinX = Math.max(currentChunkX*100, x)%100;
-                int currentChunkMaxX = Math.min(currentChunkX*100 +99, x+width-1)%100;
-                int currentChunkMinY = Math.max(currentChunkY*100, y)%100;
-                int currentChunkMaxY = Math.min(currentChunkY*100 +99, y+height-1)%100;
+                int currentChunkMinX = (Math.max(currentChunkX*100, x)%100+100)%100;
+                int currentChunkMaxX = (Math.min(currentChunkX*100 +99, x+width-1)%100+100)%100;
+                int currentChunkMinY = (Math.max(currentChunkY*100, y)%100+100)%100;
+                int currentChunkMaxY = (Math.min(currentChunkY*100 +99, y+height-1)%100+100)%100;
 
                 for (int i = currentChunkMinX; i <= currentChunkMaxX; i++) {
                     float[] src = currentChunk.data()[i];
@@ -70,7 +71,7 @@ public class InfiniteWorld {
     }
 
     private Chunk getChunk(int x, int y) {
-        return getRegion(new Vector2i(x, y).div(10)).getChunk(new Vector2i(x, y), chunkGenerator);
+        return getRegion(new Vector2i(Util.properIntDivide(x, 10), Util.properIntDivide(y, 10))).getChunk(new Vector2i(x, y), chunkGenerator);
     }
 
     public void unloadRegion(Vector2i regionCoord) {

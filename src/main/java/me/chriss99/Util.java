@@ -38,4 +38,9 @@ public class Util {
     static int indexOfXZFlattenedArray(int x, int z, int xSize) {
         return x + z*xSize;
     }
+
+    public static int properIntDivide(int a, int b) {
+        //yes this is horrible, but I was too lazy to do it better
+        return (int) Math.floor(((double) a)/((double) b));
+    }
 }
