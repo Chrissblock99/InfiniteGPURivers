@@ -26,6 +26,7 @@ public class Main {
 
     static InfiniteWorld terrainStorage;
 
+    static Vector2i srcPos = new Vector2i(-100, -100);
     static int xSize = 8*64;
     static int zSize = 8*64;
     static int simulationStepsPerFrame = 5;
@@ -47,7 +48,7 @@ public class Main {
         glfwInit();
         createWindow();
         terrainStorage = new InfiniteWorld("testT", TerrainGenerator::generateChunk);
-        float[][] heightMap = terrainStorage.readArea(0, 0, xSize, zSize);
+        float[][] heightMap = terrainStorage.readArea(srcPos.x, srcPos.y, xSize, zSize);
         gpuTerrainEroder = new GPUTerrainEroder(new float[][][]{heightMap, heightMap});
 
         vaoListProgram = new VAOListProgram(cameraMatrix, List.of(/*VAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
@@ -117,7 +118,7 @@ public class Main {
 
 
         float[][][] map = gpuTerrainEroder.downloadMap();
-        terrainVAOListProgram.terrainVAOs.add(TerrainVAOGenerator.heightMapToSimpleVAO(map, new Vector2i(0, 0)));
+        terrainVAOListProgram.terrainVAOs.add(TerrainVAOGenerator.heightMapToSimpleVAO(map, srcPos));
     }
 
     private static void updateData() {
@@ -176,6 +177,8 @@ public class Main {
             }
             lastTime = currentTime;
         }
+
+        terrainStorage.unloadAllRegions();
     }
 
     private static void cleanGL() {
