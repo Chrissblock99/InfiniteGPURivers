@@ -1,20 +1,20 @@
 package me.chriss99;
 
+import org.joml.Vector2i;
+
 public class TerrainVAOGenerator {
     public static float[] heightMapToSimpleVertexes(float[][][] heightMap) {
-        float[] vertecies = new float[heightMap[0].length*heightMap[0][0].length*4];
+        float[] vertecies = new float[heightMap[0].length*heightMap[0][0].length*2];
         int vertexShift = 0;
 
         for (int z = 0; z < heightMap[0][0].length; z++)
             for (int x = 0; x < heightMap[0].length; x++) {
-                vertecies[vertexShift] = x;
-                vertecies[vertexShift + 1] = z;
-                vertecies[vertexShift + 2] = heightMap[0][x][z];
+                vertecies[vertexShift] = heightMap[0][x][z];
 
                 float waterHeight = heightMap[1][x][z] - .03f;
-                vertecies[vertexShift + 3] = heightMap[0][x][z] + waterHeight - ((waterHeight <= 0) ? .1f : 0);
+                vertecies[vertexShift + 1] = heightMap[0][x][z] + waterHeight - ((waterHeight <= 0) ? .1f : 0);
 
-                vertexShift += 4;
+                vertexShift += 2;
             }
 
         return vertecies;
@@ -42,10 +42,10 @@ public class TerrainVAOGenerator {
         return index;
     }
 
-    public static TerrainVAO heightMapToSimpleVAO(float[][][] heightMap) {
+    public static TerrainVAO heightMapToSimpleVAO(float[][][] heightMap, Vector2i srcPos) {
         float[] vertexes = heightMapToSimpleVertexes(heightMap);
         int[] index = heightMapToSimpleIndex(heightMap[0].length, heightMap[0][0].length);
 
-        return new TerrainVAO(vertexes, index);
+        return new TerrainVAO(vertexes, index, srcPos, heightMap[0].length);
     }
 }

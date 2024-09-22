@@ -2,6 +2,7 @@ package me.chriss99;
 
 import me.chriss99.program.*;
 import me.chriss99.worldmanagement.InfiniteWorld;
+import org.joml.Vector2i;
 import org.lwjgl.opengl.*;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -116,7 +117,7 @@ public class Main {
 
 
         float[][][] map = gpuTerrainEroder.downloadMap();
-        terrainVAOListProgram.terrainVAOs.add(TerrainVAOGenerator.heightMapToSimpleVAO(map));
+        terrainVAOListProgram.terrainVAOs.add(TerrainVAOGenerator.heightMapToSimpleVAO(map, new Vector2i(0, 0)));
     }
 
     private static void updateData() {

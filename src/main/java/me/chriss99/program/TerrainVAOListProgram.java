@@ -15,6 +15,8 @@ public class TerrainVAOListProgram extends RenderProgram {
     private final int transformMatrix;
     private final int cameraPos;
     private final int waterUniform;
+    private final int srcPosUniform;
+    private final int widthUniform;
 
     public final LinkedList<TerrainVAO> terrainVAOs = new LinkedList<>();
 
@@ -32,6 +34,8 @@ public class TerrainVAOListProgram extends RenderProgram {
         transformMatrix = getUniform("transformMatrix");
         cameraPos = getUniform("cameraPos");
         waterUniform = getUniform("water");
+        srcPosUniform = getUniform("srcPos");
+        widthUniform = getUniform("width");
     }
 
     @Override
@@ -50,6 +54,9 @@ public class TerrainVAOListProgram extends RenderProgram {
         glUniform1i(waterUniform, renderWater ? 1 : 0);
         for (TerrainVAO vao : terrainVAOs) {
             vao.bind();
+            glUniform2i(srcPosUniform, vao.srcPos.x, vao.srcPos.y);
+            glUniform1i(widthUniform, vao.width);
+
             glDrawElements(GL_TRIANGLES, vao.indexLength(), GL_UNSIGNED_INT, 0);
         }
     }

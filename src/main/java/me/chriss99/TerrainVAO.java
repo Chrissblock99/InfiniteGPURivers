@@ -1,5 +1,7 @@
 package me.chriss99;
 
+import org.joml.Vector2i;
+
 import java.nio.ByteBuffer;
 
 import static org.lwjgl.opengl.GL30.*;
@@ -10,7 +12,13 @@ public class TerrainVAO {
     private final int indicesVBO;
     private final int indexLength;
 
-    public TerrainVAO(float[] triangle, int[] index) {
+    public final Vector2i srcPos;
+    public final int width;
+
+    public TerrainVAO(float[] triangle, int[] index, Vector2i srcPos, int width) {
+        this.srcPos = srcPos;
+        this.width = width;
+
         this.vao = glGenVertexArrays();
         glBindVertexArray(vao);
 
@@ -20,7 +28,7 @@ public class TerrainVAO {
         coordVBO = glGenBuffers();
         glBindBuffer(GL_ARRAY_BUFFER, coordVBO);
         glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 4, GL_FLOAT, false, 0, 0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
         glEnableVertexAttribArray(0);
 
         indicesVBO = glGenBuffers();
