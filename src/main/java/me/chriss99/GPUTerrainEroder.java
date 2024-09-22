@@ -173,18 +173,16 @@ public class GPUTerrainEroder {
         }
 
         waterMap.downloadData(x, y, width, height, GL_RED, GL_FLOAT, byteBuffer);
-        float[][] addedMap = new float[width][height];
+        float[][] waterMap = new float[width][height];
 
         for (int i = 0; i < width*height; i++) {
             int cX = i % width;
             int cZ = (i - cX) / width;
 
-            float waterHeight = byteBuffer.getFloat(i*4) + terrainMap[cX][cZ] - .03f;
-            waterHeight -= (waterHeight <= 0) ? .1f : 0;
-            addedMap[cX][cZ] = waterHeight;
+            waterMap[cX][cZ] = byteBuffer.getFloat(i*4);
         }
 
-        return new float[][][]{terrainMap, addedMap};
+        return new float[][][]{terrainMap, waterMap};
     }
 
     public void uploadMap(float[][][] map) {
@@ -208,10 +206,7 @@ public class GPUTerrainEroder {
             int cX = i % width;
             int cZ = (i - cX) / width;
 
-            //TODO: this might be broken
-            float waterHeight = map[1][cX][cZ];
-            waterHeight += (waterHeight <= 0) ? .1f : 0;
-            byteBuffer.putFloat(i*4, waterHeight - map[0][cX][cZ] + .3f);
+            byteBuffer.putFloat(i*4, map[1][cX][cZ]);
         }
         waterMap.uploadData(x, y, width, height, GL_RED, GL_FLOAT, byteBuffer);
     }

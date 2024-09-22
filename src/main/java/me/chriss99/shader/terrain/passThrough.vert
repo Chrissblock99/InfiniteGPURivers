@@ -1,7 +1,9 @@
 #version 450 core
 
-in vec3 position;
+uniform bool water;
+
+in vec4 position;
 
 void main(void) {
-    gl_Position = vec4(position, 1);
+    gl_Position = vec4(water ? position.xwy : position.xzy, 1);
 }

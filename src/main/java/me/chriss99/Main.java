@@ -118,13 +118,9 @@ public class Main {
         for (TerrainVAO vao : terrainVAOListProgram.terrainVAOs)
             vao.delete();
         terrainVAOListProgram.terrainVAOs.clear();
-        for (TerrainVAO vao : terrainVAOListProgram.waterVAOs)
-            vao.delete();
-        terrainVAOListProgram.waterVAOs.clear();
 
         float[][][] map = gpuTerrainEroder.downloadMap();
-        terrainVAOListProgram.terrainVAOs.add(TerrainVAOGenerator.heightMapToSimpleVAO(map[0]));
-        terrainVAOListProgram.waterVAOs.add(TerrainVAOGenerator.heightMapToSimpleVAO(map[1]));
+        terrainVAOListProgram.terrainVAOs.add(TerrainVAOGenerator.heightMapToSimpleVAO(map));
     }
 
     private static void loop() {
@@ -148,6 +144,7 @@ public class Main {
 
             vaoListProgram.render();
             terrainVAOListProgram.render();
+            terrainVAOListProgram.render(true);
             /*if (niceRender)
                 niceTessProgram.render();
             else

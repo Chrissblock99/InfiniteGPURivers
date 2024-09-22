@@ -20,7 +20,7 @@ public class TerrainVAO {
         coordVBO = glGenBuffers();
         glBindBuffer(GL_ARRAY_BUFFER, coordVBO);
         glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+        glVertexAttribPointer(0, 4, GL_FLOAT, false, 0, 0);
         glEnableVertexAttribArray(0);
 
         indicesVBO = glGenBuffers();

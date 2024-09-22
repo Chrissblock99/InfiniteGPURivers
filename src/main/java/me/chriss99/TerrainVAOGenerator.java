@@ -1,17 +1,20 @@
 package me.chriss99;
 
 public class TerrainVAOGenerator {
-    public static float[] heightMapToSimpleVertexes(float[][] heightMap) {
-        float[] vertecies = new float[heightMap.length*heightMap[0].length*3];
+    public static float[] heightMapToSimpleVertexes(float[][][] heightMap) {
+        float[] vertecies = new float[heightMap[0].length*heightMap[0][0].length*4];
         int vertexShift = 0;
 
-        for (int z = 0; z < heightMap[0].length; z++)
-            for (int x = 0; x < heightMap.length; x++) {
+        for (int z = 0; z < heightMap[0][0].length; z++)
+            for (int x = 0; x < heightMap[0].length; x++) {
                 vertecies[vertexShift] = x;
-                vertecies[vertexShift + 1] = heightMap[x][z];
-                vertecies[vertexShift + 2] = z;
+                vertecies[vertexShift + 1] = z;
+                vertecies[vertexShift + 2] = heightMap[0][x][z];
 
-                vertexShift += 3;
+                float waterHeight = heightMap[1][x][z] - .03f;
+                vertecies[vertexShift + 3] = heightMap[0][x][z] + waterHeight - ((waterHeight <= 0) ? .1f : 0);
+
+                vertexShift += 4;
             }
 
         return vertecies;
@@ -39,9 +42,9 @@ public class TerrainVAOGenerator {
         return index;
     }
 
-    public static TerrainVAO heightMapToSimpleVAO(float[][] heightMap) {
+    public static TerrainVAO heightMapToSimpleVAO(float[][][] heightMap) {
         float[] vertexes = heightMapToSimpleVertexes(heightMap);
-        int[] index = heightMapToSimpleIndex(heightMap.length, heightMap[0].length);
+        int[] index = heightMapToSimpleIndex(heightMap[0].length, heightMap[0][0].length);
 
         return new TerrainVAO(vertexes, index);
     }

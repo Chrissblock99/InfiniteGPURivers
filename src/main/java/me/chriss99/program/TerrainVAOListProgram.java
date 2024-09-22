@@ -17,7 +17,6 @@ public class TerrainVAOListProgram extends RenderProgram {
     private final int waterUniform;
 
     public final LinkedList<TerrainVAO> terrainVAOs = new LinkedList<>();
-    public final LinkedList<TerrainVAO> waterVAOs = new LinkedList<>();
 
     public TerrainVAOListProgram(CameraMatrix cameraMatrix) {
         this.cameraMatrix = cameraMatrix;
@@ -37,20 +36,19 @@ public class TerrainVAOListProgram extends RenderProgram {
 
     @Override
     public void render() {
-        if (terrainVAOs.isEmpty() && waterVAOs.isEmpty())
+        render(false);
+    }
+
+    public void render(boolean renderWater) {
+        if (terrainVAOs.isEmpty())
             return;
 
         use();
         glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
         glUniform3f(cameraPos, cameraMatrix.position.x, cameraMatrix.position.y, cameraMatrix.position.z);
 
-        glUniform1i(waterUniform, 0);
+        glUniform1i(waterUniform, renderWater ? 1 : 0);
         for (TerrainVAO vao : terrainVAOs) {
-            vao.bind();
-            glDrawElements(GL_TRIANGLES, vao.indexLength(), GL_UNSIGNED_INT, 0);
-        }
-        glUniform1i(waterUniform, 1);
-        for (TerrainVAO vao : waterVAOs) {
             vao.bind();
             glDrawElements(GL_TRIANGLES, vao.indexLength(), GL_UNSIGNED_INT, 0);
         }
@@ -59,8 +57,6 @@ public class TerrainVAOListProgram extends RenderProgram {
     @Override
     public void delete() {
         for (TerrainVAO vao : terrainVAOs)
-            vao.delete();
-        for (TerrainVAO vao : waterVAOs)
             vao.delete();
         super.delete();
     }
