@@ -112,15 +112,16 @@ public class Main {
         glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
         glVertexAttribPointer(0, 2, GL_DOUBLE, false, 0, 0);
         glEnableVertexAttribArray(0);
-    }
 
-    private static void updateData() {
-        for (TerrainVAO vao : terrainVAOListProgram.terrainVAOs)
-            vao.delete();
-        terrainVAOListProgram.terrainVAOs.clear();
+
 
         float[][][] map = gpuTerrainEroder.downloadMap();
         terrainVAOListProgram.terrainVAOs.add(TerrainVAOGenerator.heightMapToSimpleVAO(map));
+    }
+
+    private static void updateData() {
+        float[][][] map = gpuTerrainEroder.downloadMap();
+        terrainVAOListProgram.terrainVAOs.get(0).updatePositions(TerrainVAOGenerator.heightMapToSimpleVertexes(map));
     }
 
     private static void loop() {
@@ -129,7 +130,6 @@ public class Main {
         LinkedList<Double> frames = new LinkedList<>();
 
         double lastUpdate = 0;
-        updateData();
 
         while(!glfwWindowShouldClose(window)) {
             movementController.update();
