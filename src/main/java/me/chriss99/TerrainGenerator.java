@@ -17,7 +17,7 @@ import static org.lwjgl.opengl.GL42.glMemoryBarrier;
 import static org.lwjgl.opengl.GL43.glDispatchCompute;
 
 public class TerrainGenerator {
-    public static Chunk generateChunk(Vector2i chunkPos) {
+    public static Chunk<Float> generateChunk(Vector2i chunkPos) {
         Texture2D terrainMap = new Texture2D(GL_R32F, 100, 100);
         ComputeProgram genHeightMap = new ComputeProgram("genHeightMap");
         int srcPosUniform = genHeightMap.getUniform("srcPos");
@@ -32,7 +32,7 @@ public class TerrainGenerator {
 
         ByteBuffer byteBuffer = BufferUtils.createByteBuffer(100*100*4);
         terrainMap.downloadFullData(GL_RED, GL_FLOAT, byteBuffer);
-        float[][] chunk = new float[100][100];
+        Float[][] chunk = new Float[100][100];
 
         for (int i = 0; i < 100*100; i++) {
             int cX = i % 100;
@@ -40,6 +40,6 @@ public class TerrainGenerator {
             chunk[cX][cZ] = byteBuffer.getFloat(i*4);
         }
 
-        return new Chunk(chunk);
+        return new Chunk<>(chunk);
     }
 }

@@ -3,19 +3,26 @@ package me.chriss99.worldmanagement;
 import org.joml.Vector2i;
 
 import java.io.*;
+import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
-public class RegionFileManager {
+public class RegionFileManager<T> {
     private final String worldName;
-    private static final int chunkByteSize = 4*(2+100*100);
+    private final int chunkByteSize;
+    private final BufferInterpreter<T> bufferInterpreter;
+    private final Class<T> tClass;
 
-    public RegionFileManager(String worldName) {
+    public RegionFileManager(String worldName, BufferInterpreter<T> bufferInterpreter) {
         this.worldName = worldName;
+        chunkByteSize = 2*4 + bufferInterpreter.byteSize()*100*100;
+
+        this.bufferInterpreter = bufferInterpreter;
+        this.tClass = bufferInterpreter.typeClass();
         new File("worlds/" + worldName).mkdirs();
     }
 
-    public Region loadRegion(Vector2i regionCoord) {
+    public Region<T> loadRegion(Vector2i regionCoord) {
         File file = getRegionFile(regionCoord);
 
         FileInputStream inputStream;
@@ -27,7 +34,7 @@ public class RegionFileManager {
 
         try {
             return RegionFromByteArray(inputStream.readAllBytes(), regionCoord);
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         } finally {
             try {
@@ -38,7 +45,7 @@ public class RegionFileManager {
         }
     }
 
-    public void saveRegion(Region region) {
+    public void saveRegion(Region<T> region) {
         File file = getRegionFile(region.coord);
 
         FileOutputStream outputStream;
@@ -61,36 +68,37 @@ public class RegionFileManager {
         }
     }
 
-    private Region RegionFromByteArray(byte[] array, Vector2i regionCoord) throws IOException {
+    private Region<T> RegionFromByteArray(byte[] array, Vector2i regionCoord) throws IOException, ClassNotFoundException {
         int chunkNum = array.length/chunkByteSize;
-        Region region = new Region(regionCoord);
+        Region<T> region = new Region<>(regionCoord);
         ByteBuffer buffer = ByteBuffer.wrap(array);
 
         for (int i = 0; i < chunkNum; i++) {
             Vector2i chunkCoord = new Vector2i(buffer.getInt(), buffer.getInt());
-            float[][] data = new float[100][100];
+            @SuppressWarnings("unchecked")
+            T[][] data = (T[][]) Array.newInstance(tClass, 100, 100);
 
             for (int x = 0; x < 100; x++)
                 for (int y = 0; y < 100; y++)
-                    data[x][y] = buffer.getFloat();
+                    data[x][y] = bufferInterpreter.getFromByteBuffer(buffer);
 
-            region.addChunk(chunkCoord, new Chunk(data));
+            region.addChunk(chunkCoord, new Chunk<>(data));
         }
 
         return region;
     }
 
-    private byte[] RegionToByteArray(Region region) throws IOException {
+    private byte[] RegionToByteArray(Region<T> region) throws IOException {
         ByteBuffer buffer = ByteBuffer.allocate(region.getAllChunks().size()*chunkByteSize);
 
-        for (Map.Entry<Vector2i, Chunk> entry : region.getAllChunks()) {
+        for (Map.Entry<Vector2i, Chunk<T>> entry : region.getAllChunks()) {
             buffer.putInt(entry.getKey().x);
             buffer.putInt(entry.getKey().y);
-            float[][] data = entry.getValue().data();
+            T[][] data = entry.getValue().data();
 
             for (int x = 0; x < 100; x++)
                 for (int y = 0; y < 100; y++)
-                    buffer.putFloat(data[x][y]);
+                    bufferInterpreter.putInByteBuffer(buffer, data[x][y]);
         }
 
         return buffer.array();

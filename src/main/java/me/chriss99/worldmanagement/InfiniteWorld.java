@@ -3,29 +3,35 @@ package me.chriss99.worldmanagement;
 import me.chriss99.Util;
 import org.joml.Vector2i;
 
+import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-public class InfiniteWorld {
-    private final HashMap<Vector2i, Region> loadedRegions = new HashMap<>();
-    private final RegionFileManager regionFileManager;
-    private final Function<Vector2i, Chunk> chunkGenerator;
+public class InfiniteWorld<T> {
+    private final Class<T> tClass;
 
-    public InfiniteWorld(String worldName, Function<Vector2i, Chunk> chunkGenerator) {
-        this.regionFileManager = new RegionFileManager(worldName);
+    private final HashMap<Vector2i, Region<T>> loadedRegions = new HashMap<>();
+    private final RegionFileManager<T> regionFileManager;
+    private final Function<Vector2i, Chunk<T>> chunkGenerator;
+
+    public InfiniteWorld(String worldName, BufferInterpreter<T> bufferInterpreter, Function<Vector2i, Chunk<T>> chunkGenerator) {
+        this.tClass = bufferInterpreter.typeClass();
+        this.regionFileManager = new RegionFileManager<>(worldName, bufferInterpreter);
         this.chunkGenerator = chunkGenerator;
     }
 
-    public float[][] readArea(int x, int y, int width, int height) {
-        return readWriteArea(x, y, new float[width][height], false);
+    public T[][] readArea(int x, int y, int width, int height) {
+        @SuppressWarnings("unchecked")
+        T[][] array = (T[][]) Array.newInstance(tClass, width, height);
+        return readWriteArea(x, y, array, false);
     }
 
-    public void writeArea(int x, int y, float[][] data) {
+    public void writeArea(int x, int y, T[][] data) {
         readWriteArea(x, y, data, true);
     }
 
-    public float[][] readWriteArea(int x, int y, float[][] data, boolean write) {
+    public T[][] readWriteArea(int x, int y, T[][] data, boolean write) {
         int width = data.length;
         int height = data[0].length;
 
@@ -36,7 +42,7 @@ public class InfiniteWorld {
 
         for (int currentChunkX = chunkX; currentChunkX < chunkX+chunksX; currentChunkX++)
             for (int currentChunkY = chunkY; currentChunkY < chunkY+chunksY; currentChunkY++) {
-                Chunk currentChunk = getChunk(currentChunkX, currentChunkY);
+                Chunk<T> currentChunk = getChunk(currentChunkX, currentChunkY);
 
                 int currentChunkMinX = (Math.max(currentChunkX*100, x)%100+100)%100;
                 int currentChunkMaxX = (Math.min(currentChunkX*100 +99, x+width-1)%100+100)%100;
@@ -44,13 +50,13 @@ public class InfiniteWorld {
                 int currentChunkMaxY = (Math.min(currentChunkY*100 +99, y+height-1)%100+100)%100;
 
                 for (int i = currentChunkMinX; i <= currentChunkMaxX; i++) {
-                    float[] src = currentChunk.data()[i];
+                    T[] src = currentChunk.data()[i];
                     int srcPos = currentChunkMinY;
-                    float[] dest = data[currentChunkX*100 + i - x];
+                    T[] dest = data[currentChunkX*100 + i - x];
                     int destPos = currentChunkY*100 + currentChunkMinY - y;
 
                     if (write) {
-                        float[] tempArray = src;
+                        T[] tempArray = src;
                         src = dest;
                         dest = tempArray;
 
@@ -66,16 +72,16 @@ public class InfiniteWorld {
         return data;
     }
 
-    private Region getRegion(Vector2i regionCoord) {
+    private Region<T> getRegion(Vector2i regionCoord) {
         return loadedRegions.computeIfAbsent(regionCoord, regionFileManager::loadRegion);
     }
 
-    private Chunk getChunk(int x, int y) {
+    private Chunk<T> getChunk(int x, int y) {
         return getRegion(new Vector2i(Util.properIntDivide(x, 10), Util.properIntDivide(y, 10))).getChunk(new Vector2i(x, y), chunkGenerator);
     }
 
     public void unloadRegion(Vector2i regionCoord) {
-        Region region = loadedRegions.remove(regionCoord);
+        Region<T> region = loadedRegions.remove(regionCoord);
         if (region == null) {
             System.out.println("Region " + regionCoord.x+ ", " + regionCoord.y + " is not loaded, but was called for unloading!");
             return;
@@ -85,7 +91,7 @@ public class InfiniteWorld {
     }
 
     public void unloadAllRegions() {
-        for (Map.Entry<Vector2i, Region> entry : loadedRegions.entrySet())
+        for (Map.Entry<Vector2i, Region<T>> entry : loadedRegions.entrySet())
             regionFileManager.saveRegion(entry.getValue());
     }
 }

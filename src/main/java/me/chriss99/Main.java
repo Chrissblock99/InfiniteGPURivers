@@ -24,7 +24,7 @@ public class Main {
     static RenderProgram tessProgram;
     static RenderProgram niceTessProgram;
 
-    static InfiniteWorld terrainStorage;
+    static InfiniteWorld<Float> terrainStorage;
 
     static Vector2i srcPos = new Vector2i(-100, -100);
     static int xSize = 8*64;
@@ -47,9 +47,17 @@ public class Main {
     public static void main(String[] args) {
         glfwInit();
         createWindow();
-        terrainStorage = new InfiniteWorld("testT", TerrainGenerator::generateChunk);
-        float[][] heightMap = terrainStorage.readArea(srcPos.x, srcPos.y, xSize, zSize);
-        gpuTerrainEroder = new GPUTerrainEroder(new float[][][]{heightMap, heightMap});
+
+
+        terrainStorage = new InfiniteWorld<>("testT", new FloatWrapper(), TerrainGenerator::generateChunk);
+        Float[][] heightMap = terrainStorage.readArea(srcPos.x, srcPos.y, xSize, zSize);
+        float[][] floatMap = new float[heightMap.length][heightMap[0].length];
+        for (int i = 0; i < heightMap.length; i++)
+            for (int j = 0; j < heightMap[0].length; j++)
+                floatMap[i][j] = heightMap[i][j];
+
+        gpuTerrainEroder = new GPUTerrainEroder(new float[][][]{floatMap, floatMap});
+
 
         vaoListProgram = new VAOListProgram(cameraMatrix, List.of(/*VAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
         terrainVAOListProgram = new TerrainVAOListProgram(cameraMatrix);
