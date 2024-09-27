@@ -1,11 +1,16 @@
 package me.chriss99.worldmanagement;
 
+import me.chriss99.ArrayBufferWrapper;
 import me.chriss99.Util;
 import org.joml.Vector2i;
+import org.lwjgl.BufferUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+
+import static org.lwjgl.opengl.GL11.GL_FLOAT;
+import static org.lwjgl.opengl.GL11.GL_RED;
 
 public class InfiniteWorld {
     private final HashMap<Vector2i, Region> loadedRegions = new HashMap<>();
@@ -17,17 +22,23 @@ public class InfiniteWorld {
         this.chunkGenerator = chunkGenerator;
     }
 
-    public float[][] readArea(int x, int y, int width, int height) {
-        return readWriteArea(x, y, new float[width][height], false);
+    public ArrayBufferWrapper readArea(int x, int y, int width, int height) {
+        return readWriteArea(x, y, new ArrayBufferWrapper(BufferUtils.createByteBuffer(width*height*4), GL_RED, GL_FLOAT, width, height), false);
     }
 
-    public void writeArea(int x, int y, float[][] data) {
+    public void writeArea(int x, int y, ArrayBufferWrapper data) {
         readWriteArea(x, y, data, true);
     }
 
-    public float[][] readWriteArea(int x, int y, float[][] data, boolean write) {
-        int width = data.length;
-        int height = data[0].length;
+    public ArrayBufferWrapper readWriteArea(int x, int y, ArrayBufferWrapper buffer, boolean write) {
+        int width = buffer.width;
+        int height = buffer.height;
+        float[][] data = new float[width][height];
+        if (write)
+            for (int i = 0; i < width; i++)
+                for (int j = 0; j < height; j++)
+                    data[i][j] = buffer.getFloat(i, j);
+
 
         int chunkX = Util.properIntDivide(x, 100);
         int chunkY = Util.properIntDivide(y, 100);
@@ -63,7 +74,12 @@ public class InfiniteWorld {
                 }
             }
 
-        return data;
+        if (!write)
+            for (int i = 0; i < width; i++)
+                for (int j = 0; j < height; j++)
+                    buffer.putFloat(i, j, data[i][j]);
+
+        return buffer;
     }
 
     private Region getRegion(Vector2i regionCoord) {

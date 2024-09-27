@@ -3,16 +3,17 @@ package me.chriss99;
 import org.joml.Vector2i;
 
 public class TerrainVAOGenerator {
-    public static float[] heightMapToSimpleVertexes(float[][][] heightMap) {
-        float[] vertecies = new float[heightMap[0].length*heightMap[0][0].length*2];
+    public static float[] heightMapToSimpleVertexes(ArrayBufferWrapper terrain, ArrayBufferWrapper water) {
+        float[] vertecies = new float[terrain.width* terrain.height*2];
         int vertexShift = 0;
 
-        for (int z = 0; z < heightMap[0][0].length; z++)
-            for (int x = 0; x < heightMap[0].length; x++) {
-                vertecies[vertexShift] = heightMap[0][x][z];
+        for (int z = 0; z < terrain.height; z++)
+            for (int x = 0; x < terrain.width; x++) {
+                float terrainHeight = terrain.getFloat(x, z);
+                vertecies[vertexShift] = terrainHeight;
 
-                float waterHeight = heightMap[1][x][z] - .03f;
-                vertecies[vertexShift + 1] = heightMap[0][x][z] + waterHeight - ((waterHeight <= 0) ? .1f : 0);
+                float waterHeight = water.getFloat(x, z) - .03f;
+                vertecies[vertexShift + 1] = terrainHeight + waterHeight - ((waterHeight <= 0) ? .1f : 0);
 
                 vertexShift += 2;
             }
@@ -42,10 +43,10 @@ public class TerrainVAOGenerator {
         return index;
     }
 
-    public static TerrainVAO heightMapToSimpleVAO(float[][][] heightMap, Vector2i srcPos) {
-        float[] vertexes = heightMapToSimpleVertexes(heightMap);
-        int[] index = heightMapToSimpleIndex(heightMap[0].length, heightMap[0][0].length);
+    public static TerrainVAO heightMapToSimpleVAO(ArrayBufferWrapper terrain, ArrayBufferWrapper water, Vector2i srcPos) {
+        float[] vertices = heightMapToSimpleVertexes(terrain, water);
+        int[] index = heightMapToSimpleIndex(terrain.width, terrain.height);
 
-        return new TerrainVAO(vertexes, index, srcPos, heightMap[0].length);
+        return new TerrainVAO(vertices, index, srcPos, terrain.width);
     }
 }

@@ -48,8 +48,8 @@ public class Main {
         glfwInit();
         createWindow();
         terrainStorage = new InfiniteWorld("testT", TerrainGenerator::generateChunk);
-        float[][] heightMap = terrainStorage.readArea(srcPos.x, srcPos.y, xSize, zSize);
-        gpuTerrainEroder = new GPUTerrainEroder(new float[][][]{heightMap, heightMap});
+        ArrayBufferWrapper heightMap = terrainStorage.readArea(srcPos.x, srcPos.y, xSize, zSize);
+        gpuTerrainEroder = new GPUTerrainEroder(heightMap, heightMap);
 
         vaoListProgram = new VAOListProgram(cameraMatrix, List.of(/*VAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
         terrainVAOListProgram = new TerrainVAOListProgram(cameraMatrix);
@@ -117,13 +117,13 @@ public class Main {
 
 
 
-        float[][][] map = gpuTerrainEroder.downloadMap();
-        terrainVAOListProgram.terrainVAOs.add(TerrainVAOGenerator.heightMapToSimpleVAO(map, srcPos));
+        ArrayBufferWrapper[] map = gpuTerrainEroder.downloadMap();
+        terrainVAOListProgram.terrainVAOs.add(TerrainVAOGenerator.heightMapToSimpleVAO(map[0], map[1], srcPos));
     }
 
     private static void updateData() {
-        float[][][] map = gpuTerrainEroder.downloadMap();
-        terrainVAOListProgram.terrainVAOs.get(0).updatePositions(TerrainVAOGenerator.heightMapToSimpleVertexes(map));
+        ArrayBufferWrapper[] map = gpuTerrainEroder.downloadMap();
+        terrainVAOListProgram.terrainVAOs.get(0).updatePositions(TerrainVAOGenerator.heightMapToSimpleVertexes(map[0], map[1]));
     }
 
     private static void loop() {
