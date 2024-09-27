@@ -162,27 +162,36 @@ public class GPUTerrainEroder {
     }
 
     public float[][][] downloadMapPart(int x, int y, int width, int height) {
-        ByteBuffer byteBuffer = BufferUtils.createByteBuffer(width*height*4);
-        terrainMap.downloadData(x, y, width, height, GL_RED, GL_FLOAT, byteBuffer);
-        float[][] terrainMap = new float[width][height];
+        Float[][][] heightMap = downloadTexturePart(this.terrainMap, x, y, width, height, false);
+        float[][] terrainMap = new float[heightMap.length][heightMap[0].length];
+        for (int i = 0; i < heightMap.length; i++)
+            for (int j = 0; j < heightMap[0].length; j++)
+                terrainMap[i][j] = heightMap[i][j][0];
 
-        for (int i = 0; i < width*height; i++) {
-            int cX = i % width;
-            int cZ = (i - cX) / width;
-            terrainMap[cX][cZ] = byteBuffer.getFloat(i*4);
-        }
-
-        waterMap.downloadData(x, y, width, height, GL_RED, GL_FLOAT, byteBuffer);
-        float[][] waterMap = new float[width][height];
-
-        for (int i = 0; i < width*height; i++) {
-            int cX = i % width;
-            int cZ = (i - cX) / width;
-
-            waterMap[cX][cZ] = byteBuffer.getFloat(i*4);
-        }
+        heightMap = downloadTexturePart(this.waterMap, x, y, width, height, false);
+        float[][] waterMap = new float[heightMap.length][heightMap[0].length];
+        for (int i = 0; i < heightMap.length; i++)
+            for (int j = 0; j < heightMap[0].length; j++)
+                waterMap[i][j] = heightMap[i][j][0];
 
         return new float[][][]{terrainMap, waterMap};
+    }
+
+    public Float[][][] downloadTexturePart(Texture2D texture, int x, int y, int width, int height, boolean vec4) {
+        int floatCount = vec4 ? 4 : 1;
+        ByteBuffer byteBuffer = BufferUtils.createByteBuffer(width*height*floatCount*4);
+        texture.downloadData(x, y, width, height, vec4 ? GL_RGBA : GL_RED, GL_FLOAT, byteBuffer);
+        Float[][][] data = new Float[width][height][floatCount];
+
+        for (int i = 0; i < width*height; i++) {
+            int cX = i % width;
+            int cZ = (i - cX) / width;
+
+            for (int j = 0; j < floatCount; j++)
+                data[cX][cZ][j] = byteBuffer.getFloat();
+        }
+
+        return data;
     }
 
     public void uploadMap(float[][][] map) {
@@ -193,22 +202,33 @@ public class GPUTerrainEroder {
         int width = map[0].length;
         int height = map[0][0].length;
 
-        ByteBuffer byteBuffer = BufferUtils.createByteBuffer(width*height*4);
+        Float[][][] values = new Float[width][height][1];
+        for (int i = 0; i < values.length; i++)
+            for (int j = 0; j < values[0].length; j++)
+                values[i][j][0] = map[0][i][j];
+        uploadTexturePart(terrainMap, x, y, values);
+
+        for (int i = 0; i < values.length; i++)
+            for (int j = 0; j < values[0].length; j++)
+                values[i][j][0] = map[1][i][j];
+        uploadTexturePart(waterMap, x, y, values);
+    }
+
+    public void uploadTexturePart(Texture2D texture, int x, int y, Float[][][] values) {
+        int width = values.length;
+        int height = values[0].length;
+        int floatCount = values[0][0].length;
+
+        ByteBuffer byteBuffer = BufferUtils.createByteBuffer(width*height*floatCount*4);
 
         for (int i = 0; i < width*height; i++) {
             int cX = i % width;
             int cZ = (i - cX) / width;
-            byteBuffer.putFloat(i*4, map[0][cX][cZ]);
-        }
-        terrainMap.uploadData(x, y, width, height, GL_RED, GL_FLOAT, byteBuffer);
 
-        for (int i = 0; i < width*height; i++) {
-            int cX = i % width;
-            int cZ = (i - cX) / width;
-
-            byteBuffer.putFloat(i*4, map[1][cX][cZ]);
+            for (int j = 0; j < floatCount; j++)
+                byteBuffer.putFloat((i*floatCount + j)*4, values[cX][cZ][j]);
         }
-        waterMap.uploadData(x, y, width, height, GL_RED, GL_FLOAT, byteBuffer);
+        texture.uploadData(x, y, width, height, (floatCount == 4) ? GL_RGBA : GL_RED, GL_FLOAT, byteBuffer);
     }
 
     public float[][][] downloadWaterOutflow() {
