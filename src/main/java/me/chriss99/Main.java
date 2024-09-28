@@ -46,6 +46,7 @@ public class Main {
 
     public static void main(String[] args) {
         glfwInit();
+        double start = glfwGetTime();
         createWindow();
         terrainStorage = new InfiniteWorld("testT", TerrainGenerator::generateChunk);
         ArrayBufferWrapper heightMap = terrainStorage.readArea(srcPos.x, srcPos.y, xSize, zSize);
@@ -68,6 +69,7 @@ public class Main {
         GLUtil.setupDebugMessageCallback();
         updateVSync();
 
+        System.out.println("Started after: " + (glfwGetTime() - start));
         loop();
         System.out.println("Window closed");
 
