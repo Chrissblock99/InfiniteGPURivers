@@ -30,9 +30,16 @@ public class PlayerCenteredRenderer extends TerrainVAOMapProgram {
             return;
         previousPosition = position;
 
-        terrainVAOs.clear();
-        for (int x = 0; x < chunkRenderDistance*2-1; x++)
-            for (int y= 0; y < chunkRenderDistance*2-1; y++)
+        int sideLength = chunkRenderDistance*2-1;
+        Vector2i srcPos = new Vector2i((int) position.x, (int) position.y);
+
+        terrainVAOs.values().removeIf(terrainVAO -> !pointInsideSquare(terrainVAO.srcPos, srcPos, sideLength*64));
+        for (int x = 0; x < sideLength; x++)
+            for (int y= 0; y < sideLength; y++)
                 terrainVAOs.computeIfAbsent(new Vector2i((int) position.x + x*64, (int) position.y + y*64), chunkLoader);
+    }
+
+    private static boolean pointInsideSquare(Vector2i point, Vector2i srcPos, int sideLength) {
+        return (point.x >= srcPos.x && point.x < srcPos.x+sideLength) && (point.y >= srcPos.y && point.y < srcPos.y+sideLength);
     }
 }
