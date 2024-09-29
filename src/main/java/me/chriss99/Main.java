@@ -27,7 +27,7 @@ public class Main {
 
     static InfiniteWorld terrainStorage;
 
-    static Vector2i srcPos = new Vector2i(-100, -100);
+    static Vector2i srcPos = new Vector2i(-400, 300);
     static int xSize = 8*64;
     static int zSize = 8*64;
     static int simulationStepsPerFrame = 5;
@@ -60,7 +60,7 @@ public class Main {
             Array2DBufferWrapper water = new Array2DBufferWrapper(GL_RED, GL_FLOAT, 65, 65);
 
             return TerrainVAOGenerator.heightMapToSimpleVAO(terrain, water, vector2i);
-        }), 1);
+        }), 7);
 
         setupData();
 
@@ -144,7 +144,7 @@ public class Main {
 
         while(!glfwWindowShouldClose(window)) {
             movementController.update();
-            playerCenteredRenderer.updatePlayerPosition();
+            playerCenteredRenderer.updateLoadedChunks();
 
             //clear the window
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
