@@ -51,7 +51,7 @@ public class GPUTerrainEroder {
     private final ComputeProgram initTextures;
     private final ComputeProgram[] erosionPrograms;
 
-    public GPUTerrainEroder(ArrayBufferWrapper terrain, ArrayBufferWrapper water) {
+    public GPUTerrainEroder(Array2DBufferWrapper terrain, Array2DBufferWrapper water) {
         this.width = terrain.width;
         this.height = terrain.height;
 
@@ -157,25 +157,25 @@ public class GPUTerrainEroder {
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
     }
 
-    public ArrayBufferWrapper[] downloadMap() {
+    public Array2DBufferWrapper[] downloadMap() {
         return downloadMapPart(0, 0, width, height);
     }
 
-    public ArrayBufferWrapper[] downloadMapPart(int x, int y, int width, int height) {
-        ArrayBufferWrapper terrain = new ArrayBufferWrapper(GL_RED, GL_FLOAT, width, height);
+    public Array2DBufferWrapper[] downloadMapPart(int x, int y, int width, int height) {
+        Array2DBufferWrapper terrain = new Array2DBufferWrapper(GL_RED, GL_FLOAT, width, height);
         terrainMap.downloadData(x, y, terrain);
 
-        ArrayBufferWrapper water = new ArrayBufferWrapper(GL_RED, GL_FLOAT, width, height);
+        Array2DBufferWrapper water = new Array2DBufferWrapper(GL_RED, GL_FLOAT, width, height);
         waterMap.downloadData(x, y, water);
 
-        return new ArrayBufferWrapper[]{terrain, water};
+        return new Array2DBufferWrapper[]{terrain, water};
     }
 
-    public void uploadMap(ArrayBufferWrapper terrain, ArrayBufferWrapper water) {
+    public void uploadMap(Array2DBufferWrapper terrain, Array2DBufferWrapper water) {
         uploadMapPart(0, 0, terrain, water);
     }
 
-    public void uploadMapPart(int x, int y, ArrayBufferWrapper terrain, ArrayBufferWrapper water) {
+    public void uploadMapPart(int x, int y, Array2DBufferWrapper terrain, Array2DBufferWrapper water) {
         terrainMap.uploadData(x, y, terrain);
         waterMap.uploadData(x, y, water);
     }

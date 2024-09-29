@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 
 import static org.lwjgl.opengl.GL11.*;
 
-public class ArrayBufferWrapper {
+public class Array2DBufferWrapper {
     public final ByteBuffer buffer;
     public final int format;
     public final int type;
@@ -14,7 +14,7 @@ public class ArrayBufferWrapper {
     public final int width;
     public final int height;
 
-    public ArrayBufferWrapper(ByteBuffer buffer, int format, int type, int width, int height) {
+    public Array2DBufferWrapper(ByteBuffer buffer, int format, int type, int width, int height) {
         int correctCapacity = width*height*sizeOf(format, type);
         if (buffer.capacity() != correctCapacity)
             throw new IllegalArgumentException("Buffer has to be of size " + correctCapacity + " but is " + buffer.capacity());
@@ -27,7 +27,7 @@ public class ArrayBufferWrapper {
         this.height = height;
     }
 
-    public ArrayBufferWrapper(int format, int type, int width, int height) {
+    public Array2DBufferWrapper(int format, int type, int width, int height) {
         this.buffer = BufferUtils.createByteBuffer(width*height*sizeOf(format, type));
         this.format = format;
         this.type = type;
