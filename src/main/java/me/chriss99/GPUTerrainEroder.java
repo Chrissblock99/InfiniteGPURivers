@@ -162,10 +162,10 @@ public class GPUTerrainEroder {
     }
 
     public ArrayBufferWrapper[] downloadMapPart(int x, int y, int width, int height) {
-        ArrayBufferWrapper terrain = new ArrayBufferWrapper(BufferUtils.createByteBuffer(width*height*4), GL_RED, GL_FLOAT, width, height);
+        ArrayBufferWrapper terrain = new ArrayBufferWrapper(GL_RED, GL_FLOAT, width, height);
         terrainMap.downloadData(x, y, terrain);
 
-        ArrayBufferWrapper water = new ArrayBufferWrapper(BufferUtils.createByteBuffer(width*height*4), GL_RED, GL_FLOAT, width, height);
+        ArrayBufferWrapper water = new ArrayBufferWrapper(GL_RED, GL_FLOAT, width, height);
         waterMap.downloadData(x, y, water);
 
         return new ArrayBufferWrapper[]{terrain, water};

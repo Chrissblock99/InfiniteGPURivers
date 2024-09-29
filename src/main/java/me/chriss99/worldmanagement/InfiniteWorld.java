@@ -3,7 +3,6 @@ package me.chriss99.worldmanagement;
 import me.chriss99.ArrayBufferWrapper;
 import me.chriss99.Util;
 import org.joml.Vector2i;
-import org.lwjgl.BufferUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +22,7 @@ public class InfiniteWorld {
     }
 
     public ArrayBufferWrapper readArea(int x, int y, int width, int height) {
-        return readWriteArea(x, y, new ArrayBufferWrapper(BufferUtils.createByteBuffer(width*height*4), GL_RED, GL_FLOAT, width, height), false);
+        return readWriteArea(x, y, new ArrayBufferWrapper(GL_RED, GL_FLOAT, width, height), false);
     }
 
     public void writeArea(int x, int y, ArrayBufferWrapper data) {
