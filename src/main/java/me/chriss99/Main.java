@@ -21,6 +21,7 @@ public class Main {
     static boolean niceRender = true;
     static RenderProgram vaoListProgram;
     static TerrainVAOListProgram terrainVAOListProgram;
+    static PlayerCenteredRenderer playerCenteredRenderer;
     static RenderProgram tessProgram;
     static RenderProgram niceTessProgram;
 
@@ -54,6 +55,12 @@ public class Main {
 
         vaoListProgram = new VAOListProgram(cameraMatrix, List.of(/*VAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
         terrainVAOListProgram = new TerrainVAOListProgram(cameraMatrix);
+        playerCenteredRenderer = new PlayerCenteredRenderer(cameraMatrix, (vector2i -> {
+            Array2DBufferWrapper terrain = terrainStorage.readArea(vector2i.x, vector2i.y, 65, 65);
+            Array2DBufferWrapper water = new Array2DBufferWrapper(GL_RED, GL_FLOAT, 65, 65);
+
+            return TerrainVAOGenerator.heightMapToSimpleVAO(terrain, water, vector2i);
+        }), 1);
 
         setupData();
 
@@ -137,6 +144,7 @@ public class Main {
 
         while(!glfwWindowShouldClose(window)) {
             movementController.update();
+            playerCenteredRenderer.updatePlayerPosition();
 
             //clear the window
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -149,6 +157,7 @@ public class Main {
             vaoListProgram.render();
             terrainVAOListProgram.render();
             terrainVAOListProgram.render(true);
+            playerCenteredRenderer.render();
             /*if (niceRender)
                 niceTessProgram.render();
             else
