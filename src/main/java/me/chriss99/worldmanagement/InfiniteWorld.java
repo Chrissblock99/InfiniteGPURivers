@@ -41,8 +41,8 @@ public class InfiniteWorld {
 
         int chunkX = Util.properIntDivide(x, 100);
         int chunkY = Util.properIntDivide(y, 100);
-        int chunksX = (x+width-1)/100 - chunkX + 1;
-        int chunksY = (y+height-1)/100 - chunkY + 1;
+        int chunksX = Util.properIntDivide(x+width-1, 100) - chunkX + 1;
+        int chunksY = Util.properIntDivide(y+height-1, 100) - chunkY + 1;
 
         for (int currentChunkX = chunkX; currentChunkX < chunkX+chunksX; currentChunkX++)
             for (int currentChunkY = chunkY; currentChunkY < chunkY+chunksY; currentChunkY++) {
