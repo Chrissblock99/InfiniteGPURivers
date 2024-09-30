@@ -1,6 +1,6 @@
 #version 450 core
 layout(local_size_x = 1, local_size_y = 1) in;
-layout(binding = 0, r32f) restrict writeonly uniform image2D terrainMap;
+layout(binding = 8, r32f) restrict writeonly uniform image2D terrainMap;
 
 uniform ivec2 srcPos;
 

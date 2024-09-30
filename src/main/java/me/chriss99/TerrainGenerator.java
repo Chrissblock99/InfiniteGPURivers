@@ -22,7 +22,7 @@ public class TerrainGenerator {
         ComputeProgram genHeightMap = new ComputeProgram("genHeightMap");
         int srcPosUniform = genHeightMap.getUniform("srcPos");
 
-        terrainMap.bindUniformImage(genHeightMap.program, 0, "terrainMap", GL_WRITE_ONLY);
+        terrainMap.bindUniformImage(genHeightMap.program, 8, "terrainMap", GL_WRITE_ONLY);
         glUniform2i(srcPosUniform, chunkPos.x*100, chunkPos.y*100);
 
         genHeightMap.use();
