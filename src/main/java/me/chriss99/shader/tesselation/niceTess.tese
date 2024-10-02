@@ -4,6 +4,7 @@ layout(binding = 0, r32f) restrict readonly uniform image2D terrainMap;
 layout(binding = 1, r32f) restrict readonly uniform image2D waterMap;
 
 uniform bool water;
+uniform ivec2 srcPos;
 
 void main() {
     vec2 uv = gl_TessCoord.xy;
@@ -20,5 +21,5 @@ void main() {
         height += waterHeight - ((waterHeight <= 0) ? .1 : 0);
     }
 
-    gl_Position =  vec4(position.x, height, position.y, 1);
+    gl_Position =  vec4(position.x + srcPos.x, height, position.y + srcPos.y, 1);
 }

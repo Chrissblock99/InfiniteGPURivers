@@ -65,8 +65,8 @@ public class Main {
         setupData();
 
         glPatchParameteri(GL_PATCH_VERTICES, 4);
-        tessProgram = new TessProgram(cameraMatrix, vao, xSize, zSize, false);
-        niceTessProgram = new TessProgram(cameraMatrix, vao, xSize, zSize, true);
+        tessProgram = new TessProgram(cameraMatrix, vao, srcPos, xSize, zSize, false);
+        niceTessProgram = new TessProgram(cameraMatrix, vao, srcPos, xSize, zSize, true);
 
         inputDeviceManager = new InputDeviceManager(window);
         movementController = new MovementController(inputDeviceManager, cameraMatrix);
