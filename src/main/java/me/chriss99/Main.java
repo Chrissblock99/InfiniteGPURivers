@@ -20,7 +20,6 @@ public class Main {
 
     static boolean niceRender = true;
     static RenderProgram vaoListProgram;
-    static TerrainVAOListProgram terrainVAOListProgram;
     static PlayerCenteredRenderer playerCenteredRenderer;
     static RenderProgram tessProgram;
     static RenderProgram niceTessProgram;
@@ -54,7 +53,6 @@ public class Main {
         gpuTerrainEroder = new GPUTerrainEroder(heightMap, heightMap);
 
         vaoListProgram = new VAOListProgram(cameraMatrix, List.of(/*VAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
-        terrainVAOListProgram = new TerrainVAOListProgram(cameraMatrix);
         playerCenteredRenderer = new PlayerCenteredRenderer(cameraMatrix, (vector2i -> {
             Array2DBufferWrapper terrain = terrainStorage.readArea(vector2i.x, vector2i.y, 65, 65);
             Array2DBufferWrapper water = new Array2DBufferWrapper(GL_RED, GL_FLOAT, 65, 65);
@@ -123,16 +121,6 @@ public class Main {
         glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
         glVertexAttribPointer(0, 2, GL_DOUBLE, false, 0, 0);
         glEnableVertexAttribArray(0);
-
-
-
-        Array2DBufferWrapper[] map = gpuTerrainEroder.downloadMap();
-        terrainVAOListProgram.terrainVAOs.add(TerrainVAOGenerator.heightMapToSimpleVAO(map[0], map[1], srcPos));
-    }
-
-    private static void updateData() {
-        Array2DBufferWrapper[] map = gpuTerrainEroder.downloadMap();
-        terrainVAOListProgram.terrainVAOs.get(0).updatePositions(TerrainVAOGenerator.heightMapToSimpleVertexes(map[0], map[1]));
     }
 
     private static void loop() {
@@ -140,19 +128,12 @@ public class Main {
         double lastFramePrint = Double.NEGATIVE_INFINITY;
         LinkedList<Double> frames = new LinkedList<>();
 
-        double lastUpdate = 0;
-
         while(!glfwWindowShouldClose(window)) {
             movementController.update();
             playerCenteredRenderer.updateLoadedChunks();
 
             //clear the window
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            if (simulateErosion && lastTime - lastUpdate >= .5) {
-                lastUpdate = lastTime;
-                updateData();
-            }
 
             vaoListProgram.render();
             //terrainVAOListProgram.render();
