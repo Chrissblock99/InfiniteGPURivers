@@ -27,7 +27,7 @@ public class Main {
 
     static InfiniteWorld terrainStorage;
 
-    static Vector2i srcPos = new Vector2i(-400, 300);
+    static Vector2i srcPos = new Vector2i(-7*64, 5*64);
     static int xSize = 8*64;
     static int zSize = 8*64;
     static int simulationStepsPerFrame = 5;
