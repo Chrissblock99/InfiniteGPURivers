@@ -155,13 +155,13 @@ public class Main {
             }
 
             vaoListProgram.render();
-            terrainVAOListProgram.render();
-            terrainVAOListProgram.render(true);
+            //terrainVAOListProgram.render();
+            //terrainVAOListProgram.render(true);
             playerCenteredRenderer.render();
-            /*if (niceRender)
+            if (niceRender)
                 niceTessProgram.render();
             else
-                tessProgram.render();*/
+                tessProgram.render();
 
             //swap the frame to show the rendered image
             glfwSwapBuffers(window);
