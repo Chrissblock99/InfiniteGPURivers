@@ -9,7 +9,7 @@ import java.util.function.Function;
 
 public class PlayerCenteredRenderer extends TerrainVAOMapProgram {
     private final Function<Vector2i, TerrainVAO> chunkLoader;
-    private int chunkRenderDistance;
+    public int chunkRenderDistance;
     private Vector2f previousPosition = null;
 
     public PlayerCenteredRenderer(CameraMatrix cameraMatrix, Function<Vector2i, TerrainVAO> chunkLoader, int chunkRenderDistance) {
