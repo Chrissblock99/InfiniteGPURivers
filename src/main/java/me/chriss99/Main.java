@@ -14,8 +14,6 @@ import java.util.*;
 
 
 public class Main {
-
-    //a variable to hold the id of the GLFW window
     static long window;
 
     static boolean niceRender = true;
@@ -53,12 +51,12 @@ public class Main {
         gpuTerrainEroder = new GPUTerrainEroder(heightMap, heightMap);
 
         vaoListProgram = new VAOListProgram(cameraMatrix, List.of(/*VAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
-        playerCenteredRenderer = new PlayerCenteredRenderer(cameraMatrix, (vector2i -> {
+        playerCenteredRenderer = new PlayerCenteredRenderer(cameraMatrix, vector2i -> {
             Array2DBufferWrapper terrain = terrainStorage.readArea(vector2i.x, vector2i.y, 65, 65);
             Array2DBufferWrapper water = new Array2DBufferWrapper(GL_RED, GL_FLOAT, 65, 65);
 
             return TerrainVAOGenerator.heightMapToSimpleVAO(terrain, water, vector2i);
-        }), 7);
+        }, 7);
 
         setupData();
 
