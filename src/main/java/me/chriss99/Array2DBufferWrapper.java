@@ -51,12 +51,4 @@ public class Array2DBufferWrapper {
 
         return length;
     }
-
-    public float getFloat(int x, int z) {
-        return buffer.getFloat((z*width + x)*4);
-    }
-
-    public void putFloat(int x, int z, float f) {
-        buffer.putFloat((z*width + x)*4, f);
-    }
 }

@@ -1,6 +1,6 @@
 package me.chriss99.worldmanagement;
 
-import me.chriss99.Array2DBufferWrapper;
+import me.chriss99.Float2DBufferWrapper;
 import me.chriss99.Util;
 import org.joml.Vector2i;
 
@@ -21,15 +21,15 @@ public class InfiniteWorld {
         this.chunkGenerator = chunkGenerator;
     }
 
-    public Array2DBufferWrapper readArea(int x, int y, int width, int height) {
-        return readWriteArea(x, y, new Array2DBufferWrapper(GL_RED, GL_FLOAT, width, height), false);
+    public Float2DBufferWrapper readArea(int x, int y, int width, int height) {
+        return readWriteArea(x, y, new Float2DBufferWrapper(width, height), false);
     }
 
-    public void writeArea(int x, int y, Array2DBufferWrapper data) {
+    public void writeArea(int x, int y, Float2DBufferWrapper data) {
         readWriteArea(x, y, data, true);
     }
 
-    public Array2DBufferWrapper readWriteArea(int x, int y, Array2DBufferWrapper buffer, boolean write) {
+    public Float2DBufferWrapper readWriteArea(int x, int y, Float2DBufferWrapper buffer, boolean write) {
         int width = buffer.width;
         int height = buffer.height;
         float[][] data = new float[width][height];

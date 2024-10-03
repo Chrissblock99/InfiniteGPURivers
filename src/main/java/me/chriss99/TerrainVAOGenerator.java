@@ -3,7 +3,7 @@ package me.chriss99;
 import org.joml.Vector2i;
 
 public class TerrainVAOGenerator {
-    public static float[] heightMapToSimpleVertexes(Array2DBufferWrapper terrain, Array2DBufferWrapper water) {
+    public static float[] heightMapToSimpleVertexes(Float2DBufferWrapper terrain, Float2DBufferWrapper water) {
         float[] vertecies = new float[terrain.width* terrain.height*2];
         int vertexShift = 0;
 
@@ -43,7 +43,7 @@ public class TerrainVAOGenerator {
         return index;
     }
 
-    public static TerrainVAO heightMapToSimpleVAO(Array2DBufferWrapper terrain, Array2DBufferWrapper water, Vector2i srcPos) {
+    public static TerrainVAO heightMapToSimpleVAO(Float2DBufferWrapper terrain, Float2DBufferWrapper water, Vector2i srcPos) {
         float[] vertices = heightMapToSimpleVertexes(terrain, water);
         int[] index = heightMapToSimpleIndex(terrain.width, terrain.height);
 
