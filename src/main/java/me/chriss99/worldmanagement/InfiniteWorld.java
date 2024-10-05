@@ -8,9 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import static org.lwjgl.opengl.GL11.GL_FLOAT;
-import static org.lwjgl.opengl.GL11.GL_RED;
-
 public class InfiniteWorld {
     private final HashMap<Vector2i, Region> loadedRegions = new HashMap<>();
     private final RegionFileManager regionFileManager;
@@ -22,22 +19,7 @@ public class InfiniteWorld {
     }
 
     public Float2DBufferWrapper readArea(int x, int y, int width, int height) {
-        return readWriteArea(x, y, new Float2DBufferWrapper(width, height), false);
-    }
-
-    public void writeArea(int x, int y, Float2DBufferWrapper data) {
-        readWriteArea(x, y, data, true);
-    }
-
-    public Float2DBufferWrapper readWriteArea(int x, int y, Float2DBufferWrapper buffer, boolean write) {
-        int width = buffer.width;
-        int height = buffer.height;
         float[][] data = new float[width][height];
-        if (write)
-            for (int i = 0; i < width; i++)
-                for (int j = 0; j < height; j++)
-                    data[i][j] = buffer.getFloat(i, j);
-
 
         int chunkX = Util.properIntDivide(x, 100);
         int chunkY = Util.properIntDivide(y, 100);
@@ -59,26 +41,50 @@ public class InfiniteWorld {
                     float[] dest = data[currentChunkX*100 + i - x];
                     int destPos = currentChunkY*100 + currentChunkMinY - y;
 
-                    if (write) {
-                        float[] tempArray = src;
-                        src = dest;
-                        dest = tempArray;
-
-                        int tempInt = srcPos;
-                        srcPos = destPos;
-                        destPos = tempInt;
-                    }
-
                     System.arraycopy(src, srcPos, dest, destPos, currentChunkMaxY-currentChunkMinY + 1);
                 }
             }
 
-        if (!write)
-            for (int i = 0; i < width; i++)
-                for (int j = 0; j < height; j++)
-                    buffer.putFloat(i, j, data[i][j]);
+        Float2DBufferWrapper buffer = new Float2DBufferWrapper(width, height);
+        for (int i = 0; i < width; i++)
+            for (int j = 0; j < height; j++)
+                buffer.putFloat(i, j, data[i][j]);
 
         return buffer;
+    }
+
+    public void writeArea(int x, int y, Float2DBufferWrapper data) {
+        int width = data.width;
+        int height = data.height;
+        float[][] dataArray = new float[width][height];
+        for (int i = 0; i < width; i++)
+            for (int j = 0; j < height; j++)
+                dataArray[i][j] = data.getFloat(i, j);
+
+
+        int chunkX = Util.properIntDivide(x, 100);
+        int chunkY = Util.properIntDivide(y, 100);
+        int chunksX = Util.properIntDivide(x+width-1, 100) - chunkX + 1;
+        int chunksY = Util.properIntDivide(y+height-1, 100) - chunkY + 1;
+
+        for (int currentChunkX = chunkX; currentChunkX < chunkX+chunksX; currentChunkX++)
+            for (int currentChunkY = chunkY; currentChunkY < chunkY+chunksY; currentChunkY++) {
+                Chunk currentChunk = getChunk(currentChunkX, currentChunkY);
+
+                int currentChunkMinX = (Math.max(currentChunkX*100, x)%100+100)%100;
+                int currentChunkMaxX = (Math.min(currentChunkX*100 +99, x+width-1)%100+100)%100;
+                int currentChunkMinY = (Math.max(currentChunkY*100, y)%100+100)%100;
+                int currentChunkMaxY = (Math.min(currentChunkY*100 +99, y+height-1)%100+100)%100;
+
+                for (int i = currentChunkMinX; i <= currentChunkMaxX; i++) {
+                    float[] src = dataArray[currentChunkX*100 + i - x];
+                    int srcPos = currentChunkY*100 + currentChunkMinY - y;
+                    float[] dest = currentChunk.data()[i];
+                    int destPos = currentChunkMinY;
+
+                    System.arraycopy(src, srcPos, dest, destPos, currentChunkMaxY-currentChunkMinY + 1);
+                }
+            }
     }
 
     private Region getRegion(Vector2i regionCoord) {
