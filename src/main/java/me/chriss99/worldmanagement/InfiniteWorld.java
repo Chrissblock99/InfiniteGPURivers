@@ -45,21 +45,13 @@ public class InfiniteWorld {
                 }
             }
 
-        Float2DBufferWrapper buffer = new Float2DBufferWrapper(width, height);
-        for (int i = 0; i < width; i++)
-            for (int j = 0; j < height; j++)
-                buffer.putFloat(i, j, data[i][j]);
-
-        return buffer;
+        return new Float2DBufferWrapper(data);
     }
 
     public void writeArea(int x, int y, Float2DBufferWrapper data) {
         int width = data.width;
         int height = data.height;
-        float[][] dataArray = new float[width][height];
-        for (int i = 0; i < width; i++)
-            for (int j = 0; j < height; j++)
-                dataArray[i][j] = data.getFloat(i, j);
+        float[][] dataArray = data.getArray();
 
 
         int chunkX = Util.properIntDivide(x, 100);

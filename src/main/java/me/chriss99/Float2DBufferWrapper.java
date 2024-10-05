@@ -10,6 +10,13 @@ public class Float2DBufferWrapper extends Array2DBufferWrapper {
         super(buffer, GL_RED, GL_FLOAT, width, height);
     }
 
+    public Float2DBufferWrapper(float[][] data) {
+        this(data.length, data[0].length);
+        for (int i = 0; i < width; i++)
+            for (int j = 0; j < height; j++)
+                putFloat(i, j, data[i][j]);
+    }
+
     public Float2DBufferWrapper(int width, int height) {
         super(GL_RED, GL_FLOAT, width, height);
     }
@@ -20,5 +27,14 @@ public class Float2DBufferWrapper extends Array2DBufferWrapper {
 
     public void putFloat(int x, int z, float f) {
         buffer.putFloat((z*width + x)*4, f);
+    }
+
+    public float[][] getArray() {
+        float[][] data = new float[width][height];
+        for (int i = 0; i < width; i++)
+            for (int j = 0; j < height; j++)
+                data[i][j] = getFloat(i, j);
+
+        return data;
     }
 }
