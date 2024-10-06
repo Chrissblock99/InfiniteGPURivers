@@ -2,14 +2,14 @@ package me.chriss99.worldmanagement;
 
 import org.joml.Vector2i;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
 public class Region {
     public final Vector2i coord;
-    private final HashMap<Vector2i, Chunk> chunks = new HashMap<>();
+    private final LinkedHashMap<Vector2i, Chunk> chunks = new LinkedHashMap<>();
 
     public Region(Vector2i coord) {
         this.coord = coord;
