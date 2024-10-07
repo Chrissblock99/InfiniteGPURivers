@@ -3,9 +3,6 @@ package me.chriss99;
 import me.chriss99.program.ComputeProgram;
 import me.chriss99.worldmanagement.Chunk;
 import org.joml.Vector2i;
-import org.lwjgl.BufferUtils;
-
-import java.nio.ByteBuffer;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL11.GL_RED;
@@ -30,16 +27,9 @@ public class TerrainGenerator {
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 
-        ByteBuffer byteBuffer = BufferUtils.createByteBuffer(100*100*4);
-        terrainMap.downloadFullData(GL_RED, GL_FLOAT, byteBuffer);
-        float[][] chunk = new float[100][100];
+        Float2DBufferWrapper buffer = new Float2DBufferWrapper(100, 100);
+        terrainMap.downloadFullData(GL_RED, GL_FLOAT, buffer.buffer);
 
-        for (int i = 0; i < 100*100; i++) {
-            int cX = i % 100;
-            int cZ = (i - cX) / 100;
-            chunk[cX][cZ] = byteBuffer.getFloat(i*4);
-        }
-
-        return new Chunk(new Float2DBufferWrapper(chunk));
+        return new Chunk(buffer);
     }
 }
