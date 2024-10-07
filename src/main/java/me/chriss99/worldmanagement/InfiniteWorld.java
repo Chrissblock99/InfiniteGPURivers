@@ -36,14 +36,13 @@ public class InfiniteWorld {
                 int currentChunkMinY = (Math.max(currentChunkY*100, y)%100+100)%100;
                 int currentChunkMaxY = (Math.min(currentChunkY*100 +99, y+height-1)%100+100)%100;
 
-                for (int i = currentChunkMinX; i <= currentChunkMaxX; i++) {
-                    //this part now generates z slices instead of x slices, swizzling every chunk (artifacts)
+                for (int i = currentChunkMinY; i <= currentChunkMaxY; i++) {
                     Array2DBufferWrapper src = currentChunk.data().slice(i);
-                    int srcPos = currentChunkMinY;
-                    Array2DBufferWrapper dest = data.slice(currentChunkX*100 + i - x);
-                    int destPos = currentChunkY*100 + currentChunkMinY - y;
+                    int srcPos = currentChunkMinX;
+                    Array2DBufferWrapper dest = data.slice(currentChunkY*100 + i - y);
+                    int destPos = currentChunkX*100 + currentChunkMinX - x;
 
-                    dest.buffer.put(destPos*4, src.buffer, srcPos*4, (currentChunkMaxY-currentChunkMinY + 1)*4);
+                    dest.buffer.put(destPos*4, src.buffer, srcPos*4, (currentChunkMaxX-currentChunkMinX + 1)*4);
                 }
             }
 
