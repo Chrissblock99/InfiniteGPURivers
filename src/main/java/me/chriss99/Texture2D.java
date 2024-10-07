@@ -34,7 +34,7 @@ public class Texture2D {
         glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, width, height, format, type, data);
     }
 
-    public void uploadData(int xOffset, int yOffset, Float2DBufferWrapper data) {
+    public void uploadData(int xOffset, int yOffset, Array2DBufferWrapper data) {
         uploadData(xOffset, yOffset, data.width, data.height, data.format, data.type, data.buffer);
     }
 
@@ -42,7 +42,7 @@ public class Texture2D {
         uploadData(0, 0, width, height, format, type, data);
     }
 
-    public void downloadData(int xOffset, int yOffset, Float2DBufferWrapper writeTo) {
+    public void downloadData(int xOffset, int yOffset, Array2DBufferWrapper writeTo) {
         downloadData(xOffset, yOffset, writeTo.width, writeTo.height, writeTo.format, writeTo.type, writeTo.buffer);
     }
 
