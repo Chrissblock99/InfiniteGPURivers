@@ -1,5 +1,6 @@
 package me.chriss99.worldmanagement;
 
+import me.chriss99.Array2DBufferWrapper;
 import me.chriss99.Float2DBufferWrapper;
 import me.chriss99.Util;
 import org.joml.Vector2i;
@@ -19,7 +20,7 @@ public class InfiniteWorld {
     }
 
     public Float2DBufferWrapper readArea(int x, int y, int width, int height) {
-        float[][] data = new float[width][height];
+        Float2DBufferWrapper data = new Float2DBufferWrapper(width, height);
 
         int chunkX = Util.properIntDivide(x, 100);
         int chunkY = Util.properIntDivide(y, 100);
@@ -37,17 +38,16 @@ public class InfiniteWorld {
 
                 for (int i = currentChunkMinX; i <= currentChunkMaxX; i++) {
                     //this part now generates z slices instead of x slices, swizzling every chunk (artifacts)
-                    Float2DBufferWrapper wrapper = new Float2DBufferWrapper(currentChunk.data().slice(i).buffer, 100, 1);
-                    float[] src = wrapper.getRealArray()[0];
+                    Array2DBufferWrapper src = currentChunk.data().slice(i);
                     int srcPos = currentChunkMinY;
-                    float[] dest = data[currentChunkX*100 + i - x];
+                    Array2DBufferWrapper dest = data.slice(currentChunkX*100 + i - x);
                     int destPos = currentChunkY*100 + currentChunkMinY - y;
 
-                    System.arraycopy(src, srcPos, dest, destPos, currentChunkMaxY-currentChunkMinY + 1);
+                    dest.buffer.put(destPos*4, src.buffer, srcPos*4, (currentChunkMaxY-currentChunkMinY + 1)*4);
                 }
             }
 
-        return new Float2DBufferWrapper(data);
+        return data;
     }
 
     /*public void writeArea(int x, int y, Float2DBufferWrapper data) {
