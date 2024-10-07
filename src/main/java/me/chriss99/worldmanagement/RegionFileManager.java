@@ -74,7 +74,7 @@ public class RegionFileManager {
                 for (int y = 0; y < 100; y++)
                     data[x][y] = buffer.getFloat();
 
-            region.addChunk(chunkCoord, new Chunk(data));
+            //region.addChunk(chunkCoord, new Chunk(data));
         }
 
         return region;
@@ -86,11 +86,11 @@ public class RegionFileManager {
         for (Map.Entry<Vector2i, Chunk> entry : region.getAllChunks()) {
             buffer.putInt(entry.getKey().x);
             buffer.putInt(entry.getKey().y);
-            float[][] data = entry.getValue().data();
+            /*float[][] data = entry.getValue().data();
 
             for (int x = 0; x < 100; x++)
                 for (int y = 0; y < 100; y++)
-                    buffer.putFloat(data[x][y]);
+                    buffer.putFloat(data[x][y]);*/
         }
 
         return buffer.array();

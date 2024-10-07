@@ -1,4 +1,6 @@
 package me.chriss99.worldmanagement;
 
-public record Chunk(float[][] data) {
+import me.chriss99.Array2DBufferWrapper;
+
+public record Chunk(Array2DBufferWrapper data) {
 }

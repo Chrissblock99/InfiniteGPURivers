@@ -40,6 +40,6 @@ public class TerrainGenerator {
             chunk[cX][cZ] = byteBuffer.getFloat(i*4);
         }
 
-        return new Chunk(chunk);
+        return new Chunk(new Float2DBufferWrapper(chunk));
     }
 }

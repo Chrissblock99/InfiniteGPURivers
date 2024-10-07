@@ -36,7 +36,8 @@ public class InfiniteWorld {
                 int currentChunkMaxY = (Math.min(currentChunkY*100 +99, y+height-1)%100+100)%100;
 
                 for (int i = currentChunkMinX; i <= currentChunkMaxX; i++) {
-                    float[] src = currentChunk.data()[i];
+                    Float2DBufferWrapper wrapper = new Float2DBufferWrapper(currentChunk.data().buffer, 100, 100);
+                    float[] src = wrapper.getArray()[i];
                     int srcPos = currentChunkMinY;
                     float[] dest = data[currentChunkX*100 + i - x];
                     int destPos = currentChunkY*100 + currentChunkMinY - y;
@@ -48,7 +49,7 @@ public class InfiniteWorld {
         return new Float2DBufferWrapper(data);
     }
 
-    public void writeArea(int x, int y, Float2DBufferWrapper data) {
+    /*public void writeArea(int x, int y, Float2DBufferWrapper data) {
         int width = data.width;
         int height = data.height;
         float[][] dataArray = data.getArray();
@@ -77,7 +78,7 @@ public class InfiniteWorld {
                     System.arraycopy(src, srcPos, dest, destPos, currentChunkMaxY-currentChunkMinY + 1);
                 }
             }
-    }
+    }*/
 
     private Region getRegion(Vector2i regionCoord) {
         return loadedRegions.computeIfAbsent(regionCoord, regionFileManager::loadRegion);

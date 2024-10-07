@@ -168,7 +168,7 @@ public class Main {
             lastTime = currentTime;
         }
 
-        terrainStorage.unloadAllRegions();
+        //terrainStorage.unloadAllRegions();
     }
 
     private static void cleanGL() {
