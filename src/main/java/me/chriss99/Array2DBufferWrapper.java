@@ -45,7 +45,7 @@ public class Array2DBufferWrapper {
     }
 
 
-    private static int sizeOf(int format, int type) {
+    public static int sizeOf(int format, int type) {
         int length = switch (type) {
             case GL_FLOAT, GL_INT -> 4;
             case GL_DOUBLE -> 8;

@@ -1,7 +1,6 @@
 package me.chriss99.worldmanagement;
 
 import me.chriss99.Array2DBufferWrapper;
-import me.chriss99.Float2DBufferWrapper;
 import me.chriss99.Util;
 import org.joml.Vector2i;
 
@@ -14,13 +13,21 @@ public class InfiniteWorld {
     private final RegionFileManager regionFileManager;
     private final Function<Vector2i, Chunk> chunkGenerator;
 
-    public InfiniteWorld(String worldName, Function<Vector2i, Chunk> chunkGenerator) {
-        this.regionFileManager = new RegionFileManager(worldName);
+    public final int elementSize;
+    public final int format;
+    public final int type;
+
+    public InfiniteWorld(String worldName, int format, int type, Function<Vector2i, Chunk> chunkGenerator) {
+        this.regionFileManager = new RegionFileManager(worldName, format, type);
         this.chunkGenerator = chunkGenerator;
+
+        elementSize = Array2DBufferWrapper.sizeOf(format, type);
+        this.format = format;
+        this.type = type;
     }
 
-    public Float2DBufferWrapper readArea(int x, int y, int width, int height) {
-        Float2DBufferWrapper data = new Float2DBufferWrapper(width, height);
+    public Array2DBufferWrapper readArea(int x, int y, int width, int height) {
+        Array2DBufferWrapper data = new Array2DBufferWrapper(format, type, width, height);
 
         int chunkX = Util.properIntDivide(x, 100);
         int chunkY = Util.properIntDivide(y, 100);
@@ -42,7 +49,7 @@ public class InfiniteWorld {
                     Array2DBufferWrapper dest = data.slice(currentChunkY*100 + i - y);
                     int destPos = currentChunkX*100 + currentChunkMinX - x;
 
-                    dest.buffer.put(destPos*4, src.buffer, srcPos*4, (currentChunkMaxX-currentChunkMinX + 1)*4);
+                    dest.buffer.put(destPos*elementSize, src.buffer, srcPos*elementSize, (currentChunkMaxX-currentChunkMinX + 1)*elementSize);
                 }
             }
 
