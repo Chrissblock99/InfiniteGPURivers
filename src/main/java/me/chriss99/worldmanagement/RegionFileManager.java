@@ -1,5 +1,6 @@
 package me.chriss99.worldmanagement;
 
+import me.chriss99.Float2DBufferWrapper;
 import org.joml.Vector2i;
 
 import java.io.*;
@@ -68,13 +69,10 @@ public class RegionFileManager {
 
         for (int i = 0; i < chunkNum; i++) {
             Vector2i chunkCoord = new Vector2i(buffer.getInt(), buffer.getInt());
-            float[][] data = new float[100][100];
-
-            for (int x = 0; x < 100; x++)
-                for (int y = 0; y < 100; y++)
-                    data[x][y] = buffer.getFloat();
-
-            //region.addChunk(chunkCoord, new Chunk(data));
+            byte[] what = new byte[100*100*4];
+            buffer.get(what);
+            Float2DBufferWrapper data = new Float2DBufferWrapper(ByteBuffer.wrap(what), 100, 100);
+            region.addChunk(chunkCoord, new Chunk(data));
         }
 
         return region;
@@ -86,11 +84,7 @@ public class RegionFileManager {
         for (Map.Entry<Vector2i, Chunk> entry : region.getAllChunks()) {
             buffer.putInt(entry.getKey().x);
             buffer.putInt(entry.getKey().y);
-            /*float[][] data = entry.getValue().data();
-
-            for (int x = 0; x < 100; x++)
-                for (int y = 0; y < 100; y++)
-                    buffer.putFloat(data[x][y]);*/
+            buffer.put(entry.getValue().data().buffer);
         }
 
         return buffer.array();
