@@ -3,6 +3,7 @@ package me.chriss99;
 import org.lwjgl.BufferUtils;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -38,6 +39,11 @@ public class Array2DBufferWrapper {
         this.width = width;
         this.height = height;
     }
+
+    public Array2DBufferWrapper slice(int z) {
+        return new Array2DBufferWrapper(buffer.slice(width*elementSize*z, width*elementSize).order(ByteOrder.LITTLE_ENDIAN), format, type, width, 1);
+    }
+
 
     private static int sizeOf(int format, int type) {
         int length = switch (type) {

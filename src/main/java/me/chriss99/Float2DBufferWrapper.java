@@ -37,4 +37,13 @@ public class Float2DBufferWrapper extends Array2DBufferWrapper {
 
         return data;
     }
+
+    public float[][] getRealArray() {
+        float[][] data = new float[height][width];
+        for (int i = 0; i < width; i++)
+            for (int j = 0; j < height; j++)
+                data[j][i] = getFloat(i, j);
+
+        return data;
+    }
 }
