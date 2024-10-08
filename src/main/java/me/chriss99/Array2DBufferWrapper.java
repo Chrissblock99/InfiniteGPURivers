@@ -44,6 +44,18 @@ public class Array2DBufferWrapper {
         return new Array2DBufferWrapper(buffer.slice(width*elementSize*z, width*elementSize).order(ByteOrder.LITTLE_ENDIAN), format, type, width, 1);
     }
 
+    public Float2DBufferWrapper asFloatWrapper() {
+        if (format != GL_RED || type != GL_FLOAT)
+            throw new IllegalStateException("This buffer wrapper does not hold floats!");
+        return new Float2DBufferWrapper(buffer, width, height);
+    }
+
+    public Vec4f2DBufferWrapper asVec4fWrapper() {
+        if (format != GL_RGBA || type != GL_FLOAT)
+            throw new IllegalStateException("This buffer wrapper does not hold Vec4f types!");
+        return new Vec4f2DBufferWrapper(buffer, width, height);
+    }
+
 
     public static int sizeOf(int format, int type) {
         int length = switch (type) {

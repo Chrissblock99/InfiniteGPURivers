@@ -47,12 +47,12 @@ public class Main {
         double start = glfwGetTime();
         createWindow();
         terrainStorage = new InfiniteWorld("testT", GL_RED, GL_FLOAT, TerrainGenerator::generateChunk);
-        Float2DBufferWrapper heightMap = new Float2DBufferWrapper(terrainStorage.readArea(srcPos.x, srcPos.y, xSize, zSize).buffer, xSize, zSize);
+        Float2DBufferWrapper heightMap = terrainStorage.readArea(srcPos.x, srcPos.y, xSize, zSize).asFloatWrapper();
         gpuTerrainEroder = new GPUTerrainEroder(heightMap, heightMap);
 
         vaoListProgram = new VAOListProgram(cameraMatrix, List.of(/*VAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
         playerCenteredRenderer = new PlayerCenteredRenderer(cameraMatrix, vector2i -> {
-            Float2DBufferWrapper terrain = new Float2DBufferWrapper(terrainStorage.readArea(vector2i.x, vector2i.y, 65, 65).buffer, 65, 65);
+            Float2DBufferWrapper terrain = terrainStorage.readArea(vector2i.x, vector2i.y, 65, 65).asFloatWrapper();
             Float2DBufferWrapper water = new Float2DBufferWrapper(65, 65);
 
             return TerrainVAOGenerator.heightMapToSimpleVAO(terrain, water, vector2i);
