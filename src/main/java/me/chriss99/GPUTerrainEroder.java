@@ -1,9 +1,7 @@
 package me.chriss99;
 
 import me.chriss99.program.ComputeProgram;
-import org.lwjgl.BufferUtils;
-
-import java.nio.ByteBuffer;
+import org.joml.Vector2i;
 
 import static org.lwjgl.opengl.GL45.*;
 
@@ -26,6 +24,8 @@ public class GPUTerrainEroder {
     double voidSediment = 0.3; //[0;1]
     */
 
+    private final ErosionDataStorage erosionDataStorage;
+    private Vector2i srcPos;
     private final int width;
     private final int height;
 
@@ -48,12 +48,13 @@ public class GPUTerrainEroder {
     private final ComputeProgram applySedimentThermalOutflowEvaporateAndAddWater;
     private final ComputeProgram evaporateWater;
 
-    private final ComputeProgram initTextures;
     private final ComputeProgram[] erosionPrograms;
 
-    public GPUTerrainEroder(Float2DBufferWrapper terrain, Float2DBufferWrapper water) {
-        this.width = terrain.width;
-        this.height = terrain.height;
+    public GPUTerrainEroder(ErosionDataStorage erosionDataStorage, Vector2i srcPos, int width, int height) {
+        this.erosionDataStorage = erosionDataStorage;
+        this.srcPos = srcPos;
+        this.width = width;
+        this.height = height;
 
         terrainMap = new Texture2D(GL_R32F, width, height);
         waterMap = new Texture2D(GL_R32F, width, height);
@@ -120,18 +121,7 @@ public class GPUTerrainEroder {
 
 
 
-        uploadMap(terrain, water);
-
-        initTextures = new ComputeProgram("initTextures");
-
-        waterMap.bindUniformImage(initTextures.program, 1, "waterMap", GL_WRITE_ONLY);
-        sedimentMap.bindUniformImage(initTextures.program, 2, "sedimentMap", GL_WRITE_ONLY);
-        hardnessMap.bindUniformImage(initTextures.program, 3, "hardnessMap", GL_WRITE_ONLY);
-        waterOutflowPipes.bindUniformImage(initTextures.program, 4, "waterOutflowPipes", GL_WRITE_ONLY);
-
-        initTextures.use();
-        glDispatchCompute(width, height, 1);
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        uploadMap();
 
         Main.printErrors();
     }
@@ -171,35 +161,20 @@ public class GPUTerrainEroder {
         return new Float2DBufferWrapper[]{terrain, water};
     }
 
-    public void uploadMap(Float2DBufferWrapper terrain, Float2DBufferWrapper water) {
-        uploadMapPart(0, 0, terrain, water);
-    }
+    public void uploadMap() {
+        terrainMap.uploadData(0, 0, erosionDataStorage.terrain.readArea(srcPos.x, srcPos.y, width, height));
+        waterMap.uploadData(0, 0, erosionDataStorage.water.readArea(srcPos.x, srcPos.y, width, height));
+        sedimentMap.uploadData(0, 0, erosionDataStorage.sediment.readArea(srcPos.x, srcPos.y, width, height));
+        hardnessMap.uploadData(0, 0, erosionDataStorage.hardness.readArea(srcPos.x, srcPos.y, width, height));
 
-    public void uploadMapPart(int x, int y, Float2DBufferWrapper terrain, Float2DBufferWrapper water) {
-        terrainMap.uploadData(x, y, terrain);
-        waterMap.uploadData(x, y, water);
-    }
+        waterOutflowPipes.uploadData(0, 0, erosionDataStorage.waterOutflow.readArea(srcPos.x, srcPos.y, width, height));
+        sedimentOutflowPipes.uploadData(0, 0, erosionDataStorage.sedimentOutflow.readArea(srcPos.x, srcPos.y, width, height));
 
-    public float[][][] downloadWaterOutflow() {
-        ByteBuffer byteBuffer = BufferUtils.createByteBuffer(width*height*4*4);
-        waterOutflowPipes.downloadFullData(GL_RGBA, GL_FLOAT, byteBuffer);
-        float[][][] waterOutflow = new float[width][height][4];
-
-        for (int i = 0; i < width*height; i++) {
-            int x = i % width;
-            int z = (i - x) / width;
-            waterOutflow[x][z][0] = byteBuffer.getFloat(i*4*4);
-            waterOutflow[x][z][1] = byteBuffer.getFloat(i*4*4 + 4);
-            waterOutflow[x][z][2] = byteBuffer.getFloat(i*4*4 + 8);
-            waterOutflow[x][z][3] = byteBuffer.getFloat(i*4*4 + 12);
-        }
-
-        return waterOutflow;
+        thermalOutflowPipes1.uploadData(0, 0, erosionDataStorage.thermalOutflow1.readArea(srcPos.x, srcPos.y, width, height));
+        thermalOutflowPipes2.uploadData(0, 0, erosionDataStorage.thermalOutflow2.readArea(srcPos.x, srcPos.y, width, height));
     }
 
     public void delete() {
-        initTextures.delete();
-
         addWater.delete();
         for (ComputeProgram program : erosionPrograms)
             program.delete();
