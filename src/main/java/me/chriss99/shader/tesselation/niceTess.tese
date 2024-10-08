@@ -14,12 +14,6 @@ void main() {
 
     vec2 position = (p11 - p00) * uv + p00;
 
-    ivec2 size = imageSize(terrainMap);
-    if (size.x <= position.x)
-    position.x = size.x-1;
-    if (size.y <= position.y)
-    position.y = size.y-1;
-
     float height = imageLoad(terrainMap, ivec2(position)).x;
     if (water) {
         float waterHeight = imageLoad(waterMap, ivec2(position)).x - .03;
