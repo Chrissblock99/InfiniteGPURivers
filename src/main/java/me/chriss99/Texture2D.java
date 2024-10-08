@@ -29,27 +29,15 @@ public class Texture2D {
         glUniform1i(location, bindingUnit);
     }
 
-    public void uploadData(int xOffset, int yOffset, int width, int height, int format, int type, ByteBuffer data) {
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, width, height, format, type, data);
-    }
-
     public void uploadData(int xOffset, int yOffset, Array2DBufferWrapper data) {
-        uploadData(xOffset, yOffset, data.width, data.height, data.format, data.type, data.buffer);
-    }
-
-    public void uploadFullData(int format, int type, ByteBuffer data) {
-        uploadData(0, 0, width, height, format, type, data);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, data.width, data.height, data.format, data.type, data.buffer);
     }
 
     public void downloadData(int xOffset, int yOffset, Array2DBufferWrapper writeTo) {
-        downloadData(xOffset, yOffset, writeTo.width, writeTo.height, writeTo.format, writeTo.type, writeTo.buffer);
-    }
-
-    public void downloadData(int xOffset, int yOffset, int width, int height, int format, int type, ByteBuffer buffer) {
         glBindTexture(GL_TEXTURE_2D, texture);
         //excuse me the docs say that I have to use "GL_TEXTURE_2D" instead of "texture"
-        glGetTextureSubImage(texture, 0, xOffset, yOffset, 0, width, height, 1, format, type, buffer);
+        glGetTextureSubImage(texture, 0, xOffset, yOffset, 0, writeTo.width, writeTo.height, 1, writeTo.format, writeTo.type, writeTo.buffer);
     }
 
     public void downloadFullData(int format, int type, ByteBuffer buffer) {
