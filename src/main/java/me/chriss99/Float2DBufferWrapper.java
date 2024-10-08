@@ -21,6 +21,14 @@ public class Float2DBufferWrapper extends Array2DBufferWrapper {
         super(GL_RED, GL_FLOAT, width, height);
     }
 
+    public Float2DBufferWrapper(int width, int height, float fill) {
+        this(width, height);
+        for (int i = 0; i < width; i++)
+            for (int j = 0; j < height; j++)
+                buffer.putFloat(fill);
+        buffer.rewind();
+    }
+
     public float getFloat(int x, int z) {
         return buffer.getFloat((z*width + x)*4);
     }

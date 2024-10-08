@@ -24,12 +24,7 @@ public class ErosionDataStorage {
         terrain = new InfiniteWorld(worldName + "/terrain", GL_RED, GL_FLOAT, chunkGenerator);
         water = new InfiniteWorld(worldName + "/water", GL_RED, GL_FLOAT, vector2i -> new Chunk(new Float2DBufferWrapper(100, 100)));
         sediment = new InfiniteWorld(worldName + "/sediment", GL_RED, GL_FLOAT, vector2i -> new Chunk(new Float2DBufferWrapper(100, 100)));
-        hardness = new InfiniteWorld(worldName + "/hardness", GL_RED, GL_FLOAT, vector2i -> {
-            Float2DBufferWrapper wrapper = new Float2DBufferWrapper(100, 100);
-            for (int i = 0; i < 100 * 100; i++)
-                wrapper.buffer.putFloat(1);
-            return new Chunk(wrapper);
-        });
+        hardness = new InfiniteWorld(worldName + "/hardness", GL_RED, GL_FLOAT, vector2i -> new Chunk(new Float2DBufferWrapper(100, 100, 1)));
 
         waterOutflow = new InfiniteWorld(worldName + "/waterOutflow", GL_RGBA, GL_FLOAT, vector2i -> new Chunk(new Vec4f2DBufferWrapper(100, 100)));
         sedimentOutflow = new InfiniteWorld(worldName + "/sedimentOutflow", GL_RGBA, GL_FLOAT, vector2i -> new Chunk(new Vec4f2DBufferWrapper(100, 100)));
