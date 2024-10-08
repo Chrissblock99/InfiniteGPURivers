@@ -147,18 +147,40 @@ public class GPUTerrainEroder {
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
     }
 
-    public Float2DBufferWrapper[] downloadMap() {
-        return downloadMapPart(0, 0, width, height);
-    }
-
-    public Float2DBufferWrapper[] downloadMapPart(int x, int y, int width, int height) {
+    public void downloadMap() {
         Float2DBufferWrapper terrain = new Float2DBufferWrapper(width, height);
-        terrainMap.downloadData(x, y, terrain);
+        terrainMap.downloadData(0, 0, terrain);
+        erosionDataStorage.terrain.writeArea(srcPos.x, srcPos.y, terrain);
 
         Float2DBufferWrapper water = new Float2DBufferWrapper(width, height);
-        waterMap.downloadData(x, y, water);
+        waterMap.downloadData(0, 0, water);
+        erosionDataStorage.water.writeArea(srcPos.x, srcPos.y, water);
 
-        return new Float2DBufferWrapper[]{terrain, water};
+        Float2DBufferWrapper sediment = new Float2DBufferWrapper(width, height);
+        sedimentMap.downloadData(0, 0, sediment);
+        erosionDataStorage.sediment.writeArea(srcPos.x, srcPos.y, sediment);
+
+        Float2DBufferWrapper hardness = new Float2DBufferWrapper(width, height);
+        hardnessMap.downloadData(0, 0, hardness);
+        erosionDataStorage.hardness.writeArea(srcPos.x, srcPos.y, hardness);
+
+
+        Vec4f2DBufferWrapper waterOutflow = new Vec4f2DBufferWrapper(width, height);
+        waterOutflowPipes.downloadData(0, 0, waterOutflow);
+        erosionDataStorage.waterOutflow.writeArea(srcPos.x, srcPos.y, waterOutflow);
+
+        Vec4f2DBufferWrapper sedimentOutflow = new Vec4f2DBufferWrapper(width, height);
+        sedimentOutflowPipes.downloadData(0, 0, sedimentOutflow);
+        erosionDataStorage.sedimentOutflow.writeArea(srcPos.x, srcPos.y, sedimentOutflow);
+
+
+        Vec4f2DBufferWrapper thermalOutflow1 = new Vec4f2DBufferWrapper(width, height);
+        thermalOutflowPipes1.downloadData(0, 0, thermalOutflow1);
+        erosionDataStorage.thermalOutflow1.writeArea(srcPos.x, srcPos.y, thermalOutflow1);
+
+        Vec4f2DBufferWrapper thermalOutflow2 = new Vec4f2DBufferWrapper(width, height);
+        thermalOutflowPipes2.downloadData(0, 0, thermalOutflow2);
+        erosionDataStorage.thermalOutflow2.writeArea(srcPos.x, srcPos.y, thermalOutflow2);
     }
 
     public void uploadMap() {

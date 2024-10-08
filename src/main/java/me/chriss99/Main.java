@@ -167,6 +167,7 @@ public class Main {
             lastTime = currentTime;
         }
 
+        gpuTerrainEroder.downloadMap();
         worldStorage.unloadAll();
     }
 
