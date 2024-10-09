@@ -1,5 +1,7 @@
 package me.chriss99;
 
+import org.joml.Vector2f;
+import org.joml.Vector2i;
 import org.joml.Vector3f;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -58,6 +60,17 @@ public class MovementController {
 
 
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_T, () -> Main.simulateErosion = !Main.simulateErosion);
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_R, () -> {
+            Vector2f pos = new Vector2f(Main.cameraMatrix.position.x, Main.cameraMatrix.position.z);
+            pos.div(64f).sub(new Vector2f(Main.xSize/(64*2f))).floor().mul(64f);
+            Vector2i srcPos = new Vector2i((int) pos.x, (int) pos.y);
+
+            Main.srcPos.x = srcPos.x;
+            Main.srcPos.y = srcPos.y;
+
+            Main.gpuTerrainEroder.changeSrcPos(srcPos);
+            Main.playerCenteredRenderer.updateLoadedChunks(Main.srcPos, new Vector2i(Main.xSize, Main.zSize), true);
+        });
     }
 
     public void update() {
