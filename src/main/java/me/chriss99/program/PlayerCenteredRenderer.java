@@ -13,14 +13,22 @@ public class PlayerCenteredRenderer extends TerrainVAOMapProgram {
     private Vector2f previousPosition = null;
 
     public PlayerCenteredRenderer(CameraMatrix cameraMatrix, Function<Vector2i, TerrainVAO> chunkLoader, int chunkRenderDistance) {
+        this(cameraMatrix, chunkLoader, chunkRenderDistance, new Vector2i(), new Vector2i());
+    }
+
+    public PlayerCenteredRenderer(CameraMatrix cameraMatrix, Function<Vector2i, TerrainVAO> chunkLoader, int chunkRenderDistance, Vector2i skipSrcPos, Vector2i skipSideLength) {
         super(cameraMatrix);
         this.chunkLoader = chunkLoader;
         this.chunkRenderDistance = chunkRenderDistance;
 
-        updateLoadedChunks();
+        updateLoadedChunks(skipSrcPos, skipSideLength);
     }
 
     public void updateLoadedChunks() {
+        updateLoadedChunks(new Vector2i(), new Vector2i());
+    }
+
+    public void updateLoadedChunks(Vector2i skipSrcPos, Vector2i skipSideLength) {
         Vector2f position = new Vector2f();
         position.x = cameraMatrix.position.x - (chunkRenderDistance-1)*64;
         position.y = cameraMatrix.position.z - (chunkRenderDistance-1)*64;
@@ -35,8 +43,11 @@ public class PlayerCenteredRenderer extends TerrainVAOMapProgram {
 
         terrainVAOs.values().removeIf(terrainVAO -> !pointInsideRectangle(terrainVAO.srcPos, srcPos, new Vector2i(sideLength*64)));
         for (int x = 0; x < sideLength; x++)
-            for (int y= 0; y < sideLength; y++)
-                terrainVAOs.computeIfAbsent(new Vector2i((int) position.x + x*64, (int) position.y + y*64), chunkLoader);
+            for (int y= 0; y < sideLength; y++) {
+                Vector2i pos = new Vector2i((int) position.x + x*64, (int) position.y + y*64);
+                if (!pointInsideRectangle(pos, skipSrcPos, skipSideLength))
+                    terrainVAOs.computeIfAbsent(pos, chunkLoader);
+            }
     }
 
     private static boolean pointInsideRectangle(Vector2i point, Vector2i srcPos, Vector2i sideLength) {

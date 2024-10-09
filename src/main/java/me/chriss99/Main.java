@@ -55,7 +55,7 @@ public class Main {
             Float2DBufferWrapper water = worldStorage.water.readArea(vector2i.x, vector2i.y, 65, 65).asFloatWrapper();
 
             return TerrainVAOGenerator.heightMapToSimpleVAO(terrain, water, vector2i);
-        }, 7);
+        }, 7, srcPos, new Vector2i(xSize, zSize));
 
         setupData();
 
@@ -127,7 +127,7 @@ public class Main {
 
         while(!glfwWindowShouldClose(window)) {
             movementController.update();
-            playerCenteredRenderer.updateLoadedChunks();
+            playerCenteredRenderer.updateLoadedChunks(srcPos, new Vector2i(xSize, zSize));
 
             //clear the window
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
