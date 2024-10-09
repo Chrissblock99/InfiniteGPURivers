@@ -19,6 +19,7 @@ public class Main {
     static PlayerCenteredRenderer playerCenteredRenderer;
     static TerrainRenderer tessProgram;
 
+    static TerrainGenerator terrainGenerator;
     static ErosionDataStorage worldStorage;
 
     static Vector2i srcPos = new Vector2i(-7*64, 5*64);
@@ -43,7 +44,8 @@ public class Main {
         glfwInit();
         double start = glfwGetTime();
         createWindow();
-        worldStorage = new ErosionDataStorage("testT", TerrainGenerator::generateChunk);
+        terrainGenerator = new TerrainGenerator();
+        worldStorage = new ErosionDataStorage("testT", terrainGenerator::generateChunk);
         gpuTerrainEroder = new GPUTerrainEroder(worldStorage, srcPos, xSize+1, zSize+1);
 
         vaoListProgram = new VAOListProgram(cameraMatrix, List.of(/*VAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
@@ -175,6 +177,7 @@ public class Main {
         vaoListProgram.delete();
         tessProgram.delete();
 
+        terrainGenerator.delete();
         gpuTerrainEroder.delete();
         printErrors();
     }

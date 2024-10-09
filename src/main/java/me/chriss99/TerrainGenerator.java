@@ -13,16 +13,22 @@ import static org.lwjgl.opengl.GL42.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT;
 import static org.lwjgl.opengl.GL42.glMemoryBarrier;
 import static org.lwjgl.opengl.GL43.glDispatchCompute;
 
-public class TerrainGenerator {
-    public static Chunk generateChunk(Vector2i chunkPos) {
-        Texture2D terrainMap = new Texture2D(GL_R32F, 100, 100);
-        ComputeProgram genHeightMap = new ComputeProgram("genHeightMap");
-        int srcPosUniform = genHeightMap.getUniform("srcPos");
+public class TerrainGenerator extends ComputeProgram {
+    final Texture2D terrainMap;
+    final int srcPosUniform;
 
-        terrainMap.bindUniformImage(genHeightMap.program, 8, "terrainMap", GL_WRITE_ONLY);
+    public TerrainGenerator() {
+        super("genHeightMap");
+        terrainMap = new Texture2D(GL_R32F, 100, 100);
+        srcPosUniform = getUniform("srcPos");
+
+        terrainMap.bindUniformImage(program, 8, "terrainMap", GL_WRITE_ONLY);
+    }
+
+    public Chunk generateChunk(Vector2i chunkPos) {
+        use();
         glUniform2i(srcPosUniform, chunkPos.x*100, chunkPos.y*100);
 
-        genHeightMap.use();
         glDispatchCompute(100, 100, 1);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
