@@ -3,10 +3,8 @@ layout (quads, equal_spacing, ccw) in;
 layout(binding = 0, r32f) restrict readonly uniform image2D terrainMap;
 layout(binding = 1, r32f) restrict readonly uniform image2D waterMap;
 
-uniform mat4 transformMatrix;
 uniform bool water;
-
-out vec3 pos;
+uniform ivec2 srcPos;
 
 void main() {
     vec2 uv = gl_TessCoord.xy;
@@ -16,12 +14,11 @@ void main() {
 
     vec2 position = (p11 - p00) * uv + p00;
 
-
     float height = imageLoad(terrainMap, ivec2(position)).x;
-    if (water)
-        height += imageLoad(waterMap, ivec2(position)).x - .03;
+    if (water) {
+        float waterHeight = imageLoad(waterMap, ivec2(position)).x - .03;
+        height += waterHeight - ((waterHeight <= 0) ? .1 : 0);
+    }
 
-    pos = vec3(position.x, height, position.y);
-
-    gl_Position = transformMatrix * vec4(pos, 1);
+    gl_Position =  vec4(position.x + srcPos.x, height, position.y + srcPos.y, 1);
 }

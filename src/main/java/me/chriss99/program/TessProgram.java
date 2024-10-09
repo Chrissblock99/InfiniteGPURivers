@@ -22,7 +22,7 @@ public class TessProgram extends TerrainRenderer {
     private final int waterUniform;
     private final int srcPosUniform;
 
-    public TessProgram(CameraMatrix cameraMatrix, int vao, Vector2i srcPos, int xSize, int zSize, boolean niceLooking) {
+    public TessProgram(CameraMatrix cameraMatrix, int vao, Vector2i srcPos, int xSize, int zSize) {
         this.cameraMatrix = cameraMatrix;
         this.vao = vao;
         this.srcPos = srcPos;
@@ -31,17 +31,12 @@ public class TessProgram extends TerrainRenderer {
 
         addShader("tesselation/passThrough.vert", GL_VERTEX_SHADER);
         addShader("tesselation/tess.tesc", GL_TESS_CONTROL_SHADER);
-        if (!niceLooking) {
-            addShader("tesselation/tess.tese", GL_TESS_EVALUATION_SHADER);
-            addShader("tesselation/gradient.frag", GL_FRAGMENT_SHADER);
-        } else {
-            addShader("tesselation/niceTess.tese", GL_TESS_EVALUATION_SHADER);
-            addShader("tesselation/normals.geom", GL_GEOMETRY_SHADER);
-            addShader("tesselation/different.frag", GL_FRAGMENT_SHADER);
+        addShader("tesselation/tess.tese", GL_TESS_EVALUATION_SHADER);
+        addShader("tesselation/normals.geom", GL_GEOMETRY_SHADER);
+        addShader("tesselation/different.frag", GL_FRAGMENT_SHADER);
 
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        }
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         bindAttribute(0, "position");
         validate();

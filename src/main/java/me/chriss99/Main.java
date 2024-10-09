@@ -1,7 +1,6 @@
 package me.chriss99;
 
 import me.chriss99.program.*;
-import me.chriss99.worldmanagement.InfiniteWorld;
 import org.joml.Vector2i;
 import org.lwjgl.opengl.*;
 
@@ -16,11 +15,9 @@ import java.util.*;
 public class Main {
     static long window;
 
-    static boolean niceRender = true;
     static RenderProgram vaoListProgram;
     static PlayerCenteredRenderer playerCenteredRenderer;
     static TerrainRenderer tessProgram;
-    static TerrainRenderer niceTessProgram;
 
     static ErosionDataStorage worldStorage;
 
@@ -60,8 +57,7 @@ public class Main {
         setupData();
 
         glPatchParameteri(GL_PATCH_VERTICES, 4);
-        tessProgram = new TessProgram(cameraMatrix, vao, srcPos, xSize, zSize, false);
-        niceTessProgram = new TessProgram(cameraMatrix, vao, srcPos, xSize, zSize, true);
+        tessProgram = new TessProgram(cameraMatrix, vao, srcPos, xSize, zSize);
 
         inputDeviceManager = new InputDeviceManager(window);
         movementController = new MovementController(inputDeviceManager, cameraMatrix);
@@ -136,16 +132,10 @@ public class Main {
             //terrainVAOListProgram.render();
             //terrainVAOListProgram.render(true);
             playerCenteredRenderer.renderTerrain();
-            if (niceRender)
-                niceTessProgram.renderTerrain();
-            else
-                tessProgram.renderTerrain();
+            tessProgram.renderTerrain();
 
             playerCenteredRenderer.renderWater();
-            if (niceRender)
-                niceTessProgram.renderWater();
-            else
-                tessProgram.renderWater();
+            tessProgram.renderWater();
 
             //swap the frame to show the rendered image
             glfwSwapBuffers(window);
@@ -184,7 +174,6 @@ public class Main {
 
         vaoListProgram.delete();
         tessProgram.delete();
-        niceTessProgram.delete();
 
         gpuTerrainEroder.delete();
         printErrors();
