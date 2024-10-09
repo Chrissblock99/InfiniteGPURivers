@@ -25,7 +25,7 @@ public class GPUTerrainEroder {
     */
 
     private final ErosionDataStorage erosionDataStorage;
-    private Vector2i srcPos;
+    private final Vector2i srcPos = new Vector2i();
     private final int width;
     private final int height;
 
@@ -52,7 +52,8 @@ public class GPUTerrainEroder {
 
     public GPUTerrainEroder(ErosionDataStorage erosionDataStorage, Vector2i srcPos, int width, int height) {
         this.erosionDataStorage = erosionDataStorage;
-        this.srcPos = srcPos;
+        this.srcPos.x = srcPos.x;
+        this.srcPos.y = srcPos.y;
         this.width = width;
         this.height = height;
 
@@ -145,6 +146,13 @@ public class GPUTerrainEroder {
         program.use();
         glDispatchCompute(width, height, 1);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+    }
+
+    public void changeSrcPos(Vector2i srcPos) {
+        downloadMap();
+        this.srcPos.x = srcPos.x;
+        this.srcPos.y = srcPos.y;
+        uploadMap();
     }
 
     public void downloadMap() {
