@@ -166,7 +166,9 @@ public class Main {
         }
 
         gpuTerrainEroder.downloadMap();
+        System.out.println("Saving world...");
         worldStorage.unloadAll();
+        System.out.println("Saved world in " + (glfwGetTime() - lastTime) + " seconds.");
     }
 
     private static void cleanGL() {
