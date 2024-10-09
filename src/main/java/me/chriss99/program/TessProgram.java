@@ -9,7 +9,7 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL32.GL_GEOMETRY_SHADER;
 import static org.lwjgl.opengl.GL40.*;
 
-public class TessProgram extends RenderProgram {
+public class TessProgram extends TerrainRenderer {
     private final CameraMatrix cameraMatrix;
 
     private final int vao;
@@ -53,7 +53,7 @@ public class TessProgram extends RenderProgram {
     }
 
     @Override
-    public void render() {
+    public void renderTerrain() {
         use();
         glUniform2i(srcPosUniform, srcPos.x, srcPos.y);
         glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
@@ -62,7 +62,18 @@ public class TessProgram extends RenderProgram {
 
         glUniform1i(waterUniform, 0);
         glDrawArrays(GL_PATCHES, 0, xSize/64*zSize/64*4);
+    }
+
+    @Override
+    public void renderWater() {
+        use();
+        glUniform2i(srcPosUniform, srcPos.x, srcPos.y);
+        glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
+        glUniform3f(cameraPos, cameraMatrix.position.x, cameraMatrix.position.y, cameraMatrix.position.z);
+        glBindVertexArray(vao);
+
         glUniform1i(waterUniform, 1);
         glDrawArrays(GL_PATCHES, 0, xSize/64*zSize/64*4);
+
     }
 }

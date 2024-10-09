@@ -19,8 +19,8 @@ public class Main {
     static boolean niceRender = true;
     static RenderProgram vaoListProgram;
     static PlayerCenteredRenderer playerCenteredRenderer;
-    static RenderProgram tessProgram;
-    static RenderProgram niceTessProgram;
+    static TerrainRenderer tessProgram;
+    static TerrainRenderer niceTessProgram;
 
     static ErosionDataStorage worldStorage;
 
@@ -135,11 +135,17 @@ public class Main {
             vaoListProgram.render();
             //terrainVAOListProgram.render();
             //terrainVAOListProgram.render(true);
-            playerCenteredRenderer.render();
+            playerCenteredRenderer.renderTerrain();
             if (niceRender)
-                niceTessProgram.render();
+                niceTessProgram.renderTerrain();
             else
-                tessProgram.render();
+                tessProgram.renderTerrain();
+
+            playerCenteredRenderer.renderWater();
+            if (niceRender)
+                niceTessProgram.renderWater();
+            else
+                tessProgram.renderWater();
 
             //swap the frame to show the rendered image
             glfwSwapBuffers(window);

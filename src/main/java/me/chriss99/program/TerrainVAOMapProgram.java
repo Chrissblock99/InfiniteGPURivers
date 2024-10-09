@@ -10,7 +10,7 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL32.GL_GEOMETRY_SHADER;
 
-public class TerrainVAOMapProgram extends RenderProgram {
+public class TerrainVAOMapProgram extends TerrainRenderer {
     protected final CameraMatrix cameraMatrix;
 
     private final int transformMatrix;
@@ -40,7 +40,7 @@ public class TerrainVAOMapProgram extends RenderProgram {
     }
 
     @Override
-    public void render() {
+    public void renderTerrain() {
         if (terrainVAOs.isEmpty())
             return;
 
@@ -50,6 +50,17 @@ public class TerrainVAOMapProgram extends RenderProgram {
 
         glUniform1i(waterUniform, 0);
         renderAll();
+    }
+
+    @Override
+    public void renderWater() {
+        if (terrainVAOs.isEmpty())
+            return;
+
+        use();
+        glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
+        glUniform3f(cameraPos, cameraMatrix.position.x, cameraMatrix.position.y, cameraMatrix.position.z);
+
         glUniform1i(waterUniform, 1);
         renderAll();
     }
