@@ -3,10 +3,6 @@ package me.chriss99.program;
 import me.chriss99.CameraMatrix;
 import org.joml.Vector2i;
 
-import static org.lwjgl.opengl.GL11.glDrawArrays;
-import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL30.glBindVertexArray;
-import static org.lwjgl.opengl.GL32.GL_GEOMETRY_SHADER;
 import static org.lwjgl.opengl.GL40.*;
 
 public class TessProgram extends TerrainRenderer {

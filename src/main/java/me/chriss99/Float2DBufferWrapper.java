@@ -1,7 +1,6 @@
 package me.chriss99;
 
 import java.nio.ByteBuffer;
-import java.sql.Array;
 
 import static org.lwjgl.opengl.GL11.*;
 

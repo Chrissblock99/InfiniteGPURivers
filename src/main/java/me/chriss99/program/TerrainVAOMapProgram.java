@@ -6,7 +6,6 @@ import org.joml.Vector2i;
 
 import java.util.LinkedHashMap;
 
-import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL32.GL_GEOMETRY_SHADER;
 

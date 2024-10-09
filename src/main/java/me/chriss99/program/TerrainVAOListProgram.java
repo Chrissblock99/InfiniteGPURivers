@@ -5,7 +5,6 @@ import me.chriss99.TerrainVAO;
 
 import java.util.LinkedList;
 
-import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL32.GL_GEOMETRY_SHADER;
 

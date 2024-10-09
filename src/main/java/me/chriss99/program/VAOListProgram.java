@@ -5,7 +5,6 @@ import me.chriss99.VAO;
 
 import java.util.List;
 
-import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
 
 public class VAOListProgram extends RenderProgram {
