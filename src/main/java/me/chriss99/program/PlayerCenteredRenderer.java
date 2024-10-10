@@ -45,8 +45,15 @@ public class PlayerCenteredRenderer extends TerrainVAOMapProgram {
         int sideLength = chunkRenderDistance*2-1;
         Vector2i srcPos = new Vector2i((int) position.x, (int) position.y);
 
-        terrainVAOs.values().removeIf(terrainVAO -> !pointInsideRectangle(terrainVAO.srcPos, srcPos, new Vector2i(sideLength*64))
-                || pointInsideRectangle(terrainVAO.srcPos, skipSrcPos, skipSideLength));
+
+        terrainVAOs.values().removeIf(terrainVAO -> {
+            boolean clear = !pointInsideRectangle(terrainVAO.srcPos, srcPos, new Vector2i(sideLength*64))
+                    || pointInsideRectangle(terrainVAO.srcPos, skipSrcPos, skipSideLength);
+            if (clear)
+                terrainVAO.delete();
+            return clear;
+        });
+
         for (int x = 0; x < sideLength; x++)
             for (int y= 0; y < sideLength; y++) {
                 Vector2i pos = new Vector2i((int) position.x + x*64, (int) position.y + y*64);
