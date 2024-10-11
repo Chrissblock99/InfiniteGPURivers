@@ -1,0 +1,126 @@
+#version 450 core
+layout(local_size_x = 1, local_size_y = 1) in;
+layout(binding = 0, r32f) restrict readonly uniform image2D terrainMap;
+layout(binding = 1, r32f) restrict readonly uniform image2D waterMap;
+layout(binding = 2, r32f) restrict readonly uniform image2D sedimentMap;
+layout(binding = 3, r32f) restrict readonly uniform image2D hardnessMap;
+layout(binding = 4, rgba32f) restrict uniform image2D waterOutflowPipes;
+layout(binding = 5, rgba32f) restrict writeonly uniform image2D sedimentOutflowPipes;
+layout(binding = 6, rgba32f) restrict writeonly uniform image2D thermalOutflowPipes1;
+layout(binding = 7, rgba32f) restrict writeonly uniform image2D thermalOutflowPipes2;
+
+const float deltaT = 0.02; //[0;0.05]
+const float waterFlowMultiplier = 1; //[0.1;2]
+const float thermalErosionRate = 0.75; //[0;3]
+const float talusAngleTangentCoeff = 0.8; //[0;1]
+const float talusAngleTangentBias = 0.1; //[0;1]
+
+
+const ivec2 vonNeumannNeighbourhood[4] = ivec2[](
+    ivec2( 0,  1),
+    ivec2(-1,  0),
+    ivec2( 1,  0),
+    ivec2( 0, -1)
+);
+
+const ivec2 mooreNeighbourhood[8] = ivec2[](
+    ivec2(-1,  1),
+    ivec2( 0,  1),
+    ivec2( 1,  1),
+    ivec2(-1,  0),
+    ivec2( 1,  0),
+    ivec2(-1, -1),
+    ivec2( 0, -1),
+    ivec2( 1, -1)
+);
+
+const float inverseMooreNeighbourhoodDistances[8] = float[](
+    1/sqrt(2),
+    1,
+    1/sqrt(2),
+    1,
+    1,
+    1/sqrt(2),
+    1,
+    1/sqrt(2)
+);
+
+
+void main() {
+    float terrainHeight = imageLoad(terrainMap, ivec2(gl_GlobalInvocationID)).x;
+    float sedimentHeight = imageLoad(sedimentMap, ivec2(gl_GlobalInvocationID)).x;
+    float hardness = imageLoad(hardnessMap, ivec2(gl_GlobalInvocationID)).x;
+    float heightDiffs8[8];
+    for (int i = 0; i < 8; i++)
+        heightDiffs8[i] = terrainHeight - imageLoad(terrainMap, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[i]).x;
+    float heightDiffs4[4] = float[](heightDiffs8[1], heightDiffs8[3], heightDiffs8[4], heightDiffs8[6]);
+
+    float waterHeight = imageLoad(waterMap, ivec2(gl_GlobalInvocationID)).x;
+    float addedHeight = terrainHeight + waterHeight;
+    float waterHeights[4];
+    for (int i = 0; i < 4; i++)
+        waterHeights[i] = imageLoad(waterMap, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[i]).x;
+    vec4 waterHeightDiffs = vec4(waterHeight) -
+            vec4(waterHeights[0], waterHeights[1], waterHeights[2], waterHeights[3]) +
+            vec4(heightDiffs8[1], heightDiffs8[3], heightDiffs8[4], heightDiffs8[6]);
+
+    vec4 waterOutflow = imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID));
+    float waterOutflows[4] = float[](waterOutflow.x, waterOutflow.y, waterOutflow.z, waterOutflow.w);
+
+
+    //water
+    waterOutflow = max(vec4(0), waterOutflow + vec4(deltaT) * waterHeightDiffs * waterFlowMultiplier);
+
+    float totalOutFlow = waterOutflow.x + waterOutflow.y + waterOutflow.z + waterOutflow.w;
+    if (totalOutFlow > waterHeight) {
+        float flowScalar = waterHeight / totalOutFlow;
+        waterOutflow *= flowScalar;
+    }
+
+
+    //sediment
+    float totalOutflow = 0;
+
+    float sedimentOutflows[4];
+    for (int i = 0; i < 4; i++) {
+        float sedimentOutflow = (heightDiffs4[i] >= 0) ? waterOutflows[i] : 0;
+        sedimentOutflows[i] = sedimentOutflow;
+        totalOutflow += sedimentOutflow;
+    }
+
+    vec4 sedimentOutflow = vec4(sedimentOutflows[0], sedimentOutflows[1], sedimentOutflows[2], sedimentOutflows[3]);
+    if (totalOutflow > sedimentHeight) {
+        float flowScalar = sedimentHeight / totalOutflow;
+        sedimentOutflow *= flowScalar;
+    }
+
+
+    //thermal
+    float maxHeightDiff = -1/0;  //This equates to negative infinity
+    bool neighborBelowTalusAngle[8] = bool[](false, false, false, false, false, false, false, false);
+    float steepNeighbourHeightDiffSum = 0;
+
+    for (int i = 0; i < 8; i++) {
+        maxHeightDiff = max(maxHeightDiff, heightDiffs8[i]);
+
+        float angle = heightDiffs8[i] * inverseMooreNeighbourhoodDistances[i]; //this is normally in atan() but is only used for tan()
+        if (heightDiffs8[i] > 0 && angle > hardness * talusAngleTangentCoeff + talusAngleTangentBias) {
+            neighborBelowTalusAngle[i] = true;
+            steepNeighbourHeightDiffSum += heightDiffs8[i];
+        }
+    }
+
+    float heightChange = deltaT * thermalErosionRate * hardness * maxHeightDiff*.5;
+    float inverseSteepNeighbourHeightDiffSum = 1 / steepNeighbourHeightDiffSum;
+
+    //inverseSteepNeighbourHeightDiffSum CAN be Infinite, but in that case all differences are 0 and no one ever calculates anything
+    for (int i = 0; i < 8; i++)
+    heightDiffs8[i] = (neighborBelowTalusAngle[i]) ?
+    heightChange * heightDiffs8[i] * inverseSteepNeighbourHeightDiffSum : 0;
+
+
+    imageStore(waterOutflowPipes, ivec2(gl_GlobalInvocationID), waterOutflow);
+    imageStore(sedimentOutflowPipes, ivec2(gl_GlobalInvocationID), sedimentOutflow);
+    imageStore(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID), vec4(heightDiffs8[0], heightDiffs8[1], heightDiffs8[2], heightDiffs8[3]));
+    imageStore(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID), vec4(heightDiffs8[4], heightDiffs8[5], heightDiffs8[6], heightDiffs8[7]));
+}
