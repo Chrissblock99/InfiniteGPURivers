@@ -1,0 +1,136 @@
+#version 450 core
+layout(local_size_x = 1, local_size_y = 1) in;
+layout(binding = 0, r32f) restrict uniform image2D terrainMap;
+layout(binding = 1, r32f) restrict uniform image2D waterMap;
+layout(binding = 2, r32f) restrict uniform image2D sedimentMap;
+layout(binding = 3, r32f) restrict uniform image2D hardnessMap;
+layout(binding = 4, rgba32f) restrict readonly uniform image2D waterOutflowPipes;
+layout(binding = 5, rgba32f) restrict readonly uniform image2D SedimentOutflowPipes;
+layout(binding = 6, rgba32f) restrict readonly uniform image2D thermalOutflowPipes1;
+layout(binding = 7, rgba32f) restrict readonly uniform image2D thermalOutflowPipes2;
+
+const float deltaT = 0.02; //[0;0.05]
+const float rainRate = 0.012; //[0;0.05]
+const float evaporationRate = 0.015; //[0;0.05]
+const float sedimentCapacityMultiplier = 1; //[0.1;3]
+const float soilSuspensionRate = 0.5; //[0.1;2]
+const float sedimentDepositionRate = 1; //[0.1;3]
+const float sedimentSofteningRate = 5; //[0;10]
+const float maxErosionDepth = 10; //[0;40]
+const float minimumHardness = 0.25; //[0;1]
+const float voidSediment = 0.3; //[0;1]
+
+const float evaporationMultiplier = (1 - evaporationRate * deltaT);
+const float rain = deltaT * rainRate;
+
+const ivec2 vonNeumannNeighbourhood[4] = ivec2[](
+    ivec2( 0,  1),
+    ivec2(-1,  0),
+    ivec2( 1,  0),
+    ivec2( 0, -1)
+);
+
+const ivec2 mooreNeighbourhood[8] = ivec2[](
+    ivec2(-1,  1),
+    ivec2( 0,  1),
+    ivec2( 1,  1),
+    ivec2(-1,  0),
+    ivec2( 1,  0),
+    ivec2(-1, -1),
+    ivec2( 0, -1),
+    ivec2( 1, -1)
+);
+
+
+const float inverseMaxErosionDepth = 1.0 / maxErosionDepth;
+float erosionDepthMultiplier(float depth) {
+    if (depth >= maxErosionDepth) return 0;
+    if (depth <= 0) return 1;
+    return 1 - inverseMaxErosionDepth*depth;
+}
+
+void main() {
+    vec4 outflow = imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID));
+    float up =     imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[0]).w;
+    float left =   imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[1]).z;
+    float right =  imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[2]).y;
+    float down =   imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[3]).x;
+
+    float terrainHeight = imageLoad(terrainMap, ivec2(gl_GlobalInvocationID)).x;
+    float waterHeight = imageLoad(waterMap, ivec2(gl_GlobalInvocationID)).x;
+    float sedimentHeight = imageLoad(sedimentMap, ivec2(gl_GlobalInvocationID)).x;
+    float hardness = imageLoad(hardnessMap, ivec2(gl_GlobalInvocationID)).x;
+
+
+    //waterOutFlow
+    waterHeight -= outflow.x + outflow.y + outflow.z + outflow.w;
+    waterHeight += up + left + right + down;
+    waterHeight = max(0, waterHeight);
+
+
+    //sediment
+    vec4 outflowS = imageLoad(SedimentOutflowPipes, ivec2(gl_GlobalInvocationID));
+    float upS =     imageLoad(SedimentOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[0]).w;
+    float leftS =   imageLoad(SedimentOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[1]).z;
+    float rightS =  imageLoad(SedimentOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[2]).y;
+    float downS =   imageLoad(SedimentOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[3]).x;
+
+    sedimentHeight -= outflowS.x + outflowS.y + outflowS.z + outflowS.w;
+    sedimentHeight += upS + leftS + rightS + downS;
+    sedimentHeight = max(0, sedimentHeight);
+
+
+    //thermal
+    vec4 outflow1 = imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID));
+    vec4 outflow2 = imageLoad(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID));
+    terrainHeight -= outflow1.x + outflow1.y + outflow1.z + outflow1.w + outflow2.x + outflow2.y + outflow2.z + outflow2.w;
+
+    terrainHeight += imageLoad(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[0]).w;
+    terrainHeight += imageLoad(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[1]).z;
+    terrainHeight += imageLoad(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[2]).y;
+    terrainHeight += imageLoad(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[3]).x;
+    terrainHeight += imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[4]).w;
+    terrainHeight += imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[5]).z;
+    terrainHeight += imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[6]).y;
+    terrainHeight += imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[7]).x;
+
+
+    //erosionDeposition
+    vec2 velocity = vec2(0);
+    velocity.x -= outflow.y;
+    velocity.x += outflow.z;
+    velocity.y += outflow.x;
+    velocity.y -= outflow.w;
+
+    velocity.x += left;
+    velocity.x -= right;
+    velocity.y -= up;
+    velocity.y += down;
+
+    float sedimentCapacity = erosionDepthMultiplier(waterHeight) * sedimentCapacityMultiplier * length(velocity);
+    float unusedCapacity = sedimentCapacity - sedimentHeight;
+
+    float change = (unusedCapacity > 0) ?
+            deltaT * hardness * soilSuspensionRate * unusedCapacity :
+            deltaT * sedimentDepositionRate * unusedCapacity;
+    terrainHeight -= change;
+    sedimentHeight = max(0, sedimentHeight + change);
+    waterHeight    = max(0, waterHeight    + change);
+
+    hardness = max(minimumHardness, hardness - sedimentSofteningRate * change);
+
+    float voided = sedimentHeight * voidSediment;
+    sedimentHeight -= voided;
+    waterHeight -= voided;
+
+
+    //evaporateAndAddWater
+    waterHeight *= evaporationMultiplier;
+    waterHeight += rain;
+
+
+    imageStore(terrainMap,  ivec2(gl_GlobalInvocationID), vec4(terrainHeight));
+    imageStore(waterMap,    ivec2(gl_GlobalInvocationID), vec4(waterHeight));
+    imageStore(sedimentMap, ivec2(gl_GlobalInvocationID), vec4(sedimentHeight));
+    imageStore(hardnessMap, ivec2(gl_GlobalInvocationID), vec4(hardness));
+}
