@@ -114,7 +114,7 @@ public class GPUTerrainEroder {
 
     public void downloadMap() {
         downloadHelper(terrainMap, erosionDataStorage.terrain);
-        downloadHelper(waterMap, erosionDataStorage.waterOutflow);
+        downloadHelper(waterMap, erosionDataStorage.water);
         downloadHelper(sedimentMap, erosionDataStorage.sediment);
         downloadHelper(hardnessMap, erosionDataStorage.hardness);
 
