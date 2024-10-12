@@ -93,9 +93,6 @@ public class GPUTerrainEroder {
     }
 
     public void erosionSteps(int steps) {
-        if (steps == 0)
-            return;
-
         for (int i = 0; i < steps; i++) {
             execShader(calcWaterSedimentThermalOutflow);
             execShader(applyWaterSedimentThermalOutflowErosionDepositionEvaporateAddWater);
