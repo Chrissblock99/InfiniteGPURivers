@@ -1,6 +1,7 @@
 package me.chriss99;
 
 import me.chriss99.program.ComputeProgram;
+import me.chriss99.worldmanagement.InfiniteWorld;
 import org.joml.Vector2i;
 
 import static org.lwjgl.opengl.GL45.*;
@@ -115,39 +116,22 @@ public class GPUTerrainEroder {
     }
 
     public void downloadMap() {
-        Float2DBufferWrapper terrain = new Float2DBufferWrapper(width, height);
-        terrainMap.downloadData(0, 0, terrain);
-        erosionDataStorage.terrain.writeArea(srcPos.x, srcPos.y, terrain);
+        downloadHelper(terrainMap, erosionDataStorage.terrain);
+        downloadHelper(waterMap, erosionDataStorage.waterOutflow);
+        downloadHelper(sedimentMap, erosionDataStorage.sediment);
+        downloadHelper(hardnessMap, erosionDataStorage.hardness);
 
-        Float2DBufferWrapper water = new Float2DBufferWrapper(width, height);
-        waterMap.downloadData(0, 0, water);
-        erosionDataStorage.water.writeArea(srcPos.x, srcPos.y, water);
+        downloadHelper(waterOutflowPipes, erosionDataStorage.waterOutflow);
+        downloadHelper(sedimentOutflowPipes, erosionDataStorage.sedimentOutflow);
 
-        Float2DBufferWrapper sediment = new Float2DBufferWrapper(width, height);
-        sedimentMap.downloadData(0, 0, sediment);
-        erosionDataStorage.sediment.writeArea(srcPos.x, srcPos.y, sediment);
+        downloadHelper(thermalOutflowPipes1, erosionDataStorage.thermalOutflow1);
+        downloadHelper(thermalOutflowPipes2, erosionDataStorage.thermalOutflow2);
+    }
 
-        Float2DBufferWrapper hardness = new Float2DBufferWrapper(width, height);
-        hardnessMap.downloadData(0, 0, hardness);
-        erosionDataStorage.hardness.writeArea(srcPos.x, srcPos.y, hardness);
-
-
-        Vec4f2DBufferWrapper waterOutflow = new Vec4f2DBufferWrapper(width, height);
-        waterOutflowPipes.downloadData(0, 0, waterOutflow);
-        erosionDataStorage.waterOutflow.writeArea(srcPos.x, srcPos.y, waterOutflow);
-
-        Vec4f2DBufferWrapper sedimentOutflow = new Vec4f2DBufferWrapper(width, height);
-        sedimentOutflowPipes.downloadData(0, 0, sedimentOutflow);
-        erosionDataStorage.sedimentOutflow.writeArea(srcPos.x, srcPos.y, sedimentOutflow);
-
-
-        Vec4f2DBufferWrapper thermalOutflow1 = new Vec4f2DBufferWrapper(width, height);
-        thermalOutflowPipes1.downloadData(0, 0, thermalOutflow1);
-        erosionDataStorage.thermalOutflow1.writeArea(srcPos.x, srcPos.y, thermalOutflow1);
-
-        Vec4f2DBufferWrapper thermalOutflow2 = new Vec4f2DBufferWrapper(width, height);
-        thermalOutflowPipes2.downloadData(0, 0, thermalOutflow2);
-        erosionDataStorage.thermalOutflow2.writeArea(srcPos.x, srcPos.y, thermalOutflow2);
+    private void downloadHelper(Texture2D download, InfiniteWorld write) {
+        Array2DBufferWrapper bufferWrapper = new Array2DBufferWrapper(write.format, write.type, width, height);
+        download.downloadData(0, 0, bufferWrapper);
+        write.writeArea(srcPos.x, srcPos.y, bufferWrapper);
     }
 
     public void uploadMap() {
