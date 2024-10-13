@@ -44,7 +44,7 @@ public class Main {
         glfwInit();
         double start = glfwGetTime();
         createWindow();
-        terrainGenerator = new TerrainGenerator();
+        terrainGenerator = new TerrainGenerator(100);
         worldStorage = new ErosionDataStorage("testT", terrainGenerator::generateChunk);
         gpuTerrainEroder = new GPUTerrainEroder(worldStorage, srcPos, xSize+1, zSize+1);
 

@@ -13,14 +13,16 @@ public class RegionFileManager {
     private final int chunkDataByteSize;
     public final int format;
     public final int type;
+    public final int chunkSize;
 
-    public RegionFileManager(String worldName, int format, int type) {
+    public RegionFileManager(String worldName, int format, int type, int chunkSize) {
         this.worldName = worldName;
 
-        chunkDataByteSize = 100*100*Array2DBufferWrapper.sizeOf(format, type);
+        chunkDataByteSize = chunkSize*chunkSize*Array2DBufferWrapper.sizeOf(format, type);
         chunkByteSize = chunkDataByteSize + 4*2;
         this.format = format;
         this.type = type;
+        this.chunkSize = chunkSize;
 
         new File("worlds/" + worldName).mkdirs();
     }
@@ -80,7 +82,7 @@ public class RegionFileManager {
             Vector2i chunkCoord = new Vector2i(buffer.getInt(), buffer.getInt());
             byte[] byteArray = new byte[chunkDataByteSize];
             buffer.get(byteArray);
-            Array2DBufferWrapper data = new Array2DBufferWrapper(ByteBuffer.wrap(byteArray), format, type, 100, 100);
+            Array2DBufferWrapper data = new Array2DBufferWrapper(ByteBuffer.wrap(byteArray), format, type, chunkSize, chunkSize);
             region.addChunk(chunkCoord, new Chunk(data));
         }
 

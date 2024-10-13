@@ -17,23 +17,23 @@ public class TerrainGenerator extends ComputeProgram {
     final Texture2D terrainMap;
     final int srcPosUniform;
 
-    public TerrainGenerator() {
+    public TerrainGenerator(int chunkSize) {
         super("genHeightMap");
-        terrainMap = new Texture2D(GL_R32F, 100, 100);
+        terrainMap = new Texture2D(GL_R32F, chunkSize, chunkSize);
         srcPosUniform = getUniform("srcPos");
 
         terrainMap.bindUniformImage(program, 8, "terrainMap", GL_WRITE_ONLY);
     }
 
-    public Chunk generateChunk(Vector2i chunkPos) {
+    public Chunk generateChunk(Vector2i chunkPos, int chunkSize) {
         use();
-        glUniform2i(srcPosUniform, chunkPos.x*100, chunkPos.y*100);
+        glUniform2i(srcPosUniform, chunkPos.x*chunkSize, chunkPos.y*chunkSize);
 
-        glDispatchCompute(100, 100, 1);
+        glDispatchCompute(chunkSize, chunkSize, 1);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 
-        Float2DBufferWrapper buffer = new Float2DBufferWrapper(100, 100);
+        Float2DBufferWrapper buffer = new Float2DBufferWrapper(chunkSize, chunkSize);
         terrainMap.downloadFullData(GL_RED, GL_FLOAT, buffer.buffer);
 
         return new Chunk(buffer);
