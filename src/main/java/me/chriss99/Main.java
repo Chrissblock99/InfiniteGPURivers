@@ -43,7 +43,7 @@ public class Main {
         glfwInit();
         double start = glfwGetTime();
         createWindow();
-        worldStorage = new ErosionDataStorage("testT");
+        worldStorage = new ErosionDataStorage("testT", 100);
         gpuTerrainEroder = new GPUTerrainEroder(worldStorage, srcPos, xSize+1, zSize+1);
 
         vaoListProgram = new VAOListProgram(cameraMatrix, List.of(/*VAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
