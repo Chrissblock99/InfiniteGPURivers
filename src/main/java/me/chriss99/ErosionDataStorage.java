@@ -2,13 +2,12 @@ package me.chriss99;
 
 import me.chriss99.worldmanagement.Chunk;
 import me.chriss99.worldmanagement.InfiniteWorld;
-import org.joml.Vector2i;
-
-import java.util.function.BiFunction;
 
 import static org.lwjgl.opengl.GL11.*;
 
 public class ErosionDataStorage {
+    private final TerrainGenerator terrainGenerator;
+
     public final InfiniteWorld terrain;
     public final InfiniteWorld water;
     public final InfiniteWorld sediment;
@@ -20,8 +19,10 @@ public class ErosionDataStorage {
     public final InfiniteWorld thermalOutflow1;
     public final InfiniteWorld thermalOutflow2;
 
-    public ErosionDataStorage(String worldName, BiFunction<Vector2i, Integer, Chunk> chunkGenerator) {
-        terrain = new InfiniteWorld(worldName + "/terrain", GL_RED, GL_FLOAT, 100, chunkGenerator);
+    public ErosionDataStorage(String worldName) {
+        terrainGenerator = new TerrainGenerator(100);
+
+        terrain = new InfiniteWorld(worldName + "/terrain", GL_RED, GL_FLOAT, 100, terrainGenerator::generateChunk);
         water = new InfiniteWorld(worldName + "/water", GL_RED, GL_FLOAT, 100, (vector2i, chunkSize) -> new Chunk(new Float2DBufferWrapper(chunkSize, chunkSize)));
         sediment = new InfiniteWorld(worldName + "/sediment", GL_RED, GL_FLOAT, 100, (vector2i, chunkSize) -> new Chunk(new Float2DBufferWrapper(chunkSize, chunkSize)));
         hardness = new InfiniteWorld(worldName + "/hardness", GL_RED, GL_FLOAT, 100, (vector2i, chunkSize) -> new Chunk(new Float2DBufferWrapper(chunkSize, chunkSize, 1)));
@@ -44,5 +45,9 @@ public class ErosionDataStorage {
 
         thermalOutflow1.unloadAllRegions();
         thermalOutflow2.unloadAllRegions();
+    }
+
+    public void cleanGL() {
+        terrainGenerator.delete();
     }
 }
