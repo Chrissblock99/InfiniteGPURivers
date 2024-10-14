@@ -11,7 +11,8 @@ out vec4 FragColor;
 const vec3 lightDir = normalize(vec3(1, -1, 1));
 
 void main(void) {
-    vec3 color = water ? vec3(.2, .24, .6) : vec3(.8, .76, .4);
+    float angle0to1 = acos(normal.y)/3.1415926535*.5;
+    vec3 color = water ? vec3(.2, .24, .6) : ((angle0to1 < 0.4) ? vec3(0.375) : vec3(.1875, .375, .0625));
 
 
     float diffuse = dot(normal, lightDir);
