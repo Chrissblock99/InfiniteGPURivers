@@ -43,7 +43,7 @@ public class Main {
         glfwInit();
         double start = glfwGetTime();
         createWindow();
-        worldStorage = new ErosionDataStorage("test64", 64);
+        worldStorage = new ErosionDataStorage("test64", 64, 10);
         gpuTerrainEroder = new GPUTerrainEroder(worldStorage, srcPos, xSize+1, zSize+1);
 
         vaoListProgram = new VAOListProgram(cameraMatrix, List.of(/*VAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
@@ -163,10 +163,10 @@ public class Main {
             lastTime = currentTime;
         }
 
-        gpuTerrainEroder.downloadMap();
+        /*gpuTerrainEroder.downloadMap();
         System.out.println("Saving world...");
         worldStorage.unloadAll();
-        System.out.println("Saved world in " + (glfwGetTime() - lastTime) + " seconds.");
+        System.out.println("Saved world in " + (glfwGetTime() - lastTime) + " seconds.");*/
     }
 
     private static void cleanGL() {

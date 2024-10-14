@@ -16,16 +16,20 @@ public class InfiniteWorld {
     public final int elementSize;
     public final int format;
     public final int type;
-    public final int chunkSize;
 
-    public InfiniteWorld(String worldName, int format, int type, int chunkSize, BiFunction<Vector2i, Integer, Chunk> chunkGenerator) {
+    public final int chunkSize;
+    public final int regionSize;
+
+    public InfiniteWorld(String worldName, int format, int type, int chunkSize, int regionSize, BiFunction<Vector2i, Integer, Chunk> chunkGenerator) {
         this.regionFileManager = new RegionFileManager(worldName, format, type, chunkSize);
         this.chunkGenerator = chunkGenerator;
 
         elementSize = Array2DBufferWrapper.sizeOf(format, type);
         this.format = format;
         this.type = type;
+
         this.chunkSize = chunkSize;
+        this.regionSize = regionSize;
     }
 
     public Array2DBufferWrapper readArea(int x, int y, int width, int height) {
@@ -93,7 +97,7 @@ public class InfiniteWorld {
     }
 
     private Chunk getChunk(int x, int y) {
-        return getRegion(new Vector2i(Util.properIntDivide(x, 10), Util.properIntDivide(y, 10))).getChunk(new Vector2i(x, y), vector2i -> chunkGenerator.apply(vector2i, chunkSize));
+        return getRegion(new Vector2i(Util.properIntDivide(x, regionSize), Util.properIntDivide(y, regionSize))).getChunk(new Vector2i(x, y), vector2i -> chunkGenerator.apply(vector2i, chunkSize));
     }
 
     public void unloadRegion(Vector2i regionCoord) {
