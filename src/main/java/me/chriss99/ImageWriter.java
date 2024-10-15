@@ -22,8 +22,10 @@ public class ImageWriter {
                 image.setRGB(i, j, rgb);
             }
 
+        File file = new File("images/" + filename + ".png");
+        file.mkdirs();
         try {
-            ImageIO.write(image, "png", new File("images/" + filename + ".png"));
+            ImageIO.write(image, "png", file);
         } catch (IOException e) {
             System.out.println("Couldn't save image!");
         }
