@@ -21,6 +21,8 @@ public class Main {
 
     static ErosionDataStorage worldStorage;
 
+    static String worldName = "test64";
+    static int chunkRenderDistance = 7;
     static Vector2i srcPos = new Vector2i(-7*64, 5*64);
     static int xSize = 8*64;
     static int zSize = 8*64;
@@ -43,7 +45,7 @@ public class Main {
         glfwInit();
         double start = glfwGetTime();
         createWindow();
-        worldStorage = new ErosionDataStorage("test64", 64, 10);
+        worldStorage = new ErosionDataStorage(worldName, 64, 10);
         gpuTerrainEroder = new GPUTerrainEroder(worldStorage, srcPos, xSize+1, zSize+1);
 
         vaoListProgram = new VAOListProgram(cameraMatrix, List.of(/*VAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
@@ -52,7 +54,7 @@ public class Main {
             Float2DBufferWrapper water = worldStorage.water.readArea(vector2i.x, vector2i.y, 65, 65).asFloatWrapper();
 
             return TerrainVAOGenerator.heightMapToSimpleVAO(terrain, water, vector2i);
-        }, 7, srcPos, new Vector2i(xSize, zSize));
+        }, chunkRenderDistance, srcPos, new Vector2i(xSize, zSize));
 
         setupData();
 
