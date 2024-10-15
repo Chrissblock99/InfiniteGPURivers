@@ -48,25 +48,29 @@ public class ErosionDataStorage {
         return data & 0x0FFFFFFF;
     }
 
-    public byte iterationSurfaceTypeOf(Vector2i chunkCoord) {
+    private byte iterationSurfaceTypeBitsOf(Vector2i chunkCoord) {
         int data = iterationInfo.readArea(Util.properIntDivide(chunkCoord.x, regionSize), Util.properIntDivide(chunkCoord.y, regionSize), 1, 1).buffer.getInt();
         return (byte) ((data & 0xF0000000) >>> 28);
+    }
+
+    public IterationSurfaceType iterationSurfaceTypeOf(Vector2i chunkCoord) {
+        return new IterationSurfaceType(iterationSurfaceTypeBitsOf(chunkCoord));
     }
 
     public void setIterationOf(Vector2i chunkCoord, int iteration) {
         int x = Util.properIntDivide(chunkCoord.x, regionSize);
         int y = Util.properIntDivide(chunkCoord.y, regionSize);
 
-        int data = iterationSurfaceTypeOf(new Vector2i(x, y)) | (iteration & 0x0FFFFFFF);
+        int data = iterationSurfaceTypeBitsOf(new Vector2i(x, y)) | (iteration & 0x0FFFFFFF);
 
         iterationInfo.writeArea(x, y, new Array2DBufferWrapper(BufferUtils.createByteBuffer(4).putInt(data), GL_RED, GL_INT, 1, 1));
     }
 
-    public void setIterationSurfaceTypeOf(Vector2i chunkCoord, byte surfaceType) {
+    public void setIterationSurfaceTypeOf(Vector2i chunkCoord, IterationSurfaceType surfaceType) {
         int x = Util.properIntDivide(chunkCoord.x, regionSize);
         int y = Util.properIntDivide(chunkCoord.y, regionSize);
 
-        int data = (((int) surfaceType) << 28) | iterationOf(new Vector2i(x, y));
+        int data = (((int) surfaceType.toBits()) << 28) | iterationOf(new Vector2i(x, y));
 
         iterationInfo.writeArea(x, y, new Array2DBufferWrapper(BufferUtils.createByteBuffer(4).putInt(data), GL_RED, GL_INT, 1, 1));
     }
