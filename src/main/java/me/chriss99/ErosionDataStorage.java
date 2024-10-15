@@ -58,6 +58,9 @@ public class ErosionDataStorage {
     }
 
     public void setIterationOf(Vector2i chunkCoord, int iteration) {
+        if ((iteration & 0xF0000000) != 0)
+            throw new IllegalArgumentException("Iteration too large: " + iteration + ". Maximum is " + 0x0FFFFFFF);
+
         int x = Util.properIntDivide(chunkCoord.x, regionSize);
         int y = Util.properIntDivide(chunkCoord.y, regionSize);
 
