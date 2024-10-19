@@ -48,22 +48,22 @@ public class VAOGenerator {
         return color;
     }
 
-    public static int[] heightMapToSimpleIndex(double[][] heightMap) {
-        int[] index = new int[(heightMap.length-1)*(heightMap[0].length-1)*6];
+    public static int[] heightMapToSimpleIndex(Vector2i size) {
+        int[] index = new int[(size.x-1)*(size.y-1)*6];
         int indexShift = 0;
 
-        for (int z = 0; z < heightMap[0].length; z++)
-            for (int x = 0; x < heightMap.length; x++) {
+        for (int z = 0; z < size.y; z++)
+            for (int x = 0; x < size.x; x++) {
 
-                if (z == heightMap[0].length-1 || x == heightMap.length-1)
+                if (z == size.y-1 || x == size.x-1)
                     continue;
 
-                index[indexShift+0] = Util.indexOfXZFlattenedArray(x, z, heightMap.length);
-                index[indexShift+1] = Util.indexOfXZFlattenedArray(x+1, z, heightMap.length);
-                index[indexShift+2] = Util.indexOfXZFlattenedArray(x, z+1, heightMap.length);
-                index[indexShift+3] = Util.indexOfXZFlattenedArray(x+1, z, heightMap.length);
-                index[indexShift+4] = Util.indexOfXZFlattenedArray(x+1, z+1, heightMap.length);
-                index[indexShift+5] = Util.indexOfXZFlattenedArray(x, z+1, heightMap.length);
+                index[indexShift+0] = Util.indexOfXZFlattenedArray(x, z, size.x);
+                index[indexShift+1] = Util.indexOfXZFlattenedArray(x+1, z, size.x);
+                index[indexShift+2] = Util.indexOfXZFlattenedArray(x, z+1, size.x);
+                index[indexShift+3] = Util.indexOfXZFlattenedArray(x+1, z, size.x);
+                index[indexShift+4] = Util.indexOfXZFlattenedArray(x+1, z+1, size.x);
+                index[indexShift+5] = Util.indexOfXZFlattenedArray(x, z+1, size.x);
                 indexShift += 6;
             }
 
@@ -73,7 +73,7 @@ public class VAOGenerator {
     public static VAO heightMapToSimpleVAO(double[][] heightMap, double min, double max, boolean water) {
         double[] vertexes = heightMapToSimpleVertexes(heightMap, water);
         double[] color = heightMapToSimpleColors(heightMap, min, max, water);
-        int[] index = heightMapToSimpleIndex(heightMap);
+        int[] index = heightMapToSimpleIndex(new Vector2i(heightMap.length, heightMap[0].length));
 
         return new VAO(vertexes, color, index);
     }
@@ -111,32 +111,10 @@ public class VAOGenerator {
         return color;
     }
 
-    public static int[] heightMapToIterationIndex(Vector2i sizeInChunks) {
-        int[] index = new int[(sizeInChunks.x-1)*(sizeInChunks.y-1)*6];
-        int indexShift = 0;
-
-        for (int z = 0; z < sizeInChunks.y; z++)
-            for (int x = 0; x < sizeInChunks.x; x++) {
-
-                if (z == sizeInChunks.y-1 || x == sizeInChunks.x-1)
-                    continue;
-
-                index[indexShift+0] = Util.indexOfXZFlattenedArray(x, z, sizeInChunks.x);
-                index[indexShift+1] = Util.indexOfXZFlattenedArray(x+1, z, sizeInChunks.x);
-                index[indexShift+2] = Util.indexOfXZFlattenedArray(x, z+1, sizeInChunks.x);
-                index[indexShift+3] = Util.indexOfXZFlattenedArray(x+1, z, sizeInChunks.x);
-                index[indexShift+4] = Util.indexOfXZFlattenedArray(x+1, z+1, sizeInChunks.x);
-                index[indexShift+5] = Util.indexOfXZFlattenedArray(x, z+1, sizeInChunks.x);
-                indexShift += 6;
-            }
-
-        return index;
-    }
-
     public static VAO heightMapToIterationVAO(Vector2i srcPosInChunks, Vector2i sizeInChunks, ErosionDataStorage data) {
         double[] vertexes = heightMapToIterationVertexes(srcPosInChunks, sizeInChunks, data);
         double[] color = heightMapToIterationColors(sizeInChunks);
-        int[] index = heightMapToIterationIndex(sizeInChunks);
+        int[] index = heightMapToSimpleIndex(sizeInChunks);
 
         return new VAO(vertexes, color, index);
     }
