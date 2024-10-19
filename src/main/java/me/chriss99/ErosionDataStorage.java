@@ -8,6 +8,7 @@ import org.lwjgl.BufferUtils;
 import static org.lwjgl.opengl.GL11.*;
 
 public class ErosionDataStorage {
+    public final int chunkSize;
     public final int regionSize;
 
     private final TerrainGenerator terrainGenerator;
@@ -26,6 +27,7 @@ public class ErosionDataStorage {
     private final InfiniteWorld iterationInfo;
 
     public ErosionDataStorage(String worldName, int chunkSize, int regionSize) {
+        this.chunkSize = chunkSize;
         this.regionSize = regionSize;
         terrainGenerator = new TerrainGenerator(chunkSize);
 
