@@ -2,6 +2,7 @@ package me.chriss99;
 
 import org.joml.Math;
 import org.joml.Vector2d;
+import org.joml.Vector2i;
 import org.joml.Vector3d;
 
 import java.util.Arrays;
@@ -73,6 +74,69 @@ public class VAOGenerator {
         double[] vertexes = heightMapToSimpleVertexes(heightMap, water);
         double[] color = heightMapToSimpleColors(heightMap, min, max, water);
         int[] index = heightMapToSimpleIndex(heightMap);
+
+        return new VAO(vertexes, color, index);
+    }
+
+    public static double[] heightMapToIterationVertexes(Vector2i srcPosInChunks, Vector2i sizeInChunks, ErosionDataStorage data) {
+        double[] vertecies = new double[sizeInChunks.x*sizeInChunks.y*3];
+        int vertexShift = 0;
+
+        for (int z = 0; z < sizeInChunks.y; z++)
+            for (int x = 0; x < sizeInChunks.x; x++) {
+                vertecies[vertexShift] = (x + srcPosInChunks.x) * data.chunkSize;
+                //TODO: this needs to account for the surface type
+                vertecies[vertexShift + 1] = data.iterationOf(new Vector2i(x, z).add(srcPosInChunks));
+                vertecies[vertexShift + 2] = (z + srcPosInChunks.y) * data.chunkSize;
+
+                vertexShift += 3;
+            }
+
+        return vertecies;
+    }
+
+    public static double[] heightMapToIterationColors(Vector2i sizeInChunks) {
+        double[] color = new double[sizeInChunks.x*sizeInChunks.y*3];
+        int vertexShift = 0;
+
+        for (int z = 0; z < sizeInChunks.y; z++)
+            for (int x = 0; x < sizeInChunks.x; x++) {
+                color[vertexShift  ] = .5*.7+.3;
+                color[vertexShift+1] = .5*.8+.2;
+                color[vertexShift+2] = (x%2==0) ? .33 : 0 + ((z%2==0) ? .33 : 0);
+
+                vertexShift += 3;
+            }
+
+        return color;
+    }
+
+    public static int[] heightMapToIterationIndex(Vector2i sizeInChunks) {
+        int[] index = new int[(sizeInChunks.x-1)*(sizeInChunks.y-1)*6];
+        int indexShift = 0;
+
+        for (int z = 0; z < sizeInChunks.y; z++)
+            for (int x = 0; x < sizeInChunks.x; x++) {
+
+                if (z == sizeInChunks.y-1 || x == sizeInChunks.x-1)
+                    continue;
+
+                index[indexShift+0] = Util.indexOfXZFlattenedArray(x, z, sizeInChunks.x);
+                index[indexShift+1] = Util.indexOfXZFlattenedArray(x+1, z, sizeInChunks.x);
+                index[indexShift+2] = Util.indexOfXZFlattenedArray(x, z+1, sizeInChunks.x);
+                index[indexShift+3] = Util.indexOfXZFlattenedArray(x+1, z, sizeInChunks.x);
+                index[indexShift+4] = Util.indexOfXZFlattenedArray(x+1, z+1, sizeInChunks.x);
+                index[indexShift+5] = Util.indexOfXZFlattenedArray(x, z+1, sizeInChunks.x);
+                indexShift += 6;
+            }
+
+        return index;
+    }
+
+    public static VAO heightMapToIterationVAO(Vector2i srcPosInChunks, Vector2i sizeInChunks, ErosionDataStorage data) {
+        double[] vertexes = heightMapToIterationVertexes(srcPosInChunks, sizeInChunks, data);
+        double[] color = heightMapToIterationColors(sizeInChunks);
+        int[] index = heightMapToIterationIndex(sizeInChunks);
 
         return new VAO(vertexes, color, index);
     }
