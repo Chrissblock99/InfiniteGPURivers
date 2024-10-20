@@ -1,12 +1,16 @@
 package me.chriss99.program;
 
-public abstract class TerrainRenderer extends RenderProgram {
+import me.chriss99.TerrainVAO;
+
+import java.util.Collection;
+
+public abstract class TerrainRenderer extends RenderProgram<TerrainVAO> {
     @Override
-    public void render() {
-        renderTerrain();
-        renderWater();
+    public void render(Collection<TerrainVAO> vaos) {
+        renderTerrain(vaos);
+        renderWater(vaos);
     }
 
-    public abstract void renderTerrain();
-    public abstract void renderWater();
+    public abstract void renderTerrain(Collection<TerrainVAO> vao);
+    public abstract void renderWater(Collection<TerrainVAO> vao);
 }

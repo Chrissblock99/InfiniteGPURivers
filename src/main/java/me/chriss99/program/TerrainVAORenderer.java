@@ -2,14 +2,17 @@ package me.chriss99.program;
 
 import me.chriss99.CameraMatrix;
 import me.chriss99.TerrainVAO;
+import org.joml.Vector2i;
 
-import java.util.LinkedList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL32.GL_GEOMETRY_SHADER;
 
-public class TerrainVAOListProgram extends RenderProgram {
-    private final CameraMatrix cameraMatrix;
+public class TerrainVAORenderer extends TerrainRenderer {
+    protected final CameraMatrix cameraMatrix;
 
     private final int transformMatrix;
     private final int cameraPos;
@@ -17,9 +20,7 @@ public class TerrainVAOListProgram extends RenderProgram {
     private final int srcPosUniform;
     private final int widthUniform;
 
-    public final LinkedList<TerrainVAO> terrainVAOs = new LinkedList<>();
-
-    public TerrainVAOListProgram(CameraMatrix cameraMatrix) {
+    public TerrainVAORenderer(CameraMatrix cameraMatrix) {
         this.cameraMatrix = cameraMatrix;
 
         addShader("terrain/passThrough.vert", GL_VERTEX_SHADER);
@@ -38,32 +39,29 @@ public class TerrainVAOListProgram extends RenderProgram {
     }
 
     @Override
-    public void render() {
-        render(false);
-    }
-
-    public void render(boolean renderWater) {
-        if (terrainVAOs.isEmpty())
-            return;
-
+    public void renderTerrain(Collection<TerrainVAO> vaos) {
         use();
-        glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
-        glUniform3f(cameraPos, cameraMatrix.position.x, cameraMatrix.position.y, cameraMatrix.position.z);
-
-        glUniform1i(waterUniform, renderWater ? 1 : 0);
-        for (TerrainVAO vao : terrainVAOs) {
-            vao.bind();
-            glUniform2i(srcPosUniform, vao.srcPos.x, vao.srcPos.y);
-            glUniform1i(widthUniform, vao.width);
-
-            glDrawElements(GL_TRIANGLES, vao.indexLength(), GL_UNSIGNED_INT, 0);
-        }
+        glUniform1i(waterUniform, 0);
+        renderAll(vaos);
     }
 
     @Override
-    public void delete() {
-        for (TerrainVAO vao : terrainVAOs)
-            vao.delete();
-        super.delete();
+    public void renderWater(Collection<TerrainVAO> vaos) {
+        use();
+        glUniform1i(waterUniform, 1);
+        renderAll(vaos);
+    }
+
+    private void renderAll(Collection<TerrainVAO> vaos) {
+        glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
+        glUniform3f(cameraPos, cameraMatrix.position.x, cameraMatrix.position.y, cameraMatrix.position.z);
+
+        for (TerrainVAO vao : vaos) {
+            vao.bind();
+            glUniform2i(srcPosUniform, vao.getSrcPos().x, vao.getSrcPos().y);
+            glUniform1i(widthUniform, vao.getWidth());
+
+            glDrawElements(GL_TRIANGLES, vao.getIndexLength(), GL_UNSIGNED_INT, 0);
+        }
     }
 }

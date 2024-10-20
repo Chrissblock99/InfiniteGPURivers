@@ -1,21 +1,19 @@
 package me.chriss99.program;
 
 import me.chriss99.CameraMatrix;
-import me.chriss99.VAO;
+import me.chriss99.ColoredVAO;
 
+import java.util.Collection;
 import java.util.List;
 
 import static org.lwjgl.opengl.GL20.*;
 
-public class VAOListProgram extends RenderProgram {
+public class ColoredVAORenderer extends RenderProgram<ColoredVAO> {
     private final CameraMatrix cameraMatrix;
     private final int transformMatrix;
 
-    private final List<VAO> vaoList;
-
-    public VAOListProgram(CameraMatrix cameraMatrix, List<VAO> vaoList) {
+    public ColoredVAORenderer(CameraMatrix cameraMatrix) {
         this.cameraMatrix = cameraMatrix;
-        this.vaoList = vaoList;
 
         addShader("shader.vert", GL_VERTEX_SHADER);
         addShader("shader.frag", GL_FRAGMENT_SHADER);
@@ -29,25 +27,17 @@ public class VAOListProgram extends RenderProgram {
     }
 
     @Override
-    public void render() {
-        if (vaoList.isEmpty())
+    public void render(Collection<ColoredVAO> vaos) {
+        if (vaos.isEmpty())
             return;
 
         use();
         glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
 
-        for (VAO vao : vaoList) {
+        for (ColoredVAO vao : vaos) {
             vao.bind();
 
-            //draw the current bound VAO/VBO using an index buffer
-            glDrawElements(GL_TRIANGLES, vao.indexLength(), GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, vao.getIndexLength(), GL_UNSIGNED_INT, 0);
         }
-    }
-
-    @Override
-    public void delete() {
-        for (VAO vao : vaoList)
-            vao.delete();
-        super.delete();
     }
 }

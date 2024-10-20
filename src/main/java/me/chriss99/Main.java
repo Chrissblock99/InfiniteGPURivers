@@ -15,9 +15,9 @@ import java.util.*;
 public class Main {
     static long window;
 
-    static RenderProgram vaoListProgram;
-    static PlayerCenteredRenderer playerCenteredRenderer;
-    static TerrainRenderer tessProgram;
+    static ListRenderer<ColoredVAO> vaoListProgram;
+    static PositionCenteredRenderer<TerrainVAO> playerCenteredRenderer;
+    static TessProgram tessProgram;
 
     static ErosionDataStorage worldStorage;
 
@@ -48,13 +48,13 @@ public class Main {
         worldStorage = new ErosionDataStorage(worldName, 64, 10);
         gpuTerrainEroder = new GPUTerrainEroder(worldStorage, srcPos, xSize+1, zSize+1);
 
-        vaoListProgram = new VAOListProgram(cameraMatrix, List.of(/*VAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
-        playerCenteredRenderer = new PlayerCenteredRenderer(cameraMatrix, vector2i -> {
+        vaoListProgram = new ListRenderer<>(new ColoredVAORenderer(cameraMatrix), List.of(/*ColoredVAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
+        playerCenteredRenderer = new PositionCenteredRenderer<>(new TerrainVAORenderer(cameraMatrix), vector2i -> {
             Float2DBufferWrapper terrain = worldStorage.terrain.readArea(vector2i.x, vector2i.y, 65, 65).asFloatWrapper();
             Float2DBufferWrapper water = worldStorage.water.readArea(vector2i.x, vector2i.y, 65, 65).asFloatWrapper();
 
             return TerrainVAOGenerator.heightMapToSimpleVAO(terrain, water, vector2i);
-        }, chunkRenderDistance, srcPos, new Vector2i(xSize, zSize));
+        }, cameraMatrix.position, chunkRenderDistance, srcPos, new Vector2i(xSize, zSize));
 
         setupData();
 
@@ -109,7 +109,7 @@ public class Main {
         vao = glGenVertexArrays();
         glBindVertexArray(vao);
 
-        ByteBuffer vertices = Util.storeArrayInBuffer(VAOGenerator.tesselationGridVertexesTest(xSize/64, zSize/64, 64));
+        ByteBuffer vertices = Util.storeArrayInBuffer(ColoredVAOGenerator.tesselationGridVertexesTest(xSize/64, zSize/64, 64));
 
         vertexes = glGenBuffers();
         glBindBuffer(GL_ARRAY_BUFFER, vertexes);
@@ -131,12 +131,8 @@ public class Main {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             vaoListProgram.render();
-            //terrainVAOListProgram.render();
-            //terrainVAOListProgram.render(true);
-            playerCenteredRenderer.renderTerrain();
             tessProgram.renderTerrain();
-
-            playerCenteredRenderer.renderWater();
+            playerCenteredRenderer.render();
             tessProgram.renderWater();
 
             //swap the frame to show the rendered image
@@ -176,7 +172,7 @@ public class Main {
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
 
-        vaoListProgram.delete();
+        //vaoListProgram.delete();
         tessProgram.delete();
 
         worldStorage.cleanGL();

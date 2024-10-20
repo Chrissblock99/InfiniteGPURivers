@@ -7,7 +7,7 @@ import org.joml.Vector3d;
 
 import java.util.Arrays;
 
-public class VAOGenerator {
+public class ColoredVAOGenerator {
     public static double[] heightMapToSimpleVertexes(double[][] heightMap, boolean water) {
         double[] vertecies = new double[heightMap.length*heightMap[0].length*3];
         int vertexShift = 0;
@@ -70,12 +70,12 @@ public class VAOGenerator {
         return index;
     }
 
-    public static VAO heightMapToSimpleVAO(double[][] heightMap, double min, double max, boolean water) {
+    public static ColoredVAO heightMapToSimpleVAO(double[][] heightMap, double min, double max, boolean water) {
         double[] vertexes = heightMapToSimpleVertexes(heightMap, water);
         double[] color = heightMapToSimpleColors(heightMap, min, max, water);
         int[] index = heightMapToSimpleIndex(new Vector2i(heightMap.length, heightMap[0].length));
 
-        return new VAO(vertexes, color, index);
+        return new ColoredVAO(vertexes, color, index);
     }
 
     public static double[] heightMapToIterationVertexes(Vector2i srcPosInChunks, Vector2i sizeInChunks, ErosionDataStorage data) {
@@ -111,12 +111,12 @@ public class VAOGenerator {
         return color;
     }
 
-    public static VAO heightMapToIterationVAO(Vector2i srcPosInChunks, Vector2i sizeInChunks, ErosionDataStorage data) {
+    public static ColoredVAO heightMapToIterationVAO(Vector2i srcPosInChunks, Vector2i sizeInChunks, ErosionDataStorage data) {
         double[] vertexes = heightMapToIterationVertexes(srcPosInChunks, sizeInChunks, data);
         double[] color = heightMapToIterationColors(sizeInChunks);
         int[] index = heightMapToSimpleIndex(sizeInChunks);
 
-        return new VAO(vertexes, color, index);
+        return new ColoredVAO(vertexes, color, index);
     }
 
     public static double[] heightMapToSquareVertexes(double[][] heightMap) {
@@ -163,12 +163,12 @@ public class VAOGenerator {
         return index;
     }
 
-    public static VAO heightMapToSquareVAO(double[][] heightMap) {
+    public static ColoredVAO heightMapToSquareVAO(double[][] heightMap) {
         double[] vertexes = heightMapToSquareVertexes(heightMap);
         double[] color = heightMapToSquareColors(heightMap);
         int[] index = heightMapToSquareIndex(heightMap);
 
-        return new VAO(vertexes, color, index);
+        return new ColoredVAO(vertexes, color, index);
     }
 
     private static final double[][] offsets = new double[][]{
@@ -247,12 +247,12 @@ public class VAOGenerator {
         return index;
     }
 
-    public static VAO heightMapToCrossVAO(double[][] heightMap, double[][][] outflowPipes) {
+    public static ColoredVAO heightMapToCrossVAO(double[][] heightMap, double[][][] outflowPipes) {
         double[] vertexes = heightMapToCrossVertexes(heightMap);
         double[] color = heightMapToCrossColors(heightMap, outflowPipes);
         int[] index = heightMapToCrossIndex(heightMap);
 
-        return new VAO(vertexes, color, index);
+        return new ColoredVAO(vertexes, color, index);
     }
 
     public static double[] heightMapToVectorVertexes(double[][] heightMap, double[][][] vectorField) {
@@ -307,12 +307,12 @@ public class VAOGenerator {
         return index;
     }
 
-    public static VAO heightMapToVectorVAO(double[][] heightMap, double[][][] vectorField) {
+    public static ColoredVAO heightMapToVectorVAO(double[][] heightMap, double[][][] vectorField) {
         double[] vertexes = heightMapToVectorVertexes(heightMap, vectorField);
         double[] color = heightMapToVectorColors(heightMap);
         int[] index = heightMapToVectorIndex(heightMap);
 
-        return new VAO(vertexes, color, index);
+        return new ColoredVAO(vertexes, color, index);
     }
 
     public static double[] heightMapToNormalVertexes(double[][] heightMap) {
@@ -342,12 +342,12 @@ public class VAOGenerator {
         return vertexes;
     }
 
-    public static VAO heightMapToNormalVAO(double[][] heightMap) {
+    public static ColoredVAO heightMapToNormalVAO(double[][] heightMap) {
         double[] vertexes = heightMapToNormalVertexes(heightMap);
         double[] color = heightMapToVectorColors(heightMap);
         int[] index = heightMapToVectorIndex(heightMap);
 
-        return new VAO(vertexes, color, index);
+        return new ColoredVAO(vertexes, color, index);
     }
 
     public static double[] tesselationGridVertexesTest(int xSize, int zSize, double step) {

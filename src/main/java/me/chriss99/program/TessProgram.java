@@ -5,7 +5,7 @@ import org.joml.Vector2i;
 
 import static org.lwjgl.opengl.GL40.*;
 
-public class TessProgram extends TerrainRenderer {
+public class TessProgram extends GLProgram {
     private final CameraMatrix cameraMatrix;
 
     private final int vao;
@@ -43,7 +43,6 @@ public class TessProgram extends TerrainRenderer {
         srcPosUniform = getUniform("srcPos");
     }
 
-    @Override
     public void renderTerrain() {
         use();
         glUniform2i(srcPosUniform, srcPos.x, srcPos.y);
@@ -55,7 +54,6 @@ public class TessProgram extends TerrainRenderer {
         glDrawArrays(GL_PATCHES, 0, xSize/64*zSize/64*4);
     }
 
-    @Override
     public void renderWater() {
         use();
         glUniform2i(srcPosUniform, srcPos.x, srcPos.y);
