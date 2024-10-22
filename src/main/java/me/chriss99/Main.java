@@ -18,6 +18,7 @@ public class Main {
 
     static ListRenderer<ColoredVAO> vaoListProgram;
     static PositionCenteredRenderer<TerrainVAO> playerCenteredRenderer;
+    static PositionCenteredRenderer<ColoredChunkVAO> iterationRenderer;
     static TessProgram tessProgram;
 
     static ErosionDataStorage worldStorage;
@@ -56,6 +57,16 @@ public class Main {
 
             return TerrainVAOGenerator.heightMapToSimpleVAO(terrain, water, vector2i);
         }, cameraMatrix.position, worldStorage.chunkSize, chunkRenderDistance, srcPos, new Vector2i(xSize, zSize));
+        iterationRenderer = new PositionCenteredRenderer<>(new RenderProgram<>() {
+            RenderProgram<ColoredVAO> javaSkillIssue = new ColoredVAORenderer(cameraMatrix);
+
+            @Override
+            public void render(Collection<ColoredChunkVAO> vaos) {
+                javaSkillIssue.render(vaos.stream().map(vao -> (ColoredVAO) vao).toList());
+            }
+        },
+                (vector2i, chunkSize) -> ColoredVAOGenerator.heightMapToIterationVAO(vector2i, new Vector2i(chunkSize), worldStorage),
+                cameraMatrix.position, worldStorage.chunkSize, 2);
 
         setupData();
 
@@ -127,10 +138,12 @@ public class Main {
         while(!glfwWindowShouldClose(window)) {
             movementController.update();
             playerCenteredRenderer.updateLoadedChunks(cameraMatrix.position, srcPos, new Vector2i(xSize, zSize));
+            iterationRenderer.updateLoadedChunks(new Vector3f(cameraMatrix.position).div(64));
 
             //clear the window
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+            iterationRenderer.render();
             vaoListProgram.render();
             tessProgram.renderTerrain();
             playerCenteredRenderer.render();
