@@ -186,7 +186,9 @@ public class Main {
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
 
-        //vaoListProgram.delete();
+        vaoListProgram.delete();
+        playerCenteredRenderer.delete();
+        iterationRenderer.delete();
         tessProgram.delete();
 
         worldStorage.cleanGL();
