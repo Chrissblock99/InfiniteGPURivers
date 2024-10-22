@@ -2,6 +2,7 @@ package me.chriss99;
 
 import me.chriss99.program.*;
 import org.joml.Vector2i;
+import org.joml.Vector3f;
 import org.lwjgl.opengl.*;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -125,7 +126,7 @@ public class Main {
 
         while(!glfwWindowShouldClose(window)) {
             movementController.update();
-            playerCenteredRenderer.updateLoadedChunks(srcPos, new Vector2i(xSize, zSize));
+            playerCenteredRenderer.updateLoadedChunks(cameraMatrix.position, srcPos, new Vector2i(xSize, zSize));
 
             //clear the window
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

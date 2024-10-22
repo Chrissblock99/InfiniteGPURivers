@@ -13,7 +13,6 @@ public class PositionCenteredRenderer<T extends ChunkVAO> {
     protected final LinkedHashMap<Vector2i, T> chunkVAOS = new LinkedHashMap<>();
     private final Function<Vector2i, T> chunkLoader;
 
-    public final Vector3f position;
     public int chunkRenderDistance;
     private Vector2f previousPosition = null;
 
@@ -24,24 +23,23 @@ public class PositionCenteredRenderer<T extends ChunkVAO> {
     public PositionCenteredRenderer(RenderProgram<T> renderProgram, Function<Vector2i, T> chunkLoader, Vector3f position, int chunkRenderDistance, Vector2i skipSrcPos, Vector2i skipSideLength) {
         this.renderProgram = renderProgram;
         this.chunkLoader = chunkLoader;
-        this.position = position;
         this.chunkRenderDistance = chunkRenderDistance;
 
-        updateLoadedChunks(skipSrcPos, skipSideLength);
+        updateLoadedChunks(position, skipSrcPos, skipSideLength);
     }
 
-    public void updateLoadedChunks() {
-        updateLoadedChunks(new Vector2i(), new Vector2i());
+    public void updateLoadedChunks(Vector3f newPosition) {
+        updateLoadedChunks(newPosition, new Vector2i(), new Vector2i());
     }
 
-    public void updateLoadedChunks(Vector2i skipSrcPos, Vector2i skipSideLength) {
-        updateLoadedChunks(skipSrcPos, skipSideLength, false);
+    public void updateLoadedChunks(Vector3f newPosition, Vector2i skipSrcPos, Vector2i skipSideLength) {
+        updateLoadedChunks(newPosition, skipSrcPos, skipSideLength, false);
     }
 
-    public void updateLoadedChunks(Vector2i skipSrcPos, Vector2i skipSideLength, boolean force) {
+    public void updateLoadedChunks(Vector3f newPosition, Vector2i skipSrcPos, Vector2i skipSideLength, boolean force) {
         Vector2f position = new Vector2f();
-        position.x = this.position.x - (chunkRenderDistance-1)*64;
-        position.y = this.position.z - (chunkRenderDistance-1)*64;
+        position.x = newPosition.x - (chunkRenderDistance-1)*64;
+        position.y = newPosition.z - (chunkRenderDistance-1)*64;
         position.div(64f).floor().mul(64f);
 
         if (position.equals(previousPosition) && !force)

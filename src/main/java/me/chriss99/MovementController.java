@@ -69,7 +69,7 @@ public class MovementController {
             Main.srcPos.y = srcPos.y;
 
             Main.gpuTerrainEroder.changeSrcPos(srcPos);
-            Main.playerCenteredRenderer.updateLoadedChunks(Main.srcPos, new Vector2i(Main.xSize, Main.zSize), true);
+            Main.playerCenteredRenderer.updateLoadedChunks(Main.cameraMatrix.position, Main.srcPos, new Vector2i(Main.xSize, Main.zSize), true);
         });
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_F, () -> {
             Main.gpuTerrainEroder.downloadMap();
