@@ -111,12 +111,12 @@ public class ColoredVAOGenerator {
         return color;
     }
 
-    public static ColoredVAO heightMapToIterationVAO(Vector2i srcPosInChunks, Vector2i sizeInChunks, ErosionDataStorage data) {
+    public static ColoredChunkVAO heightMapToIterationVAO(Vector2i srcPosInChunks, Vector2i sizeInChunks, ErosionDataStorage data) {
         double[] vertexes = heightMapToIterationVertexes(srcPosInChunks, sizeInChunks, data);
         double[] color = heightMapToIterationColors(sizeInChunks);
         int[] index = heightMapToSimpleIndex(sizeInChunks);
 
-        return new ColoredVAO(vertexes, color, index);
+        return new ColoredChunkVAO(vertexes, color, index, srcPosInChunks, sizeInChunks.x);
     }
 
     public static double[] heightMapToSquareVertexes(double[][] heightMap) {
