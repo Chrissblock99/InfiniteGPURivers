@@ -27,6 +27,19 @@ public class IterationSurfaceType {
         return bits;
     }
 
+    public int[][] getSurface() {
+        int[][] s = surfaceType.surface;
+        return switch (bits & 0b0011) {
+            case 0b00 -> s;
+            case 0b01 -> new int[][]{{s[1][0], s[0][0]}, {s[1][1], s[0][1]}};
+            case 0b10 -> new int[][]{{s[0][1], s[1][1]}, {s[0][0], s[1][0]}};
+            case 0b11 -> new int[][]{{s[1][1], s[1][0]}, {s[0][1], s[0][0]}};
+            default -> throw new IllegalStateException("Unexpected value: " + bits);
+        };
+    }
+
+
+
 
     private static Vector2i aaDirectionFromBits(byte bits) {
         return switch (bits) {
@@ -50,15 +63,17 @@ public class IterationSurfaceType {
 
 
     public enum SurfaceType {
-        FLAT(IterationSurfaceType::aaDirectionFromBits),
-        SLOPE(IterationSurfaceType::aaDirectionFromBits),
-        OUTWARD_SLOPE(IterationSurfaceType::diagonalDirectionFromBits),
-        INWARD_SLOPE(IterationSurfaceType::diagonalDirectionFromBits);
+        FLAT(IterationSurfaceType::aaDirectionFromBits, new int[2][2]),
+        SLOPE(IterationSurfaceType::aaDirectionFromBits, new int[][]{{0, 0}, {1, 1}}),
+        OUTWARD_SLOPE(IterationSurfaceType::diagonalDirectionFromBits, new int[][]{{0, 0}, {0, 1}}),
+        INWARD_SLOPE(IterationSurfaceType::diagonalDirectionFromBits, new int[][]{{0, 1}, {1, 1}});
 
         private final Function<Byte, Vector2i> directionFromBits;
+        private final int[][] surface;
 
-        SurfaceType(Function<Byte, Vector2i> directionFromBits) {
+        SurfaceType(Function<Byte, Vector2i> directionFromBits, int[][] surface) {
             this.directionFromBits = directionFromBits;
+            this.surface = surface;
         }
 
 

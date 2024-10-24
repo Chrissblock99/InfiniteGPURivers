@@ -123,4 +123,43 @@ class IterationSurfaceTypeTest {
         b++;
         assertEquals(b, new IterationSurfaceType(b).toBits());
     }
+
+    @Test
+    void getSurface() {
+        byte b = 0;
+        assertArrayEquals(new int[2][2], new IterationSurfaceType(b).getSurface());
+        b++;
+        assertArrayEquals(new int[2][2], new IterationSurfaceType(b).getSurface());
+        b++;
+        assertArrayEquals(new int[2][2], new IterationSurfaceType(b).getSurface());
+        b++;
+        assertArrayEquals(new int[2][2], new IterationSurfaceType(b).getSurface());
+
+        b++;
+        assertArrayEquals(new int[][]{{0, 0}, {1, 1}}, new IterationSurfaceType(b).getSurface());
+        b++;
+        assertArrayEquals(new int[][]{{1, 0}, {1, 0}}, new IterationSurfaceType(b).getSurface());
+        b++;
+        assertArrayEquals(new int[][]{{0, 1}, {0, 1}}, new IterationSurfaceType(b).getSurface());
+        b++;
+        assertArrayEquals(new int[][]{{1, 1}, {0, 0}}, new IterationSurfaceType(b).getSurface());
+
+        b++;
+        assertArrayEquals(new int[][]{{0, 0}, {0, 1}}, new IterationSurfaceType(b).getSurface());
+        b++;
+        assertArrayEquals(new int[][]{{0, 0}, {1, 0}}, new IterationSurfaceType(b).getSurface());
+        b++;
+        assertArrayEquals(new int[][]{{0, 1}, {0, 0}}, new IterationSurfaceType(b).getSurface());
+        b++;
+        assertArrayEquals(new int[][]{{1, 0}, {0, 0}}, new IterationSurfaceType(b).getSurface());
+
+        b++;
+        assertArrayEquals(new int[][]{{0, 1}, {1, 1}}, new IterationSurfaceType(b).getSurface());
+        b++;
+        assertArrayEquals(new int[][]{{1, 0}, {1, 1}}, new IterationSurfaceType(b).getSurface());
+        b++;
+        assertArrayEquals(new int[][]{{1, 1}, {0, 1}}, new IterationSurfaceType(b).getSurface());
+        b++;
+        assertArrayEquals(new int[][]{{1, 1}, {1, 0}}, new IterationSurfaceType(b).getSurface());
+    }
 }
