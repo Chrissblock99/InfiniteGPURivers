@@ -91,6 +91,8 @@ public class ErosionDataStorage {
 
         thermalOutflow1.unloadAllRegions();
         thermalOutflow2.unloadAllRegions();
+
+        iterationInfo.unloadAllRegions();
     }
 
     public void cleanGL() {
