@@ -78,47 +78,6 @@ public class ColoredVAOGenerator {
         return new ColoredVAO(vertexes, color, index);
     }
 
-    public static double[] heightMapToIterationVertexes(Vector2i srcPosInChunks, Vector2i sizeInChunks, ErosionDataStorage data) {
-        double[] vertecies = new double[sizeInChunks.x*sizeInChunks.y*3];
-        int vertexShift = 0;
-
-        for (int z = 0; z < sizeInChunks.y; z++)
-            for (int x = 0; x < sizeInChunks.x; x++) {
-                vertecies[vertexShift] = (x + srcPosInChunks.x) * data.chunkSize;
-                //TODO: this needs to account for the surface type
-                vertecies[vertexShift + 1] = data.iterationOf(new Vector2i(x, z).add(srcPosInChunks));
-                vertecies[vertexShift + 2] = (z + srcPosInChunks.y) * data.chunkSize;
-
-                vertexShift += 3;
-            }
-
-        return vertecies;
-    }
-
-    public static double[] heightMapToIterationColors(Vector2i sizeInChunks) {
-        double[] color = new double[sizeInChunks.x*sizeInChunks.y*3];
-        int vertexShift = 0;
-
-        for (int z = 0; z < sizeInChunks.y; z++)
-            for (int x = 0; x < sizeInChunks.x; x++) {
-                color[vertexShift  ] = .5*.7+.3;
-                color[vertexShift+1] = .5*.8+.2;
-                color[vertexShift+2] = (x%2==0) ? .33 : 0 + ((z%2==0) ? .33 : 0);
-
-                vertexShift += 3;
-            }
-
-        return color;
-    }
-
-    public static ColoredChunkVAO heightMapToIterationVAO(Vector2i srcPosInChunks, Vector2i sizeInChunks, ErosionDataStorage data) {
-        double[] vertexes = heightMapToIterationVertexes(srcPosInChunks, sizeInChunks, data);
-        double[] color = heightMapToIterationColors(sizeInChunks);
-        int[] index = heightMapToSimpleIndex(sizeInChunks);
-
-        return new ColoredChunkVAO(vertexes, color, index, srcPosInChunks, sizeInChunks.x);
-    }
-
     public static double[] heightMapToSquareVertexes(double[][] heightMap) {
         double[] vertexes = new double[heightMap.length*heightMap[0].length*4*3];
         int vertexShift = 0;
