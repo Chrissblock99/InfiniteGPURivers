@@ -45,7 +45,7 @@ public class IterationVAORenderer extends RenderProgram<IterationVAO> {
             glUniform2i(srcPosUniform, vao.getSrcPos().x, vao.getSrcPos().y);
             glUniform1i(widthUniform, vao.getWidth());
 
-            glDrawElements(GL_TRIANGLES, vao.getIndexLength(), GL_UNSIGNED_INT, 0);
+            glDrawArrays(GL_TRIANGLES, 0, vao.getIndexLength());
         }
     }
 }

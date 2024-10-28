@@ -23,7 +23,7 @@ public class VAOImpl implements VAO {
         }
 
         ibo = (index != null) ? new IntGLBuffer(GL_ELEMENT_ARRAY_BUFFER).updateData(index, GL_STATIC_DRAW) : null;
-        indexLength = (index != null) ? index.length : 0;
+        indexLength = (index != null) ? index.length : vbos[0].length/vertexSize;
     }
 
     public VAOImpl(int[] index, int vertexSize, float[]... vbos) {
@@ -41,7 +41,7 @@ public class VAOImpl implements VAO {
         }
 
         ibo = (index != null) ? new IntGLBuffer(GL_ELEMENT_ARRAY_BUFFER).updateData(index, GL_STATIC_DRAW) : null;
-        indexLength = (index != null) ? index.length : 0;
+        indexLength = (index != null) ? index.length : vbos[0].length/vertexSize;
     }
 
     public void updateVertices(int index, double[] vertices) {
@@ -71,7 +71,8 @@ public class VAOImpl implements VAO {
     public void delete() {
         for (VBO vbo : vbos)
             vbo.delete();
-        ibo.delete();
+        if (ibo != null)
+            ibo.delete();
         glDeleteVertexArrays(vao);
     }
 }

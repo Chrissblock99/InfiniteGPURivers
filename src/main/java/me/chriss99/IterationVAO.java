@@ -8,8 +8,8 @@ public class IterationVAO implements ChunkVAO {
     private final Vector2i srcPos;
     private final int width;
 
-    public IterationVAO(float[] triangle, int[] index, Vector2i srcPos, int width) {
-        vao = new VAOImpl(index, 3, triangle);
+    public IterationVAO(float[] triangle, Vector2i srcPos, int width) {
+        vao = new VAOImpl(null, 3, triangle);
         this.srcPos = srcPos;
         this.width = width;
     }
