@@ -18,6 +18,7 @@ public class Main {
 
     static ListRenderer<ColoredVAO> vaoListProgram;
     static PositionCenteredRenderer<TerrainVAO> playerCenteredRenderer;
+    static boolean renderIterations = false;
     static PositionCenteredRenderer<IterationVAO> iterationRenderer;
     static TessProgram tessProgram;
 
@@ -131,7 +132,8 @@ public class Main {
         while(!glfwWindowShouldClose(window)) {
             movementController.update();
             playerCenteredRenderer.updateLoadedChunks(cameraMatrix.position, srcPos, new Vector2i(xSize, zSize));
-            iterationRenderer.updateLoadedChunks(new Vector3f(cameraMatrix.position).div(64));
+            if (renderIterations)
+                iterationRenderer.updateLoadedChunks(new Vector3f(cameraMatrix.position).div(64));
 
             //clear the window
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -140,7 +142,8 @@ public class Main {
             tessProgram.renderTerrain();
             playerCenteredRenderer.render();
             tessProgram.renderWater();
-            iterationRenderer.render();
+            if (renderIterations)
+                iterationRenderer.render();
 
             //swap the frame to show the rendered image
             glfwSwapBuffers(window);

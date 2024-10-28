@@ -60,6 +60,7 @@ public class MovementController {
 
 
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_T, () -> Main.simulateErosion = !Main.simulateErosion);
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_I, () -> Main.renderIterations = !Main.renderIterations);
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_R, () -> {
             Vector2f pos = new Vector2f(Main.cameraMatrix.position.x, Main.cameraMatrix.position.z);
             pos.div(64f).sub(new Vector2f(Main.xSize/(64*2f))).floor().mul(64f);
