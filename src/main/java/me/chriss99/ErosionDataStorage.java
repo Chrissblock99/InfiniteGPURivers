@@ -63,7 +63,7 @@ public class ErosionDataStorage {
         if ((iteration & 0xF0000000) != 0)
             throw new IllegalArgumentException("Iteration too large: " + iteration + ". Maximum is " + 0x0FFFFFFF);
 
-        int data = iterationSurfaceTypeBitsOf(chunkCoord) | (iteration & 0x0FFFFFFF);
+        int data = (((int) iterationSurfaceTypeBitsOf(chunkCoord)) << 28) | (iteration & 0x0FFFFFFF);
 
         iterationInfo.writeArea(chunkCoord.x, chunkCoord.y, new Array2DBufferWrapper(BufferUtils.createByteBuffer(4).putInt(data), GL_RED, GL_INT, 1, 1));
     }
