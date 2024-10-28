@@ -4,7 +4,7 @@ import org.joml.Vector2i;
 
 public class IterationVAOGenerator {
     public static IterationVAO heightMapToIterationVAO(Vector2i srcPosInChunks, Vector2i sizeInChunks, ErosionDataStorage data) {
-        float[] vertecies = new float[sizeInChunks.x* sizeInChunks.y];
+        float[] vertecies = new float[sizeInChunks.x* sizeInChunks.y*3];
         int[] index = new int[(sizeInChunks.x-1)*(sizeInChunks.y-1)*6];
 
         int vertexShift = 0;
@@ -13,9 +13,12 @@ public class IterationVAOGenerator {
         for (int z = 0; z < sizeInChunks.y; z++)
             for (int x = 0; x < sizeInChunks.x; x++) {
                 Vector2i position = new Vector2i(x, z).add(srcPosInChunks);
-                vertecies[vertexShift] = data.iterationOf(position) + data.iterationSurfaceTypeOf(position).getSurface()[0][0]* data.chunkSize;
+                IterationSurfaceType surfaceType = data.iterationSurfaceTypeOf(position);
 
-                vertexShift++;
+                vertecies[vertexShift+0] = (srcPosInChunks.x + x) * data.chunkSize;
+                vertecies[vertexShift+1] = data.iterationOf(position) + surfaceType.getSurface()[0][0]* data.chunkSize;
+                vertecies[vertexShift+2] = (srcPosInChunks.y + z) * data.chunkSize;
+                vertexShift += 3;
 
 
                 if (z == sizeInChunks.y-1 || x == sizeInChunks.x-1)

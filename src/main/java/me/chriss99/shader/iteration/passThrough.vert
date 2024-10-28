@@ -3,13 +3,8 @@
 uniform ivec2 srcPos;
 uniform int width;
 
-in float height;
+in vec3 position;
 
 void main(void) {
-    int i = gl_VertexID;
-
-    int x = i % width;
-    int z = (i - x) / width;
-
-    gl_Position = vec4((x + srcPos.x)*64, height, (z + srcPos.y)*64, 1);
+    gl_Position = vec4(position, 1);
 }
