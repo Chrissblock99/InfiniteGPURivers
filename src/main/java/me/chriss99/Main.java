@@ -53,6 +53,7 @@ public class Main {
 
         vaoListProgram = new ListRenderer<>(new ColoredVAORenderer(cameraMatrix), List.of(/*ColoredVAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
         playerCenteredRenderer = new PositionCenteredRenderer<>(new TerrainVAORenderer(cameraMatrix), (vector2i, chunkSize) -> {
+            chunkSize++;
             Float2DBufferWrapper terrain = worldStorage.terrain.readArea(vector2i.x, vector2i.y, chunkSize, chunkSize).asFloatWrapper();
             Float2DBufferWrapper water = worldStorage.water.readArea(vector2i.x, vector2i.y, chunkSize, chunkSize).asFloatWrapper();
 

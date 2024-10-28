@@ -64,7 +64,7 @@ public class PositionCenteredRenderer<T extends ChunkVAO> {
             for (int y= 0; y < sideLength; y++) {
                 Vector2i pos = new Vector2i((int) position.x + x*chunkSize, (int) position.y + y*chunkSize);
                 if (!pointInsideRectangle(pos, skipSrcPos, skipSideLength))
-                    chunkVAOS.computeIfAbsent(pos, vector2i -> chunkLoader.apply(vector2i, chunkSize+1));
+                    chunkVAOS.computeIfAbsent(pos, vector2i -> chunkLoader.apply(vector2i, chunkSize));
             }
     }
 
