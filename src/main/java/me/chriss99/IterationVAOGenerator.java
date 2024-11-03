@@ -15,47 +15,49 @@ public class IterationVAOGenerator {
                 byte type = (byte) (bits & 0b1100);
                 int dir = (byte) (bits & 0b0011);
                 boolean otherOrdering = (type == 0b1000 || type == 0b1100) && (dir == 0b0000 || dir == 0b0011);
+                int iteration = data.iterationOf(position);
+                int[][] surface = surfaceType.getSurface();
 
                 vertecies[vertexShift+0] = (srcPosInChunks.x + x) * data.chunkSize;
-                vertecies[vertexShift+1] = data.iterationOf(position) + surfaceType.getSurface()[0][0]* data.chunkSize;
+                vertecies[vertexShift+1] = iteration + surface[0][0] * data.chunkSize;
                 vertecies[vertexShift+2] = (srcPosInChunks.y + z) * data.chunkSize;
                 vertexShift += 3;
 
                 vertecies[vertexShift+0] = (srcPosInChunks.x + x + 1) * data.chunkSize;
-                vertecies[vertexShift+1] = data.iterationOf(position) + surfaceType.getSurface()[0][1]* data.chunkSize;
+                vertecies[vertexShift+1] = iteration + surface[0][1] * data.chunkSize;
                 vertecies[vertexShift+2] = (srcPosInChunks.y + z) * data.chunkSize;
                 vertexShift += 3;
 
                 if (!otherOrdering) {
                     vertecies[vertexShift + 0] = (srcPosInChunks.x + x) * data.chunkSize;
-                    vertecies[vertexShift + 1] = data.iterationOf(position) + surfaceType.getSurface()[1][0] * data.chunkSize;
+                    vertecies[vertexShift + 1] = iteration + surface[1][0] * data.chunkSize;
                 } else {
                     vertecies[vertexShift+0] = (srcPosInChunks.x + x + 1) * data.chunkSize;
-                    vertecies[vertexShift+1] = data.iterationOf(position) + surfaceType.getSurface()[1][1]* data.chunkSize;
+                    vertecies[vertexShift+1] = iteration + surface[1][1] * data.chunkSize;
                 }
                 vertecies[vertexShift + 2] = (srcPosInChunks.y + z + 1) * data.chunkSize;
                 vertexShift += 3;
 
                 if (!otherOrdering) {
                     vertecies[vertexShift + 0] = (srcPosInChunks.x + x + 1) * data.chunkSize;
-                    vertecies[vertexShift + 1] = data.iterationOf(position) + surfaceType.getSurface()[0][1] * data.chunkSize;
+                    vertecies[vertexShift + 1] = iteration + surface[0][1] * data.chunkSize;
                     vertecies[vertexShift + 2] = (srcPosInChunks.y + z) * data.chunkSize;
                     vertexShift += 3;
                 }
 
                 vertecies[vertexShift+0] = (srcPosInChunks.x + x + 1) * data.chunkSize;
-                vertecies[vertexShift+1] = data.iterationOf(position) + surfaceType.getSurface()[1][1]* data.chunkSize;
+                vertecies[vertexShift+1] = iteration + surface[1][1] * data.chunkSize;
                 vertecies[vertexShift+2] = (srcPosInChunks.y + z + 1) * data.chunkSize;
                 vertexShift += 3;
 
                 vertecies[vertexShift+0] = (srcPosInChunks.x + x) * data.chunkSize;
-                vertecies[vertexShift+1] = data.iterationOf(position) + surfaceType.getSurface()[1][0]* data.chunkSize;
+                vertecies[vertexShift+1] = iteration + surface[1][0] * data.chunkSize;
                 vertecies[vertexShift+2] = (srcPosInChunks.y + z + 1) * data.chunkSize;
                 vertexShift += 3;
 
                 if (otherOrdering) {
                     vertecies[vertexShift+0] = (srcPosInChunks.x + x) * data.chunkSize;
-                    vertecies[vertexShift+1] = data.iterationOf(position) + surfaceType.getSurface()[0][0]* data.chunkSize;
+                    vertecies[vertexShift+1] = iteration + surface[0][0] * data.chunkSize;
                     vertecies[vertexShift+2] = (srcPosInChunks.y + z) * data.chunkSize;
                     vertexShift += 3;
                 }
