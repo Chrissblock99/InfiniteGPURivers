@@ -22,48 +22,18 @@ public class FileLoadStoreManager<T> {
     }
 
     public T loadFile(Vector2i coord) {
-        File file = getFile(coord);
-
-        FileInputStream inputStream;
-        try {
-            inputStream = new FileInputStream(file);
-        } catch (FileNotFoundException e1) {
-            throw new RuntimeException(e1);
-        }
-
-        try {
+        try (FileInputStream inputStream = new FileInputStream(getFile(coord))) {
             return fileFromBytes.apply(inputStream.readAllBytes(), coord);
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } finally {
-            try {
-                inputStream.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
         }
     }
 
     public void saveFile(T type, Vector2i coord) {
-        File file = getFile(coord);
-
-        FileOutputStream outputStream;
-        try {
-            outputStream = new FileOutputStream(file);
-        } catch (FileNotFoundException e1) {
-            throw new RuntimeException(e1);
-        }
-
-        try {
+        try (FileOutputStream outputStream = new FileOutputStream(getFile(coord))) {
             outputStream.write(fileToBytes.apply(type));
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } finally {
-            try {
-                outputStream.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
         }
     }
 
