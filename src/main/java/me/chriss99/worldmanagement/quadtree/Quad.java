@@ -4,6 +4,8 @@ import org.joml.Vector2i;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Supplier;
 
 public class Quad<T> {
     private final Quad<T> parent;
@@ -125,5 +127,34 @@ public class Quad<T> {
 
     public Quad<T> getBottomRight() {
         return bottomRight;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Quad<?> quad = (Quad<?>) o;
+        return greatestNodeDepth == quad.greatestNodeDepth && size == quad.size && Objects.equals(pos, quad.pos) && Objects.equals(value, quad.value) && Objects.equals(topLeft, quad.topLeft) && Objects.equals(topRight, quad.topRight) && Objects.equals(bottomLeft, quad.bottomLeft) && Objects.equals(bottomRight, quad.bottomRight);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(greatestNodeDepth, pos, size, value, topLeft, topRight, bottomLeft, bottomRight);
+    }
+
+    @Override
+    public String toString() {
+        return "Quad{" +
+                "greatestNodeDepth=" + greatestNodeDepth +
+                ", pos=" + pos +
+                ", size=" + size +
+                ((!isSubdivided()) ?
+                        ", value=" + value
+                        :
+                        ", topLeft=" + topLeft +
+                        ", topRight=" + topRight +
+                        ", bottomLeft=" + bottomLeft +
+                        ", bottomRight=" + bottomRight) +
+                '}';
     }
 }

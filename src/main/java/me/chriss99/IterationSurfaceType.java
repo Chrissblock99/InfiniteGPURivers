@@ -2,6 +2,7 @@ package me.chriss99;
 
 import org.joml.Vector2i;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 public class IterationSurfaceType {
@@ -88,5 +89,23 @@ public class IterationSurfaceType {
                 default -> throw new IllegalStateException("Unexpected value: " + bits);
             };
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IterationSurfaceType that = (IterationSurfaceType) o;
+        return bits == that.bits;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(bits);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%4s", Integer.toBinaryString(bits & 0xFF)).replace(' ', '0');
     }
 }
