@@ -32,6 +32,46 @@ public class Quad<T> {
         this.value = value;
     }
 
+
+    /**
+     * Instances a generic Quadtree using a supplier called in depth first order <br>
+     * The passed supplier dictates when to subdivide by returning null <br>
+     * When the current node is a leaf the supplier should return a not null value
+     *
+     * @param depthFirst returns null when the current node should be subdivided and a value when it is a leaf
+     * @param pos the position of the Quad
+     * @param size the size of the Quad
+     * @return The fully built Quadtree
+     * @param <T> the generic type of the Quadtree
+     */
+    public static <T> Quad<T> depthFirstInstance(Supplier<T> depthFirst, Vector2i pos, int size) {
+        ArrayList<Quad<T>> leafs = new ArrayList<>();
+        Quad<T> quad = recursiveInstance(leafs, null, depthFirst, 0, pos, size);
+        leafs.forEach(a -> a.updateGreatestNodeDepth(true));
+        return quad;
+    }
+
+    private static <T> Quad<T> recursiveInstance(ArrayList<Quad<T>> leafs, Quad<T> parent, Supplier<T> depthFirst, int nodeDepth, Vector2i pos, int size) {
+        T value = depthFirst.get();
+        Quad<T> node = new Quad<>(parent, nodeDepth, value, pos, size);
+
+        if (value != null) {
+            leafs.add(node);
+            return node;
+        }
+
+        nodeDepth++;
+
+        int halfSize = size/2;
+        node.topLeft = recursiveInstance(leafs, node, depthFirst, nodeDepth, new Vector2i(pos.x + halfSize, pos.y + halfSize), halfSize);
+        node.topRight = recursiveInstance(leafs, node, depthFirst, nodeDepth, new Vector2i(pos.x, pos.y + halfSize), halfSize);
+        node.bottomLeft = recursiveInstance(leafs, node, depthFirst, nodeDepth, pos, halfSize);
+        node.bottomRight = recursiveInstance(leafs, node, depthFirst, nodeDepth, new Vector2i(pos.x + halfSize, pos.y), halfSize);
+
+        return node;
+    }
+
+
     private void updateGreatestNodeDepth(boolean skip) {
         int previous = greatestNodeDepth;
         if (!skip) {
