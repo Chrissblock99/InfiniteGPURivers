@@ -6,16 +6,16 @@ import org.joml.Vector2i;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
-public class RegionFileManager {
-    private final FileLoadStoreManager<Region> fileManager;
+public class ChunkRegionFileManager {
+    private final FileLoadStoreManager<Region<Chunk>> fileManager;
     private final int chunkByteSize;
     private final int chunkDataByteSize;
     public final int format;
     public final int type;
     public final int chunkSize;
 
-    public RegionFileManager(String worldName, int format, int type, int chunkSize) {
-        this.fileManager = new FileLoadStoreManager<>("worlds/" + worldName, "region", this::regionFromByteArray, this::regionToByteArray);
+    public ChunkRegionFileManager(String worldName, int format, int type, int chunkSize) {
+        this.fileManager = new FileLoadStoreManager<Region<Chunk>>("worlds/" + worldName, "region", this::regionFromByteArray, this::regionToByteArray);
 
         chunkDataByteSize = chunkSize*chunkSize*Array2DBufferWrapper.sizeOf(format, type);
         chunkByteSize = chunkDataByteSize + 4*2;
@@ -24,17 +24,17 @@ public class RegionFileManager {
         this.chunkSize = chunkSize;
     }
 
-    public Region loadRegion(Vector2i regionCoord) {
+    public Region<Chunk> loadRegion(Vector2i regionCoord) {
         return fileManager.loadFile(regionCoord);
     }
 
-    public void saveRegion(Region region) {
+    public void saveRegion(Region<Chunk> region) {
         fileManager.saveFile(region, region.coord);
     }
 
-    private Region regionFromByteArray(byte[] array, Vector2i regionCoord) {
+    private Region<Chunk> regionFromByteArray(byte[] array, Vector2i regionCoord) {
         int chunkNum = array.length/chunkByteSize;
-        Region region = new Region(regionCoord);
+        Region<Chunk> region = new Region<>(regionCoord);
         ByteBuffer buffer = ByteBuffer.wrap(array);
 
         for (int i = 0; i < chunkNum; i++) {
@@ -48,7 +48,7 @@ public class RegionFileManager {
         return region;
     }
 
-    private byte[] regionToByteArray(Region region) {
+    private byte[] regionToByteArray(Region<Chunk> region) {
         ByteBuffer buffer = ByteBuffer.allocate(region.getAllChunks().size()*chunkByteSize);
 
         for (Map.Entry<Vector2i, Chunk> entry : region.getAllChunks()) {

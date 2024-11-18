@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.function.BiFunction;
 
 public class InfiniteWorld {
-    private final HashMap<Vector2i, Region> loadedRegions = new HashMap<>();
-    private final RegionFileManager regionFileManager;
+    private final HashMap<Vector2i, Region<Chunk>> loadedRegions = new HashMap<>();
+    private final ChunkRegionFileManager regionFileManager;
     private final BiFunction<Vector2i, Integer, Chunk> chunkGenerator;
 
     public final int elementSize;
@@ -21,7 +21,7 @@ public class InfiniteWorld {
     public final int regionSize;
 
     public InfiniteWorld(String worldName, int format, int type, int chunkSize, int regionSize, BiFunction<Vector2i, Integer, Chunk> chunkGenerator) {
-        this.regionFileManager = new RegionFileManager(worldName, format, type, chunkSize);
+        this.regionFileManager = new ChunkRegionFileManager(worldName, format, type, chunkSize);
         this.chunkGenerator = chunkGenerator;
 
         elementSize = Array2DBufferWrapper.sizeOf(format, type);
@@ -92,7 +92,7 @@ public class InfiniteWorld {
             }
     }
 
-    private Region getRegion(Vector2i regionCoord) {
+    private Region<Chunk> getRegion(Vector2i regionCoord) {
         return loadedRegions.computeIfAbsent(regionCoord, regionFileManager::loadRegion);
     }
 
@@ -101,7 +101,7 @@ public class InfiniteWorld {
     }
 
     public void unloadRegion(Vector2i regionCoord) {
-        Region region = loadedRegions.remove(regionCoord);
+        Region<Chunk> region = loadedRegions.remove(regionCoord);
         if (region == null) {
             System.out.println("Region " + regionCoord.x+ ", " + regionCoord.y + " is not loaded, but was called for unloading!");
             return;
@@ -111,7 +111,7 @@ public class InfiniteWorld {
     }
 
     public void unloadAllRegions() {
-        for (Map.Entry<Vector2i, Region> entry : loadedRegions.entrySet())
+        for (Map.Entry<Vector2i, Region<Chunk>> entry : loadedRegions.entrySet())
             regionFileManager.saveRegion(entry.getValue());
     }
 }
