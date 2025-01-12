@@ -6,7 +6,7 @@ import org.joml.Vector2i;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
-public class ChunkRegionFileManager {
+public class ChunkRegionFileManager implements RegionFileManager<Chunk> {
     private final FileLoadStoreManager<Region<Chunk>> fileManager;
     private final int chunkByteSize;
     private final int chunkDataByteSize;
@@ -15,7 +15,7 @@ public class ChunkRegionFileManager {
     public final int chunkSize;
 
     public ChunkRegionFileManager(String worldName, int format, int type, int chunkSize) {
-        this.fileManager = new FileLoadStoreManager<Region<Chunk>>("worlds/" + worldName, "region", this::regionFromByteArray, this::regionToByteArray);
+        this.fileManager = new FileLoadStoreManager<>("worlds/" + worldName, "region", this::regionFromByteArray, this::regionToByteArray);
 
         chunkDataByteSize = chunkSize*chunkSize*Array2DBufferWrapper.sizeOf(format, type);
         chunkByteSize = chunkDataByteSize + 4*2;

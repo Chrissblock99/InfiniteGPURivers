@@ -3,6 +3,7 @@ package me.chriss99.worldmanagement.quadtree;
 import me.chriss99.IterationSurfaceType;
 import me.chriss99.worldmanagement.FileLoadStoreManager;
 import me.chriss99.worldmanagement.Region;
+import me.chriss99.worldmanagement.RegionFileManager;
 import org.joml.Vector2i;
 
 import java.nio.ByteBuffer;
@@ -10,7 +11,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Map;
 
-public class QuadRegionFileManager {
+public class QuadRegionFileManager implements RegionFileManager<Quad<IterationSurfaceType>> {
     private final FileLoadStoreManager<Region<Quad<IterationSurfaceType>>> fileManager;
     private final int quadTileSize;
 
@@ -19,11 +20,11 @@ public class QuadRegionFileManager {
         this.quadTileSize = quadTileSize;
     }
 
-    public Region<Quad<IterationSurfaceType>> loadQuadRegion(Vector2i chunkCoord) {
+    public Region<Quad<IterationSurfaceType>> loadRegion(Vector2i chunkCoord) {
         return fileManager.loadFile(chunkCoord);
     }
 
-    public void saveQuadRegion(Region<Quad<IterationSurfaceType>> quadRegion) {
+    public void saveRegion(Region<Quad<IterationSurfaceType>> quadRegion) {
         fileManager.saveFile(quadRegion, quadRegion.coord);
     }
 

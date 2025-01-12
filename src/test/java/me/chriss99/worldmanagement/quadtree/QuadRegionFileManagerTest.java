@@ -21,8 +21,8 @@ class QuadRegionFileManagerTest {
             try {
                 Region<Quad<IterationSurfaceType>> quadRegion = randomTreeRegion(pos, 10, .95, 0.9, tileSize);
 
-                manager.saveQuadRegion(quadRegion);
-                Region<Quad<IterationSurfaceType>> reconstructed = manager.loadQuadRegion(pos);
+                manager.saveRegion(quadRegion);
+                Region<Quad<IterationSurfaceType>> reconstructed = manager.loadRegion(pos);
 
                 assertEquals(quadRegion, reconstructed);
             } catch (StackOverflowError ignored) {}
