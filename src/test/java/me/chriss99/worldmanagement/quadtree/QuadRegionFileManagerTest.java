@@ -1,33 +1,47 @@
 package me.chriss99.worldmanagement.quadtree;
 
 import me.chriss99.IterationSurfaceType;
+import me.chriss99.worldmanagement.Region;
 import org.joml.Vector2i;
 import org.junit.jupiter.api.Test;
 
+import java.util.LinkedList;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-class QuadFileManagerTest {
+class QuadRegionFileManagerTest {
 
     @Test
     public void bijective() {
         int tileSize = 4;
-        QuadFileManager manager = new QuadFileManager("jUnitTest", tileSize);
+        QuadRegionFileManager manager = new QuadRegionFileManager("jUnitTest", tileSize);
         Vector2i pos = new Vector2i();
 
         for (int i = 0; i < 1000; i++) {
             try {
-                Quad<IterationSurfaceType> quad = randomTree(.95, 0.9, pos, tileSize);
+                Region<Quad<IterationSurfaceType>> quadRegion = randomTreeRegion(pos, 10, .95, 0.9, tileSize);
 
-                manager.saveQuad(quad);
-                Quad<IterationSurfaceType> reconstructed = manager.loadQuad(pos);
+                manager.saveQuadRegion(quadRegion);
+                Region<Quad<IterationSurfaceType>> reconstructed = manager.loadQuadRegion(pos);
 
-                assertEquals(quad, reconstructed);
+                assertEquals(quadRegion, reconstructed);
             } catch (StackOverflowError ignored) {}
         }
     }
 
-    public static Quad<IterationSurfaceType> randomTree(double chance, double chanceMul, Vector2i pos, int size) {
-        Quad<IterationSurfaceType> quad = new Quad<>(randomType(), pos, size);
+    public static Region<Quad<IterationSurfaceType>> randomTreeRegion(Vector2i pos, int length, double chance, double chanceMul, int size) {
+        Region<Quad<IterationSurfaceType>> quadRegion = new Region<>(pos);
+
+        for (int i = 0; i < length; i++) {
+            Quad<IterationSurfaceType> quad = randomTree(chance, chanceMul, size);
+            quadRegion.addChunk(quad.getPos(), quad);
+        }
+
+        return quadRegion;
+    }
+
+    public static Quad<IterationSurfaceType> randomTree(double chance, double chanceMul, int size) {
+        Quad<IterationSurfaceType> quad = new Quad<>(randomType(), randomPos(), size);
         randomSubdivide(quad, chance, chanceMul);
         return quad;
     }
@@ -55,5 +69,9 @@ class QuadFileManagerTest {
 
     public static IterationSurfaceType randomType() {
         return new IterationSurfaceType((byte) (Math.random()*16));
+    }
+
+    public static Vector2i randomPos() {
+        return new Vector2i((int) (Math.random()*Integer.MAX_VALUE), (int) (Math.random()*Integer.MAX_VALUE));
     }
 }
