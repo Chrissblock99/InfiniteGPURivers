@@ -4,6 +4,7 @@ import org.joml.Vector2i;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -27,5 +28,17 @@ public class Region<C> {
 
     public Set<Map.Entry<Vector2i, C>> getAllChunks() {
         return chunks.entrySet();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Region<?> region = (Region<?>) o;
+        return Objects.equals(coord, region.coord) && Objects.equals(chunks, region.chunks);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(coord, chunks);
     }
 }
