@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 
-public abstract class InfiniteWorld<C> {
+public class InfiniteWorld<C> {
     private final HashMap<Vector2i, Region<C>> loadedRegions = new HashMap<>();
     private final RegionFileManager<C> regionFileManager;
     private final BiFunction<Vector2i, Integer, C> chunkGenerator;
