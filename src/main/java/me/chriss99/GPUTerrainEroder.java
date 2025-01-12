@@ -1,7 +1,7 @@
 package me.chriss99;
 
 import me.chriss99.program.ComputeProgram;
-import me.chriss99.worldmanagement.InfiniteWorld;
+import me.chriss99.worldmanagement.InfiniteChunkWorld;
 import org.joml.Vector2i;
 
 import static org.lwjgl.opengl.GL45.*;
@@ -125,7 +125,7 @@ public class GPUTerrainEroder {
         downloadHelper(thermalOutflowPipes2, erosionDataStorage.thermalOutflow2);
     }
 
-    private void downloadHelper(Texture2D download, InfiniteWorld write) {
+    private void downloadHelper(Texture2D download, InfiniteChunkWorld write) {
         Array2DBufferWrapper bufferWrapper = new Array2DBufferWrapper(write.format, write.type, width, height);
         download.downloadData(0, 0, bufferWrapper);
         write.writeArea(srcPos.x, srcPos.y, bufferWrapper);
