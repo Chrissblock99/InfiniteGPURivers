@@ -8,28 +8,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 
-public class InfiniteChunkWorld {
-    private final HashMap<Vector2i, Region<Chunk>> loadedRegions = new HashMap<>();
-    private final ChunkRegionFileManager regionFileManager;
-    private final BiFunction<Vector2i, Integer, Chunk> chunkGenerator;
-
+public class InfiniteChunkWorld extends InfiniteWorld<Chunk> {
     public final int elementSize;
     public final int format;
     public final int type;
 
-    public final int chunkSize;
-    public final int regionSize;
-
     public InfiniteChunkWorld(String worldName, int format, int type, int chunkSize, int regionSize, BiFunction<Vector2i, Integer, Chunk> chunkGenerator) {
-        this.regionFileManager = new ChunkRegionFileManager(worldName, format, type, chunkSize);
-        this.chunkGenerator = chunkGenerator;
+        super(chunkSize, regionSize, chunkGenerator, new ChunkRegionFileManager(worldName, format, type, chunkSize));
 
         elementSize = Array2DBufferWrapper.sizeOf(format, type);
         this.format = format;
         this.type = type;
-
-        this.chunkSize = chunkSize;
-        this.regionSize = regionSize;
     }
 
     public Array2DBufferWrapper readArea(int x, int y, int width, int height) {
@@ -90,28 +79,5 @@ public class InfiniteChunkWorld {
                     dest.buffer.put(destPos*elementSize, src.buffer, srcPos*elementSize, (currentChunkMaxX-currentChunkMinX + 1)*elementSize);
                 }
             }
-    }
-
-    private Region<Chunk> getRegion(Vector2i regionCoord) {
-        return loadedRegions.computeIfAbsent(regionCoord, regionFileManager::loadRegion);
-    }
-
-    private Chunk getChunk(int x, int y) {
-        return getRegion(new Vector2i(Util.properIntDivide(x, regionSize), Util.properIntDivide(y, regionSize))).getChunk(new Vector2i(x, y), vector2i -> chunkGenerator.apply(vector2i, chunkSize));
-    }
-
-    public void unloadRegion(Vector2i regionCoord) {
-        Region<Chunk> region = loadedRegions.remove(regionCoord);
-        if (region == null) {
-            System.out.println("Region " + regionCoord.x+ ", " + regionCoord.y + " is not loaded, but was called for unloading!");
-            return;
-        }
-
-        regionFileManager.saveRegion(region);
-    }
-
-    public void unloadAllRegions() {
-        for (Map.Entry<Vector2i, Region<Chunk>> entry : loadedRegions.entrySet())
-            regionFileManager.saveRegion(entry.getValue());
     }
 }
