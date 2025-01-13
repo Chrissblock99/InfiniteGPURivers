@@ -15,55 +15,55 @@ public class IterationVAOGenerator {
                 IterationSurface surface = data.iterationInfo.getChunk(position.x, position.y);
                 IterationSurfaceType surfaceType = new IterationSurfaceType((byte) 0b1101); //TODO; hahahahahaahahahahaha (actually do the tree some time later)
 
-                Vector3i pos = new Vector3i(position.x, surface.getIteration(), position.y);
-                addSurface(vertecies, pos, data.chunkSize, surfaceType);
+                Vector3i pos = new Vector3i(position.x*data.chunkSize, surface.getIteration(), position.y*data.chunkSize);
+                addSurface(vertecies, surfaceType, pos, data.chunkSize);
             }
 
         return new IterationVAO(vertecies.getArray(), srcPosInChunks, sizeInChunks.x);
     }
 
-    private static void addSurface(FloatArrayList vertecies, Vector3i pos, int chunkSize, IterationSurfaceType surfaceType) {
+    private static void addSurface(FloatArrayList vertecies, IterationSurfaceType surfaceType, Vector3i pos, int scale) {
         byte bits = surfaceType.toBits();
         byte type = (byte) (bits & 0b1100);
         int dir = (byte) (bits & 0b0011);
         boolean otherOrdering = (type == 0b1000 || type == 0b1100) && (dir == 0b0000 || dir == 0b0011);
         int[][] elevation = surfaceType.getSurface();
 
-        vertecies.add(pos.x * chunkSize);
-        vertecies.add(pos.y + elevation[0][0] * chunkSize);
-        vertecies.add(pos.z * chunkSize);
+        vertecies.add(pos.x);
+        vertecies.add(pos.y + elevation[0][0] * scale);
+        vertecies.add(pos.z);
 
-        vertecies.add((pos.x + 1) * chunkSize);
-        vertecies.add(pos.y + elevation[0][1] * chunkSize);
-        vertecies.add(pos.z * chunkSize);
+        vertecies.add(pos.x + scale);
+        vertecies.add(pos.y + elevation[0][1] * scale);
+        vertecies.add(pos.z);
 
         if (!otherOrdering) {
-            vertecies.add(pos.x * chunkSize);
-            vertecies.add(pos.y + elevation[1][0] * chunkSize);
+            vertecies.add(pos.x);
+            vertecies.add(pos.y + elevation[1][0] * scale);
         } else {
-            vertecies.add((pos.x + 1) * chunkSize);
-            vertecies.add(pos.y + elevation[1][1] * chunkSize);
+            vertecies.add(pos.x + scale);
+            vertecies.add(pos.y + elevation[1][1] * scale);
         }
-        vertecies.add((pos.z + 1) * chunkSize);
+        vertecies.add(pos.z + scale);
 
         if (!otherOrdering) {
-            vertecies.add((pos.x + 1) * chunkSize);
-            vertecies.add(pos.y + elevation[0][1] * chunkSize);
-            vertecies.add(pos.z * chunkSize);
+            vertecies.add(pos.x + scale);
+            vertecies.add(pos.y + elevation[0][1] * scale);
+            vertecies.add(pos.z);
         }
 
-        vertecies.add((pos.x + 1) * chunkSize);
-        vertecies.add(pos.y + elevation[1][1] * chunkSize);
-        vertecies.add((pos.z + 1) * chunkSize);
+        vertecies.add(pos.x + scale);
+        vertecies.add(pos.y + elevation[1][1] * scale);
+        vertecies.add(pos.z + scale);
 
-        vertecies.add(pos.x * chunkSize);
-        vertecies.add(pos.y + elevation[1][0] * chunkSize);
-        vertecies.add((pos.z + 1) * chunkSize);
+        vertecies.add(pos.x);
+        vertecies.add(pos.y + elevation[1][0] * scale);
+        vertecies.add(pos.z + scale);
 
         if (otherOrdering) {
-            vertecies.add(pos.x * chunkSize);
-            vertecies.add(pos.y + elevation[0][0] * chunkSize);
-            vertecies.add(pos.z * chunkSize);
+            vertecies.add(pos.x);
+            vertecies.add(pos.y + elevation[0][0] * scale);
+            vertecies.add(pos.z);
         }
     }
 }
