@@ -11,32 +11,33 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Map;
 
-public class QuadRegionFileManager implements RegionFileManager<Quad<IterationSurfaceType>> {
-    private final FileLoadStoreManager<Region<Quad<IterationSurfaceType>>> fileManager;
+public class IterationSurfaceRegionFileManager implements RegionFileManager<IterationSurface> {
+    private final FileLoadStoreManager<Region<IterationSurface>> fileManager;
     private final int quadTileSize;
 
-    public QuadRegionFileManager(String worldName, int quadTileSize) {
-        fileManager = new FileLoadStoreManager<>("worlds/" + worldName, "quadtree", this::quadRegionFromBytes, QuadRegionFileManager::quadRegionToBytes);
+    public IterationSurfaceRegionFileManager(String worldName, int quadTileSize) {
+        fileManager = new FileLoadStoreManager<>("worlds/" + worldName, "quadtree", this::iterationSurfaceRegionFromBytes, IterationSurfaceRegionFileManager::IterationSurfaceRegionToBytes);
         this.quadTileSize = quadTileSize;
     }
 
-    public Region<Quad<IterationSurfaceType>> loadRegion(Vector2i chunkCoord) {
+    public Region<IterationSurface> loadRegion(Vector2i chunkCoord) {
         return fileManager.loadFile(chunkCoord);
     }
 
-    public void saveRegion(Region<Quad<IterationSurfaceType>> quadRegion) {
+    public void saveRegion(Region<IterationSurface> quadRegion) {
         fileManager.saveFile(quadRegion, quadRegion.coord);
     }
 
-    private static byte[] quadRegionToBytes(Region<Quad<IterationSurfaceType>> quadRegion) {
+    private static byte[] IterationSurfaceRegionToBytes(Region<IterationSurface> quadRegion) {
         LinkedList<byte[]> bytesList = new LinkedList<>();
         int length = 0;
 
-        for (Quad<IterationSurfaceType> quad : quadRegion.getAllChunks().stream().map(Map.Entry::getValue).toList()) {
+        for (IterationSurface surface : quadRegion.getAllChunks().stream().map(Map.Entry::getValue).toList()) {
             ArrayList<Boolean> treeBits = new ArrayList<>();
             ArrayList<IterationSurfaceType> values = new ArrayList<>();
+            Quad<IterationSurfaceType> quad = surface.getQuad();
             flatten(quad, treeBits, values);
-            byte[] bytes = toArray(quad.getPos(), treeBits, values);
+            byte[] bytes = toArray(surface.getIteration(), quad.getPos(), treeBits, values);
 
             bytesList.add(bytes);
             length += bytes.length;
@@ -66,13 +67,13 @@ public class QuadRegionFileManager implements RegionFileManager<Quad<IterationSu
         }
     }
 
-    private static byte[] toArray(Vector2i pos, ArrayList<Boolean> treeBits, ArrayList<IterationSurfaceType> values) {
+    private static byte[] toArray(int iteration, Vector2i pos, ArrayList<Boolean> treeBits, ArrayList<IterationSurfaceType> values) {
         int treeBitsBytes = (int) Math.ceil(((double) treeBits.size())/8d);
         int valuesBytes = (int) Math.ceil(((double) values.size())/2d);
-        byte[] bytes = new byte[8 + treeBitsBytes + valuesBytes];
+        byte[] bytes = new byte[12 + treeBitsBytes + valuesBytes];
 
-        byte[] posBytes = ByteBuffer.allocate(8).putInt(pos.x).putInt(pos.y).array();
-        System.arraycopy(posBytes, 0, bytes, 0, 8);
+        byte[] posBytes = ByteBuffer.allocate(12).putInt(iteration).putInt(pos.x).putInt(pos.y).array();
+        System.arraycopy(posBytes, 0, bytes, 0, 12);
 
         for (int i = 0; i < treeBits.size(); i++) {
             if (!treeBits.get(i))
@@ -80,14 +81,14 @@ public class QuadRegionFileManager implements RegionFileManager<Quad<IterationSu
 
             int index = i/8;
             int offset = i%8;
-            bytes[8 + index] |= (byte) (0b10000000 >>> offset);
+            bytes[12 + index] |= (byte) (0b10000000 >>> offset);
         }
 
         for (int i = 0; i < values.size(); i++) {
             int index = i/2;
             boolean offset = i%2 == 0;
             byte bits = values.get(i).toBits();
-            bytes[8 + treeBitsBytes + index] |= offset ? (byte) (bits << 4) : bits;
+            bytes[12 + treeBitsBytes + index] |= offset ? (byte) (bits << 4) : bits;
         }
 
         return bytes;
@@ -95,25 +96,26 @@ public class QuadRegionFileManager implements RegionFileManager<Quad<IterationSu
 
     private record TreeData(ArrayList<Boolean> treeBits, int valuesNum) {}
 
-    private Region<Quad<IterationSurfaceType>> quadRegionFromBytes(byte[] bytes, Vector2i pos) {
-        Region<Quad<IterationSurfaceType>> quadRegion = new Region<>(pos);
+    private Region<IterationSurface> iterationSurfaceRegionFromBytes(byte[] bytes, Vector2i pos) {
+        Region<IterationSurface> quadRegion = new Region<>(pos);
         int readOffset = 0;
 
         while (readOffset < bytes.length) {
-            byte[] posBytes = new byte[8];
-            System.arraycopy(bytes, readOffset, posBytes, 0, 8);
+            byte[] posBytes = new byte[12];
+            System.arraycopy(bytes, readOffset, posBytes, 0, 12);
             ByteBuffer posBuffer = ByteBuffer.wrap(posBytes);
+            int iteration = posBuffer.getInt();
             Vector2i quadPos = new Vector2i(posBuffer.getInt(), posBuffer.getInt());
 
-            TreeData treeData = treeData(bytes, readOffset + 8);
+            TreeData treeData = treeData(bytes, readOffset + 12);
             ArrayList<Boolean> treeBits = treeData.treeBits;
             int valuesNum = treeData.valuesNum;
 
             int treeBitsBytes = (int) Math.ceil(((double) treeBits.size()) / 8d);
-            ArrayList<IterationSurfaceType> values = values(bytes, readOffset + 8, treeBitsBytes, valuesNum);
-            readOffset += 8 + treeBitsBytes + (int) Math.ceil(((double) valuesNum) / 2d);
+            ArrayList<IterationSurfaceType> values = values(bytes, readOffset + 12, treeBitsBytes, valuesNum);
+            readOffset += 12 + treeBitsBytes + (int) Math.ceil(((double) valuesNum) / 2d);
 
-            quadRegion.addChunk(quadPos, buildTree(treeBits, values, quadPos, quadTileSize));
+            quadRegion.addChunk(quadPos, new IterationSurface(iteration, buildTree(treeBits, values, quadPos, quadTileSize)));
         }
 
         return quadRegion;

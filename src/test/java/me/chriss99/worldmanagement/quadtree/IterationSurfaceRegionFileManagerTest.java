@@ -5,36 +5,34 @@ import me.chriss99.worldmanagement.Region;
 import org.joml.Vector2i;
 import org.junit.jupiter.api.Test;
 
-import java.util.LinkedList;
-
 import static org.junit.jupiter.api.Assertions.*;
 
-class QuadRegionFileManagerTest {
+class IterationSurfaceRegionFileManagerTest {
 
     @Test
     public void bijective() {
         int tileSize = 4;
-        QuadRegionFileManager manager = new QuadRegionFileManager("jUnitTest", tileSize);
+        IterationSurfaceRegionFileManager manager = new IterationSurfaceRegionFileManager("jUnitTest", tileSize);
         Vector2i pos = new Vector2i();
 
         for (int i = 0; i < 1000; i++) {
             try {
-                Region<Quad<IterationSurfaceType>> quadRegion = randomTreeRegion(pos, 10, .95, 0.9, tileSize);
+                Region<IterationSurface> quadRegion = randomIterationSurfaceRegion(pos, 10, .95, 0.9, tileSize);
 
                 manager.saveRegion(quadRegion);
-                Region<Quad<IterationSurfaceType>> reconstructed = manager.loadRegion(pos);
+                Region<IterationSurface> reconstructed = manager.loadRegion(pos);
 
                 assertEquals(quadRegion, reconstructed);
             } catch (StackOverflowError ignored) {}
         }
     }
 
-    public static Region<Quad<IterationSurfaceType>> randomTreeRegion(Vector2i pos, int length, double chance, double chanceMul, int size) {
-        Region<Quad<IterationSurfaceType>> quadRegion = new Region<>(pos);
+    public static Region<IterationSurface> randomIterationSurfaceRegion(Vector2i pos, int length, double chance, double chanceMul, int size) {
+        Region<IterationSurface> quadRegion = new Region<>(pos);
 
         for (int i = 0; i < length; i++) {
             Quad<IterationSurfaceType> quad = randomTree(chance, chanceMul, size);
-            quadRegion.addChunk(quad.getPos(), quad);
+            quadRegion.addChunk(quad.getPos(), new IterationSurface(randomInt(), quad));
         }
 
         return quadRegion;
@@ -72,6 +70,10 @@ class QuadRegionFileManagerTest {
     }
 
     public static Vector2i randomPos() {
-        return new Vector2i((int) (Math.random()*Integer.MAX_VALUE), (int) (Math.random()*Integer.MAX_VALUE));
+        return new Vector2i(randomInt(), randomInt());
+    }
+
+    public static int randomInt() {
+        return (int) (Math.random()*Integer.MAX_VALUE);
     }
 }
