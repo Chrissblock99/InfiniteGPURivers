@@ -2,8 +2,9 @@ package me.chriss99;
 
 import me.chriss99.worldmanagement.Chunk;
 import me.chriss99.worldmanagement.InfiniteChunkWorld;
-import org.joml.Vector2i;
-import org.lwjgl.BufferUtils;
+import me.chriss99.worldmanagement.InfiniteWorld;
+import me.chriss99.worldmanagement.quadtree.IterationSurface;
+import me.chriss99.worldmanagement.quadtree.IterationSurfaceRegionFileManager;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -24,7 +25,7 @@ public class ErosionDataStorage {
     public final InfiniteChunkWorld thermalOutflow1;
     public final InfiniteChunkWorld thermalOutflow2;
 
-    private final InfiniteChunkWorld iterationInfo;
+    public final InfiniteWorld<IterationSurface> iterationInfo;
 
     public ErosionDataStorage(String worldName, int chunkSize, int regionSize) {
         this.chunkSize = chunkSize;
@@ -42,36 +43,7 @@ public class ErosionDataStorage {
         thermalOutflow1 = new InfiniteChunkWorld(worldName + "/thermalOutflow1", GL_RGBA, GL_FLOAT, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Vec4f2DBufferWrapper(chunkSize1, chunkSize1)));
         thermalOutflow2 = new InfiniteChunkWorld(worldName + "/thermalOutflow2", GL_RGBA, GL_FLOAT, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Vec4f2DBufferWrapper(chunkSize1, chunkSize1)));
 
-        iterationInfo = new InfiniteChunkWorld(worldName + "/iteration", GL_RED, GL_INT, regionSize, 100, (vector2i, chunkSize1) -> new Chunk(new Array2DBufferWrapper(GL_RED, GL_INT, chunkSize1, chunkSize1)));
-    }
-
-    public int iterationOf(Vector2i chunkCoord) {
-        int data = iterationInfo.readArea(chunkCoord.x, chunkCoord.y, 1, 1).buffer.getInt();
-        return data & 0x0FFFFFFF;
-    }
-
-    private byte iterationSurfaceTypeBitsOf(Vector2i chunkCoord) {
-        int data = iterationInfo.readArea(chunkCoord.x, chunkCoord.y, 1, 1).buffer.getInt();
-        return (byte) ((data & 0xF0000000) >>> 28);
-    }
-
-    public IterationSurfaceType iterationSurfaceTypeOf(Vector2i chunkCoord) {
-        return new IterationSurfaceType(iterationSurfaceTypeBitsOf(chunkCoord));
-    }
-
-    public void setIterationOf(Vector2i chunkCoord, int iteration) {
-        if ((iteration & 0xF0000000) != 0)
-            throw new IllegalArgumentException("Iteration too large: " + iteration + ". Maximum is " + 0x0FFFFFFF);
-
-        int data = (((int) iterationSurfaceTypeBitsOf(chunkCoord)) << 28) | (iteration & 0x0FFFFFFF);
-
-        iterationInfo.writeArea(chunkCoord.x, chunkCoord.y, new Array2DBufferWrapper(BufferUtils.createByteBuffer(4).putInt(data), GL_RED, GL_INT, 1, 1));
-    }
-
-    public void setIterationSurfaceTypeOf(Vector2i chunkCoord, IterationSurfaceType surfaceType) {
-        int data = (((int) surfaceType.toBits()) << 28) | iterationOf(chunkCoord);
-
-        iterationInfo.writeArea(chunkCoord.x, chunkCoord.y, new Array2DBufferWrapper(BufferUtils.createByteBuffer(4).putInt(data), GL_RED, GL_INT, 1, 1));
+        iterationInfo = new InfiniteWorld<>(chunkSize, regionSize, IterationSurface::new, new IterationSurfaceRegionFileManager(worldName + "/iteration", chunkSize));
     }
 
     public void unloadAll() {
