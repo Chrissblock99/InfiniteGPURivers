@@ -24,12 +24,22 @@ public class Main {
 
     static ErosionDataStorage worldStorage;
 
-    static String worldName = "test64";
-    static int chunkRenderDistance = 7;
-    static Vector2i srcPos = new Vector2i(-7*64, 5*64);
-    static int xSize = 8*64;
-    static int zSize = 8*64;
+    //config -----------------
+    static final String worldName = "test64";
+    static final int chunkSize = 64;
+    static final int regionSize = 10;
+    static final int iterationChunkSize = 64;
+    static final int iterationRegionSize = 10;
+
+    static final int chunkRenderDistance = 7;
+    static final int iterationRenderDistance = 2;
+
+    static final Vector2i srcPos = new Vector2i(-7*64, 5*64);
+    static final int xSize = 8*64;
+    static final int zSize = 8*64;
+
     static int simulationStepsPerFrame = 5;
+    //config -----------------
 
     static GPUTerrainEroder gpuTerrainEroder;
     static int vao;
@@ -48,7 +58,7 @@ public class Main {
         glfwInit();
         double start = glfwGetTime();
         createWindow();
-        worldStorage = new ErosionDataStorage(worldName, 64, 10, 64, 10);
+        worldStorage = new ErosionDataStorage(worldName, chunkSize, regionSize, iterationChunkSize, iterationRegionSize);
         gpuTerrainEroder = new GPUTerrainEroder(worldStorage, srcPos, xSize+1, zSize+1);
 
         vaoListProgram = new ListRenderer<>(new ColoredVAORenderer(cameraMatrix), List.of(/*ColoredVAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
@@ -61,7 +71,7 @@ public class Main {
         }, cameraMatrix.position, worldStorage.chunkSize, chunkRenderDistance, srcPos, new Vector2i(xSize, zSize));
         iterationRenderer = new PositionCenteredRenderer<>(new IterationVAORenderer(cameraMatrix),
                 (vector2i, chunkSize) -> IterationVAOGenerator.heightMapToIterationVAO(vector2i, new Vector2i(chunkSize), worldStorage.iterationInfo),
-                cameraMatrix.position, worldStorage.iterationChunkSize, 2);
+                cameraMatrix.position, worldStorage.iterationChunkSize, iterationRenderDistance);
 
         setupData();
 
