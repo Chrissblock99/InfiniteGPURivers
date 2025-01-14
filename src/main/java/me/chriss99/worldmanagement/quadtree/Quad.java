@@ -5,6 +5,7 @@ import org.joml.Vector2i;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class Quad<T> {
@@ -65,7 +66,7 @@ public class Quad<T> {
         int halfSize = size/2;
         node.topLeft = recursiveInstance(leafs, node, depthFirst, nodeDepth, new Vector2i(pos.x + halfSize, pos.y + halfSize), halfSize);
         node.topRight = recursiveInstance(leafs, node, depthFirst, nodeDepth, new Vector2i(pos.x, pos.y + halfSize), halfSize);
-        node.bottomLeft = recursiveInstance(leafs, node, depthFirst, nodeDepth, pos, halfSize);
+        node.bottomLeft = recursiveInstance(leafs, node, depthFirst, nodeDepth, new Vector2i(pos), halfSize);
         node.bottomRight = recursiveInstance(leafs, node, depthFirst, nodeDepth, new Vector2i(pos.x + halfSize, pos.y), halfSize);
 
         return node;
@@ -99,7 +100,7 @@ public class Quad<T> {
         int halfSize = size/2;
         this.topLeft = new Quad<>(this, greatestNodeDepth, topLeft, new Vector2i(pos.x + halfSize, pos.y + halfSize), halfSize);
         this.topRight = new Quad<>(this, greatestNodeDepth, topRight, new Vector2i(pos.x, pos.y + halfSize), halfSize);
-        this.bottomLeft = new Quad<>(this, greatestNodeDepth, bottomLeft, pos, halfSize);
+        this.bottomLeft = new Quad<>(this, greatestNodeDepth, bottomLeft, new Vector2i(pos), halfSize);
         this.bottomRight = new Quad<>(this, greatestNodeDepth, bottomRight, new Vector2i(pos.x + halfSize, pos.y), halfSize);
     }
 
@@ -137,7 +138,7 @@ public class Quad<T> {
 
 
     public Vector2i getPos() {
-        return pos;
+        return new Vector2i(pos);
     }
 
     public int getSize() {
