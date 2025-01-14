@@ -64,8 +64,8 @@ public class Quad<T> {
         nodeDepth++;
 
         int halfSize = size/2;
-        node.topLeft = recursiveInstance(leafs, node, depthFirst, nodeDepth, new Vector2i(pos.x + halfSize, pos.y + halfSize), halfSize);
-        node.topRight = recursiveInstance(leafs, node, depthFirst, nodeDepth, new Vector2i(pos.x, pos.y + halfSize), halfSize);
+        node.topLeft = recursiveInstance(leafs, node, depthFirst, nodeDepth, new Vector2i(pos.x, pos.y + halfSize), halfSize);
+        node.topRight = recursiveInstance(leafs, node, depthFirst, nodeDepth, new Vector2i(pos.x + halfSize, pos.y + halfSize), halfSize);
         node.bottomLeft = recursiveInstance(leafs, node, depthFirst, nodeDepth, new Vector2i(pos), halfSize);
         node.bottomRight = recursiveInstance(leafs, node, depthFirst, nodeDepth, new Vector2i(pos.x + halfSize, pos.y), halfSize);
 
@@ -98,8 +98,8 @@ public class Quad<T> {
 
         value = null;
         int halfSize = size/2;
-        this.topLeft = new Quad<>(this, greatestNodeDepth, topLeft, new Vector2i(pos.x + halfSize, pos.y + halfSize), halfSize);
-        this.topRight = new Quad<>(this, greatestNodeDepth, topRight, new Vector2i(pos.x, pos.y + halfSize), halfSize);
+        this.topLeft = new Quad<>(this, greatestNodeDepth, topLeft, new Vector2i(pos.x, pos.y + halfSize), halfSize);
+        this.topRight = new Quad<>(this, greatestNodeDepth, topRight, new Vector2i(pos.x + halfSize, pos.y + halfSize), halfSize);
         this.bottomLeft = new Quad<>(this, greatestNodeDepth, bottomLeft, new Vector2i(pos), halfSize);
         this.bottomRight = new Quad<>(this, greatestNodeDepth, bottomRight, new Vector2i(pos.x + halfSize, pos.y), halfSize);
     }
