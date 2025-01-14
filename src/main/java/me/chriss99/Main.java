@@ -39,6 +39,8 @@ public class Main {
     static final int zSize = 8*64;
 
     static int simulationStepsPerFrame = 5;
+
+    static boolean wireFrame = false;
     //config -----------------
 
     static GPUTerrainEroder gpuTerrainEroder;
@@ -81,9 +83,9 @@ public class Main {
         inputDeviceManager = new InputDeviceManager(window);
         movementController = new MovementController(inputDeviceManager, cameraMatrix);
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
         GLUtil.setupDebugMessageCallback();
+        updateWireFrame();
         updateVSync();
 
         System.out.println("Started after: " + (glfwGetTime() - start));
@@ -201,6 +203,16 @@ public class Main {
         worldStorage.cleanGL();
         gpuTerrainEroder.delete();
         printErrors();
+    }
+
+    public static void updateWireFrame() {
+        if (wireFrame) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            glDisable(GL_CULL_FACE);
+        } else {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            glEnable(GL_CULL_FACE);
+        }
     }
 
     public static void updateVSync() {

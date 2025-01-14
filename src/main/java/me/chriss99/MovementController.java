@@ -56,6 +56,10 @@ public class MovementController {
             Main.vSync = !Main.vSync;
             Main.updateVSync();
         });
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_E, () -> {
+            Main.wireFrame = !Main.wireFrame;
+            Main.updateWireFrame();
+        });
 
 
 
