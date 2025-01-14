@@ -48,7 +48,7 @@ public class Main {
         glfwInit();
         double start = glfwGetTime();
         createWindow();
-        worldStorage = new ErosionDataStorage(worldName, 64, 10);
+        worldStorage = new ErosionDataStorage(worldName, 64, 10, 64, 10);
         gpuTerrainEroder = new GPUTerrainEroder(worldStorage, srcPos, xSize+1, zSize+1);
 
         vaoListProgram = new ListRenderer<>(new ColoredVAORenderer(cameraMatrix), List.of(/*ColoredVAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
@@ -61,7 +61,7 @@ public class Main {
         }, cameraMatrix.position, worldStorage.chunkSize, chunkRenderDistance, srcPos, new Vector2i(xSize, zSize));
         iterationRenderer = new PositionCenteredRenderer<>(new IterationVAORenderer(cameraMatrix),
                 (vector2i, chunkSize) -> IterationVAOGenerator.heightMapToIterationVAO(vector2i, new Vector2i(chunkSize), worldStorage.iterationInfo),
-                cameraMatrix.position, worldStorage.chunkSize, 2);
+                cameraMatrix.position, worldStorage.iterationChunkSize, 2);
 
         setupData();
 

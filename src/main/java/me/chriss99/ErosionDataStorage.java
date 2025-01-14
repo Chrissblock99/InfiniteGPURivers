@@ -12,6 +12,8 @@ import static org.lwjgl.opengl.GL11.*;
 public class ErosionDataStorage {
     public final int chunkSize;
     public final int regionSize;
+    public final int iterationChunkSize;
+    public final int iterationRegionSize;
 
     private final TerrainGenerator terrainGenerator;
 
@@ -28,9 +30,11 @@ public class ErosionDataStorage {
 
     public final InfiniteWorld<IterationSurface> iterationInfo;
 
-    public ErosionDataStorage(String worldName, int chunkSize, int regionSize) {
+    public ErosionDataStorage(String worldName, int chunkSize, int regionSize, int iterationChunkSize, int iterationRegionSize) {
         this.chunkSize = chunkSize;
         this.regionSize = regionSize;
+        this.iterationChunkSize = iterationChunkSize;
+        this.iterationRegionSize = iterationRegionSize;
         terrainGenerator = new TerrainGenerator(chunkSize);
 
         terrain = new InfiniteChunkWorld(worldName + "/terrain", GL_RED, GL_FLOAT, chunkSize, regionSize, terrainGenerator::generateChunk);
@@ -44,7 +48,7 @@ public class ErosionDataStorage {
         thermalOutflow1 = new InfiniteChunkWorld(worldName + "/thermalOutflow1", GL_RGBA, GL_FLOAT, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Vec4f2DBufferWrapper(chunkSize1, chunkSize1)));
         thermalOutflow2 = new InfiniteChunkWorld(worldName + "/thermalOutflow2", GL_RGBA, GL_FLOAT, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Vec4f2DBufferWrapper(chunkSize1, chunkSize1)));
 
-        iterationInfo = new InfiniteWorld<>(chunkSize, regionSize, (srcPos, size) -> new IterationSurface(new Vector2i(srcPos).mul(chunkSize), size), new IterationSurfaceRegionFileManager(worldName + "/iteration", chunkSize));
+        iterationInfo = new InfiniteWorld<>(iterationChunkSize, iterationRegionSize, (srcPos, size) -> new IterationSurface(new Vector2i(srcPos).mul(iterationChunkSize), size), new IterationSurfaceRegionFileManager(worldName + "/iteration", iterationChunkSize));
     }
 
     public void unloadAll() {
