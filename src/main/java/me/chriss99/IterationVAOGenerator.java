@@ -1,18 +1,19 @@
 package me.chriss99;
 
 import me.chriss99.util.FloatArrayList;
+import me.chriss99.worldmanagement.InfiniteWorld;
 import me.chriss99.worldmanagement.quadtree.IterationSurface;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
 public class IterationVAOGenerator {
-    public static IterationVAO heightMapToIterationVAO(Vector2i srcPosInChunks, Vector2i sizeInChunks, ErosionDataStorage data) {
+    public static IterationVAO heightMapToIterationVAO(Vector2i srcPosInChunks, Vector2i sizeInChunks, InfiniteWorld<IterationSurface> iterationInfo) {
         FloatArrayList vertecies = new FloatArrayList();
 
         for (int z = 0; z < sizeInChunks.y; z++)
             for (int x = 0; x < sizeInChunks.x; x++) {
                 Vector2i position = new Vector2i(x, z).add(srcPosInChunks);
-                IterationSurface surface = data.iterationInfo.getChunk(position.x, position.y);
+                IterationSurface surface = iterationInfo.getChunk(position.x, position.y);
 
                 surface.getQuad().iterateAllLeafs(quad -> {
                     IterationSurfaceType surfaceType = quad.getValue();

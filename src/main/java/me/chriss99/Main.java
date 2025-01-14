@@ -60,7 +60,7 @@ public class Main {
             return TerrainVAOGenerator.heightMapToSimpleVAO(terrain, water, vector2i);
         }, cameraMatrix.position, worldStorage.chunkSize, chunkRenderDistance, srcPos, new Vector2i(xSize, zSize));
         iterationRenderer = new PositionCenteredRenderer<>(new IterationVAORenderer(cameraMatrix),
-                (vector2i, chunkSize) -> IterationVAOGenerator.heightMapToIterationVAO(vector2i, new Vector2i(chunkSize), worldStorage),
+                (vector2i, chunkSize) -> IterationVAOGenerator.heightMapToIterationVAO(vector2i, new Vector2i(chunkSize), worldStorage.iterationInfo),
                 cameraMatrix.position, worldStorage.chunkSize, 2);
 
         setupData();
