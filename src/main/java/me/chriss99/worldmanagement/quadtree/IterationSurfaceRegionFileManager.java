@@ -115,7 +115,7 @@ public class IterationSurfaceRegionFileManager implements RegionFileManager<Iter
             ArrayList<IterationSurfaceType> values = values(bytes, readOffset + 12, treeBitsBytes, valuesNum);
             readOffset += 12 + treeBitsBytes + (int) Math.ceil(((double) valuesNum) / 2d);
 
-            quadRegion.addChunk(quadPos, new IterationSurface(iteration, buildTree(treeBits, values, quadPos, quadTileSize)));
+            quadRegion.addChunk(new Vector2i(quadPos).div(quadTileSize), new IterationSurface(iteration, buildTree(treeBits, values, quadPos, quadTileSize)));
         }
 
         return quadRegion;
