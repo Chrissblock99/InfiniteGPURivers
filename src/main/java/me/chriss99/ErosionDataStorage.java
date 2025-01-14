@@ -5,6 +5,7 @@ import me.chriss99.worldmanagement.InfiniteChunkWorld;
 import me.chriss99.worldmanagement.InfiniteWorld;
 import me.chriss99.worldmanagement.quadtree.IterationSurface;
 import me.chriss99.worldmanagement.quadtree.IterationSurfaceRegionFileManager;
+import org.joml.Vector2i;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -43,7 +44,7 @@ public class ErosionDataStorage {
         thermalOutflow1 = new InfiniteChunkWorld(worldName + "/thermalOutflow1", GL_RGBA, GL_FLOAT, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Vec4f2DBufferWrapper(chunkSize1, chunkSize1)));
         thermalOutflow2 = new InfiniteChunkWorld(worldName + "/thermalOutflow2", GL_RGBA, GL_FLOAT, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Vec4f2DBufferWrapper(chunkSize1, chunkSize1)));
 
-        iterationInfo = new InfiniteWorld<>(chunkSize, regionSize, IterationSurface::new, new IterationSurfaceRegionFileManager(worldName + "/iteration", chunkSize));
+        iterationInfo = new InfiniteWorld<>(chunkSize, regionSize, (srcPos, size) -> new IterationSurface(new Vector2i(srcPos).mul(chunkSize), size), new IterationSurfaceRegionFileManager(worldName + "/iteration", chunkSize));
     }
 
     public void unloadAll() {

@@ -13,10 +13,13 @@ public class IterationVAOGenerator {
             for (int x = 0; x < sizeInChunks.x; x++) {
                 Vector2i position = new Vector2i(x, z).add(srcPosInChunks);
                 IterationSurface surface = data.iterationInfo.getChunk(position.x, position.y);
-                IterationSurfaceType surfaceType = new IterationSurfaceType((byte) 0b1101); //TODO; hahahahahaahahahahaha (actually do the tree some time later)
 
-                Vector3i pos = new Vector3i(position.x*data.chunkSize, surface.getIteration(), position.y*data.chunkSize);
-                addSurface(vertecies, surfaceType, pos, data.chunkSize);
+                surface.getQuad().iterateAllLeafs(quad -> {
+                    IterationSurfaceType surfaceType = quad.getValue();
+
+                    Vector3i pos = new Vector3i(quad.getPos().x, surface.getIteration(), quad.getPos().y);
+                    addSurface(vertecies, surfaceType, pos, quad.getSize());
+                });
             }
 
         return new IterationVAO(vertecies.getArray(), srcPosInChunks, sizeInChunks.x);

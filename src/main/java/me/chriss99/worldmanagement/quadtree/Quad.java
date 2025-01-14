@@ -118,6 +118,18 @@ public class Quad<T> {
         bottomRight = null;
     }
 
+    public void iterateAllLeafs(Consumer<Quad<T>> function) {
+        if (value != null) {
+            function.accept(this);
+            return;
+        }
+
+        topLeft.iterateAllLeafs(function);
+        topRight.iterateAllLeafs(function);
+        bottomLeft.iterateAllLeafs(function);
+        bottomRight.iterateAllLeafs(function);
+    }
+
     public ArrayList<Quad<T>> findDeepestNodes() {
         ArrayList<Quad<T>> nodes = new ArrayList<>(List.of(topLeft, topRight, bottomLeft, bottomRight));
         nodes.removeIf(node -> node.greatestNodeDepth < greatestNodeDepth);
