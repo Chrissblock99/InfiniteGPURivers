@@ -154,17 +154,45 @@ vec3 simplexFBM(vec2 pos, int seed, int octaves, float freq, float amp, float la
     return sum;
 }
 
+vec3 simplexFBMPositive(vec2 pos, int seed, int octaves, float freq, float amp, float lacunarity, float persistence, bool deriv) {
+    vec3 sum = vec3(0);
+
+    for (int i = 0; i < octaves; i++) {
+        sum += (simplexNoiseDeriv(pos * freq, seed + i, deriv).z * .5 + .5) * amp;
+        freq *= lacunarity;
+        amp *= persistence;
+    }
+
+    return sum;
+}
+
 const int seed = 0;
 
 const int octaves = 8;
-const float freq = 0.0015;
-const float amp = 60;
+const float freq = 0.006;
+const float amp = 30;
 const float lacunarity = 2;
 const float persistence = .5;
 
 void main() {
     vec2 pos = vec2(gl_GlobalInvocationID.xy + vec2(srcPos));
-    float height = simplexFBM(pos, seed, octaves, freq, amp, lacunarity, persistence, false).z;
+    float height = simplexFBMPositive(pos, seed, 3, freq, amp, lacunarity, persistence, false).z;
+    float mul = simplexFBMPositive(pos, seed+1, 1, freq/4, 1, 0, 0, false).z;
+    height *= smoothstep(.5, .7, mul);
+
+    float height2 = simplexFBMPositive(pos, seed+10, 3, freq, amp, lacunarity, persistence, false).z;
+    float mul2 = simplexFBMPositive(pos, seed+11, 1, freq/4, 1, 0, 0, false).z;
+    height += height2*smoothstep(.5, .7, mul2);
+
+    float height3 = simplexFBMPositive(pos, seed+20, 3, freq, amp, lacunarity, persistence, false).z;
+    float mul3 = simplexFBMPositive(pos, seed+21, 1, freq/4, 1, 0, 0, false).z;
+    height += height3*smoothstep(.5, .7, mul3);
+
+
+    float detail = simplexFBMPositive(pos, seed+5, 5, freq*lacunarity*lacunarity*lacunarity, amp*persistence*persistence*persistence, lacunarity, persistence, false).z;
+    height += detail;
+    float detail2 = simplexFBMPositive(pos, seed-5, 2, freq*.5, amp, lacunarity, persistence, false).z;
+    height += detail2;
 
     imageStore(terrainMap, ivec2(gl_GlobalInvocationID.xy), vec4(height));
 }
