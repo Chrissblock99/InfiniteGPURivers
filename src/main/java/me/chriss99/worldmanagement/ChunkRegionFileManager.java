@@ -10,16 +10,14 @@ public class ChunkRegionFileManager implements RegionFileManager<Chunk> {
     private final FileLoadStoreManager<Region<Chunk>> fileManager;
     private final int chunkByteSize;
     private final int chunkDataByteSize;
-    public final int format;
-    public final int type;
+    public final Array2DBufferWrapper.Type type;
     public final int chunkSize;
 
-    public ChunkRegionFileManager(String worldName, int format, int type, int chunkSize) {
+    public ChunkRegionFileManager(String worldName, Array2DBufferWrapper.Type type, int chunkSize) {
         this.fileManager = new FileLoadStoreManager<>("worlds/" + worldName, "region", this::regionFromByteArray, this::regionToByteArray);
 
-        chunkDataByteSize = chunkSize*chunkSize*Array2DBufferWrapper.sizeOf(format, type);
+        chunkDataByteSize = chunkSize*chunkSize*type.elementSize;
         chunkByteSize = chunkDataByteSize + 4*2;
-        this.format = format;
         this.type = type;
         this.chunkSize = chunkSize;
     }
@@ -41,7 +39,7 @@ public class ChunkRegionFileManager implements RegionFileManager<Chunk> {
             Vector2i chunkCoord = new Vector2i(buffer.getInt(), buffer.getInt());
             byte[] byteArray = new byte[chunkDataByteSize];
             buffer.get(byteArray);
-            Array2DBufferWrapper data = new Array2DBufferWrapper(ByteBuffer.wrap(byteArray), format, type, chunkSize, chunkSize);
+            Array2DBufferWrapper data = Array2DBufferWrapper.of(ByteBuffer.wrap(byteArray), type, chunkSize, chunkSize);
             region.addChunk(chunkCoord, new Chunk(data));
         }
 

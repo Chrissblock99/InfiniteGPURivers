@@ -31,13 +31,13 @@ public class Texture2D {
 
     public void uploadData(int xOffset, int yOffset, Array2DBufferWrapper data) {
         glBindTexture(GL_TEXTURE_2D, texture);
-        glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, data.width, data.height, data.format, data.type, data.buffer);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, xOffset, yOffset, data.width, data.height, data.type.glFormat, data.type.glType, data.buffer);
     }
 
     public void downloadData(int xOffset, int yOffset, Array2DBufferWrapper writeTo) {
         glBindTexture(GL_TEXTURE_2D, texture);
         //excuse me the docs say that I have to use "GL_TEXTURE_2D" instead of "texture"
-        glGetTextureSubImage(texture, 0, xOffset, yOffset, 0, writeTo.width, writeTo.height, 1, writeTo.format, writeTo.type, writeTo.buffer);
+        glGetTextureSubImage(texture, 0, xOffset, yOffset, 0, writeTo.width, writeTo.height, 1, writeTo.type.glFormat, writeTo.type.glType, writeTo.buffer);
     }
 
     public void downloadFullData(int format, int type, ByteBuffer buffer) {

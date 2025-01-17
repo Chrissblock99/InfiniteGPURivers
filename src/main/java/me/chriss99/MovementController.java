@@ -78,8 +78,8 @@ public class MovementController {
         });
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_F, () -> {
             Main.gpuTerrainEroder.downloadMap();
-            ImageWriter.writeImageHeightMap(Main.worldStorage.terrain.readArea(Main.srcPos.x, Main.srcPos.y, Main.xSize, Main.zSize).asFloatWrapper(), "terrain", true);
-            ImageWriter.writeImageHeightMap(Main.worldStorage.water.readArea(Main.srcPos.x, Main.srcPos.y, Main.xSize, Main.zSize).asFloatWrapper(), "water", false);
+            ImageWriter.writeImageHeightMap((Float2DBufferWrapper) Main.worldStorage.terrain.readArea(Main.srcPos.x, Main.srcPos.y, Main.xSize, Main.zSize), "terrain", true);
+            ImageWriter.writeImageHeightMap((Float2DBufferWrapper) Main.worldStorage.water.readArea(Main.srcPos.x, Main.srcPos.y, Main.xSize, Main.zSize), "water", false);
         });
     }
 

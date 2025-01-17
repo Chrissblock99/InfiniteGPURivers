@@ -4,25 +4,18 @@ import me.chriss99.Array2DBufferWrapper;
 import me.chriss99.Util;
 import org.joml.Vector2i;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.BiFunction;
 
 public class InfiniteChunkWorld extends InfiniteWorld<Chunk> {
-    public final int elementSize;
-    public final int format;
-    public final int type;
+    public final Array2DBufferWrapper.Type type;
 
-    public InfiniteChunkWorld(String worldName, int format, int type, int chunkSize, int regionSize, BiFunction<Vector2i, Integer, Chunk> chunkGenerator) {
-        super(chunkSize, regionSize, chunkGenerator, new ChunkRegionFileManager(worldName, format, type, chunkSize));
-
-        elementSize = Array2DBufferWrapper.sizeOf(format, type);
-        this.format = format;
+    public InfiniteChunkWorld(String worldName, Array2DBufferWrapper.Type type, int chunkSize, int regionSize, BiFunction<Vector2i, Integer, Chunk> chunkGenerator) {
+        super(chunkSize, regionSize, chunkGenerator, new ChunkRegionFileManager(worldName, type, chunkSize));
         this.type = type;
     }
 
     public Array2DBufferWrapper readArea(int x, int y, int width, int height) {
-        Array2DBufferWrapper data = new Array2DBufferWrapper(format, type, width, height);
+        Array2DBufferWrapper data = Array2DBufferWrapper.of(type, width, height);
 
         int chunkX = Util.properIntDivide(x, chunkSize);
         int chunkY = Util.properIntDivide(y, chunkSize);
@@ -44,7 +37,7 @@ public class InfiniteChunkWorld extends InfiniteWorld<Chunk> {
                     Array2DBufferWrapper dest = data.slice(currentChunkY*chunkSize + i - y);
                     int destPos = currentChunkX*chunkSize + currentChunkMinX - x;
 
-                    dest.buffer.put(destPos*elementSize, src.buffer, srcPos*elementSize, (currentChunkMaxX-currentChunkMinX + 1)*elementSize);
+                    dest.buffer.put(destPos*type.elementSize, src.buffer, srcPos*type.elementSize, (currentChunkMaxX-currentChunkMinX + 1)*type.elementSize);
                 }
             }
 
@@ -76,7 +69,7 @@ public class InfiniteChunkWorld extends InfiniteWorld<Chunk> {
                     Array2DBufferWrapper dest = currentChunk.data().slice(i);
                     int destPos = currentChunkMinX;
 
-                    dest.buffer.put(destPos*elementSize, src.buffer, srcPos*elementSize, (currentChunkMaxX-currentChunkMinX + 1)*elementSize);
+                    dest.buffer.put(destPos*type.elementSize, src.buffer, srcPos*type.elementSize, (currentChunkMaxX-currentChunkMinX + 1)*type.elementSize);
                 }
             }
     }

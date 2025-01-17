@@ -4,9 +4,9 @@ import java.nio.ByteBuffer;
 
 import static org.lwjgl.opengl.GL11.*;
 
-public class Float2DBufferWrapper extends Array2DBufferWrapper {
+public final class Float2DBufferWrapper extends Array2DBufferWrapper {
     public Float2DBufferWrapper(ByteBuffer buffer, int width, int height) {
-        super(buffer, GL_RED, GL_FLOAT, width, height);
+        super(buffer, Type.FLOAT, width, height);
     }
 
     public Float2DBufferWrapper(float[][] data) {
@@ -17,7 +17,7 @@ public class Float2DBufferWrapper extends Array2DBufferWrapper {
     }
 
     public Float2DBufferWrapper(int width, int height) {
-        super(GL_RED, GL_FLOAT, width, height);
+        super(Type.FLOAT, width, height);
     }
 
     public Float2DBufferWrapper(int width, int height, float fill) {

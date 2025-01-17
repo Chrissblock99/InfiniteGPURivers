@@ -7,6 +7,8 @@ import me.chriss99.worldmanagement.quadtree.IterationSurface;
 import me.chriss99.worldmanagement.quadtree.IterationSurfaceRegionFileManager;
 import org.joml.Vector2i;
 
+import static me.chriss99.Array2DBufferWrapper.Type;
+
 import static org.lwjgl.opengl.GL11.*;
 
 public class ErosionDataStorage {
@@ -37,16 +39,16 @@ public class ErosionDataStorage {
         this.iterationRegionSize = iterationRegionSize;
         terrainGenerator = new TerrainGenerator(chunkSize);
 
-        terrain = new InfiniteChunkWorld(worldName + "/terrain", GL_RED, GL_FLOAT, chunkSize, regionSize, terrainGenerator::generateChunk);
-        water = new InfiniteChunkWorld(worldName + "/water", GL_RED, GL_FLOAT, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Float2DBufferWrapper(chunkSize1, chunkSize1)));
-        sediment = new InfiniteChunkWorld(worldName + "/sediment", GL_RED, GL_FLOAT, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Float2DBufferWrapper(chunkSize1, chunkSize1)));
-        hardness = new InfiniteChunkWorld(worldName + "/hardness", GL_RED, GL_FLOAT, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Float2DBufferWrapper(chunkSize1, chunkSize1, 1)));
+        terrain = new InfiniteChunkWorld(worldName + "/terrain", Type.FLOAT, chunkSize, regionSize, terrainGenerator::generateChunk);
+        water = new InfiniteChunkWorld(worldName + "/water", Type.FLOAT, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Float2DBufferWrapper(chunkSize1, chunkSize1)));
+        sediment = new InfiniteChunkWorld(worldName + "/sediment", Type.FLOAT, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Float2DBufferWrapper(chunkSize1, chunkSize1)));
+        hardness = new InfiniteChunkWorld(worldName + "/hardness", Type.FLOAT, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Float2DBufferWrapper(chunkSize1, chunkSize1, 1)));
 
-        waterOutflow = new InfiniteChunkWorld(worldName + "/waterOutflow", GL_RGBA, GL_FLOAT, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Vec4f2DBufferWrapper(chunkSize1, chunkSize1)));
-        sedimentOutflow = new InfiniteChunkWorld(worldName + "/sedimentOutflow", GL_RGBA, GL_FLOAT, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Vec4f2DBufferWrapper(chunkSize1, chunkSize1)));
+        waterOutflow = new InfiniteChunkWorld(worldName + "/waterOutflow", Type.VEC4F, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Vec4f2DBufferWrapper(chunkSize1, chunkSize1)));
+        sedimentOutflow = new InfiniteChunkWorld(worldName + "/sedimentOutflow", Type.VEC4F, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Vec4f2DBufferWrapper(chunkSize1, chunkSize1)));
 
-        thermalOutflow1 = new InfiniteChunkWorld(worldName + "/thermalOutflow1", GL_RGBA, GL_FLOAT, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Vec4f2DBufferWrapper(chunkSize1, chunkSize1)));
-        thermalOutflow2 = new InfiniteChunkWorld(worldName + "/thermalOutflow2", GL_RGBA, GL_FLOAT, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Vec4f2DBufferWrapper(chunkSize1, chunkSize1)));
+        thermalOutflow1 = new InfiniteChunkWorld(worldName + "/thermalOutflow1", Type.VEC4F, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Vec4f2DBufferWrapper(chunkSize1, chunkSize1)));
+        thermalOutflow2 = new InfiniteChunkWorld(worldName + "/thermalOutflow2", Type.VEC4F, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Vec4f2DBufferWrapper(chunkSize1, chunkSize1)));
 
         iterationInfo = new InfiniteWorld<>(iterationChunkSize, iterationRegionSize, (srcPos, size) -> new IterationSurface(new Vector2i(srcPos).mul(iterationChunkSize), size), new IterationSurfaceRegionFileManager(worldName + "/iteration", iterationChunkSize));
     }

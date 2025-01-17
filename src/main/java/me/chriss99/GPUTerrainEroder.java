@@ -126,7 +126,7 @@ public class GPUTerrainEroder {
     }
 
     private void downloadHelper(Texture2D download, InfiniteChunkWorld write) {
-        Array2DBufferWrapper bufferWrapper = new Array2DBufferWrapper(write.format, write.type, width, height);
+        Array2DBufferWrapper bufferWrapper = Array2DBufferWrapper.of(write.type, width, height);
         download.downloadData(0, 0, bufferWrapper);
         write.writeArea(srcPos.x, srcPos.y, bufferWrapper);
     }
