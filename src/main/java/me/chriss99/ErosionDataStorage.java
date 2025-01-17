@@ -3,6 +3,7 @@ package me.chriss99;
 import me.chriss99.worldmanagement.Chunk;
 import me.chriss99.worldmanagement.InfiniteChunkWorld;
 import me.chriss99.worldmanagement.InfiniteWorld;
+import me.chriss99.worldmanagement.MipMappedInfiniteChunkWorld;
 import me.chriss99.worldmanagement.quadtree.IterationSurface;
 import me.chriss99.worldmanagement.quadtree.IterationSurfaceRegionFileManager;
 import org.joml.Vector2i;
@@ -18,6 +19,9 @@ public class ErosionDataStorage {
     public final int iterationRegionSize;
 
     private final TerrainGenerator terrainGenerator;
+
+    public final MipMappedInfiniteChunkWorld mipMappedTerrain;
+    public final MipMappedInfiniteChunkWorld mipMappedWater;
 
     public final InfiniteChunkWorld terrain;
     public final InfiniteChunkWorld water;
@@ -39,8 +43,11 @@ public class ErosionDataStorage {
         this.iterationRegionSize = iterationRegionSize;
         terrainGenerator = new TerrainGenerator(chunkSize);
 
-        terrain = new InfiniteChunkWorld(worldName + "/terrain", Type.FLOAT, chunkSize, regionSize, terrainGenerator::generateChunk);
-        water = new InfiniteChunkWorld(worldName + "/water", Type.FLOAT, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Float2DBufferWrapper(chunkSize1, chunkSize1)));
+        mipMappedTerrain = new MipMappedInfiniteChunkWorld(worldName + "/terrain", chunkSize, regionSize, terrainGenerator::generateChunk);
+        mipMappedWater = new MipMappedInfiniteChunkWorld(worldName + "/water", chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Float2DBufferWrapper(chunkSize1, chunkSize1)));
+
+        terrain = mipMappedTerrain.getMipMapLevel(0);
+        water = mipMappedWater.getMipMapLevel(0);
         sediment = new InfiniteChunkWorld(worldName + "/sediment", Type.FLOAT, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Float2DBufferWrapper(chunkSize1, chunkSize1)));
         hardness = new InfiniteChunkWorld(worldName + "/hardness", Type.FLOAT, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Float2DBufferWrapper(chunkSize1, chunkSize1, 1)));
 
@@ -54,8 +61,9 @@ public class ErosionDataStorage {
     }
 
     public void unloadAll() {
-        terrain.unloadAllRegions();
-        water.unloadAllRegions();
+        mipMappedTerrain.unloadAll();
+        mipMappedWater.unloadAll();
+
         sediment.unloadAllRegions();
         hardness.unloadAllRegions();
 
