@@ -43,10 +43,10 @@ public class TerrainVAOGenerator {
         return index;
     }
 
-    public static TerrainVAO heightMapToSimpleVAO(Float2DBufferWrapper terrain, Float2DBufferWrapper water, Vector2i srcPos) {
+    public static TerrainVAO heightMapToSimpleVAO(Float2DBufferWrapper terrain, Float2DBufferWrapper water, Vector2i srcPos, int scale) {
         float[] vertices = heightMapToSimpleVertexes(terrain, water);
         int[] index = heightMapToSimpleIndex(terrain.width, terrain.height);
 
-        return new TerrainVAO(vertices, index, srcPos, terrain.width);
+        return new TerrainVAO(vertices, index, srcPos, terrain.width, scale);
     }
 }

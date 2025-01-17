@@ -19,6 +19,7 @@ public class TerrainVAORenderer extends TerrainRenderer {
     private final int waterUniform;
     private final int srcPosUniform;
     private final int widthUniform;
+    private final int scaleUniform;
 
     public TerrainVAORenderer(CameraMatrix cameraMatrix) {
         this.cameraMatrix = cameraMatrix;
@@ -36,6 +37,7 @@ public class TerrainVAORenderer extends TerrainRenderer {
         waterUniform = getUniform("water");
         srcPosUniform = getUniform("srcPos");
         widthUniform = getUniform("width");
+        scaleUniform = getUniform("scale");
     }
 
     @Override
@@ -60,6 +62,7 @@ public class TerrainVAORenderer extends TerrainRenderer {
             vao.bind();
             glUniform2i(srcPosUniform, vao.getSrcPos().x, vao.getSrcPos().y);
             glUniform1i(widthUniform, vao.getWidth());
+            glUniform1i(scaleUniform, vao.getScale());
 
             glDrawElements(GL_TRIANGLES, vao.getIndexLength(), GL_UNSIGNED_INT, 0);
         }

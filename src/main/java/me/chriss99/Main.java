@@ -69,7 +69,7 @@ public class Main {
             Float2DBufferWrapper terrain = (Float2DBufferWrapper) worldStorage.terrain.readArea(vector2i.x, vector2i.y, chunkSize, chunkSize);
             Float2DBufferWrapper water = (Float2DBufferWrapper) worldStorage.water.readArea(vector2i.x, vector2i.y, chunkSize, chunkSize);
 
-            return TerrainVAOGenerator.heightMapToSimpleVAO(terrain, water, vector2i);
+            return TerrainVAOGenerator.heightMapToSimpleVAO(terrain, water, vector2i, 1);
         }, cameraMatrix.position, worldStorage.chunkSize, chunkRenderDistance, srcPos, new Vector2i(xSize, zSize));
         iterationRenderer = new PositionCenteredRenderer<>(new IterationVAORenderer(cameraMatrix),
                 (vector2i, chunkSize) -> IterationVAOGenerator.heightMapToIterationVAO(vector2i, new Vector2i(chunkSize), worldStorage.iterationInfo),

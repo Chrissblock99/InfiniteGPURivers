@@ -3,6 +3,7 @@
 uniform bool water;
 uniform ivec2 srcPos;
 uniform int width;
+uniform int scale;
 
 in vec2 position;
 
@@ -12,5 +13,5 @@ void main(void) {
     int x = i % width;
     int z = (i - x) / width;
 
-    gl_Position = vec4(x + srcPos.x, water ? position.y : position.x, z + srcPos.y, 1);
+    gl_Position = vec4(x*scale + srcPos.x, water ? position.y : position.x, z*scale + srcPos.y, 1);
 }

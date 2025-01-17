@@ -7,11 +7,13 @@ public class TerrainVAO implements ChunkVAO {
     private final VAOImpl vao;
     private final Vector2i srcPos;
     private final int width;
+    private final int scale;
 
-    public TerrainVAO(float[] triangle, int[] index, Vector2i srcPos, int width) {
+    public TerrainVAO(float[] triangle, int[] index, Vector2i srcPos, int width, int scale) {
         vao = new VAOImpl(index, 2, triangle);
         this.srcPos = srcPos;
         this.width = width;
+        this.scale = scale;
     }
 
     public void updatePositions(float[] positions) {
@@ -26,6 +28,10 @@ public class TerrainVAO implements ChunkVAO {
     @Override
     public int getWidth() {
         return width;
+    }
+
+    public int getScale() {
+        return scale;
     }
 
     @Override
