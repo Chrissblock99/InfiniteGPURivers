@@ -44,6 +44,8 @@ public abstract sealed class Array2DBufferWrapper permits Float2DBufferWrapper, 
         return of(null, type, width, height);
     }
 
+    public abstract Array2DBufferWrapper mipMap();
+
 
     public Array2DBufferWrapper slice(int z) {
         return of(buffer.slice(width*type.elementSize*z, width*type.elementSize).order(ByteOrder.LITTLE_ENDIAN), type, width, 1);
