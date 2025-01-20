@@ -64,12 +64,12 @@ public class Main {
         gpuTerrainEroder = new GPUTerrainEroder(worldStorage, srcPos, xSize+1, zSize+1);
 
         vaoListProgram = new ListRenderer<>(new ColoredVAORenderer(cameraMatrix), List.of(/*ColoredVAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
-        playerCenteredRenderer = new PositionCenteredRenderer<>(new TerrainVAORenderer(cameraMatrix), (vector2i, chunkSize) -> {
+        playerCenteredRenderer = new PositionCenteredRenderer<>(new TerrainVAORenderer(cameraMatrix), (srcPos, chunkSize) -> {
             chunkSize++;
-            Float2DBufferWrapper terrain = (Float2DBufferWrapper) worldStorage.terrain.readArea(vector2i.x, vector2i.y, chunkSize, chunkSize);
-            Float2DBufferWrapper water = (Float2DBufferWrapper) worldStorage.water.readArea(vector2i.x, vector2i.y, chunkSize, chunkSize);
+            Float2DBufferWrapper terrain = (Float2DBufferWrapper) worldStorage.terrain.readArea(srcPos.x, srcPos.y, chunkSize, chunkSize);
+            Float2DBufferWrapper water = (Float2DBufferWrapper) worldStorage.water.readArea(srcPos.x, srcPos.y, chunkSize, chunkSize);
 
-            return TerrainVAOGenerator.heightMapToSimpleVAO(terrain, water, vector2i, 1);
+            return TerrainVAOGenerator.heightMapToSimpleVAO(terrain, water, srcPos, 1);
         }, cameraMatrix.position, worldStorage.chunkSize, chunkRenderDistance, srcPos, new Vector2i(xSize, zSize));
         iterationRenderer = new PositionCenteredRenderer<>(new IterationVAORenderer(cameraMatrix),
                 (vector2i, chunkSize) -> IterationVAOGenerator.heightMapToIterationVAO(vector2i, new Vector2i(chunkSize), worldStorage.iterationInfo),
