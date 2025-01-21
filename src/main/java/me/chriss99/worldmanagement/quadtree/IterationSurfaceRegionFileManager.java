@@ -20,11 +20,16 @@ public class IterationSurfaceRegionFileManager implements RegionFileManager<Iter
         this.quadTileSize = quadTileSize;
     }
 
-    public Region<IterationSurface> loadRegion(Vector2i chunkCoord) {
+    @Override
+    public boolean hasFile(Vector2i key) {
+        return true;
+    }
+
+    public Region<IterationSurface> loadFile(Vector2i chunkCoord) {
         return fileManager.loadFile(chunkCoord);
     }
 
-    public void saveRegion(Region<IterationSurface> quadRegion) {
+    public void saveFile(Region<IterationSurface> quadRegion) {
         fileManager.saveFile(quadRegion, quadRegion.coord);
     }
 

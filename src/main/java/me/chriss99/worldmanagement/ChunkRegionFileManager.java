@@ -22,11 +22,16 @@ public class ChunkRegionFileManager implements RegionFileManager<Chunk> {
         this.chunkSize = chunkSize;
     }
 
-    public Region<Chunk> loadRegion(Vector2i regionCoord) {
+    @Override
+    public boolean hasFile(Vector2i key) {
+        return true;
+    }
+
+    public Region<Chunk> loadFile(Vector2i regionCoord) {
         return fileManager.loadFile(regionCoord);
     }
 
-    public void saveRegion(Region<Chunk> region) {
+    public void saveFile(Region<Chunk> region) {
         fileManager.saveFile(region, region.coord);
     }
 

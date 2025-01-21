@@ -19,8 +19,8 @@ class IterationSurfaceRegionFileManagerTest {
             try {
                 Region<IterationSurface> quadRegion = randomIterationSurfaceRegion(pos, 10, .95, 0.9, tileSize);
 
-                manager.saveRegion(quadRegion);
-                Region<IterationSurface> reconstructed = manager.loadRegion(pos);
+                manager.saveFile(quadRegion);
+                Region<IterationSurface> reconstructed = manager.loadFile(pos);
 
                 assertEquals(quadRegion, reconstructed);
             } catch (StackOverflowError ignored) {}
