@@ -31,6 +31,14 @@ public class Region<C> {
     }
 
     @Override
+    public String toString() {
+        return "Region{" +
+                "coord=" + coord +
+                ", chunks=" + chunks +
+                '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Region<?> region = (Region<?>) o;
