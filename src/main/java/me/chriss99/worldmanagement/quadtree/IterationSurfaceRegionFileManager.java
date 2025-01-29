@@ -29,7 +29,7 @@ public class IterationSurfaceRegionFileManager implements RegionFileManager<Iter
         return fileManager.loadFile(chunkCoord);
     }
 
-    public void saveFile(Region<IterationSurface> quadRegion) {
+    public void saveFile(Vector2i pos, Region<IterationSurface> quadRegion) {
         fileManager.saveFile(quadRegion, quadRegion.coord);
     }
 

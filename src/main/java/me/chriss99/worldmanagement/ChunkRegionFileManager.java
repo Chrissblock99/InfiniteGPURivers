@@ -31,7 +31,7 @@ public class ChunkRegionFileManager implements RegionFileManager<Chunk> {
         return fileManager.loadFile(regionCoord);
     }
 
-    public void saveFile(Region<Chunk> region) {
+    public void saveFile(Vector2i pos, Region<Chunk> region) {
         fileManager.saveFile(region, region.coord);
     }
 

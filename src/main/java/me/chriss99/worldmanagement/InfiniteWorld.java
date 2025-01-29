@@ -1,5 +1,6 @@
 package me.chriss99.worldmanagement;
 
+import me.chriss99.LeakingTileLoadManager;
 import me.chriss99.Util;
 import org.joml.Vector2i;
 
@@ -13,7 +14,7 @@ public class InfiniteWorld<C> {
     public final int regionSize;
 
     public InfiniteWorld(int chunkSize, int regionSize, BiFunction<Vector2i, Integer, C> chunkGenerator, RegionFileManager<C> regionFileManager) {
-        this.storage = new FileBackedTileMap2D<>(regionFileManager::loadFile, m -> {}, regionFileManager);
+        this.storage = new FileBackedTileMap2D<>(regionFileManager::loadFile, regionFileManager, new LeakingTileLoadManager<>());
         this.chunkGenerator = chunkGenerator;
 
         this.chunkSize = chunkSize;

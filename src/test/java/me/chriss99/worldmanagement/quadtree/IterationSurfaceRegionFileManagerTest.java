@@ -19,7 +19,7 @@ class IterationSurfaceRegionFileManagerTest {
             try {
                 Region<IterationSurface> quadRegion = randomIterationSurfaceRegion(pos, 10, .95, 0.9, tileSize);
 
-                manager.saveFile(quadRegion);
+                manager.saveFile(pos, quadRegion);
                 Region<IterationSurface> reconstructed = manager.loadFile(pos);
 
                 assertEquals(quadRegion, reconstructed);
