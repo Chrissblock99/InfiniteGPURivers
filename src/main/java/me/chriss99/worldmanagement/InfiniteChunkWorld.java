@@ -15,36 +15,14 @@ public class InfiniteChunkWorld extends InfiniteWorld<Chunk> {
     }
 
     public Array2DBufferWrapper readArea(int x, int y, int width, int height) {
-        Array2DBufferWrapper data = Array2DBufferWrapper.of(type, width, height);
-
-        int chunkX = Util.properIntDivide(x, chunkSize);
-        int chunkY = Util.properIntDivide(y, chunkSize);
-        int chunksX = Util.properIntDivide(x+width-1, chunkSize) - chunkX + 1;
-        int chunksY = Util.properIntDivide(y+height-1, chunkSize) - chunkY + 1;
-
-        for (int currentChunkX = chunkX; currentChunkX < chunkX+chunksX; currentChunkX++)
-            for (int currentChunkY = chunkY; currentChunkY < chunkY+chunksY; currentChunkY++) {
-                Chunk currentChunk = getTile(currentChunkX, currentChunkY);
-
-                int currentChunkMinX = (Math.max(currentChunkX*chunkSize, x)%chunkSize+chunkSize)%chunkSize;
-                int currentChunkMaxX = (Math.min(currentChunkX*chunkSize +chunkSize-1, x+width-1)%chunkSize+chunkSize)%chunkSize;
-                int currentChunkMinY = (Math.max(currentChunkY*chunkSize, y)%chunkSize+chunkSize)%chunkSize;
-                int currentChunkMaxY = (Math.min(currentChunkY*chunkSize +chunkSize-1, y+height-1)%chunkSize+chunkSize)%chunkSize;
-
-                for (int i = currentChunkMinY; i <= currentChunkMaxY; i++) {
-                    Array2DBufferWrapper src = currentChunk.data().slice(i);
-                    int srcPos = currentChunkMinX;
-                    Array2DBufferWrapper dest = data.slice(currentChunkY*chunkSize + i - y);
-                    int destPos = currentChunkX*chunkSize + currentChunkMinX - x;
-
-                    dest.buffer.put(destPos*type.elementSize, src.buffer, srcPos*type.elementSize, (currentChunkMaxX-currentChunkMinX + 1)*type.elementSize);
-                }
-            }
-
-        return data;
+        return readWriteArea(x, y, Array2DBufferWrapper.of(type, width, height), true);
     }
 
     public void writeArea(int x, int y, Array2DBufferWrapper data) {
+        readWriteArea(x, y, data, false);
+    }
+
+    private Array2DBufferWrapper readWriteArea(int x, int y, Array2DBufferWrapper data, boolean read) {
         int width = data.width;
         int height = data.height;
 
@@ -69,8 +47,20 @@ public class InfiniteChunkWorld extends InfiniteWorld<Chunk> {
                     Array2DBufferWrapper dest = currentChunk.data().slice(i);
                     int destPos = currentChunkMinX;
 
+                    if (read) {
+                        Array2DBufferWrapper temp = dest;
+                        dest = src;
+                        src = temp;
+
+                        int tempPos = destPos;
+                        destPos = srcPos;
+                        srcPos = tempPos;
+                    }
+
                     dest.buffer.put(destPos*type.elementSize, src.buffer, srcPos*type.elementSize, (currentChunkMaxX-currentChunkMinX + 1)*type.elementSize);
                 }
             }
+
+        return data;
     }
 }
