@@ -9,8 +9,8 @@ import java.util.function.BiFunction;
 public class InfiniteChunkWorld extends InfiniteWorld<Chunk> {
     public final Array2DBufferWrapper.Type type;
 
-    public InfiniteChunkWorld(String worldName, Array2DBufferWrapper.Type type, int chunkSize, int regionSize, BiFunction<Vector2i, Integer, Chunk> chunkGenerator) {
-        super(chunkSize, regionSize, chunkGenerator, new ChunkRegionFileManager(worldName, type, chunkSize));
+    public InfiniteChunkWorld(String worldName, Array2DBufferWrapper.Type type, int chunkSize, int regionSize, BiFunction<Vector2i, Integer, Chunk> chunkGenerator, TileLoadManager<Region<Chunk>> tileLoadManager) {
+        super(chunkSize, regionSize, chunkGenerator, new ChunkRegionFileManager(worldName, type, chunkSize), tileLoadManager);
         this.type = type;
     }
 
