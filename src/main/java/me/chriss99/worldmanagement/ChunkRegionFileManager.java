@@ -52,9 +52,9 @@ public class ChunkRegionFileManager implements RegionFileManager<Chunk> {
     }
 
     private byte[] regionToByteArray(Region<Chunk> region) {
-        ByteBuffer buffer = ByteBuffer.allocate(region.getAllChunks().size()*chunkByteSize);
+        ByteBuffer buffer = ByteBuffer.allocate(region.getAllTiles().size()*chunkByteSize);
 
-        for (Map.Entry<Vector2i, Chunk> entry : region.getAllChunks()) {
+        for (Map.Entry<Vector2i, Chunk> entry : region.getAllTiles()) {
             buffer.putInt(entry.getKey().x);
             buffer.putInt(entry.getKey().y);
             buffer.put(entry.getValue().data().buffer);

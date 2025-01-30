@@ -37,7 +37,7 @@ public class IterationSurfaceRegionFileManager implements RegionFileManager<Iter
         LinkedList<byte[]> bytesList = new LinkedList<>();
         int length = 0;
 
-        for (IterationSurface surface : quadRegion.getAllChunks().stream().map(Map.Entry::getValue).toList()) {
+        for (IterationSurface surface : quadRegion.getAllTiles().stream().map(Map.Entry::getValue).toList()) {
             ArrayList<Boolean> treeBits = new ArrayList<>();
             ArrayList<IterationSurfaceType> values = new ArrayList<>();
             Quad<IterationSurfaceType> quad = surface.getQuad();

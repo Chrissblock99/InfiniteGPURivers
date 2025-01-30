@@ -24,7 +24,7 @@ public class InfiniteChunkWorld extends InfiniteWorld<Chunk> {
 
         for (int currentChunkX = chunkX; currentChunkX < chunkX+chunksX; currentChunkX++)
             for (int currentChunkY = chunkY; currentChunkY < chunkY+chunksY; currentChunkY++) {
-                Chunk currentChunk = getChunk(currentChunkX, currentChunkY);
+                Chunk currentChunk = getTile(currentChunkX, currentChunkY);
 
                 int currentChunkMinX = (Math.max(currentChunkX*chunkSize, x)%chunkSize+chunkSize)%chunkSize;
                 int currentChunkMaxX = (Math.min(currentChunkX*chunkSize +chunkSize-1, x+width-1)%chunkSize+chunkSize)%chunkSize;
@@ -56,7 +56,7 @@ public class InfiniteChunkWorld extends InfiniteWorld<Chunk> {
 
         for (int currentChunkX = chunkX; currentChunkX < chunkX+chunksX; currentChunkX++)
             for (int currentChunkY = chunkY; currentChunkY < chunkY+chunksY; currentChunkY++) {
-                Chunk currentChunk = getChunk(currentChunkX, currentChunkY);
+                Chunk currentChunk = getTile(currentChunkX, currentChunkY);
 
                 int currentChunkMinX = (Math.max(currentChunkX*chunkSize, x)%chunkSize+chunkSize)%chunkSize;
                 int currentChunkMaxX = (Math.min(currentChunkX*chunkSize +chunkSize-1, x+width-1)%chunkSize+chunkSize)%chunkSize;
