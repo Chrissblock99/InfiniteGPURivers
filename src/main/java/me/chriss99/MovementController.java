@@ -61,6 +61,13 @@ public class MovementController {
             Main.updateWireFrame();
         });
 
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_M, () -> {
+            Main.playerCenteredRenderer.setChunkRenderDistance(Main.playerCenteredRenderer.getChunkRenderDistance()+1);
+        });
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_N, () -> {
+            Main.playerCenteredRenderer.setChunkRenderDistance(Main.playerCenteredRenderer.getChunkRenderDistance()-1);
+        });
+
 
 
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_T, () -> Main.simulateErosion = !Main.simulateErosion);

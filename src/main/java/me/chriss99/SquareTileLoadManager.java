@@ -33,6 +33,10 @@ public class SquareTileLoadManager<T> implements TileLoadManager<T> {
         return toLoad;
     }
 
+    public int getRenderDistance() {
+        return renderDistance;
+    }
+
     public void setRenderDistance(int renderDistance) {
         this.renderDistance = renderDistance;
     }

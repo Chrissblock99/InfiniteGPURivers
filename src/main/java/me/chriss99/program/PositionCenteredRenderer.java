@@ -44,6 +44,15 @@ public class PositionCenteredRenderer<T extends ChunkVAO> {
         chunkVaos.manageLoad();
     }
 
+    public int getChunkRenderDistance() {
+        return loadManager.getRenderDistance();
+    }
+
+    public void setChunkRenderDistance(int renderDistance) {
+        loadManager.setRenderDistance(renderDistance);
+        chunkVaos.manageLoad();
+    }
+
     public void render() {
         renderProgram.render(chunkVaos.getAllTiles());
     }
