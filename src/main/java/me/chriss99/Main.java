@@ -50,7 +50,7 @@ public class Main {
 
     static InputDeviceManager inputDeviceManager = null;
     static CameraMatrix cameraMatrix = new CameraMatrix();
-    static MovementController movementController = null;
+    static InputController inputController = null;
 
     static double deltaTime = 1d/60d;
     static boolean vSync = true;
@@ -81,7 +81,7 @@ public class Main {
         tessProgram = new TessProgram(cameraMatrix, vao, srcPos, xSize, zSize);
 
         inputDeviceManager = new InputDeviceManager(window);
-        movementController = new MovementController(inputDeviceManager, cameraMatrix);
+        inputController = new InputController(inputDeviceManager, cameraMatrix);
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         glEnable(GL_DEPTH_TEST);
         GLUtil.setupDebugMessageCallback();
@@ -143,7 +143,7 @@ public class Main {
         LinkedList<Double> frames = new LinkedList<>();
 
         while(!glfwWindowShouldClose(window)) {
-            movementController.update();
+            inputController.update();
             playerCenteredRenderer.updateLoadedChunks(cameraMatrix.position, srcPos, new Vector2i(xSize, zSize));
             if (renderIterations)
                 iterationRenderer.updateLoadedChunks(new Vector3f(cameraMatrix.position).div(64));

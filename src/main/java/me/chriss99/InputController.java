@@ -6,13 +6,13 @@ import org.joml.Vector3f;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-public class MovementController {
+public class InputController {
     private final CameraMatrix cameraMatrix;
     private final InputDeviceManager inputDeviceManager;
     private final Vector3f movementDirection = new Vector3f();
     private float movementSpeed = 3f;
 
-    public MovementController(InputDeviceManager inputDeviceManager, CameraMatrix cameraMatrix) {
+    public InputController(InputDeviceManager inputDeviceManager, CameraMatrix cameraMatrix) {
         this.cameraMatrix = cameraMatrix;
         this.inputDeviceManager = inputDeviceManager;
         setupCallBacks();
