@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import static me.chriss99.Main.printErrors;
 import static org.lwjgl.opengl.GL45.*;
 
 public class GLProgram {
@@ -41,7 +40,6 @@ public class GLProgram {
 
         System.out.println("Program Linked: "    + link);
         System.out.println("Program Validated: " + validate);
-        printErrors();
     }
 
     public void use() {

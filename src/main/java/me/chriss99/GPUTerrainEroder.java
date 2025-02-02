@@ -92,8 +92,6 @@ public class GPUTerrainEroder {
 
 
         uploadMap();
-
-        Main.printErrors();
     }
 
     public void erosionSteps(int steps) {

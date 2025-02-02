@@ -9,7 +9,7 @@ public class TessProgram extends GLProgram {
     private final CameraMatrix cameraMatrix;
 
     private final int vao;
-    private final Vector2i srcPos;
+    private Vector2i srcPos;
     private final int xSize;
     private final int zSize;
 
@@ -21,7 +21,7 @@ public class TessProgram extends GLProgram {
     public TessProgram(CameraMatrix cameraMatrix, int vao, Vector2i srcPos, int xSize, int zSize) {
         this.cameraMatrix = cameraMatrix;
         this.vao = vao;
-        this.srcPos = srcPos;
+        setSrcPos(srcPos);
         this.xSize = xSize;
         this.zSize = zSize;
 
@@ -63,6 +63,9 @@ public class TessProgram extends GLProgram {
 
         glUniform1i(waterUniform, 1);
         glDrawArrays(GL_PATCHES, 0, xSize/64*zSize/64*4);
+    }
 
+    public void setSrcPos(Vector2i srcPos) {
+        this.srcPos = new Vector2i(srcPos);
     }
 }

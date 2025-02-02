@@ -14,88 +14,86 @@ import java.util.*;
 
 
 public class Main {
-    static long window;
+    private long window;
 
-    static ListRenderer<ColoredVAO> vaoListProgram;
-    static PositionCenteredRenderer<TerrainVAO> playerCenteredRenderer;
-    static boolean renderIterations = false;
-    static PositionCenteredRenderer<IterationVAO> iterationRenderer;
-    static TessProgram tessProgram;
+    public final  ListRenderer<ColoredVAO> vaoListProgram;
+    public final  PositionCenteredRenderer<TerrainVAO> playerCenteredRenderer;
+    public boolean renderIterations = false;
+    public final  PositionCenteredRenderer<IterationVAO> iterationRenderer;
+    public final TessProgram tessProgram;
 
-    static ErosionDataStorage worldStorage;
+    public final ErosionDataStorage worldStorage;
 
-    //config -----------------
-    static final String worldName = "test64";
-    static final int chunkSize = 64;
-    static final int regionSize = 10;
-    static final int iterationChunkSize = 64;
-    static final int iterationRegionSize = 10;
+    public boolean wireFrame = false;
 
-    static final int chunkRenderDistance = 7;
-    static final int iterationRenderDistance = 2;
+    public final GPUTerrainEroder gpuTerrainEroder;
+    private int vao;
+    private int vertexes;
+    public boolean simulateErosion = false;
+    public int simulationStepsPerFrame;
 
-    static final Vector2i srcPos = new Vector2i(-7*64, 5*64);
-    static final int xSize = 8*64;
-    static final int zSize = 8*64;
+    public final InputDeviceManager inputDeviceManager;
+    public final CameraMatrix cameraMatrix = new CameraMatrix();
+    public final InputController inputController;
 
-    static int simulationStepsPerFrame = 5;
-
-    static boolean wireFrame = false;
-    //config -----------------
-
-    static GPUTerrainEroder gpuTerrainEroder;
-    static int vao;
-    static int vertexes;
-    static boolean simulateErosion = false;
-
-    static InputDeviceManager inputDeviceManager = null;
-    static CameraMatrix cameraMatrix = new CameraMatrix();
-    static InputController inputController = null;
-
-    static double deltaTime = 1d/60d;
-    static boolean vSync = true;
+    private double deltaTime = 1d/60d;
+    public boolean vSync = true;
 
 
     public static void main(String[] args) {
         glfwInit();
         double start = glfwGetTime();
+
+        Main main = new Main("test64",
+                64, 10, 64, 10,
+                7, 2,
+                new Vector2i(), new Vector2i(8*64),
+                5);
+
+        System.out.println("Started after: " + (glfwGetTime() - start));
+        main.loop();
+        System.out.println("Window closed");
+
+        main.cleanGL();
+    }
+
+    public Main(String worldName,
+                int chunkSize, int regionSize, int iterationChunkSize, int iterationRegionSize,
+                int chunkRenderDistance, int iterationRenderDistance,
+                Vector2i srcPos, Vector2i size,
+                int simulationStepsPerFrame) {
         createWindow();
         worldStorage = new ErosionDataStorage(worldName, chunkSize, regionSize, iterationChunkSize, iterationRegionSize);
-        gpuTerrainEroder = new GPUTerrainEroder(worldStorage, srcPos, new Vector2i(xSize+1, zSize+1), new Vector2i(xSize+1, zSize+1));
+        gpuTerrainEroder = new GPUTerrainEroder(worldStorage, srcPos, new Vector2i(size).add(1, 1), new Vector2i(size).add(1, 1));
+        this.simulationStepsPerFrame = simulationStepsPerFrame;
 
         vaoListProgram = new ListRenderer<>(new ColoredVAORenderer(cameraMatrix), List.of(/*ColoredVAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
-        playerCenteredRenderer = new PositionCenteredRenderer<>(new TerrainVAORenderer(cameraMatrix), (srcPos, chunkSize) -> {
-            chunkSize++;
-            Float2DBufferWrapper terrain = (Float2DBufferWrapper) worldStorage.terrain.readArea(srcPos.x, srcPos.y, chunkSize, chunkSize);
-            Float2DBufferWrapper water = (Float2DBufferWrapper) worldStorage.water.readArea(srcPos.x, srcPos.y, chunkSize, chunkSize);
+        playerCenteredRenderer = new PositionCenteredRenderer<>(new TerrainVAORenderer(cameraMatrix), (srcPos1, chunkSize1) -> {
+            chunkSize1++;
+            Float2DBufferWrapper terrain = (Float2DBufferWrapper) worldStorage.terrain.readArea(srcPos1.x, srcPos1.y, chunkSize1, chunkSize1);
+            Float2DBufferWrapper water = (Float2DBufferWrapper) worldStorage.water.readArea(srcPos1.x, srcPos1.y, chunkSize1, chunkSize1);
 
-            return TerrainVAOGenerator.heightMapToSimpleVAO(terrain, water, srcPos, 1);
-        }, cameraMatrix.position, worldStorage.chunkSize, chunkRenderDistance, srcPos, new Vector2i(xSize, zSize));
+            return TerrainVAOGenerator.heightMapToSimpleVAO(terrain, water, srcPos1, 1);
+        }, cameraMatrix.position, worldStorage.chunkSize, chunkRenderDistance, srcPos, new Vector2i(size));
         iterationRenderer = new PositionCenteredRenderer<>(new IterationVAORenderer(cameraMatrix),
-                (vector2i, chunkSize) -> IterationVAOGenerator.heightMapToIterationVAO(vector2i, new Vector2i(chunkSize), worldStorage.iterationInfo),
+                (vector2i, chunkSize1) -> IterationVAOGenerator.heightMapToIterationVAO(vector2i, new Vector2i(chunkSize1), worldStorage.iterationInfo),
                 cameraMatrix.position, worldStorage.iterationChunkSize, iterationRenderDistance);
 
-        setupData();
+        setupData(size);
 
         glPatchParameteri(GL_PATCH_VERTICES, 4);
-        tessProgram = new TessProgram(cameraMatrix, vao, srcPos, xSize, zSize);
+        tessProgram = new TessProgram(cameraMatrix, vao, srcPos, size.x, size.y);
 
         inputDeviceManager = new InputDeviceManager(window);
-        inputController = new InputController(inputDeviceManager, cameraMatrix);
+        inputController = new InputController(inputDeviceManager, this);
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         glEnable(GL_DEPTH_TEST);
         GLUtil.setupDebugMessageCallback();
         updateWireFrame();
         updateVSync();
-
-        System.out.println("Started after: " + (glfwGetTime() - start));
-        loop();
-        System.out.println("Window closed");
-
-        cleanGL();
     }
 
-    private static void createWindow() {
+    private void createWindow() {
         final int screenWidth = glfwGetVideoMode(glfwGetPrimaryMonitor()).width();
         final int screenHeight = glfwGetVideoMode(glfwGetPrimaryMonitor()).height();
         cameraMatrix.aspectRatio = (float) screenHeight / (float) screenWidth;
@@ -124,11 +122,11 @@ public class Main {
         glfwShowWindow(window);
     }
 
-    private static void setupData() {
+    private void setupData(Vector2i maxSize) {
         vao = glGenVertexArrays();
         glBindVertexArray(vao);
 
-        ByteBuffer vertices = Util.storeArrayInBuffer(ColoredVAOGenerator.tesselationGridVertexesTest(xSize/64, zSize/64, 64));
+        ByteBuffer vertices = Util.storeArrayInBuffer(ColoredVAOGenerator.tesselationGridVertexesTest(maxSize.x/64, maxSize.y/64, 64));
 
         vertexes = glGenBuffers();
         glBindBuffer(GL_ARRAY_BUFFER, vertexes);
@@ -137,14 +135,14 @@ public class Main {
         glEnableVertexAttribArray(0);
     }
 
-    private static void loop() {
+    private void loop() {
         double lastTime = glfwGetTime();
         double lastFramePrint = Double.NEGATIVE_INFINITY;
         LinkedList<Double> frames = new LinkedList<>();
 
         while(!glfwWindowShouldClose(window)) {
-            inputController.update();
-            playerCenteredRenderer.updateLoadedChunks(cameraMatrix.position, srcPos, new Vector2i(xSize, zSize));
+            inputController.update(deltaTime);
+            playerCenteredRenderer.updateLoadedChunks(cameraMatrix.position, gpuTerrainEroder.getSrcPos(), gpuTerrainEroder.getSize());
             if (renderIterations)
                 iterationRenderer.updateLoadedChunks(new Vector3f(cameraMatrix.position).div(64));
 
@@ -190,7 +188,7 @@ public class Main {
         System.out.println("Saved world in " + (glfwGetTime() - lastTime) + " seconds.");
     }
 
-    private static void cleanGL() {
+    private void cleanGL() {
         //disable the vertex attribute arrays
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
@@ -202,10 +200,9 @@ public class Main {
 
         worldStorage.cleanGL();
         gpuTerrainEroder.delete();
-        printErrors();
     }
 
-    public static void updateWireFrame() {
+    public void updateWireFrame() {
         if (wireFrame) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             glDisable(GL_CULL_FACE);
@@ -215,16 +212,8 @@ public class Main {
         }
     }
 
-    public static void updateVSync() {
+    public void updateVSync() {
         glfwSwapInterval(vSync ? 1 : 0);
-    }
-
-    public static void printErrors() {
-        int error = glGetError();
-        while(error != 0) {
-            new RuntimeException("OpenGL Error: " + glGetErrorString(error)).printStackTrace();
-            error = glGetError();
-        }
     }
 
     public static String glGetErrorString(int error) {

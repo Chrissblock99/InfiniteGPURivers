@@ -7,13 +7,13 @@ import org.joml.Vector3f;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class InputController {
-    private final CameraMatrix cameraMatrix;
+    private final Main main;
     private final InputDeviceManager inputDeviceManager;
     private final Vector3f movementDirection = new Vector3f();
     private float movementSpeed = 3f;
 
-    public InputController(InputDeviceManager inputDeviceManager, CameraMatrix cameraMatrix) {
-        this.cameraMatrix = cameraMatrix;
+    public InputController(InputDeviceManager inputDeviceManager, Main main) {
+        this.main = main;
         this.inputDeviceManager = inputDeviceManager;
         setupCallBacks();
     }
@@ -36,62 +36,60 @@ public class InputController {
         inputDeviceManager.addMouseScrollConsumer((dx, dy) -> movementSpeed = (float) Math.max(0.005, Math.pow(1.5, log(1.5, movementSpeed) + dy/4)));
 
         inputDeviceManager.addMouseRelativeMovementConsumer((dx, dy) -> {
-            cameraMatrix.yaw -= (float) (dx/300d);
-            cameraMatrix.pitch = (float) Math.max(-Math.PI/2, Math.min(cameraMatrix.pitch - (dy/300d), Math.PI/2));
+            main.cameraMatrix.yaw -= (float) (dx/300d);
+            main.cameraMatrix.pitch = (float) Math.max(-Math.PI/2, Math.min(main.cameraMatrix.pitch - (dy/300d), Math.PI/2));
         });
 
 
-        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_LEFT, () -> cameraMatrix.roll -= 0.05f);
-        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_RIGHT, () -> cameraMatrix.roll += 0.05f);
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_LEFT, () -> main.cameraMatrix.roll -= 0.05f);
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_RIGHT, () -> main.cameraMatrix.roll += 0.05f);
 
-        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_O, () -> cameraMatrix.FOV++);
-        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_P, () -> cameraMatrix.FOV--);
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_O, () -> main.cameraMatrix.FOV++);
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_P, () -> main.cameraMatrix.FOV--);
 
-        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_U, () -> cameraMatrix.zNear -= 0.05f);
-        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_I, () -> cameraMatrix.zNear += 0.05f);
-        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_J, () -> cameraMatrix.zFar -= 0.05f);
-        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_K, () -> cameraMatrix.zFar += 0.05f);
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_U, () -> main.cameraMatrix.zNear -= 0.05f);
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_I, () -> main.cameraMatrix.zNear += 0.05f);
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_J, () -> main.cameraMatrix.zFar -= 0.05f);
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_K, () -> main.cameraMatrix.zFar += 0.05f);
 
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_V, () -> {
-            Main.vSync = !Main.vSync;
-            Main.updateVSync();
+            main.vSync = !main.vSync;
+            main.updateVSync();
         });
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_E, () -> {
-            Main.wireFrame = !Main.wireFrame;
-            Main.updateWireFrame();
+            main.wireFrame = !main.wireFrame;
+            main.updateWireFrame();
         });
 
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_M, () -> {
-            Main.playerCenteredRenderer.setChunkRenderDistance(Main.playerCenteredRenderer.getChunkRenderDistance()+1);
+            main.playerCenteredRenderer.setChunkRenderDistance(main.playerCenteredRenderer.getChunkRenderDistance()+1);
         });
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_N, () -> {
-            Main.playerCenteredRenderer.setChunkRenderDistance(Main.playerCenteredRenderer.getChunkRenderDistance()-1);
+            main.playerCenteredRenderer.setChunkRenderDistance(main.playerCenteredRenderer.getChunkRenderDistance()-1);
         });
 
 
 
-        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_T, () -> Main.simulateErosion = !Main.simulateErosion);
-        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_I, () -> Main.renderIterations = !Main.renderIterations);
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_T, () -> main.simulateErosion = !main.simulateErosion);
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_I, () -> main.renderIterations = !main.renderIterations);
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_R, () -> {
-            Vector2f pos = new Vector2f(Main.cameraMatrix.position.x, Main.cameraMatrix.position.z);
-            pos.div(64f).sub(new Vector2f(Main.xSize/(64*2f))).floor().mul(64f);
+            Vector2f pos = new Vector2f(main.cameraMatrix.position.x, main.cameraMatrix.position.z);
+            pos.div(64f).sub(new Vector2f(main.gpuTerrainEroder.getSize().div(64*2f))).floor().mul(64f);
             Vector2i srcPos = new Vector2i((int) pos.x, (int) pos.y);
 
-            Main.srcPos.x = srcPos.x;
-            Main.srcPos.y = srcPos.y;
-
-            Main.gpuTerrainEroder.changeArea(srcPos);
-            Main.playerCenteredRenderer.updateLoadedChunks(Main.cameraMatrix.position, Main.srcPos, new Vector2i(Main.xSize, Main.zSize));
+            main.gpuTerrainEroder.changeArea(srcPos);
+            main.tessProgram.setSrcPos(srcPos);
+            main.playerCenteredRenderer.updateLoadedChunks(main.cameraMatrix.position, main.gpuTerrainEroder.getSrcPos(), main.gpuTerrainEroder.getSize());
         });
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_F, () -> {
-            Main.gpuTerrainEroder.downloadMap();
-            ImageWriter.writeImageHeightMap((Float2DBufferWrapper) Main.worldStorage.terrain.readArea(Main.srcPos.x, Main.srcPos.y, Main.xSize, Main.zSize), "terrain", true);
-            ImageWriter.writeImageHeightMap((Float2DBufferWrapper) Main.worldStorage.water.readArea(Main.srcPos.x, Main.srcPos.y, Main.xSize, Main.zSize), "water", false);
+            main.gpuTerrainEroder.downloadMap();
+            ImageWriter.writeImageHeightMap((Float2DBufferWrapper) main.worldStorage.terrain.readArea(main.gpuTerrainEroder.getSrcPos().x, main.gpuTerrainEroder.getSrcPos().y, main.gpuTerrainEroder.getSize().x, main.gpuTerrainEroder.getSize().y), "terrain", true);
+            ImageWriter.writeImageHeightMap((Float2DBufferWrapper) main.worldStorage.water.readArea(main.gpuTerrainEroder.getSrcPos().x, main.gpuTerrainEroder.getSrcPos().y, main.gpuTerrainEroder.getSize().x, main.gpuTerrainEroder.getSize().y), "water", false);
         });
     }
 
-    public void update() {
-        cameraMatrix.position.add(new Vector3f(movementDirection).mul((float) (movementSpeed * Main.deltaTime)).rotateY(-cameraMatrix.yaw));
+    public void update(double deltaTime) {
+        main.cameraMatrix.position.add(new Vector3f(movementDirection).mul((float) (movementSpeed * deltaTime)).rotateY(-main.cameraMatrix.yaw));
     }
 
     private static double log(double b, double x) {
