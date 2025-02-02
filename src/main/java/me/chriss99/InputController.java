@@ -80,7 +80,7 @@ public class InputController {
             Main.srcPos.x = srcPos.x;
             Main.srcPos.y = srcPos.y;
 
-            Main.gpuTerrainEroder.changeSrcPos(srcPos);
+            Main.gpuTerrainEroder.changeArea(srcPos);
             Main.playerCenteredRenderer.updateLoadedChunks(Main.cameraMatrix.position, Main.srcPos, new Vector2i(Main.xSize, Main.zSize));
         });
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_F, () -> {
