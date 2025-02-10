@@ -139,6 +139,8 @@ public class Main {
         double lastTime = glfwGetTime();
         double lastFramePrint = Double.NEGATIVE_INFINITY;
         LinkedList<Double> frames = new LinkedList<>();
+        double lastIPSPrint = Double.NEGATIVE_INFINITY;
+        LinkedList<Double> iteratedFrames = new LinkedList<>();
 
         while(!glfwWindowShouldClose(window)) {
             inputController.update(deltaTime);
@@ -179,6 +181,22 @@ public class Main {
                 System.out.println(frames.size() + "   " + Math.round(1/deltaTime) + "   " + deltaTime*1000);
                 lastFramePrint = currentTime;
             }
+
+            if (simulateErosion) {
+                iteratedFrames.add(currentTime);
+                Iterator<Double> iterator2 = iteratedFrames.iterator();
+                for (int i = 0; i < iteratedFrames.size(); i++)
+                    if (currentTime - iterator2.next() >= 1)
+                        iterator2.remove();
+                    else break;
+            }
+
+            if (simulateErosion && currentTime - lastIPSPrint > 1) {
+                Vector2i size = gpuTerrainEroder.getSize();
+                System.out.println("ips/1b: " + ((float) size.x * size.y) * ((float) simulationStepsPerFrame * iteratedFrames.size()) / ((currentTime - lastIPSPrint) * 1000000000f));
+                lastIPSPrint = currentTime;
+            }
+
             lastTime = currentTime;
         }
 
