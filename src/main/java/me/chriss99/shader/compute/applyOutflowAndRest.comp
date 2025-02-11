@@ -41,6 +41,8 @@ const ivec2 mooreNeighbourhood[8] = ivec2[](
     ivec2( 1, -1)
 );
 
+uniform ivec2 srcPos;
+
 
 const float inverseMaxErosionDepth = 1.0 / maxErosionDepth;
 float erosionDepthMultiplier(float depth) {
@@ -50,16 +52,18 @@ float erosionDepthMultiplier(float depth) {
 }
 
 void main() {
-    vec4 outflow = imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID));
-    float up =     imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[0]).w;
-    float left =   imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[1]).z;
-    float right =  imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[2]).y;
-    float down =   imageLoad(waterOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[3]).x;
+    ivec2 pos = srcPos + ivec2(gl_GlobalInvocationID);
 
-    float terrainHeight = imageLoad(terrainMap, ivec2(gl_GlobalInvocationID)).x;
-    float waterHeight = imageLoad(waterMap, ivec2(gl_GlobalInvocationID)).x;
-    float sedimentHeight = imageLoad(sedimentMap, ivec2(gl_GlobalInvocationID)).x;
-    float hardness = imageLoad(hardnessMap, ivec2(gl_GlobalInvocationID)).x;
+    vec4 outflow = imageLoad(waterOutflowPipes, pos);
+    float up =     imageLoad(waterOutflowPipes, pos + vonNeumannNeighbourhood[0]).w;
+    float left =   imageLoad(waterOutflowPipes, pos + vonNeumannNeighbourhood[1]).z;
+    float right =  imageLoad(waterOutflowPipes, pos + vonNeumannNeighbourhood[2]).y;
+    float down =   imageLoad(waterOutflowPipes, pos + vonNeumannNeighbourhood[3]).x;
+
+    float terrainHeight = imageLoad(terrainMap, pos).x;
+    float waterHeight = imageLoad(waterMap, pos).x;
+    float sedimentHeight = imageLoad(sedimentMap, pos).x;
+    float hardness = imageLoad(hardnessMap, pos).x;
 
 
     //waterOutFlow
@@ -69,11 +73,11 @@ void main() {
 
 
     //sediment
-    vec4 outflowS = imageLoad(SedimentOutflowPipes, ivec2(gl_GlobalInvocationID));
-    float upS =     imageLoad(SedimentOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[0]).w;
-    float leftS =   imageLoad(SedimentOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[1]).z;
-    float rightS =  imageLoad(SedimentOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[2]).y;
-    float downS =   imageLoad(SedimentOutflowPipes, ivec2(gl_GlobalInvocationID) + vonNeumannNeighbourhood[3]).x;
+    vec4 outflowS = imageLoad(SedimentOutflowPipes, pos);
+    float upS =     imageLoad(SedimentOutflowPipes, pos + vonNeumannNeighbourhood[0]).w;
+    float leftS =   imageLoad(SedimentOutflowPipes, pos + vonNeumannNeighbourhood[1]).z;
+    float rightS =  imageLoad(SedimentOutflowPipes, pos + vonNeumannNeighbourhood[2]).y;
+    float downS =   imageLoad(SedimentOutflowPipes, pos + vonNeumannNeighbourhood[3]).x;
 
     sedimentHeight -= outflowS.x + outflowS.y + outflowS.z + outflowS.w;
     sedimentHeight += upS + leftS + rightS + downS;
@@ -81,18 +85,18 @@ void main() {
 
 
     //thermal
-    vec4 outflow1 = imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID));
-    vec4 outflow2 = imageLoad(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID));
+    vec4 outflow1 = imageLoad(thermalOutflowPipes1, pos);
+    vec4 outflow2 = imageLoad(thermalOutflowPipes2, pos);
     terrainHeight -= outflow1.x + outflow1.y + outflow1.z + outflow1.w + outflow2.x + outflow2.y + outflow2.z + outflow2.w;
 
-    terrainHeight += imageLoad(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[0]).w;
-    terrainHeight += imageLoad(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[1]).z;
-    terrainHeight += imageLoad(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[2]).y;
-    terrainHeight += imageLoad(thermalOutflowPipes2, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[3]).x;
-    terrainHeight += imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[4]).w;
-    terrainHeight += imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[5]).z;
-    terrainHeight += imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[6]).y;
-    terrainHeight += imageLoad(thermalOutflowPipes1, ivec2(gl_GlobalInvocationID) + mooreNeighbourhood[7]).x;
+    terrainHeight += imageLoad(thermalOutflowPipes2, pos + mooreNeighbourhood[0]).w;
+    terrainHeight += imageLoad(thermalOutflowPipes2, pos + mooreNeighbourhood[1]).z;
+    terrainHeight += imageLoad(thermalOutflowPipes2, pos + mooreNeighbourhood[2]).y;
+    terrainHeight += imageLoad(thermalOutflowPipes2, pos + mooreNeighbourhood[3]).x;
+    terrainHeight += imageLoad(thermalOutflowPipes1, pos + mooreNeighbourhood[4]).w;
+    terrainHeight += imageLoad(thermalOutflowPipes1, pos + mooreNeighbourhood[5]).z;
+    terrainHeight += imageLoad(thermalOutflowPipes1, pos + mooreNeighbourhood[6]).y;
+    terrainHeight += imageLoad(thermalOutflowPipes1, pos + mooreNeighbourhood[7]).x;
 
 
     //erosionDeposition
@@ -129,8 +133,8 @@ void main() {
     waterHeight += rain;
 
 
-    imageStore(terrainMap,  ivec2(gl_GlobalInvocationID), vec4(terrainHeight));
-    imageStore(waterMap,    ivec2(gl_GlobalInvocationID), vec4(waterHeight));
-    imageStore(sedimentMap, ivec2(gl_GlobalInvocationID), vec4(sedimentHeight));
-    imageStore(hardnessMap, ivec2(gl_GlobalInvocationID), vec4(hardness));
+    imageStore(terrainMap,  pos, vec4(terrainHeight));
+    imageStore(waterMap,    pos, vec4(waterHeight));
+    imageStore(sedimentMap, pos, vec4(sedimentHeight));
+    imageStore(hardnessMap, pos, vec4(hardness));
 }

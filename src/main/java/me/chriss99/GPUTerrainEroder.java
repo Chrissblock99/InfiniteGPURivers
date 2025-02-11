@@ -45,6 +45,9 @@ public class GPUTerrainEroder {
     private final ComputeProgram calcOutflow;
     private final ComputeProgram applyOutflowAndRest;
 
+    private final int srcPosUniform1;
+    private final int srcPosUniform2;
+
     public GPUTerrainEroder(ErosionDataStorage erosionDataStorage, Vector2i srcPos, Vector2i maxSize, Vector2i size) {
         this.erosionDataStorage = erosionDataStorage;
         this.maxSize.x = maxSize.x;
@@ -69,6 +72,9 @@ public class GPUTerrainEroder {
 
         calcOutflow = new ComputeProgram("calcOutflow");
         applyOutflowAndRest = new ComputeProgram("applyOutflowAndRest");
+
+        srcPosUniform1 = calcOutflow.getUniform("srcPos");
+        srcPosUniform2 = calcOutflow.getUniform("srcPos");
 
 
         terrainMap.bindUniformImage(calcOutflow.program, 0, "terrainMap", GL_READ_ONLY);
@@ -96,13 +102,15 @@ public class GPUTerrainEroder {
 
     public void erosionSteps(int steps) {
         for (int i = 0; i < steps; i++) {
-            execShader(calcOutflow);
-            execShader(applyOutflowAndRest);
+            execShader(calcOutflow, new Vector2i(), size);
+            execShader(applyOutflowAndRest, new Vector2i(), size);
         }
     }
 
-    private void execShader(ComputeProgram program) {
+    private void execShader(ComputeProgram program, Vector2i srcPos, Vector2i size) {
         program.use();
+        glUniform2i(srcPosUniform1, srcPos.x, srcPos.y);
+        glUniform2i(srcPosUniform2, srcPos.x, srcPos.y);
         glDispatchCompute(size.x, size.y, 1);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
     }
