@@ -13,10 +13,11 @@ void main() {
     vec2 p11 = gl_in[3].gl_Position.xz;
 
     vec2 position = (p11 - p00) * uv + p00;
+    ivec2 texPosition = ivec2(position)+1;
 
-    float height = imageLoad(terrainMap, ivec2(position)).x;
+    float height = imageLoad(terrainMap, texPosition).x;
     if (water) {
-        float waterHeight = imageLoad(waterMap, ivec2(position)).x - .03;
+        float waterHeight = imageLoad(waterMap, texPosition).x - .03;
         height += waterHeight - ((waterHeight <= 0) ? .1 : 0);
     }
 

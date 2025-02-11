@@ -58,6 +58,9 @@ public class GPUTerrainEroder {
         this.size.x = size.x;
         this.size.y = size.y;
 
+        //read buffer in all directions (avoids implicit out of bound reads when iterating near edges)
+        maxSize = new Vector2i(maxSize).add(2, 2);
+
         terrainMap = new Texture2D(GL_R32F, maxSize.x, maxSize.y);
         waterMap = new Texture2D(GL_R32F, maxSize.x, maxSize.y);
         sedimentMap = new Texture2D(GL_R32F, maxSize.x, maxSize.y);
@@ -108,6 +111,13 @@ public class GPUTerrainEroder {
     }
 
     private void execShader(ComputeProgram program, Vector2i srcPos, Vector2i size) {
+        Vector2i areaControl = new Vector2i(srcPos).add(size);
+        if (areaControl.x > this.size.x || areaControl.y > this.size.y)
+            throw new IllegalArgumentException("Area exceeds size limitations! " + areaControl + ", size:" + size);
+
+        //correct for texture being one larger in all directions
+        srcPos = new Vector2i(srcPos).add(1, 1);
+
         program.use();
         glUniform2i(srcPosUniform1, srcPos.x, srcPos.y);
         glUniform2i(srcPosUniform2, srcPos.x, srcPos.y);
@@ -146,11 +156,14 @@ public class GPUTerrainEroder {
 
     private void downloadHelper(Texture2D download, InfiniteChunkWorld write) {
         Array2DBufferWrapper bufferWrapper = Array2DBufferWrapper.of(write.type, size.x, size.y);
-        download.downloadData(0, 0, bufferWrapper);
+        download.downloadData(1, 1, bufferWrapper);
         write.writeArea(srcPos.x, srcPos.y, bufferWrapper);
     }
 
     public void uploadMap() {
+        Vector2i srcPos = new Vector2i(this.srcPos).sub(1, 1);
+        Vector2i size = new Vector2i(this.size).add(2, 2);
+
         terrainMap.uploadData(0, 0, erosionDataStorage.terrain.readArea(srcPos.x, srcPos.y, size.x, size.y));
         waterMap.uploadData(0, 0, erosionDataStorage.water.readArea(srcPos.x, srcPos.y, size.x, size.y));
         sedimentMap.uploadData(0, 0, erosionDataStorage.sediment.readArea(srcPos.x, srcPos.y, size.x, size.y));
