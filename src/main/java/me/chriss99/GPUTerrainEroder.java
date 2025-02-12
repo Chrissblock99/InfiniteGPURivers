@@ -110,10 +110,11 @@ public class GPUTerrainEroder {
         }
     }
 
-    private void execShader(ComputeProgram program, Vector2i srcPos, Vector2i size) {
-        Vector2i areaControl = new Vector2i(srcPos).add(size);
-        if (areaControl.x > this.size.x || areaControl.y > this.size.y)
-            throw new IllegalArgumentException("Area exceeds size limitations! " + areaControl + ", size:" + size);
+    private void execShader(ComputeProgram program, Vector2i srcPos, Vector2i endPos) {
+        if (endPos.x > size.x || endPos.y > size.y)
+            throw new IllegalArgumentException("endPos exceeds size limitations! " + endPos + ", size:" + size);
+
+        Vector2i size = new Vector2i(endPos).sub(srcPos);
 
         //correct for texture being one larger in all directions
         srcPos = new Vector2i(srcPos).add(1, 1);
