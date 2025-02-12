@@ -162,7 +162,7 @@ public class Main {
             glfwSwapBuffers(window);
 
             if (simulateErosion)
-                gpuTerrainEroder.erosionSteps(simulationStepsPerFrame);
+                gpuTerrainEroder.erosionSteps(simulationStepsPerFrame, true, true, true, true);
 
             //poll for window events (resize, close, button presses, etc.)
             glfwPollEvents();

@@ -103,10 +103,16 @@ public class GPUTerrainEroder {
         uploadMap();
     }
 
-    public void erosionSteps(int steps) {
+    public void erosionSteps(int steps, boolean lFlat, boolean rFlat, boolean fFlat, boolean bFlat) {
+        Vector2i srcPos =                new Vector2i(lFlat ? 0 : steps, bFlat ? 0 : steps);
+        Vector2i endPos = new Vector2i(this.size).sub(rFlat ? 0 : steps, fFlat ? 0 : steps);
+
         for (int i = 0; i < steps; i++) {
-            execShader(calcOutflow, new Vector2i(), size);
-            execShader(applyOutflowAndRest, new Vector2i(), size);
+            execShader(calcOutflow, srcPos, endPos);
+            execShader(applyOutflowAndRest, srcPos, endPos);
+
+            srcPos.add(lFlat ? 1 : -1, bFlat ? 1 : -1);
+            endPos.sub(rFlat ? 1 : -1, fFlat ? 1 : -1);
         }
     }
 
