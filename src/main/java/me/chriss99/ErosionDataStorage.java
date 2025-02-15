@@ -1,9 +1,7 @@
 package me.chriss99;
 
 import me.chriss99.worldmanagement.*;
-import me.chriss99.worldmanagement.quadtree.IterationSurface;
-import me.chriss99.worldmanagement.quadtree.IterationSurfaceRegionFileManager;
-import org.joml.Vector2i;
+import me.chriss99.worldmanagement.iteration.IterateableWorld;
 
 import static me.chriss99.Array2DBufferWrapper.Type;
 
@@ -29,7 +27,7 @@ public class ErosionDataStorage {
     public final InfiniteChunkWorld thermalOutflow1;
     public final InfiniteChunkWorld thermalOutflow2;
 
-    public final InfiniteWorld<IterationSurface> iterationInfo;
+    public final IterateableWorld iterationInfo;
 
     public final TileLoadManager tileLoadManager = new LeakingTileLoadManager<>();
 
@@ -54,7 +52,7 @@ public class ErosionDataStorage {
         thermalOutflow1 = new InfiniteChunkWorld(worldName + "/thermalOutflow1", Type.VEC4F, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Vec4f2DBufferWrapper(chunkSize1, chunkSize1)), tileLoadManager);
         thermalOutflow2 = new InfiniteChunkWorld(worldName + "/thermalOutflow2", Type.VEC4F, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Vec4f2DBufferWrapper(chunkSize1, chunkSize1)), tileLoadManager);
 
-        iterationInfo = new InfiniteWorld<>(iterationChunkSize, iterationRegionSize, (srcPos, size) -> new IterationSurface(new Vector2i(srcPos).mul(iterationChunkSize), size), new IterationSurfaceRegionFileManager(worldName + "/iteration", iterationChunkSize), tileLoadManager);
+        iterationInfo = new IterateableWorld(worldName + "/iteration", iterationChunkSize, iterationRegionSize, tileLoadManager);
     }
 
     public void unloadAll() {

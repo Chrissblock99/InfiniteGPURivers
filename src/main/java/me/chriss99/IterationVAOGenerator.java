@@ -1,26 +1,21 @@
 package me.chriss99;
 
 import me.chriss99.util.FloatArrayList;
-import me.chriss99.worldmanagement.InfiniteWorld;
-import me.chriss99.worldmanagement.quadtree.IterationSurface;
+import me.chriss99.worldmanagement.iteration.IterateableWorld;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
 public class IterationVAOGenerator {
-    public static IterationVAO heightMapToIterationVAO(Vector2i srcPosInChunks, Vector2i sizeInChunks, InfiniteWorld<IterationSurface> iterationInfo) {
+    public static IterationVAO heightMapToIterationVAO(Vector2i srcPosInChunks, Vector2i sizeInChunks, IterateableWorld iterationInfo) {
         FloatArrayList vertecies = new FloatArrayList();
 
         for (int z = 0; z < sizeInChunks.y; z++)
             for (int x = 0; x < sizeInChunks.x; x++) {
                 Vector2i position = new Vector2i(x, z).add(srcPosInChunks);
-                IterationSurface surface = iterationInfo.getTile(position.x, position.y);
+                IterationSurfaceType surfaceType = iterationInfo.getIterationSurfaceType(position.x, position.y);
 
-                surface.getQuad().iterateAllLeafs(quad -> {
-                    IterationSurfaceType surfaceType = quad.getValue();
-
-                    Vector3i pos = new Vector3i(quad.getPos().x, surface.getIteration(), quad.getPos().y);
-                    addSurface(vertecies, surfaceType, pos, quad.getSize());
-                });
+                Vector3i pos = new Vector3i(position.x, 0, position.y).mul(iterationInfo.chunkSize);
+                addSurface(vertecies, surfaceType, pos, iterationInfo.chunkSize);
             }
 
         return new IterationVAO(vertecies.getArray(), srcPosInChunks, sizeInChunks.x);
