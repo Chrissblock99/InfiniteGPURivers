@@ -1,9 +1,8 @@
 package me.chriss99.worldmanagement.quadtree;
 
 import me.chriss99.IterationSurfaceType;
-import me.chriss99.worldmanagement.FileLoadStoreManager;
+import me.chriss99.worldmanagement.AbstractRegionFileManager;
 import me.chriss99.worldmanagement.Region;
-import me.chriss99.worldmanagement.RegionFileManager;
 import org.joml.Vector2i;
 
 import java.nio.ByteBuffer;
@@ -11,29 +10,16 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Map;
 
-public class IterationSurfaceRegionFileManager implements RegionFileManager<IterationSurface> {
-    private final FileLoadStoreManager<Region<IterationSurface>> fileManager;
+public class IterationSurfaceRegionFileManager extends AbstractRegionFileManager<IterationSurface> {
     private final int quadTileSize;
 
     public IterationSurfaceRegionFileManager(String worldName, int quadTileSize) {
-        fileManager = new FileLoadStoreManager<>("worlds/" + worldName, "quadtree", this::iterationSurfaceRegionFromBytes, IterationSurfaceRegionFileManager::IterationSurfaceRegionToBytes);
+        super(worldName);
         this.quadTileSize = quadTileSize;
     }
 
     @Override
-    public boolean hasFile(Vector2i key) {
-        return true;
-    }
-
-    public Region<IterationSurface> loadFile(Vector2i chunkCoord) {
-        return fileManager.loadFile(chunkCoord);
-    }
-
-    public void saveFile(Vector2i pos, Region<IterationSurface> quadRegion) {
-        fileManager.saveFile(quadRegion, quadRegion.coord);
-    }
-
-    private static byte[] IterationSurfaceRegionToBytes(Region<IterationSurface> quadRegion) {
+    protected byte[] regionToBytes(Region<IterationSurface> quadRegion) {
         LinkedList<byte[]> bytesList = new LinkedList<>();
         int length = 0;
 
@@ -101,7 +87,8 @@ public class IterationSurfaceRegionFileManager implements RegionFileManager<Iter
 
     private record TreeData(ArrayList<Boolean> treeBits, int valuesNum) {}
 
-    private Region<IterationSurface> iterationSurfaceRegionFromBytes(byte[] bytes, Vector2i pos) {
+    @Override
+    protected Region<IterationSurface> regionFromBytes(byte[] bytes, Vector2i pos) {
         Region<IterationSurface> quadRegion = new Region<>(pos);
         int readOffset = 0;
 
