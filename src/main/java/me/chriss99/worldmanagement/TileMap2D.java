@@ -32,6 +32,10 @@ public class TileMap2D<T> {
         return ((HashMap<Vector2i, T>) loadedTiles.clone()).values();
     }
 
+    public void reloadAll() {
+        loadedTiles.replaceAll((k, v) -> tileLoader.apply(k));
+    }
+
     public void manageLoad() {
         HashSet<Vector2i> toRemove = new HashSet<>();
 

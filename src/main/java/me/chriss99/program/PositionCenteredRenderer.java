@@ -44,6 +44,10 @@ public class PositionCenteredRenderer<T extends ChunkVAO> {
         chunkVaos.manageLoad();
     }
 
+    public void reloadAll() {
+        chunkVaos.reloadAll();
+    }
+
     public int getChunkRenderDistance() {
         return loadManager.getRenderDistance();
     }
