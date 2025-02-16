@@ -1,7 +1,5 @@
 package me.chriss99;
 
-import org.joml.Vector2f;
-import org.joml.Vector2i;
 import org.joml.Vector3f;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -72,15 +70,7 @@ public class InputController {
 
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_T, () -> main.simulateErosion = !main.simulateErosion);
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_I, () -> main.renderIterations = !main.renderIterations);
-        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_R, () -> {
-            Vector2f pos = new Vector2f(main.cameraMatrix.position.x, main.cameraMatrix.position.z);
-            pos.div(64f).sub(new Vector2f(main.gpuTerrainEroder.getSize().div(64*2f))).floor().mul(64f);
-            Vector2i srcPos = new Vector2i((int) pos.x, (int) pos.y);
-
-            main.gpuTerrainEroder.changeArea(srcPos);
-            main.tessProgram.setSrcPos(srcPos);
-            main.playerCenteredRenderer.updateLoadedChunks(main.cameraMatrix.position, main.gpuTerrainEroder.getSrcPos(), main.gpuTerrainEroder.getSize());
-        });
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_R, main::primitiveErosion);
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_F, () -> {
             main.gpuTerrainEroder.downloadMap();
             ImageWriter.writeImageHeightMap((Float2DBufferWrapper) main.worldStorage.terrain.readArea(main.gpuTerrainEroder.getSrcPos().x, main.gpuTerrainEroder.getSrcPos().y, main.gpuTerrainEroder.getSize().x, main.gpuTerrainEroder.getSize().y), "terrain", true);

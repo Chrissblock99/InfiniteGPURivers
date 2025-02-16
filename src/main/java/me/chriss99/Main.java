@@ -23,6 +23,7 @@ public class Main {
     public final TessProgram tessProgram;
 
     public final ErosionDataStorage worldStorage;
+    public final ErosionManager erosionManager;
 
     public boolean wireFrame = false;
 
@@ -65,6 +66,7 @@ public class Main {
         createWindow();
         worldStorage = new ErosionDataStorage(worldName, chunkSize, regionSize, iterationChunkSize, iterationRegionSize);
         gpuTerrainEroder = new GPUTerrainEroder(worldStorage, srcPos, new Vector2i(size).add(1, 1), new Vector2i(size).add(1, 1));
+        erosionManager = new ErosionManager(gpuTerrainEroder, worldStorage.iterationInfo);
         this.simulationStepsPerFrame = simulationStepsPerFrame;
 
         vaoListProgram = new ListRenderer<>(new ColoredVAORenderer(cameraMatrix), List.of(/*ColoredVAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
@@ -91,6 +93,15 @@ public class Main {
         GLUtil.setupDebugMessageCallback();
         updateWireFrame();
         updateVSync();
+    }
+
+    public void primitiveErosion() {
+        Vector2i pos = new Vector2i(Util.properIntDivide((int) cameraMatrix.position.x, worldStorage.chunkSize), Util.properIntDivide((int) cameraMatrix.position.z, worldStorage.chunkSize));
+        if (erosionManager.findIterate(pos, 10)) {
+            tessProgram.setSrcPos(gpuTerrainEroder.getSrcPos());
+
+            iterationRenderer.reloadAll();
+        } else System.out.println("Nah...");
     }
 
     private void createWindow() {
@@ -162,7 +173,8 @@ public class Main {
             glfwSwapBuffers(window);
 
             if (simulateErosion)
-                gpuTerrainEroder.erosionSteps(simulationStepsPerFrame, true, true, true, true);
+                primitiveErosion();
+                //gpuTerrainEroder.erosionSteps(simulationStepsPerFrame, true, true, true, true);
 
             //poll for window events (resize, close, button presses, etc.)
             glfwPollEvents();
