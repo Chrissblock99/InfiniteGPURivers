@@ -17,20 +17,32 @@ public class ErosionManager {
     }
 
     public boolean findIterate(Vector2i pos, int max) {
-        Vector2i size = new Vector2i(maxChunks);
+        Vector2i bestPos = null;
+        Vector2i bestSize = new Vector2i();
 
-        while (size.x > 1) {
-            for (int x = 0; x < max; x = (x>=0) ? -x-1 : -x)
-                for (int y = 0; y < max; y = (y>=0) ? -y-1 : -y)
-                    if (iterate(new Vector2i(x, y).add(pos), size))
-                        return true;
-            size.sub(1, 1);
-        }
+        for (int x = 0; x < max; x = (x>=0) ? -x-1 : -x)
+            for (int y = 0; y < max; y = (y>=0) ? -y-1 : -y) {
+                Vector2i currentPos = new Vector2i(x, y).add(pos);
+                Vector2i size = new Vector2i(maxChunks);
 
-        return false;
+                while (size.x >= 2) {
+                    if (size.x > bestSize.x && iterable(currentPos, size)) {
+                        bestPos = currentPos;
+                        bestSize = size;
+                        break;
+                    }
+                    size.sub(1, 1);
+                }
+            }
+
+        if (bestPos == null)
+            return false;
+
+        iterate(bestPos, bestSize);
+        return true;
     }
 
-    public boolean iterate(Vector2i pos, Vector2i size) {
+    private boolean iterable(Vector2i pos, Vector2i size) {
         int x = pos.x;
         int y = pos.y;
 
@@ -56,9 +68,19 @@ public class ErosionManager {
         if (l == 0 && f == 0 && !tl || f == 0 && r == 0 && !tr || l == 0 && b == 0 && !dl || b == 0 && r == 0 && !dr)
             return false;
 
-        if (!isFlat(new Vector2i(pos).add(1, 1), new Vector2i(size).sub(2, 2)))
-            return false;
+        return isFlat(new Vector2i(pos).add(1, 1), new Vector2i(size).sub(2, 2));
+    }
 
+    private void iterate(Vector2i pos, Vector2i size) {
+        int x = pos.x;
+        int y = pos.y;
+
+        Vector2i length = new Vector2i(size).sub(1, 1);
+
+        int l = getEdgesEqual(pos, length.y, true);
+        int r = getEdgesEqual(new Vector2i(pos).add(length.x,0), length.y, true);
+        int f = getEdgesEqual(new Vector2i(pos).add(0,length.y), length.x, false);
+        int b = getEdgesEqual(pos, length.x, false);
 
         eroder.changeArea(new Vector2i(x, y).mul(data.chunkSize), new Vector2i(data.chunkSize).mul(size));
         eroder.erosionSteps(data.chunkSize, l == 0, r == 0, f == 0, b == 0);
@@ -72,8 +94,6 @@ public class ErosionManager {
         setEdges(new Vector2i(pos).add(length.x,0), length.y, true, r);
         setEdges(new Vector2i(pos).add(0,length.y), length.x, false, f);
         setEdges(pos, length.x, false, b);
-
-        return true;
     }
 
     private boolean isFlat(Vector2i pos, Vector2i size) {
