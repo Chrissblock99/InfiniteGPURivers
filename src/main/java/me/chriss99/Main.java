@@ -97,7 +97,7 @@ public class Main {
 
     public void primitiveErosion() {
         Vector2i pos = new Vector2i(Util.properIntDivide((int) cameraMatrix.position.x, worldStorage.chunkSize), Util.properIntDivide((int) cameraMatrix.position.z, worldStorage.chunkSize));
-        if (erosionManager.findIterate(pos, 10)) {
+        if (erosionManager.findIterate(pos, 30, 500)) {
             tessProgram.setSrcPos(gpuTerrainEroder.getSrcPos());
 
             iterationRenderer.reloadAll();
