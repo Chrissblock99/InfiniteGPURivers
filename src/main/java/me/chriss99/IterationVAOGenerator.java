@@ -1,12 +1,12 @@
 package me.chriss99;
 
 import me.chriss99.util.FloatArrayList;
-import me.chriss99.worldmanagement.iteration.IterateableWorld;
+import me.chriss99.worldmanagement.iteration.IterableWorld;
 import org.joml.Vector2i;
 import org.joml.Vector3i;
 
 public class IterationVAOGenerator {
-    public static IterationVAO heightMapToIterationVAO(Vector2i srcPosInChunks, Vector2i sizeInChunks, IterateableWorld iterationInfo) {
+    public static IterationVAO heightMapToIterationVAO(Vector2i srcPosInChunks, Vector2i sizeInChunks, IterableWorld iterationInfo) {
         FloatArrayList vertecies = new FloatArrayList();
 
         for (int z = 0; z < sizeInChunks.y; z++)

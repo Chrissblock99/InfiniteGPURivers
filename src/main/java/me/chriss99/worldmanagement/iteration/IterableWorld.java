@@ -5,8 +5,8 @@ import me.chriss99.worldmanagement.InfiniteWorld;
 import me.chriss99.worldmanagement.Region;
 import me.chriss99.worldmanagement.TileLoadManager;
 
-public class IterateableWorld extends InfiniteWorld<IterationTile> {
-    public IterateableWorld(String worldName, int chunkSize, int regionSize, TileLoadManager<Region<IterationTile>> tileLoadManager) {
+public class IterableWorld extends InfiniteWorld<IterationTile> {
+    public IterableWorld(String worldName, int chunkSize, int regionSize, TileLoadManager<Region<IterationTile>> tileLoadManager) {
         super(chunkSize, regionSize, (a, b) -> new IterationTile(0, 0), new IterationTileRegionFileManager(worldName), tileLoadManager);
     }
 

@@ -1,15 +1,15 @@
 package me.chriss99;
 
-import me.chriss99.worldmanagement.iteration.IterateableWorld;
+import me.chriss99.worldmanagement.iteration.IterableWorld;
 import org.joml.Vector2i;
 
 public class ErosionManager {
     private final GPUTerrainEroder eroder;
-    private final IterateableWorld data;
+    private final IterableWorld data;
 
     private final Vector2i maxChunks;
 
-    public ErosionManager(GPUTerrainEroder eroder, IterateableWorld data) {
+    public ErosionManager(GPUTerrainEroder eroder, IterableWorld data) {
         this.eroder = eroder;
         this.data = data;
 
