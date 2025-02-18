@@ -118,10 +118,10 @@ public class ErosionManager {
             for (int y = 1; y < size.y; y++)
                 data.getTile(pos.x + size.x, pos.y + y).iteration += data.chunkSize;
         if (f == 0)
-            for (int x = 1; x < size.y; x++)
+            for (int x = 1; x < size.x; x++)
                 data.getTile(pos.x + x, pos.y + size.y).iteration += data.chunkSize;
         if (b == 0)
-            for (int x = 1; x < size.y; x++)
+            for (int x = 1; x < size.x; x++)
                 data.getTile(pos.x + x, pos.y).iteration += data.chunkSize;
 
         if (l == 0 && b == 0)
