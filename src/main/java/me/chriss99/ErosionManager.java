@@ -17,38 +17,81 @@ public class ErosionManager {
     }
 
     public boolean findIterate(Vector2i pos, int maxSearch, int maxIteration) {
-        Vector2i bestPos = null;
+        Vector2i bestPos = new Vector2i(Integer.MIN_VALUE);
         Vector2i bestSize = new Vector2i();
         int bestIteration = Integer.MAX_VALUE;
 
-        for (int x = 0; x < maxSearch; x = (x>=0) ? -x-1 : -x)
-            for (int y = 0; y < maxSearch; y = (y>=0) ? -y-1 : -y) {
+        for (int x = -maxSearch; x < maxSearch; x++)
+            for (int y = -maxSearch; y < maxSearch; y++) {
                 Vector2i currentPos = new Vector2i(x, y).add(pos);
-                Vector2i size = new Vector2i(maxChunks);
+                Vector2i size = new Vector2i(2);
                 int iteration = data.getTile(currentPos.x, currentPos.y).iteration;
 
                 if (iteration > bestIteration || iteration > maxIteration)
                     continue;
 
-                while (size.x >= 2) {
-                    if ((iteration < bestIteration || size.x > bestSize.x) && iterable(currentPos, size)) {
-                        bestPos = currentPos;
-                        bestSize = size;
-                        bestIteration = iteration;
-                        break;
-                    }
-                    size.sub(1, 1);
-                }
+                if (betterAreaFrom(currentPos, size, bestPos, bestSize, iteration < bestIteration))
+                    bestIteration = iteration;
             }
 
-        if (bestPos == null)
+        if (bestPos.equals(new Vector2i(Integer.MIN_VALUE)))
             return false;
 
         iterate(bestPos, bestSize);
         return true;
     }
 
+    private static final Vector2i[] posChanges = new Vector2i[]{new Vector2i(1, 0), new Vector2i(0, 1), new Vector2i(), new Vector2i()};
+    private static final Vector2i[] sizeChanges = new Vector2i[]{new Vector2i(1, 0), new Vector2i(0, 1), new Vector2i(1, 0), new Vector2i(0, 1)};
+    private boolean betterAreaFrom(Vector2i pos, Vector2i size, Vector2i bestPos, Vector2i bestSize, boolean betterIteration) {
+        if (!iterable(pos, size))
+            return false;
+
+        boolean[] directions = new boolean[]{true, true, true, true};
+
+        for (int i = 0; directions[0] || directions[1] || directions[2] || directions[3]; i = (i+1) % 4) {
+            if (size.x == maxChunks.x) {
+                directions[0] = false;
+                directions[2] = false;
+            }
+            if (size.y == maxChunks.y) {
+                directions[1] = false;
+                directions[3] = false;
+            }
+
+
+            if (!directions[i])
+                continue;
+
+            pos.sub(posChanges[i]);
+            size.add(sizeChanges[i]);
+
+            if (!iterable(pos, size)) {
+                pos.add(posChanges[i]);
+                size.sub(sizeChanges[i]);
+                directions[i] = false;
+            }
+            System.out.println(pos.x + " " + pos.y + ", " + size.x + " " + size.y);
+        }
+        System.out.println("done");
+
+
+        if (betterIteration || size.x*size.y > bestSize.x*bestSize.y) {
+            bestPos.x = pos.x;
+            bestPos.y = pos.y;
+            bestSize.x = size.x;
+            bestSize.y = size.y;
+
+            return true;
+        }
+
+        return false;
+    }
+
     private boolean iterable(Vector2i pos, Vector2i size) {
+        if (size.x < 2 || size.y < 2)
+            return false;
+
         int x = pos.x;
         int y = pos.y;
 
@@ -74,7 +117,7 @@ public class ErosionManager {
         if (l == 0 && f == 0 && !tl || f == 0 && r == 0 && !tr || l == 0 && b == 0 && !dl || b == 0 && r == 0 && !dr)
             return false;
 
-        return isFlat(new Vector2i(pos).add(1, 1), new Vector2i(size).sub(2, 2));
+        return iterationsAreSame(pos, size);
     }
 
     private void iterate(Vector2i pos, Vector2i size) {
@@ -134,10 +177,12 @@ public class ErosionManager {
             data.getTile(pos.x + size.x, pos.y + size.y).iteration += data.chunkSize;
     }
 
-    private boolean isFlat(Vector2i pos, Vector2i size) {
+    private boolean iterationsAreSame(Vector2i pos, Vector2i size) {
+        int iteration = data.getTile(pos.x, pos.y).iteration;
+
         for (int x = 0; x < size.x; x++)
             for (int y = 0; y < size.y; y++)
-                if (!data.getIterationSurfaceType(pos.x + x, pos.y + y).getSurfaceType().equals(IterationSurfaceType.SurfaceType.FLAT))
+                if (iteration != data.getTile(pos.x + x, pos.y + y).iteration)
                     return false;
         return true;
     }
