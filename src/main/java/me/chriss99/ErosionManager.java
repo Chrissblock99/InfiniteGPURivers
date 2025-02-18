@@ -71,9 +71,7 @@ public class ErosionManager {
                 size.sub(sizeChanges[i]);
                 directions[i] = false;
             }
-            System.out.println(pos.x + " " + pos.y + ", " + size.x + " " + size.y);
         }
-        System.out.println("done");
 
 
         if (betterIteration || size.x*size.y > bestSize.x*bestSize.y) {
