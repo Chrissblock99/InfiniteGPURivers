@@ -13,8 +13,9 @@ public class IterationVAOGenerator {
             for (int x = 0; x < sizeInChunks.x; x++) {
                 Vector2i position = new Vector2i(x, z).add(srcPosInChunks);
                 IterationSurfaceType surfaceType = iterationInfo.getIterationSurfaceType(position.x, position.y);
+                int iteration = iterationInfo.getTile(position.x, position.y).iteration/ iterationInfo.chunkSize;
 
-                Vector3i pos = new Vector3i(position.x, 0, position.y).mul(iterationInfo.chunkSize);
+                Vector3i pos = new Vector3i(position.x, iteration, position.y).mul(iterationInfo.chunkSize);
                 addSurface(vertecies, surfaceType, pos, iterationInfo.chunkSize);
             }
 

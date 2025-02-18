@@ -94,6 +94,38 @@ public class ErosionManager {
         setEdges(new Vector2i(pos).add(length.x,0), length.y, true, r);
         setEdges(new Vector2i(pos).add(0,length.y), length.x, false, f);
         setEdges(pos, length.x, false, b);
+
+        increaseIteration(pos, size, l, r, f, b);
+    }
+
+    private void increaseIteration(Vector2i pos, Vector2i size, int l, int r, int f, int b) {
+        size = new Vector2i(size).sub(1, 1);
+
+        for (int x = 1; x < size.x; x++)
+            for (int y = 1; y < size.y; y++)
+                data.getTile(pos.x + x, pos.y + y).iteration += data.chunkSize;
+
+        if (l == 0)
+            for (int y = 1; y < size.y; y++)
+                data.getTile(pos.x, pos.y + y).iteration += data.chunkSize;
+        if (r == 0)
+            for (int y = 1; y < size.y; y++)
+                data.getTile(pos.x + size.x, pos.y + y).iteration += data.chunkSize;
+        if (f == 0)
+            for (int x = 1; x < size.y; x++)
+                data.getTile(pos.x + x, pos.y + size.y).iteration += data.chunkSize;
+        if (b == 0)
+            for (int x = 1; x < size.y; x++)
+                data.getTile(pos.x + x, pos.y).iteration += data.chunkSize;
+
+        if (l == 0 && b == 0)
+            data.getTile(pos.x, pos.y).iteration += data.chunkSize;
+        if (l == 0 && f == 0)
+            data.getTile(pos.x, pos.y + size.y).iteration += data.chunkSize;
+        if (r == 0 && b == 0)
+            data.getTile(pos.x + size.x, pos.y).iteration += data.chunkSize;
+        if (r == 0 && f == 0)
+            data.getTile(pos.x + size.x, pos.y + size.y).iteration += data.chunkSize;
     }
 
     private boolean isFlat(Vector2i pos, Vector2i size) {
