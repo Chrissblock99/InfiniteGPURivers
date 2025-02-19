@@ -3,6 +3,8 @@ package me.chriss99;
 import me.chriss99.worldmanagement.iteration.IterableWorld;
 import org.joml.Vector2i;
 
+import java.util.*;
+
 public class ErosionManager {
     private final GPUTerrainEroder eroder;
     private final IterableWorld data;
@@ -17,33 +19,67 @@ public class ErosionManager {
     }
 
     public boolean findIterate(Vector2i pos, int maxSearch, int maxIteration) {
-        Vector2i bestPos = new Vector2i(Integer.MIN_VALUE);
-        Vector2i bestSize = new Vector2i();
-        int bestIteration = Integer.MAX_VALUE;
+        System.out.println("start");
+        HashMap<Integer, LinkedHashSet<Vector2i>> tilesAtIteration = new LinkedHashMap<>();
 
         for (int x = -maxSearch; x < maxSearch; x++)
             for (int y = -maxSearch; y < maxSearch; y++) {
                 Vector2i currentPos = new Vector2i(x, y).add(pos);
-                Vector2i size = new Vector2i(2);
                 int iteration = data.getTile(currentPos.x, currentPos.y).iteration;
 
-                if (iteration > bestIteration || iteration > maxIteration)
-                    continue;
-
-                if (betterAreaFrom(currentPos, size, bestPos, bestSize, iteration < bestIteration))
-                    bestIteration = iteration;
+                tilesAtIteration.computeIfAbsent(iteration, k -> new LinkedHashSet<>()).add(currentPos);
             }
+
+        List<Integer> sortedIterations = tilesAtIteration.keySet().stream().sorted(Comparator.naturalOrder()).toList();
+
+        HashSet<Vector2i> candidates = null;
+        for (int lowestIteration : sortedIterations) {
+            if (lowestIteration > maxIteration) {
+                System.out.println(lowestIteration + " " + maxIteration);
+                return false;
+            }
+
+            LinkedHashSet<Vector2i> currentCandidates = tilesAtIteration.get(lowestIteration);
+            if (has2x2Area(currentCandidates)) {
+                candidates = currentCandidates;
+                break;
+            }
+        }
+        if (candidates == null)
+            return false;
+
+
+        Vector2i bestPos = new Vector2i(Integer.MIN_VALUE);
+        Vector2i bestSize = new Vector2i();
+
+        for (Vector2i currentPos : candidates) {
+            betterAreaFrom(currentPos, bestPos, bestSize);
+            if (bestSize.equals(maxChunks))
+                break;
+        }
 
         if (bestPos.equals(new Vector2i(Integer.MIN_VALUE)))
             return false;
 
+        System.out.println("iterating");
         iterate(bestPos, bestSize);
+        System.out.println("end");
         return true;
+    }
+
+    private static boolean has2x2Area(LinkedHashSet<Vector2i> tiles) {
+        for (Vector2i pos : tiles)
+            if (tiles.contains(new Vector2i(pos).add(1, 0)) && tiles.contains(new Vector2i(pos).add(0, 1)) && tiles.contains(new Vector2i(pos).add(1, 1)))
+                return true;
+
+        return false;
     }
 
     private static final Vector2i[] posChanges = new Vector2i[]{new Vector2i(1, 0), new Vector2i(0, 1), new Vector2i(), new Vector2i()};
     private static final Vector2i[] sizeChanges = new Vector2i[]{new Vector2i(1, 0), new Vector2i(0, 1), new Vector2i(1, 0), new Vector2i(0, 1)};
-    private boolean betterAreaFrom(Vector2i pos, Vector2i size, Vector2i bestPos, Vector2i bestSize, boolean betterIteration) {
+    private boolean betterAreaFrom(Vector2i pos, Vector2i bestPos, Vector2i bestSize) {
+        Vector2i size = new Vector2i(2);
+
         if (!iterable(pos, size))
             return false;
 
@@ -74,7 +110,7 @@ public class ErosionManager {
         }
 
 
-        if (betterIteration || size.x*size.y > bestSize.x*bestSize.y) {
+        if (size.x*size.y > bestSize.x*bestSize.y) {
             bestPos.x = pos.x;
             bestPos.y = pos.y;
             bestSize.x = size.x;
