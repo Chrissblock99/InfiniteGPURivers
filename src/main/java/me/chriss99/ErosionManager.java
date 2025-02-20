@@ -40,7 +40,7 @@ public class ErosionManager {
             }
 
             LinkedHashSet<Vector2i> currentCandidates = tilesAtIteration.get(lowestIteration);
-            if (has2x2Area(currentCandidates)) {
+            if (hasIterable2x2Area(currentCandidates)) {
                 candidates = currentCandidates;
                 break;
             }
@@ -67,9 +67,9 @@ public class ErosionManager {
         return true;
     }
 
-    private static boolean has2x2Area(LinkedHashSet<Vector2i> tiles) {
+    private boolean hasIterable2x2Area(LinkedHashSet<Vector2i> tiles) {
         for (Vector2i pos : tiles)
-            if (tiles.contains(new Vector2i(pos).add(1, 0)) && tiles.contains(new Vector2i(pos).add(0, 1)) && tiles.contains(new Vector2i(pos).add(1, 1)))
+            if (tiles.contains(new Vector2i(pos).add(1, 0)) && tiles.contains(new Vector2i(pos).add(0, 1)) && tiles.contains(new Vector2i(pos).add(1, 1)) && iterable(pos, new Vector2i(2)))
                 return true;
 
         return false;
