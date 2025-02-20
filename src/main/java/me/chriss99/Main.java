@@ -31,7 +31,6 @@ public class Main {
     private int vao;
     private int vertexes;
     public boolean simulateErosion = false;
-    public int simulationStepsPerFrame;
 
     public final InputDeviceManager inputDeviceManager;
     public final CameraMatrix cameraMatrix = new CameraMatrix();
@@ -61,13 +60,11 @@ public class Main {
     public Main(String worldName,
                 int chunkSize, int regionSize, int iterationChunkSize, int iterationRegionSize,
                 int chunkRenderDistance, int iterationRenderDistance,
-                Vector2i srcPos, Vector2i size,
-                int simulationStepsPerFrame) {
+                Vector2i srcPos, Vector2i size) {
         createWindow();
         worldStorage = new ErosionDataStorage(worldName, chunkSize, regionSize, iterationChunkSize, iterationRegionSize);
         gpuTerrainEroder = new GPUTerrainEroder(worldStorage, srcPos, new Vector2i(size).add(1, 1), new Vector2i(size).add(1, 1));
         erosionManager = new ErosionManager(gpuTerrainEroder, worldStorage.iterationInfo);
-        this.simulationStepsPerFrame = simulationStepsPerFrame;
 
         vaoListProgram = new ListRenderer<>(new ColoredVAORenderer(cameraMatrix), List.of(/*ColoredVAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
         playerCenteredRenderer = new PositionCenteredRenderer<>(new TerrainVAORenderer(cameraMatrix), (srcPos1, chunkSize1) -> {
@@ -150,8 +147,6 @@ public class Main {
         double lastTime = glfwGetTime();
         double lastFramePrint = Double.NEGATIVE_INFINITY;
         LinkedList<Double> frames = new LinkedList<>();
-        double lastIPSPrint = Double.NEGATIVE_INFINITY;
-        LinkedList<Double> iteratedFrames = new LinkedList<>();
 
         while(!glfwWindowShouldClose(window)) {
             inputController.update(deltaTime);
@@ -192,21 +187,6 @@ public class Main {
             if (!vSync && currentTime - lastFramePrint > .5) {
                 System.out.println(frames.size() + "   " + Math.round(1/deltaTime) + "   " + deltaTime*1000);
                 lastFramePrint = currentTime;
-            }
-
-            if (simulateErosion) {
-                iteratedFrames.add(currentTime);
-                Iterator<Double> iterator2 = iteratedFrames.iterator();
-                for (int i = 0; i < iteratedFrames.size(); i++)
-                    if (currentTime - iterator2.next() >= 1)
-                        iterator2.remove();
-                    else break;
-            }
-
-            if (simulateErosion && currentTime - lastIPSPrint > 1) {
-                Vector2i size = gpuTerrainEroder.getSize();
-                System.out.println("ips/1b: " + ((float) size.x * size.y) * ((float) simulationStepsPerFrame * iteratedFrames.size()) / ((currentTime - lastIPSPrint) * 1000000000f));
-                lastIPSPrint = currentTime;
             }
 
             lastTime = currentTime;
