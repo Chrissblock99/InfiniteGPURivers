@@ -7,7 +7,7 @@ import me.chriss99.worldmanagement.TileLoadManager;
 
 public class IterableWorld extends InfiniteWorld<IterationTile> {
     public IterableWorld(String worldName, int chunkSize, int regionSize, TileLoadManager<Region<IterationTile>> tileLoadManager) {
-        super(chunkSize, regionSize, (a, b) -> new IterationTile(0, 0), new IterationTileRegionFileManager(worldName), tileLoadManager);
+        super(chunkSize, regionSize, (a, b) -> new IterationTile(0, 0, 0), new IterationTileRegionFileManager(worldName), tileLoadManager);
     }
 
     public IterationSurfaceType getIterationSurfaceType(int x, int y) {

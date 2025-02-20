@@ -3,7 +3,6 @@ package me.chriss99.worldmanagement.iteration;
 import me.chriss99.worldmanagement.AbstractRegionFileManager;
 import me.chriss99.worldmanagement.Region;
 import org.joml.Vector2i;
-import org.lwjgl.BufferUtils;
 
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -21,22 +20,23 @@ public class IterationTileRegionFileManager extends AbstractRegionFileManager<It
 
         while (buffer.hasRemaining()) {
             Vector2i tilePos = new Vector2i(buffer.getInt(), buffer.getInt());
+            int iteration = buffer.getInt();
             byte bits = buffer.get();
 
-            int horizontal = switch ((bits >>> 2) & 0b11) {
+            int horizontal = switch (bits & 0b11) {
                 case 0b00 -> 0;
                 case 0b01 -> 1;
                 case 0b11 -> -1;
                 default -> throw new IllegalStateException("Unexpected bit pattern: " + bits);
             };
-            int vertical = switch (bits & 0b11) {
+            int vertical = switch ((bits >>> 2) & 0b11) {
                 case 0b00 -> 0;
                 case 0b01 -> 1;
                 case 0b11 -> -1;
                 default -> throw new IllegalStateException("Unexpected bit pattern: " + bits);
             };
 
-            region.addChunk(tilePos, new IterationTile(horizontal, vertical));
+            region.addChunk(tilePos, new IterationTile(horizontal, vertical, iteration));
         }
 
         return region;
@@ -45,14 +45,16 @@ public class IterationTileRegionFileManager extends AbstractRegionFileManager<It
     @Override
     protected byte[] regionToBytes(Region<IterationTile> region) {
         Set<Map.Entry<Vector2i, IterationTile>> tileEntrySet = region.getAllTiles();
-        ByteBuffer buffer = BufferUtils.createByteBuffer(tileEntrySet.size() * (8 + 8 + 1));
+        byte[] array = new byte[tileEntrySet.size() * (4 + 4 + 4 + 1)];
+        ByteBuffer buffer = ByteBuffer.wrap(array);
 
         for (Map.Entry<Vector2i, IterationTile> entry : tileEntrySet) {
             buffer.putInt(entry.getKey().x).putInt(entry.getKey().y);
             IterationTile tile = entry.getValue();
+            buffer.putInt(tile.iteration);
             buffer.put((byte) ((tile.horizontal << 2) | (tile.vertical & 0b11)));
         }
 
-        return buffer.array();
+        return array;
     }
 }

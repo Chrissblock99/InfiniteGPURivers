@@ -6,8 +6,9 @@ public class IterationTile {
 
     public int iteration;
 
-    public IterationTile(int vertical, int horizontal) {
+    public IterationTile(int vertical, int horizontal, int iteration) {
         this.vertical = vertical;
         this.horizontal = horizontal;
+        this.iteration = iteration;
     }
 }
