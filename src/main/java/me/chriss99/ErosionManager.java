@@ -19,7 +19,6 @@ public class ErosionManager {
     }
 
     public boolean findIterate(Vector2i pos, int maxSearch, int maxIteration) {
-        System.out.println("start");
         HashMap<Integer, LinkedHashSet<Vector2i>> tilesAtIteration = new LinkedHashMap<>();
 
         for (int x = -maxSearch; x < maxSearch; x++)
@@ -61,9 +60,7 @@ public class ErosionManager {
         if (bestPos.equals(new Vector2i(Integer.MIN_VALUE)))
             return false;
 
-        System.out.println("iterating");
         iterate(bestPos, bestSize);
-        System.out.println("end");
         return true;
     }
 

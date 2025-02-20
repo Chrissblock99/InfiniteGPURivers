@@ -101,7 +101,7 @@ public class Main {
             tessProgram.setSrcPos(gpuTerrainEroder.getSrcPos());
 
             iterationRenderer.reloadAll();
-        } else System.out.println("Nah...");
+        } else simulateErosion = false;
     }
 
     private void createWindow() {
