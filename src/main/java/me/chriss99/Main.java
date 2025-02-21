@@ -44,8 +44,7 @@ public class Main {
         Main main = new Main("test64",
                 64, 10, 64, 10,
                 7, 2,
-                new Vector2i(), new Vector2i(8*64),
-                5);
+                new Vector2i(), new Vector2i(8*64));
 
         System.out.println("Started after: " + (glfwGetTime() - start));
         main.loop();
