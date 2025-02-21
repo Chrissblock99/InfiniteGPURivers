@@ -180,10 +180,6 @@ public class Main {
     }
 
     private void cleanGL() {
-        //disable the vertex attribute arrays
-        glDisableVertexAttribArray(0);
-        glDisableVertexAttribArray(1);
-
         vaoListProgram.delete();
         playerCenteredRenderer.delete();
         iterationRenderer.delete();

@@ -71,4 +71,10 @@ public class TessProgram extends GLProgram {
     public void setSrcPos(Vector2i srcPos) {
         this.srcPos = new Vector2i(srcPos);
     }
+
+    @Override
+    public void delete() {
+        vao.delete();
+        super.delete();
+    }
 }
