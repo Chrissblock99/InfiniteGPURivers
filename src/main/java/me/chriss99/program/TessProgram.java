@@ -47,6 +47,7 @@ public class TessProgram extends GLProgram {
     }
 
     public void renderTerrain() {
+        glPatchParameteri(GL_PATCH_VERTICES, 4);
         use();
         glUniform2i(srcPosUniform, srcPos.x, srcPos.y);
         glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
@@ -58,6 +59,7 @@ public class TessProgram extends GLProgram {
     }
 
     public void renderWater() {
+        glPatchParameteri(GL_PATCH_VERTICES, 4);
         use();
         glUniform2i(srcPosUniform, srcPos.x, srcPos.y);
         glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));

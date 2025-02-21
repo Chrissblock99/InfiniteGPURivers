@@ -73,8 +73,6 @@ public class Main {
         iterationRenderer = new PositionCenteredRenderer<>(new IterationVAORenderer(cameraMatrix),
                 (vector2i, chunkSize1) -> IterationVAOGenerator.heightMapToIterationVAO(vector2i, new Vector2i(chunkSize1), worldStorage.iterationInfo),
                 cameraMatrix.position, worldStorage.iterationChunkSize, iterationRenderDistance);
-
-        glPatchParameteri(GL_PATCH_VERTICES, 4);
         tessProgram = new TessProgram(cameraMatrix, srcPos, size.x, size.y);
 
         inputDeviceManager = new InputDeviceManager(window);
