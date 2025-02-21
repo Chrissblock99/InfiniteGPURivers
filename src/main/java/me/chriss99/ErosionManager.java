@@ -18,11 +18,11 @@ public class ErosionManager {
         maxChunks = new Vector2i(eroder.getTextureLimit()).div(data.chunkSize);
     }
 
-    public boolean findIterate(Vector2i pos, int maxSearch, int maxIteration) {
+    public boolean findIterate(Vector2i pos, Vector2i size, int maxIteration) {
         HashMap<Integer, LinkedHashSet<Vector2i>> tilesAtIteration = new LinkedHashMap<>();
 
-        for (int x = -maxSearch; x < maxSearch; x++)
-            for (int y = -maxSearch; y < maxSearch; y++) {
+        for (int x = 0; x < size.x; x++)
+            for (int y = 0; y < size.y; y++) {
                 Vector2i currentPos = new Vector2i(x, y).add(pos);
                 int iteration = data.getTile(currentPos.x, currentPos.y).iteration;
 
