@@ -206,19 +206,4 @@ public class Main {
     public void updateVSync() {
         glfwSwapInterval(vSync ? 1 : 0);
     }
-
-    public static String glGetErrorString(int error) {
-        return switch (error) {
-            case GL_NO_ERROR -> "No Error";
-            case GL_INVALID_ENUM -> "Invalid Enum";
-            case GL_INVALID_VALUE -> "Invalid Value";
-            case GL_INVALID_OPERATION -> "Invalid Operation";
-            case GL_INVALID_FRAMEBUFFER_OPERATION -> "Invalid Framebuffer Operation";
-            case GL_OUT_OF_MEMORY -> "Out of Memory";
-            case GL_STACK_UNDERFLOW -> "Stack Underflow";
-            case GL_STACK_OVERFLOW -> "Stack Overflow";
-            case GL_CONTEXT_LOST -> "Context Lost";
-            default -> "Unknown Error (" + error + ")";
-        };
-    }
 }
