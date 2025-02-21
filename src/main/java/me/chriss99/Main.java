@@ -9,7 +9,6 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL45.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-import java.nio.ByteBuffer;
 import java.util.*;
 
 
@@ -28,8 +27,6 @@ public class Main {
     public boolean wireFrame = false;
 
     public final GPUTerrainEroder gpuTerrainEroder;
-    private int vao;
-    private int vertexes;
     public boolean simulateErosion = false;
 
     public final InputDeviceManager inputDeviceManager;
@@ -78,10 +75,8 @@ public class Main {
                 (vector2i, chunkSize1) -> IterationVAOGenerator.heightMapToIterationVAO(vector2i, new Vector2i(chunkSize1), worldStorage.iterationInfo),
                 cameraMatrix.position, worldStorage.iterationChunkSize, iterationRenderDistance);
 
-        setupData(size);
-
         glPatchParameteri(GL_PATCH_VERTICES, 4);
-        tessProgram = new TessProgram(cameraMatrix, vao, srcPos, size.x, size.y);
+        tessProgram = new TessProgram(cameraMatrix, srcPos, size.x, size.y);
 
         inputDeviceManager = new InputDeviceManager(window);
         inputController = new InputController(inputDeviceManager, this);
@@ -128,19 +123,6 @@ public class Main {
 
         //show the window
         glfwShowWindow(window);
-    }
-
-    private void setupData(Vector2i maxSize) {
-        vao = glGenVertexArrays();
-        glBindVertexArray(vao);
-
-        ByteBuffer vertices = Util.storeArrayInBuffer(ColoredVAOGenerator.tesselationGridVertexesTest(maxSize.x/64, maxSize.y/64, 64));
-
-        vertexes = glGenBuffers();
-        glBindBuffer(GL_ARRAY_BUFFER, vertexes);
-        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 2, GL_DOUBLE, false, 0, 0);
-        glEnableVertexAttribArray(0);
     }
 
     private void loop() {

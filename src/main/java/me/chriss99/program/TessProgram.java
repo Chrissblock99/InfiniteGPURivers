@@ -1,6 +1,9 @@
 package me.chriss99.program;
 
 import me.chriss99.CameraMatrix;
+import me.chriss99.ColoredVAOGenerator;
+import me.chriss99.glabstractions.VAO;
+import me.chriss99.glabstractions.VAOImpl;
 import org.joml.Vector2i;
 
 import static org.lwjgl.opengl.GL40.*;
@@ -8,7 +11,7 @@ import static org.lwjgl.opengl.GL40.*;
 public class TessProgram extends GLProgram {
     private final CameraMatrix cameraMatrix;
 
-    private final int vao;
+    private final VAO vao;
     private Vector2i srcPos;
     private final int xSize;
     private final int zSize;
@@ -18,9 +21,9 @@ public class TessProgram extends GLProgram {
     private final int waterUniform;
     private final int srcPosUniform;
 
-    public TessProgram(CameraMatrix cameraMatrix, int vao, Vector2i srcPos, int xSize, int zSize) {
+    public TessProgram(CameraMatrix cameraMatrix, Vector2i srcPos, int xSize, int zSize) {
         this.cameraMatrix = cameraMatrix;
-        this.vao = vao;
+        this.vao = new VAOImpl(null, 2, ColoredVAOGenerator.tesselationGridVertexesTest(xSize/64, zSize/64, 64));
         setSrcPos(srcPos);
         this.xSize = xSize;
         this.zSize = zSize;
@@ -48,7 +51,7 @@ public class TessProgram extends GLProgram {
         glUniform2i(srcPosUniform, srcPos.x, srcPos.y);
         glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
         glUniform3f(cameraPos, cameraMatrix.position.x, cameraMatrix.position.y, cameraMatrix.position.z);
-        glBindVertexArray(vao);
+        vao.bind();
 
         glUniform1i(waterUniform, 0);
         glDrawArrays(GL_PATCHES, 0, xSize/64*zSize/64*4);
@@ -59,7 +62,7 @@ public class TessProgram extends GLProgram {
         glUniform2i(srcPosUniform, srcPos.x, srcPos.y);
         glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
         glUniform3f(cameraPos, cameraMatrix.position.x, cameraMatrix.position.y, cameraMatrix.position.z);
-        glBindVertexArray(vao);
+        vao.bind();
 
         glUniform1i(waterUniform, 1);
         glDrawArrays(GL_PATCHES, 0, xSize/64*zSize/64*4);
