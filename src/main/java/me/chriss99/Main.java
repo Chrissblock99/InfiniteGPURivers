@@ -93,7 +93,7 @@ public class Main {
             inputController.update(deltaTime);
             playerCenteredRenderer.updateLoadedChunks(cameraMatrix.position, gpuTerrainEroder.getSrcPos(), gpuTerrainEroder.getSize());
             if (renderIterations)
-                iterationRenderer.updateLoadedChunks(new Vector3f(cameraMatrix.position).div(64));
+                iterationRenderer.updateLoadedChunks(new Vector3f(cameraMatrix.position).div(worldStorage.iterationInfo.chunkSize));
 
             window.clearBuffers();
 
