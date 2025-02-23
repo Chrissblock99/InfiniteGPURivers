@@ -8,7 +8,17 @@ import java.util.List;
 
 public class LeakingTileLoadManager<T> implements TileLoadManager<T> {
     public LeakingTileLoadManager() {
-        new IllegalStateException("You are leaking memory!").printStackTrace();
+        System.err.println("""
+                -------------------------------------
+                
+                This is (probably) leaking memory!
+                If you see this someone was too lazy
+                to implement proper load management
+                of some tile based system.
+                Restarting often enough might
+                prevent crashes.
+                
+                -------------------------------------""");
     }
 
     @Override

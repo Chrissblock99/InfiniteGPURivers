@@ -30,7 +30,16 @@ public class Window {
         windowId = glfwCreateWindow(width, height, "GLFW OpenGL Window", 0, 0);
 
         glfwMakeContextCurrent(windowId);
-        System.out.println("OpenGL 4.5 Supported: " + GL.createCapabilities().OpenGL45);
+        if (!GL.createCapabilities().OpenGL45)
+            System.err.println("""
+                    -----------------------------------------
+                    
+                    This device does not support OpenGL 4.5!
+                    Parts of the program may still work,
+                    but expect issues like things not
+                    rendering or just crashing.
+                    
+                    -----------------------------------------""");
         glViewport(0, 0, width, height);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glEnable(GL_DEPTH_TEST);
