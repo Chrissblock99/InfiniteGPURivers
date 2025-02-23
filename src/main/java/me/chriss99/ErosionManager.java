@@ -33,10 +33,8 @@ public class ErosionManager {
 
         HashSet<Vector2i> candidates = null;
         for (int lowestIteration : sortedIterations) {
-            if (lowestIteration > maxIteration) {
-                System.out.println(lowestIteration + " " + maxIteration);
+            if (lowestIteration > maxIteration)
                 return false;
-            }
 
             LinkedHashSet<Vector2i> currentCandidates = tilesAtIteration.get(lowestIteration);
             if (hasIterable2x2Area(currentCandidates)) {

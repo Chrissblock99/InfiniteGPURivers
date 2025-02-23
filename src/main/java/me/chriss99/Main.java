@@ -108,7 +108,6 @@ public class Main {
 
             if (simulateErosion)
                 primitiveErosion();
-                //gpuTerrainEroder.erosionSteps(simulationStepsPerFrame, true, true, true, true);
 
             window.pollEvents();
 
