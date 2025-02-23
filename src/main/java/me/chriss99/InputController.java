@@ -50,14 +50,8 @@ public class InputController {
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_J, () -> main.cameraMatrix.zFar -= 0.05f);
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_K, () -> main.cameraMatrix.zFar += 0.05f);
 
-        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_V, () -> {
-            main.vSync = !main.vSync;
-            main.updateVSync();
-        });
-        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_E, () -> {
-            main.wireFrame = !main.wireFrame;
-            main.updateWireFrame();
-        });
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_V, () -> main.window.setVSync(!main.window.getVSync()));
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_E, () -> main.window.setWireFrame(!main.window.getWireFrame()));
 
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_M, () -> {
             main.playerCenteredRenderer.setChunkRenderDistance(main.playerCenteredRenderer.getChunkRenderDistance()+1);

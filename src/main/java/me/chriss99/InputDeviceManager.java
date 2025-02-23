@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.function.BiConsumer;
 
 public class InputDeviceManager {
-    long window;
-
     private final HashMap<Integer, ArrayList<Runnable>> keyPressRunnables = new HashMap<>();
     private final HashMap<Integer, ArrayList<Runnable>> keyReleaseRunnables = new HashMap<>();
     private final ArrayList<BiConsumer<Double, Double>> mouseAbsoluteMovementConsumers = new ArrayList<>();
@@ -18,13 +16,8 @@ public class InputDeviceManager {
     private double lastMouseX = Double.NaN;
     private double lastMouseY = Double.NaN;
 
-    public InputDeviceManager(long window) {
-        this.window = window;
-        setupCallBack();
-    }
-
-    private void setupCallBack() {
-        glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
+    public InputDeviceManager(long windowId) {
+        glfwSetKeyCallback(windowId, (window, key, scancode, action, mods) -> {
             ArrayList<Runnable> runnables = new ArrayList<>();
             switch (action) {
                 case GLFW_PRESS -> runnables = keyPressRunnables.get(key);
@@ -38,7 +31,7 @@ public class InputDeviceManager {
                 runnable.run();
         });
 
-        glfwSetCursorPosCallback(window, (win, x, y) -> {
+        glfwSetCursorPosCallback(windowId, (win, x, y) -> {
             for (BiConsumer<Double, Double> consumer : mouseAbsoluteMovementConsumers)
                 consumer.accept(x, y);
 
@@ -57,7 +50,7 @@ public class InputDeviceManager {
             lastMouseY = y;
         });
 
-        glfwSetScrollCallback(window, (win, dx, dy) -> {
+        glfwSetScrollCallback(windowId, (win, dx, dy) -> {
             for (BiConsumer<Double, Double> consumer : mouseScrollConsumers)
                 consumer.accept(dx, dy);
         });
