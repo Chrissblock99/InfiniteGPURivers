@@ -7,11 +7,11 @@ import org.joml.Vector2i;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class SquareTileLoadManager<T> implements TileLoadManager<T> {
+public class SquareTLM<T> implements TileLoadManager<T> {
     protected int renderDistance;
     protected Vector2f position;
 
-    public SquareTileLoadManager(int renderDistance, Vector2f initPos) {
+    public SquareTLM(int renderDistance, Vector2f initPos) {
         this.renderDistance = renderDistance;
         this.position = initPos;
     }

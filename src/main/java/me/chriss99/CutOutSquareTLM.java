@@ -5,11 +5,11 @@ import org.joml.Vector2i;
 
 import java.util.Collection;
 
-public class CutOutSquareTileLoadManager<T> extends SquareTileLoadManager<T> {
+public class CutOutSquareTLM<T> extends SquareTLM<T> {
     protected Vector2i skipSrcPos;
     protected Vector2i skipSideLength;
 
-    public CutOutSquareTileLoadManager(int renderDistance, Vector2f initPos, Vector2i skipSrcPos, Vector2i skipSideLength) {
+    public CutOutSquareTLM(int renderDistance, Vector2f initPos, Vector2i skipSrcPos, Vector2i skipSideLength) {
         super(renderDistance, initPos);
         this.skipSrcPos = skipSrcPos;
         this.skipSideLength = skipSideLength;

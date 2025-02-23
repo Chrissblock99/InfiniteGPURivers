@@ -29,7 +29,7 @@ public class ErosionDataStorage {
 
     public final IterableWorld iterationInfo;
 
-    public final TileLoadManager tileLoadManager = new LeakingTileLoadManager<>();
+    public final TileLoadManager tileLoadManager = new LeakingTLM<>();
 
     public ErosionDataStorage(String worldName, int chunkSize, int regionSize, int iterationChunkSize, int iterationRegionSize) {
         this.chunkSize = chunkSize;

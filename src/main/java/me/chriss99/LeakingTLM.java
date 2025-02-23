@@ -6,8 +6,8 @@ import org.joml.Vector2i;
 import java.util.Collection;
 import java.util.List;
 
-public class LeakingTileLoadManager<T> implements TileLoadManager<T> {
-    public LeakingTileLoadManager() {
+public class LeakingTLM<T> implements TileLoadManager<T> {
+    public LeakingTLM() {
         System.err.println("""
                 -------------------------------------
                 
