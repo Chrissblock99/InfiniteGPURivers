@@ -78,7 +78,7 @@ public class Main {
     public void primitiveErosion() {
         Vector2i pos = new Vector2i(Util.properIntDivide((int) cameraMatrix.position.x, worldStorage.chunkSize), Util.properIntDivide((int) cameraMatrix.position.z, worldStorage.chunkSize));
         if (erosionManager.findIterate(pos.sub(50, 50), new Vector2i(100), 2000)) {
-            tessProgram.setSrcPos(gpuTerrainEroder.getSrcPos());
+            tessProgram.setSrcPos(gpuTerrainEroder.getTexturePos());
 
             iterationRenderer.reloadAll();
         } else simulateErosion = false;
@@ -91,7 +91,7 @@ public class Main {
 
         while(!window.shouldClose()) {
             inputController.update(deltaTime);
-            playerCenteredRenderer.updateLoadedChunks(cameraMatrix.position, gpuTerrainEroder.getSrcPos(), gpuTerrainEroder.getSize());
+            playerCenteredRenderer.updateLoadedChunks(cameraMatrix.position, gpuTerrainEroder.getTexturePos(), gpuTerrainEroder.getUsedTextureSize());
             if (renderIterations)
                 iterationRenderer.updateLoadedChunks(new Vector3f(cameraMatrix.position).div(worldStorage.iterationInfo.chunkSize));
 

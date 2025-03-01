@@ -15,7 +15,7 @@ public class ErosionManager {
         this.eroder = eroder;
         this.data = data;
 
-        maxChunks = new Vector2i(eroder.getTextureLimit()).div(data.chunkSize);
+        maxChunks = new Vector2i(eroder.getMaxTextureSize()).div(data.chunkSize);
     }
 
     public boolean findIterate(Vector2i pos, Vector2i size, int maxIteration) {

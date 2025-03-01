@@ -67,8 +67,8 @@ public class InputController {
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_R, main::primitiveErosion);
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_F, () -> {
             main.gpuTerrainEroder.downloadMap();
-            ImageWriter.writeImageHeightMap((Float2DBufferWrapper) main.worldStorage.terrain.readArea(main.gpuTerrainEroder.getSrcPos().x, main.gpuTerrainEroder.getSrcPos().y, main.gpuTerrainEroder.getSize().x, main.gpuTerrainEroder.getSize().y), "terrain", true);
-            ImageWriter.writeImageHeightMap((Float2DBufferWrapper) main.worldStorage.water.readArea(main.gpuTerrainEroder.getSrcPos().x, main.gpuTerrainEroder.getSrcPos().y, main.gpuTerrainEroder.getSize().x, main.gpuTerrainEroder.getSize().y), "water", false);
+            ImageWriter.writeImageHeightMap((Float2DBufferWrapper) main.worldStorage.terrain.readArea(main.gpuTerrainEroder.getTexturePos().x, main.gpuTerrainEroder.getTexturePos().y, main.gpuTerrainEroder.getUsedTextureSize().x, main.gpuTerrainEroder.getUsedTextureSize().y), "terrain", true);
+            ImageWriter.writeImageHeightMap((Float2DBufferWrapper) main.worldStorage.water.readArea(main.gpuTerrainEroder.getTexturePos().x, main.gpuTerrainEroder.getTexturePos().y, main.gpuTerrainEroder.getUsedTextureSize().x, main.gpuTerrainEroder.getUsedTextureSize().y), "water", false);
         });
     }
 
