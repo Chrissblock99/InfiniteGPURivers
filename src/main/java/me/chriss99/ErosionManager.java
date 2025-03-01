@@ -150,9 +150,6 @@ public class ErosionManager {
     }
 
     private void iterate(Vector2i pos, Vector2i size) {
-        int x = pos.x;
-        int y = pos.y;
-
         Vector2i length = new Vector2i(size).sub(1, 1);
 
         int l = getEdgesEqual(pos, length.y, true);
@@ -160,8 +157,9 @@ public class ErosionManager {
         int f = getEdgesEqual(new Vector2i(pos).add(0,length.y), length.x, false);
         int b = getEdgesEqual(pos, length.x, false);
 
-        eroder.changeArea(new Vector2i(x, y).mul(data.chunkSize), new Vector2i(data.chunkSize).mul(size));
-        eroder.erosionSteps(data.chunkSize, l == 0, r == 0, f == 0, b == 0);
+        Vector2i idk = new Vector2i(pos).mul(data.chunkSize);
+        eroder.changeArea(idk, new Vector2i(data.chunkSize).mul(size));
+        eroder.erode(idk, eroder.getUsedTextureSize(), data.chunkSize, l == 0, r == 0, f == 0, b == 0);
 
         l--;
         r++;
