@@ -1,5 +1,6 @@
-package me.chriss99;
+package me.chriss99.erosion;
 
+import me.chriss99.IterationSurfaceType;
 import me.chriss99.worldmanagement.iteration.IterableWorld;
 import org.joml.Vector2i;
 

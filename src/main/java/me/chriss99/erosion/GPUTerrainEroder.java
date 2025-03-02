@@ -1,5 +1,8 @@
-package me.chriss99;
+package me.chriss99.erosion;
 
+import me.chriss99.Array2DBufferWrapper;
+import me.chriss99.worldmanagement.ErosionDataStorage;
+import me.chriss99.Texture2D;
 import me.chriss99.program.ComputeProgram;
 import me.chriss99.worldmanagement.InfiniteChunkWorld;
 import org.joml.Vector2i;

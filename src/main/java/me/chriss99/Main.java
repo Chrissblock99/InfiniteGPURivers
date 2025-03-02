@@ -1,6 +1,9 @@
 package me.chriss99;
 
+import me.chriss99.erosion.ErosionManager;
+import me.chriss99.erosion.GPUTerrainEroder;
 import me.chriss99.program.*;
+import me.chriss99.worldmanagement.ErosionDataStorage;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.*;

@@ -1,6 +1,9 @@
-package me.chriss99;
+package me.chriss99.worldmanagement;
 
-import me.chriss99.worldmanagement.*;
+import me.chriss99.Float2DBufferWrapper;
+import me.chriss99.LeakingTLM;
+import me.chriss99.TerrainGenerator;
+import me.chriss99.Vec4f2DBufferWrapper;
 import me.chriss99.worldmanagement.iteration.IterableWorld;
 
 import static me.chriss99.Array2DBufferWrapper.Type;
