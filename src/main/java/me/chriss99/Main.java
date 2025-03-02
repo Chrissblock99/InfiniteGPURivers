@@ -95,6 +95,10 @@ public class Main {
 
         while(!window.shouldClose()) {
             inputController.update(deltaTime);
+
+            window.updateWindowSize();
+            cameraMatrix.aspectRatio = window.getAspectRatio();
+
             playerCenteredRenderer.updateLoadedChunks(cameraMatrix.position, gpuTerrainEroder.getUsedArea());
             if (renderIterations)
                 iterationRenderer.updateLoadedChunks(new Vector3f(cameraMatrix.position).div(worldStorage.iterationInfo.chunkSize));

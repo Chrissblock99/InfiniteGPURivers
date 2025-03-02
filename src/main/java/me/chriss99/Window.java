@@ -25,7 +25,7 @@ public class Window {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
         windowId = glfwCreateWindow(width, height, "GLFW OpenGL Window", 0, 0);
 
@@ -51,6 +51,18 @@ public class Window {
         setWireFrame(false);
 
         glfwShowWindow(windowId);
+    }
+
+    public void updateWindowSize() {
+        int[] width = new int[1];
+        int[] height = new int[1];
+
+        glfwGetWindowSize(windowId, width, height);
+
+        this.width = width[0];
+        this.height = height[0];
+
+        glViewport(0, 0, this.width, this.height);
     }
 
     public float getAspectRatio() {
