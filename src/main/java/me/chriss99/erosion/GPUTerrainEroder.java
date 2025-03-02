@@ -106,33 +106,24 @@ public class GPUTerrainEroder {
         uploadMap();
     }
 
-    public void erode(Vector2i pos, Vector2i size, int steps, boolean lFlat, boolean rFlat, boolean fFlat, boolean bFlat) {
-        Vector2i srcPos = new Vector2i(pos).sub(texturePos);
-        Vector2i endPos = new Vector2i(srcPos).add(size);
-
-        srcPos.add(lFlat ? 0 : steps, bFlat ? 0 : steps);
-        endPos.sub(rFlat ? 0 : steps, fFlat ? 0 : steps);
-
-        for (int i = 0; i < steps; i++) {
-            execShader(calcOutflow, srcPos, endPos);
-            execShader(applyOutflowAndRest, srcPos, endPos);
-
-            srcPos.add(lFlat ? 1 : -1, bFlat ? 1 : -1);
-            endPos.sub(rFlat ? 1 : -1, fFlat ? 1 : -1);
-        }
-    }
-
-    private void execShader(ComputeProgram program, Vector2i srcPos, Vector2i endPos) {
+    public void erode(Vector2i srcPos, Vector2i endPos) {
         Vector2i size = new Vector2i(endPos).sub(srcPos);
+        srcPos = new Vector2i(srcPos).sub(texturePos);
+
         if (size.x > usedTextureSize.x || size.y > usedTextureSize.y)
             throw new IllegalArgumentException("Area exceeds used size! " + size + ", usedSize:" + usedTextureSize);
 
+        execShader(calcOutflow, srcPos, size);
+        execShader(applyOutflowAndRest, srcPos, size);
+    }
+
+    private void execShader(ComputeProgram program, Vector2i pos, Vector2i size) {
         //correct for texture being one larger in all directions
-        srcPos = new Vector2i(srcPos).add(1, 1);
+        pos = new Vector2i(pos).add(1, 1);
 
         program.use();
-        glUniform2i(srcPosUniform1, srcPos.x, srcPos.y);
-        glUniform2i(srcPosUniform2, srcPos.x, srcPos.y);
+        glUniform2i(srcPosUniform1, pos.x, pos.y);
+        glUniform2i(srcPosUniform2, pos.x, pos.y);
         glDispatchCompute(size.x, size.y, 1);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
     }

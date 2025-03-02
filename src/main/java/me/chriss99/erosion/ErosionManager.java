@@ -160,7 +160,7 @@ public class ErosionManager {
 
         Vector2i idk = new Vector2i(pos).mul(data.chunkSize);
         eroder.changeArea(idk, new Vector2i(data.chunkSize).mul(size));
-        eroder.erode(idk, eroder.getUsedTextureSize(), data.chunkSize, l == 0, r == 0, f == 0, b == 0);
+        new ErosionTask(eroder, idk, eroder.getUsedTextureSize(), data.chunkSize, l == 0, r == 0, f == 0, b == 0).erode();
 
         l--;
         r++;
