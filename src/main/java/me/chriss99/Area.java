@@ -16,7 +16,7 @@ public record Area(Vector2i srcPos, Vector2i endPos) {
     }
 
     public Area(Vector2i srcPos, int size) {
-        this(srcPos, new Vector2i(size));
+        this(srcPos, new Vector2i(size).add(srcPos));
     }
 
     public Area(Vector2i srcPos, Vector2i endPos) {
