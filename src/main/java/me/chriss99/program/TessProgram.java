@@ -5,6 +5,7 @@ import me.chriss99.CameraMatrix;
 import me.chriss99.ColoredVAOGenerator;
 import me.chriss99.glabstractions.VAO;
 import me.chriss99.glabstractions.VAOImpl;
+import org.joml.Vector2i;
 
 import static org.lwjgl.opengl.GL40.*;
 
@@ -13,6 +14,7 @@ public class TessProgram extends GLProgram {
 
     private final VAO vao;
     private Area area;
+    private final Vector2i maxSize;
 
     private final int transformMatrix;
     private final int cameraPos;
@@ -21,8 +23,9 @@ public class TessProgram extends GLProgram {
 
     public TessProgram(CameraMatrix cameraMatrix, Area area) {
         this.cameraMatrix = cameraMatrix;
-        this.vao = new VAOImpl(null, 2, ColoredVAOGenerator.tesselationGridVertexesTest(area.getSize().x/64, area.getSize().y/64, 64));
         setArea(area);
+        maxSize = this.area.getSize();
+        this.vao = new VAOImpl(null, 2, ColoredVAOGenerator.tesselationGridVertexesTest(maxSize.x, maxSize.y, 64));
 
         addShader("tesselation/passThrough.vert", GL_VERTEX_SHADER);
         addShader("tesselation/tess.tesc", GL_TESS_CONTROL_SHADER);
@@ -30,6 +33,7 @@ public class TessProgram extends GLProgram {
         addShader("tesselation/normals.geom", GL_GEOMETRY_SHADER);
         addShader("tesselation/different.frag", GL_FRAGMENT_SHADER);
 
+        glPatchParameteri(GL_PATCH_VERTICES, 4);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -43,31 +47,29 @@ public class TessProgram extends GLProgram {
     }
 
     public void renderTerrain() {
-        glPatchParameteri(GL_PATCH_VERTICES, 4);
-        use();
-        glUniform2i(srcPosUniform, area.srcPos().x, area.srcPos().y);
-        glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
-        glUniform3f(cameraPos, cameraMatrix.position.x, cameraMatrix.position.y, cameraMatrix.position.z);
-        vao.bind();
-
-        glUniform1i(waterUniform, 0);
-        glDrawArrays(GL_PATCHES, 0, area.getSize().x/64*area.getSize().y/64*4);
+        render(false);
     }
 
     public void renderWater() {
-        glPatchParameteri(GL_PATCH_VERTICES, 4);
+        render(true);
+    }
+
+    private void render(boolean water) {
         use();
-        glUniform2i(srcPosUniform, area.srcPos().x, area.srcPos().y);
+        glUniform2i(srcPosUniform, area.srcPos().x*64, area.srcPos().y*64);
         glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
         glUniform3f(cameraPos, cameraMatrix.position.x, cameraMatrix.position.y, cameraMatrix.position.z);
         vao.bind();
 
-        glUniform1i(waterUniform, 1);
-        glDrawArrays(GL_PATCHES, 0, area.getSize().x/64*area.getSize().y/64*4);
+        glUniform1i(waterUniform, water ? 1 : 0);
+
+        Vector2i size = area.getSize();
+        for (int y = 0; y < size.y; y++)
+            glDrawArrays(GL_PATCHES, maxSize.x*y*4, size.x*4);
     }
 
-    public void setArea(Area area) { //TODO this doesn't change the size!
-        this.area = area.copy();
+    public void setArea(Area area) {
+        this.area = area.div(64);
     }
 
     @Override
