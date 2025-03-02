@@ -12,10 +12,10 @@ public class ImageWriter {
     }
 
     public static void writeImageHeightMap(Float2DBufferWrapper heightMap, String filename, boolean negative) {
-        BufferedImage image = new BufferedImage(heightMap.width, heightMap.height, BufferedImage.TYPE_INT_RGB);
+        BufferedImage image = new BufferedImage(heightMap.getSize().x, heightMap.getSize().y, BufferedImage.TYPE_INT_RGB);
 
-        for(int i = 0; i < heightMap.width; i++)
-            for(int j = 0; j < heightMap.height; j++) {
+        for(int i = 0; i < heightMap.getSize().x; i++)
+            for(int j = 0; j < heightMap.getSize().y; j++) {
                 float heightValue = heightMap.getFloat(i, j)/250 + ((negative) ? .5f : 0);
                 Color myRGB = new Color(heightValue, heightValue, heightValue);
                 int rgb = myRGB.getRGB();

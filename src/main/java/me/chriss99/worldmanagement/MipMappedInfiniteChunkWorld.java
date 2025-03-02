@@ -1,5 +1,6 @@
 package me.chriss99.worldmanagement;
 
+import me.chriss99.Area;
 import me.chriss99.Array2DBufferWrapper;
 import org.joml.Vector2i;
 
@@ -34,7 +35,7 @@ public class MipMappedInfiniteChunkWorld {
         if (mipMapLevel == 0)
             return chunkGenerator.apply(srcPos, chunkSize);
 
-        Array2DBufferWrapper mipMapFrom = getMipMapLevel(mipMapLevel-1).readArea(srcPos.x*2, srcPos.y*2, chunkSize*2, chunkSize*2);
+        Array2DBufferWrapper mipMapFrom = getMipMapLevel(mipMapLevel-1).readArea(new Area(srcPos, chunkSize).mul(2));
         return new Chunk(mipMapFrom.mipMap());
     }
 

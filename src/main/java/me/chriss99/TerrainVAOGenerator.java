@@ -4,11 +4,11 @@ import org.joml.Vector2i;
 
 public class TerrainVAOGenerator {
     public static float[] heightMapToSimpleVertexes(Float2DBufferWrapper terrain, Float2DBufferWrapper water) {
-        float[] vertecies = new float[terrain.width* terrain.height*2];
+        float[] vertecies = new float[terrain.getSize().x* terrain.getSize().y*2];
         int vertexShift = 0;
 
-        for (int z = 0; z < terrain.height; z++)
-            for (int x = 0; x < terrain.width; x++) {
+        for (int z = 0; z < terrain.getSize().y; z++)
+            for (int x = 0; x < terrain.getSize().x; x++) {
                 float terrainHeight = terrain.getFloat(x, z);
                 vertecies[vertexShift] = terrainHeight;
 
@@ -45,8 +45,8 @@ public class TerrainVAOGenerator {
 
     public static TerrainVAO heightMapToSimpleVAO(Float2DBufferWrapper terrain, Float2DBufferWrapper water, Vector2i srcPos, int scale) {
         float[] vertices = heightMapToSimpleVertexes(terrain, water);
-        int[] index = heightMapToSimpleIndex(terrain.width, terrain.height);
+        int[] index = heightMapToSimpleIndex(terrain.getSize().x, terrain.getSize().y);
 
-        return new TerrainVAO(vertices, index, srcPos, terrain.width, scale);
+        return new TerrainVAO(vertices, index, srcPos, terrain.getSize().x, scale);
     }
 }

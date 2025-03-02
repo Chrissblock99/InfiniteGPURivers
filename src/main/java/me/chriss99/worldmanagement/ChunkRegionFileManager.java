@@ -44,7 +44,7 @@ public class ChunkRegionFileManager implements RegionFileManager<Chunk> {
             Vector2i chunkCoord = new Vector2i(buffer.getInt(), buffer.getInt());
             byte[] byteArray = new byte[chunkDataByteSize];
             buffer.get(byteArray);
-            Array2DBufferWrapper data = Array2DBufferWrapper.of(ByteBuffer.wrap(byteArray), type, chunkSize, chunkSize);
+            Array2DBufferWrapper data = Array2DBufferWrapper.of(ByteBuffer.wrap(byteArray), type, new Vector2i(chunkSize));
             region.addChunk(chunkCoord, new Chunk(data));
         }
 

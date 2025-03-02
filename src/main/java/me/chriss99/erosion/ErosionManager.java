@@ -1,5 +1,6 @@
 package me.chriss99.erosion;
 
+import me.chriss99.Area;
 import me.chriss99.IterationSurfaceType;
 import me.chriss99.worldmanagement.iteration.IterableWorld;
 import org.joml.Vector2i;
@@ -158,9 +159,9 @@ public class ErosionManager {
         int f = getEdgesEqual(new Vector2i(pos).add(0,length.y), length.x, false);
         int b = getEdgesEqual(pos, length.x, false);
 
-        Vector2i idk = new Vector2i(pos).mul(data.chunkSize);
-        eroder.changeArea(idk, new Vector2i(data.chunkSize).mul(size));
-        new ErosionTask(eroder, idk, eroder.getUsedTextureSize(), data.chunkSize, l == 0, r == 0, f == 0, b == 0).erode();
+        Area area = new Area(size).add(pos).mul(data.chunkSize);
+        eroder.changeArea(area);
+        new ErosionTask(eroder, area, data.chunkSize, l == 0, r == 0, f == 0, b == 0).erode();
 
         l--;
         r++;

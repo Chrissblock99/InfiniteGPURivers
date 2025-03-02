@@ -1,5 +1,6 @@
 package me.chriss99;
 
+import org.joml.Vector2i;
 import org.lwjgl.BufferUtils;
 
 import java.nio.ByteBuffer;
@@ -11,44 +12,46 @@ public abstract sealed class Array2DBufferWrapper permits Float2DBufferWrapper, 
     public final ByteBuffer buffer;
     public final Type type;
 
-    public final int width;
-    public final int height;
+    protected final Vector2i size;
 
-    protected Array2DBufferWrapper(ByteBuffer buffer, Type type, int width, int height) {
-        int correctCapacity = width*height*type.elementSize;
+    protected Array2DBufferWrapper(ByteBuffer buffer, Type type, Vector2i size) {
+        int correctCapacity = size.x*size.y*type.elementSize;
         if (buffer.capacity() != correctCapacity)
             throw new IllegalArgumentException("Buffer has to be of size " + correctCapacity + " but is " + buffer.capacity());
 
         this.buffer = buffer;
         this.type = type;
 
-        this.width = width;
-        this.height = height;
+        this.size = new Vector2i(size);
     }
 
-    protected Array2DBufferWrapper(Type type, int width, int height) {
-        this(BufferUtils.createByteBuffer(width*height*type.elementSize), type, width, height);
+    protected Array2DBufferWrapper(Type type, Vector2i size) {
+        this(BufferUtils.createByteBuffer(size.x*size.y*type.elementSize), type, size);
     }
 
-    public static Array2DBufferWrapper of(ByteBuffer buffer, Type type, int width, int height) {
+    public static Array2DBufferWrapper of(ByteBuffer buffer, Type type, Vector2i size) {
         if (buffer == null)
-            buffer = BufferUtils.createByteBuffer(width*height*type.elementSize);
+            buffer = BufferUtils.createByteBuffer(size.x*size.y*type.elementSize);
 
         return switch (type) {
-            case FLOAT -> new Float2DBufferWrapper(buffer, width, height);
-            case VEC4F -> new Vec4f2DBufferWrapper(buffer, width, height);
+            case FLOAT -> new Float2DBufferWrapper(buffer, size);
+            case VEC4F -> new Vec4f2DBufferWrapper(buffer, size);
         };
     }
 
-    public static Array2DBufferWrapper of(Type type, int width, int height) {
-        return of(null, type, width, height);
+    public static Array2DBufferWrapper of(Type type, Vector2i size) {
+        return of(null, type, size);
     }
 
     public abstract Array2DBufferWrapper mipMap();
 
 
     public Array2DBufferWrapper slice(int z) {
-        return of(buffer.slice(width*type.elementSize*z, width*type.elementSize).order(ByteOrder.LITTLE_ENDIAN), type, width, 1);
+        return of(buffer.slice(size.x*type.elementSize*z, size.x*type.elementSize).order(ByteOrder.LITTLE_ENDIAN), type, new Vector2i(size.x, 1));
+    }
+
+    public Vector2i getSize() {
+        return new Vector2i(size);
     }
 
 

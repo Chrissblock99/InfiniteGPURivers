@@ -1,5 +1,6 @@
 package me.chriss99.worldmanagement;
 
+import me.chriss99.Area;
 import me.chriss99.Array2DBufferWrapper;
 import me.chriss99.Util;
 import org.joml.Vector2i;
@@ -14,17 +15,19 @@ public class InfiniteChunkWorld extends InfiniteWorld<Chunk> {
         this.type = type;
     }
 
-    public Array2DBufferWrapper readArea(int x, int y, int width, int height) {
-        return readWriteArea(x, y, Array2DBufferWrapper.of(type, width, height), true);
+    public Array2DBufferWrapper readArea(Area area) {
+        return readWriteArea(area.srcPos(), Array2DBufferWrapper.of(type, area.getSize()), true);
     }
 
-    public void writeArea(int x, int y, Array2DBufferWrapper data) {
-        readWriteArea(x, y, data, false);
+    public void writeArea(Vector2i pos, Array2DBufferWrapper data) {
+        readWriteArea(pos, data, false);
     }
 
-    private Array2DBufferWrapper readWriteArea(int x, int y, Array2DBufferWrapper data, boolean read) {
-        int width = data.width;
-        int height = data.height;
+    private Array2DBufferWrapper readWriteArea(Vector2i pos, Array2DBufferWrapper data, boolean read) {
+        int x = pos.x;
+        int y = pos.y;
+        int width = data.getSize().x;
+        int height = data.getSize().y;
 
 
         int chunkX = Util.properIntDivide(x, chunkSize);

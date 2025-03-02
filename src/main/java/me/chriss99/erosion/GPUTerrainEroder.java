@@ -1,5 +1,6 @@
 package me.chriss99.erosion;
 
+import me.chriss99.Area;
 import me.chriss99.Array2DBufferWrapper;
 import me.chriss99.worldmanagement.ErosionDataStorage;
 import me.chriss99.Texture2D;
@@ -31,8 +32,7 @@ public class GPUTerrainEroder {
     private final ErosionDataStorage erosionDataStorage;
     private final Vector2i maxTextureSize = new Vector2i();
 
-    private final Vector2i texturePos = new Vector2i();
-    private final Vector2i usedTextureSize = new Vector2i();
+    private Area usedArea;
 
     private final Texture2D terrainMap;
     private final Texture2D waterMap;
@@ -51,29 +51,26 @@ public class GPUTerrainEroder {
     private final int srcPosUniform1;
     private final int srcPosUniform2;
 
-    public GPUTerrainEroder(ErosionDataStorage erosionDataStorage, Vector2i texturePos, Vector2i maxTextureSize, Vector2i usedTextureSize) {
+    public GPUTerrainEroder(ErosionDataStorage erosionDataStorage, Vector2i maxTextureSize, Area usedArea) {
         this.erosionDataStorage = erosionDataStorage;
         this.maxTextureSize.x = maxTextureSize.x;
         this.maxTextureSize.y = maxTextureSize.y;
 
-        this.texturePos.x = texturePos.x;
-        this.texturePos.y = texturePos.y;
-        this.usedTextureSize.x = usedTextureSize.x;
-        this.usedTextureSize.y = usedTextureSize.y;
+        this.usedArea = usedArea.copy();
 
         //read buffer in all directions (avoids implicit out of bound reads when iterating near edges)
         Vector2i buffedMaxSize = new Vector2i(maxTextureSize).add(2, 2);
 
-        terrainMap = new Texture2D(GL_R32F, buffedMaxSize.x, buffedMaxSize.y);
-        waterMap = new Texture2D(GL_R32F, buffedMaxSize.x, buffedMaxSize.y);
-        sedimentMap = new Texture2D(GL_R32F, buffedMaxSize.x, buffedMaxSize.y);
-        hardnessMap = new Texture2D(GL_R32F, buffedMaxSize.x, buffedMaxSize.y);
+        terrainMap = new Texture2D(GL_R32F, buffedMaxSize);
+        waterMap = new Texture2D(GL_R32F, buffedMaxSize);
+        sedimentMap = new Texture2D(GL_R32F, buffedMaxSize);
+        hardnessMap = new Texture2D(GL_R32F, buffedMaxSize);
 
-        waterOutflowPipes = new Texture2D(GL_RGBA32F, buffedMaxSize.x, buffedMaxSize.y);
-        sedimentOutflowPipes = new Texture2D(GL_RGBA32F, buffedMaxSize.x, buffedMaxSize.y);
+        waterOutflowPipes = new Texture2D(GL_RGBA32F, buffedMaxSize);
+        sedimentOutflowPipes = new Texture2D(GL_RGBA32F, buffedMaxSize);
 
-        thermalOutflowPipes1 = new Texture2D(GL_RGBA32F, buffedMaxSize.x, buffedMaxSize.y);
-        thermalOutflowPipes2 = new Texture2D(GL_RGBA32F, buffedMaxSize.x, buffedMaxSize.y);
+        thermalOutflowPipes1 = new Texture2D(GL_RGBA32F, buffedMaxSize);
+        thermalOutflowPipes2 = new Texture2D(GL_RGBA32F, buffedMaxSize);
 
 
         calcOutflow = new ComputeProgram("calcOutflow");
@@ -106,15 +103,14 @@ public class GPUTerrainEroder {
         uploadMap();
     }
 
-    public void erode(Vector2i srcPos, Vector2i endPos) {
-        Vector2i size = new Vector2i(endPos).sub(srcPos);
-        srcPos = new Vector2i(srcPos).sub(texturePos);
+    public void erode(Area area) {
+        if (!usedArea.contains(area))
+            throw new IllegalArgumentException("Area exceeds usedArea! area: " + area + ", usedArea:" + usedArea);
 
-        if (size.x > usedTextureSize.x || size.y > usedTextureSize.y)
-            throw new IllegalArgumentException("Area exceeds used size! " + size + ", usedSize:" + usedTextureSize);
+        area = area.sub(usedArea.srcPos());
 
-        execShader(calcOutflow, srcPos, size);
-        execShader(applyOutflowAndRest, srcPos, size);
+        execShader(calcOutflow, area.srcPos(), area.getSize());
+        execShader(applyOutflowAndRest, area.srcPos(), area.getSize());
     }
 
     private void execShader(ComputeProgram program, Vector2i pos, Vector2i size) {
@@ -128,19 +124,12 @@ public class GPUTerrainEroder {
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
     }
 
-    public void changeArea(Vector2i srcPos) {
-        changeArea(srcPos, usedTextureSize);
-    }
-
-    public void changeArea(Vector2i pos, Vector2i size) {
-        if (size.x > maxTextureSize.x || size.y > maxTextureSize.y)
-            throw new IllegalArgumentException("New size cannot exceed maxTextureSize!");
+    public void changeArea(Area area) {
+        if (area.getSize().x > maxTextureSize.x || area.getSize().y > maxTextureSize.y)
+            throw new IllegalArgumentException("New area cannot exceed maxTextureSize!");
 
         downloadMap();
-        texturePos.x = pos.x;
-        texturePos.y = pos.y;
-        usedTextureSize.x = size.x;
-        usedTextureSize.y = size.y;
+        usedArea = area;
         uploadMap();
     }
 
@@ -158,25 +147,25 @@ public class GPUTerrainEroder {
     }
 
     private void downloadHelper(Texture2D download, InfiniteChunkWorld write) {
-        Array2DBufferWrapper bufferWrapper = Array2DBufferWrapper.of(write.type, usedTextureSize.x, usedTextureSize.y);
-        download.downloadData(1, 1, bufferWrapper);
-        write.writeArea(texturePos.x, texturePos.y, bufferWrapper);
+        Array2DBufferWrapper bufferWrapper = Array2DBufferWrapper.of(write.type, usedArea.getSize());
+        download.downloadData(new Vector2i(1), bufferWrapper);
+        write.writeArea(usedArea.srcPos(), bufferWrapper);
     }
 
     public void uploadMap() {
-        Vector2i srcPos = new Vector2i(texturePos).sub(1, 1);
-        Vector2i size = new Vector2i(usedTextureSize).add(2, 2);
+        Area area = usedArea.outset(1);
+        Vector2i zero = new Vector2i();
 
-        terrainMap.uploadData(0, 0, erosionDataStorage.terrain.readArea(srcPos.x, srcPos.y, size.x, size.y));
-        waterMap.uploadData(0, 0, erosionDataStorage.water.readArea(srcPos.x, srcPos.y, size.x, size.y));
-        sedimentMap.uploadData(0, 0, erosionDataStorage.sediment.readArea(srcPos.x, srcPos.y, size.x, size.y));
-        hardnessMap.uploadData(0, 0, erosionDataStorage.hardness.readArea(srcPos.x, srcPos.y, size.x, size.y));
+        terrainMap.uploadData(zero, erosionDataStorage.terrain.readArea(area));
+        waterMap.uploadData(zero, erosionDataStorage.water.readArea(area));
+        sedimentMap.uploadData(zero, erosionDataStorage.sediment.readArea(area));
+        hardnessMap.uploadData(zero, erosionDataStorage.hardness.readArea(area));
 
-        waterOutflowPipes.uploadData(0, 0, erosionDataStorage.waterOutflow.readArea(srcPos.x, srcPos.y, size.x, size.y));
-        sedimentOutflowPipes.uploadData(0, 0, erosionDataStorage.sedimentOutflow.readArea(srcPos.x, srcPos.y, size.x, size.y));
+        waterOutflowPipes.uploadData(zero, erosionDataStorage.waterOutflow.readArea(area));
+        sedimentOutflowPipes.uploadData(zero, erosionDataStorage.sedimentOutflow.readArea(area));
 
-        thermalOutflowPipes1.uploadData(0, 0, erosionDataStorage.thermalOutflow1.readArea(srcPos.x, srcPos.y, size.x, size.y));
-        thermalOutflowPipes2.uploadData(0, 0, erosionDataStorage.thermalOutflow2.readArea(srcPos.x, srcPos.y, size.x, size.y));
+        thermalOutflowPipes1.uploadData(zero, erosionDataStorage.thermalOutflow1.readArea(area));
+        thermalOutflowPipes2.uploadData(zero, erosionDataStorage.thermalOutflow2.readArea(area));
     }
 
     public void delete() {
@@ -188,11 +177,7 @@ public class GPUTerrainEroder {
         return new Vector2i(maxTextureSize);
     }
 
-    public Vector2i getUsedTextureSize() {
-        return new Vector2i(usedTextureSize);
-    }
-
-    public Vector2i getTexturePos() {
-        return new Vector2i(texturePos);
+    public Area getUsedArea() {
+        return usedArea.copy();
     }
 }

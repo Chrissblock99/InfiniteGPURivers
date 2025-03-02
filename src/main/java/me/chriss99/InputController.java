@@ -53,12 +53,8 @@ public class InputController {
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_V, () -> main.window.setVSync(!main.window.getVSync()));
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_E, () -> main.window.setWireFrame(!main.window.getWireFrame()));
 
-        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_M, () -> {
-            main.playerCenteredRenderer.setChunkRenderDistance(main.playerCenteredRenderer.getChunkRenderDistance()+1);
-        });
-        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_N, () -> {
-            main.playerCenteredRenderer.setChunkRenderDistance(main.playerCenteredRenderer.getChunkRenderDistance()-1);
-        });
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_M, () -> main.playerCenteredRenderer.setChunkRenderDistance(main.playerCenteredRenderer.getChunkRenderDistance()+1));
+        inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_N, () -> main.playerCenteredRenderer.setChunkRenderDistance(main.playerCenteredRenderer.getChunkRenderDistance()-1));
 
 
 
@@ -67,8 +63,8 @@ public class InputController {
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_R, main::primitiveErosion);
         inputDeviceManager.addKeyReleaseRunnable(GLFW_KEY_F, () -> {
             main.gpuTerrainEroder.downloadMap();
-            ImageWriter.writeImageHeightMap((Float2DBufferWrapper) main.worldStorage.terrain.readArea(main.gpuTerrainEroder.getTexturePos().x, main.gpuTerrainEroder.getTexturePos().y, main.gpuTerrainEroder.getUsedTextureSize().x, main.gpuTerrainEroder.getUsedTextureSize().y), "terrain", true);
-            ImageWriter.writeImageHeightMap((Float2DBufferWrapper) main.worldStorage.water.readArea(main.gpuTerrainEroder.getTexturePos().x, main.gpuTerrainEroder.getTexturePos().y, main.gpuTerrainEroder.getUsedTextureSize().x, main.gpuTerrainEroder.getUsedTextureSize().y), "water", false);
+            ImageWriter.writeImageHeightMap((Float2DBufferWrapper) main.worldStorage.terrain.readArea(main.gpuTerrainEroder.getUsedArea()), "terrain", true);
+            ImageWriter.writeImageHeightMap((Float2DBufferWrapper) main.worldStorage.water.readArea(main.gpuTerrainEroder.getUsedArea()), "water", false);
         });
     }
 

@@ -1,40 +1,37 @@
 package me.chriss99.erosion;
 
-import org.joml.Vector2i;
+import me.chriss99.Area;
 
 public class ErosionTask {
     private final GPUTerrainEroder eroder;
 
-    private final Vector2i srcPos;
-    private final Vector2i endPos;
+    private final Area area;
     private final int steps;
     private final boolean lFlat;
     private final boolean rFlat;
     private final boolean fFlat;
     private final boolean bFlat;
 
+    private Area currentArea;
     private int currentStep;
 
-    public ErosionTask(GPUTerrainEroder eroder, Vector2i pos, Vector2i size, int steps, boolean lFlat, boolean rFlat, boolean fFlat, boolean bFlat) {
+    public ErosionTask(GPUTerrainEroder eroder, Area area, int steps, boolean lFlat, boolean rFlat, boolean fFlat, boolean bFlat) {
         this.eroder = eroder;
-        srcPos = new Vector2i(pos);
-        endPos = new Vector2i(srcPos).add(size);
+        this.area = area.copy();
         this.steps = steps;
         this.lFlat = lFlat;
         this.rFlat = rFlat;
         this.fFlat = fFlat;
         this.bFlat = bFlat;
+
+        currentArea = area.increase(rFlat ? 0 : -steps, fFlat ? 0 : -steps, lFlat ? 0 : -steps, bFlat ? 0 : -steps);
+        currentStep = 0;
     }
 
     public void erode() {
-        srcPos.add(lFlat ? 0 : steps, bFlat ? 0 : steps);
-        endPos.sub(rFlat ? 0 : steps, fFlat ? 0 : steps);
-
         for (int i = 0; i < steps; i++) {
-            eroder.erode(srcPos, endPos);
-
-            srcPos.add(lFlat ? 1 : -1, bFlat ? 1 : -1);
-            endPos.sub(rFlat ? 1 : -1, fFlat ? 1 : -1);
+            eroder.erode(currentArea);
+            currentArea = currentArea.increase(rFlat ? -1 : 1, fFlat ? -1 : 1, lFlat ? -1 : 1, bFlat ? -1 : 1);
         }
     }
 }
