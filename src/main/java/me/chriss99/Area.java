@@ -64,6 +64,18 @@ public record Area(Vector2i srcPos, Vector2i endPos) {
         return new Vector2i(endPos).sub(srcPos);
     }
 
+    public int getWidth() {
+        return endPos.x - srcPos.x;
+    }
+
+    public int getHeight() {
+        return endPos.y - srcPos.y;
+    }
+
+    public int getArea() {
+        return getWidth()*getHeight();
+    }
+
     @Override
     public Vector2i srcPos() {
         return new Vector2i(srcPos);

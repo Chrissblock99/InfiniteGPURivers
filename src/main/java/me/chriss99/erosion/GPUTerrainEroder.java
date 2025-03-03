@@ -109,18 +109,18 @@ public class GPUTerrainEroder {
 
         area = area.sub(usedArea.srcPos());
 
-        execShader(calcOutflow, area.srcPos(), area.getSize());
-        execShader(applyOutflowAndRest, area.srcPos(), area.getSize());
+        execShader(calcOutflow, area);
+        execShader(applyOutflowAndRest, area);
     }
 
-    private void execShader(ComputeProgram program, Vector2i pos, Vector2i size) {
+    private void execShader(ComputeProgram program, Area area) {
         //correct for texture being one larger in all directions
-        pos = new Vector2i(pos).add(1, 1);
+        area = area.add(new Vector2i(1));
 
         program.use();
-        glUniform2i(srcPosUniform1, pos.x, pos.y);
-        glUniform2i(srcPosUniform2, pos.x, pos.y);
-        glDispatchCompute(size.x, size.y, 1);
+        glUniform2i(srcPosUniform1, area.srcPos().x, area.srcPos().y);
+        glUniform2i(srcPosUniform2, area.srcPos().x, area.srcPos().y);
+        glDispatchCompute(area.getWidth(), area.getHeight(), 1);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
     }
 
