@@ -77,7 +77,7 @@ public class GPUTerrainEroder {
         applyOutflowAndRest = new ComputeProgram("applyOutflowAndRest");
 
         srcPosUniform1 = calcOutflow.getUniform("srcPos");
-        srcPosUniform2 = calcOutflow.getUniform("srcPos");
+        srcPosUniform2 = applyOutflowAndRest.getUniform("srcPos");
 
 
         terrainMap.bindUniformImage(calcOutflow.program, 0, "terrainMap", GL_READ_ONLY);
