@@ -161,7 +161,8 @@ public class ErosionManager {
 
         Area area = new Area(size).add(pos).mul(data.chunkSize);
         eroder.changeArea(area);
-        new ErosionTask(eroder, area, data.chunkSize, l == 0, r == 0, f == 0, b == 0).erode();
+        ErosionTask task = new ErosionTask(eroder, area, data.chunkSize, l == 0, r == 0, f == 0, b == 0);
+        while (!task.erosionStep());
 
         l--;
         r++;

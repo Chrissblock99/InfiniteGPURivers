@@ -28,10 +28,13 @@ public class ErosionTask {
         currentStep = 0;
     }
 
-    public void erode() {
-        for (int i = 0; i < steps; i++) {
-            eroder.erode(currentArea);
-            currentArea = currentArea.increase(rFlat ? -1 : 1, fFlat ? -1 : 1, lFlat ? -1 : 1, bFlat ? -1 : 1);
-        }
+    public boolean erosionStep() {
+        if (currentStep >= steps)
+            return true;
+
+        eroder.erode(currentArea);
+        currentArea = currentArea.increase(rFlat ? -1 : 1, fFlat ? -1 : 1, lFlat ? -1 : 1, bFlat ? -1 : 1);
+        currentStep++;
+        return false;
     }
 }
