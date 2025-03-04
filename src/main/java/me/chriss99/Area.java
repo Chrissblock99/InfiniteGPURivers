@@ -2,6 +2,8 @@ package me.chriss99;
 
 import org.joml.Vector2i;
 
+import java.util.function.Consumer;
+
 public record Area(Vector2i srcPos, Vector2i endPos) {
     public Area() {
         this(0);
@@ -59,6 +61,21 @@ public record Area(Vector2i srcPos, Vector2i endPos) {
         return new Area(new Vector2i(srcPos).div(scalar), new Vector2i(endPos).div(scalar));
     }
 
+
+    public Vector2i[] allPoints() {
+        Vector2i[] points = new Vector2i[getArea()];
+
+        for (int x = 0; x < getWidth(); x++)
+            for (int y = 0; y < getHeight(); y++)
+                points[x*getHeight() + y] = new Vector2i(srcPos).add(x, y);
+
+        return points;
+    }
+
+    public void forAllPoints(Consumer<Vector2i> consumer) {
+        for (Vector2i pos : allPoints())
+            consumer.accept(pos);
+    }
 
     public Vector2i getSize() {
         return new Vector2i(endPos).sub(srcPos);

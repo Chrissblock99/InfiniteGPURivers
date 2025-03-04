@@ -20,8 +20,8 @@ public class InfiniteWorld<T> {
         this.regionSize = regionSize;
     }
 
-    public T getTile(int x, int y) {
-        return storage.getTile(new Vector2i(Util.properIntDivide(x, regionSize), Util.properIntDivide(y, regionSize))).getTile(new Vector2i(x, y), vector2i -> chunkGenerator.apply(vector2i, chunkSize));
+    public T getTile(Vector2i pos) {
+        return storage.getTile(new Vector2i(Util.properIntDivide(pos.x, regionSize), Util.properIntDivide(pos.y, regionSize))).getTile(pos, vector2i -> chunkGenerator.apply(vector2i, chunkSize));
     }
 
     public void unloadAllRegions() {

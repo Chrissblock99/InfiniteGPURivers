@@ -4,17 +4,18 @@ import me.chriss99.IterationSurfaceType;
 import me.chriss99.worldmanagement.InfiniteWorld;
 import me.chriss99.worldmanagement.Region;
 import me.chriss99.worldmanagement.TileLoadManager;
+import org.joml.Vector2i;
 
 public class IterableWorld extends InfiniteWorld<IterationTile> {
     public IterableWorld(String worldName, int chunkSize, int regionSize, TileLoadManager<Region<IterationTile>> tileLoadManager) {
         super(chunkSize, regionSize, (a, b) -> new IterationTile(0, 0, 0), new IterationTileRegionFileManager(worldName), tileLoadManager);
     }
 
-    public IterationSurfaceType getIterationSurfaceType(int x, int y) {
-        int v0 = getTile(x, y).vertical & 0b11;
-        int v1 = getTile(x+1, y).vertical & 0b11;
-        int h0 = getTile(x, y).horizontal & 0b11;
-        int h1 = getTile(x, y+1).horizontal & 0b11;
+    public IterationSurfaceType getIterationSurfaceType(Vector2i pos) {
+        int v0 = getTile(pos).vertical & 0b11;
+        int v1 = getTile(new Vector2i(pos).add(1, 0)).vertical & 0b11;
+        int h0 = getTile(pos).horizontal & 0b11;
+        int h1 = getTile(new Vector2i(pos).add(0, 1)).horizontal & 0b11;
 
         int combined = h1 | (v0 << 2) | (v1 << 4) | (h0 << 6);
         byte bits = (byte) switch (combined) {
