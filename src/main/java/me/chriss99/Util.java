@@ -1,5 +1,6 @@
 package me.chriss99;
 
+import org.joml.Vector2i;
 import org.lwjgl.BufferUtils;
 
 import java.nio.ByteBuffer;
@@ -42,5 +43,9 @@ public class Util {
     public static int properIntDivide(int a, int b) {
         //yes this is horrible, but I was too lazy to do it better
         return (int) Math.floor(((double) a)/((double) b));
+    }
+
+    public static Vector2i properIntDivide(Vector2i v, int b) {
+        return new Vector2i(properIntDivide(v.x, b), properIntDivide(v.y, b));
     }
 }

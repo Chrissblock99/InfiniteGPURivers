@@ -21,7 +21,7 @@ public class InfiniteWorld<T> {
     }
 
     public T getTile(Vector2i pos) {
-        return storage.getTile(new Vector2i(Util.properIntDivide(pos.x, regionSize), Util.properIntDivide(pos.y, regionSize))).getTile(pos, vector2i -> chunkGenerator.apply(vector2i, chunkSize));
+        return storage.getTile(Util.properIntDivide(pos, regionSize)).getTile(pos, vector2i -> chunkGenerator.apply(vector2i, chunkSize));
     }
 
     public void unloadAllRegions() {
