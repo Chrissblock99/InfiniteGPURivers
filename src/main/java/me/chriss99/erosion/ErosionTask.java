@@ -29,12 +29,28 @@ public class ErosionTask {
     }
 
     public boolean erosionStep() {
-        if (currentStep >= steps)
+        if (isDone())
             return true;
 
         eroder.erode(currentArea);
         currentArea = currentArea.increase(rFlat ? -1 : 1, fFlat ? -1 : 1, lFlat ? -1 : 1, bFlat ? -1 : 1);
         currentStep++;
         return false;
+    }
+
+    public boolean hasStarted() {
+        return currentStep != 0;
+    }
+
+    public boolean isDone() {
+        return currentStep >= steps;
+    }
+
+    public boolean isRunning() {
+        return hasStarted() && !isDone();
+    }
+
+    public Area getArea() {
+        return area.copy();
     }
 }
