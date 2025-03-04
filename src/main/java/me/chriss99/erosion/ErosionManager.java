@@ -22,33 +22,14 @@ public class ErosionManager {
     }
 
     public boolean findIterate(Area area, int maxIteration) {
-        HashMap<Integer, LinkedHashSet<Vector2i>> tilesAtIteration = new LinkedHashMap<>();
-
-        area.forAllPoints(pos -> {
-            int iteration = data.getTile(pos).iteration;
-            tilesAtIteration.computeIfAbsent(iteration, k -> new LinkedHashSet<>()).add(pos);
-        });
-
-        List<Integer> sortedIterations = tilesAtIteration.keySet().stream().sorted(Comparator.naturalOrder()).toList();
-
-        HashSet<Vector2i> candidates = null;
-        for (int lowestIteration : sortedIterations) {
-            if (lowestIteration > maxIteration)
-                return false;
-
-            LinkedHashSet<Vector2i> currentCandidates = tilesAtIteration.get(lowestIteration);
-            if (hasIterable2x2Area(currentCandidates)) {
-                candidates = currentCandidates;
-                break;
-            }
-        }
-        if (candidates == null)
+        LinkedHashSet<Vector2i> lowestIterable = lowestIterableTiles(area, maxIteration);
+        if (lowestIterable == null)
             return false;
 
 
         Area bestArea = new Area();
 
-        for (Vector2i currentPos : candidates) {
+        for (Vector2i currentPos : lowestIterable) {
             Area betterArea = betterAreaFrom(currentPos, bestArea);
             if (betterArea != null)
                 bestArea = betterArea;
@@ -62,6 +43,31 @@ public class ErosionManager {
 
         iterate(bestArea);
         return true;
+    }
+
+    private LinkedHashSet<Vector2i> lowestIterableTiles(Area area, int maxIteration) {
+        HashMap<Integer, LinkedHashSet<Vector2i>> tilesAtIteration = new LinkedHashMap<>();
+
+        area.forAllPoints(pos -> {
+            int iteration = data.getTile(pos).iteration;
+            tilesAtIteration.computeIfAbsent(iteration, k -> new LinkedHashSet<>()).add(pos);
+        });
+
+        List<Integer> sortedIterations = tilesAtIteration.keySet().stream().sorted(Comparator.naturalOrder()).toList();
+
+        LinkedHashSet<Vector2i> lowestIterable = null;
+        for (int lowestIteration : sortedIterations) {
+            if (lowestIteration > maxIteration)
+                return null;
+
+            LinkedHashSet<Vector2i> currentCandidates = tilesAtIteration.get(lowestIteration);
+            if (hasIterable2x2Area(currentCandidates)) {
+                lowestIterable = currentCandidates;
+                break;
+            }
+        }
+
+        return lowestIterable;
     }
 
     private boolean hasIterable2x2Area(LinkedHashSet<Vector2i> tiles) {
