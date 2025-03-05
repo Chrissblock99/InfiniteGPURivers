@@ -41,7 +41,11 @@ public class ErosionManager {
         if (bestArea.equals(new Area()))
             return false;
 
-        iterate(bestArea);
+        ErosionTask task = createTask(bestArea);
+        eroder.changeArea(task.getArea());
+        while (!task.erosionStep());
+        taskFinished(task);
+
         return true;
     }
 
@@ -144,7 +148,7 @@ public class ErosionManager {
         return iterationsAreSame(area);
     }
 
-    private void iterate(Area area) {
+    private ErosionTask createTask(Area area) {
         Vector2i length = area.getSize().sub(1, 1);
 
         int l = getEdgesEqual(area.srcPos(), length.y, true);
@@ -152,12 +156,7 @@ public class ErosionManager {
         int f = getEdgesEqual(area.srcPos().add(0,length.y), length.x, false);
         int b = getEdgesEqual(area.srcPos(), length.x, false);
 
-        Area erosionArea = area.mul(data.chunkSize);
-        eroder.changeArea(erosionArea);
-        ErosionTask task = new ErosionTask(eroder, erosionArea, data.chunkSize, l, r, f, b);
-        while (!task.erosionStep());
-
-        taskFinished(task);
+        return new ErosionTask(eroder, area.mul(data.chunkSize), data.chunkSize, l, r, f, b);
     }
 
     private void taskFinished(ErosionTask task) {
