@@ -30,7 +30,7 @@ public class ErosionManager {
         Area bestArea = new Area();
 
         for (Vector2i currentPos : lowestIterable) {
-            Area betterArea = betterAreaFrom(currentPos, bestArea);
+            Area betterArea = betterAreaFrom(currentPos, bestArea, area);
             if (betterArea != null)
                 bestArea = betterArea;
 
@@ -79,7 +79,7 @@ public class ErosionManager {
     }
 
     private static final Vector4i[] changes = new Vector4i[]{new Vector4i(0, 0, 1, 0), new Vector4i(0, 0, 0, 1), new Vector4i(1, 0, 0, 0), new Vector4i(0, 1, 0, 0)};
-    private Area betterAreaFrom(Vector2i startPos, Area bestArea) {
+    private Area betterAreaFrom(Vector2i startPos, Area bestArea, Area allowedArea) {
         Area betterArea = new Area(startPos, 2);
 
         if (!iterable(betterArea))
@@ -103,7 +103,7 @@ public class ErosionManager {
 
             Area betterAreaTry = betterArea.increase(changes[i].x, changes[i].y, changes[i].z, changes[i].w);
 
-            if (iterable(betterAreaTry))
+            if (allowedArea.contains(betterAreaTry) && iterable(betterAreaTry))
                 betterArea = betterAreaTry;
             else
                 directions[i] = false;
