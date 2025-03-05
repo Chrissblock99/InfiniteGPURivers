@@ -22,9 +22,20 @@ public class ErosionManager {
     }
 
     public boolean findIterate(Area area, int maxIteration) {
+        ErosionTask task = findTask(area,maxIteration);
+        if (task == null)
+            return false;
+
+        eroder.changeArea(task.getArea());
+        while (!task.erosionStep());
+        taskFinished(task);
+        return true;
+    }
+
+    private ErosionTask findTask(Area area, int maxIteration) {
         LinkedHashSet<Vector2i> lowestIterable = lowestIterableTiles(area, maxIteration);
         if (lowestIterable == null)
-            return false;
+            return null;
 
 
         Area bestArea = new Area();
@@ -39,14 +50,9 @@ public class ErosionManager {
         }
 
         if (bestArea.equals(new Area()))
-            return false;
+            return null;
 
-        ErosionTask task = createTask(bestArea);
-        eroder.changeArea(task.getArea());
-        while (!task.erosionStep());
-        taskFinished(task);
-
-        return true;
+        return createTask(bestArea);
     }
 
     private LinkedHashSet<Vector2i> lowestIterableTiles(Area area, int maxIteration) {
