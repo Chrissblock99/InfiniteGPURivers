@@ -154,13 +154,20 @@ public class ErosionManager {
 
         Area erosionArea = area.mul(data.chunkSize);
         eroder.changeArea(erosionArea);
-        ErosionTask task = new ErosionTask(eroder, erosionArea, data.chunkSize, l == 0, r == 0, f == 0, b == 0);
+        ErosionTask task = new ErosionTask(eroder, erosionArea, data.chunkSize, l, r, f, b);
         while (!task.erosionStep());
 
-        l--;
-        r++;
-        f++;
-        b--;
+        taskFinished(task);
+    }
+
+    private void taskFinished(ErosionTask task) {
+        Area area = task.getArea().div(data.chunkSize);
+        Vector2i length = area.getSize().sub(1, 1);
+
+        int l = task.getL() - 1;
+        int r = task.getR() + 1;
+        int f = task.getF() + 1;
+        int b = task.getB() - 1;
 
         setEdges(area.srcPos(), length.y, true, l);
         setEdges(area.srcPos().add(length.x,0), length.y, true, r);

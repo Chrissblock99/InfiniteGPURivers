@@ -7,24 +7,24 @@ public class ErosionTask {
 
     private final Area area;
     private final int steps;
-    private final boolean lFlat;
-    private final boolean rFlat;
-    private final boolean fFlat;
-    private final boolean bFlat;
+    private final int l;
+    private final int r;
+    private final int f;
+    private final int b;
 
     private Area currentArea;
     private int currentStep;
 
-    public ErosionTask(GPUTerrainEroder eroder, Area area, int steps, boolean lFlat, boolean rFlat, boolean fFlat, boolean bFlat) {
+    public ErosionTask(GPUTerrainEroder eroder, Area area, int steps, int l, int r, int f, int b) {
         this.eroder = eroder;
         this.area = area.copy();
         this.steps = steps;
-        this.lFlat = lFlat;
-        this.rFlat = rFlat;
-        this.fFlat = fFlat;
-        this.bFlat = bFlat;
+        this.l = l;
+        this.r = r;
+        this.f = f;
+        this.b = b;
 
-        currentArea = area.increase(rFlat ? 0 : -steps, fFlat ? 0 : -steps, lFlat ? 0 : -steps, bFlat ? 0 : -steps);
+        currentArea = area.increase(r == 0 ? 0 : -steps, f == 0 ? 0 : -steps, l == 0 ? 0 : -steps, b == 0 ? 0 : -steps);
         currentStep = 0;
     }
 
@@ -33,7 +33,7 @@ public class ErosionTask {
             return true;
 
         eroder.erode(currentArea);
-        currentArea = currentArea.increase(rFlat ? -1 : 1, fFlat ? -1 : 1, lFlat ? -1 : 1, bFlat ? -1 : 1);
+        currentArea = currentArea.increase(r == 0 ? -1 : 1, f == 0 ? -1 : 1, l == 0 ? -1 : 1, b == 0 ? -1 : 1);
         currentStep++;
         return false;
     }
@@ -52,5 +52,21 @@ public class ErosionTask {
 
     public Area getArea() {
         return area.copy();
+    }
+
+    public int getB() {
+        return b;
+    }
+
+    public int getF() {
+        return f;
+    }
+
+    public int getR() {
+        return r;
+    }
+
+    public int getL() {
+        return l;
     }
 }
