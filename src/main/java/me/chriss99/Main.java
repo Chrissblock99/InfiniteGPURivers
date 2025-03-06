@@ -81,7 +81,7 @@ public class Main {
 
     public void primitiveErosion() {
         Vector2i pos = new Vector2i(Util.properIntDivide(new Vector2i((int) cameraMatrix.position.x, (int) cameraMatrix.position.z), worldStorage.chunkSize));
-        if (erosionManager.findIterate(new Area(pos.sub(50, 50), 100), 2000)) {
+        if (erosionManager.findIterate(new Area(pos.sub(50, 50), 100), 2000, 15)) {
             tessProgram.setArea(gpuTerrainEroder.getUsedArea());
 
             iterationRenderer.reloadAll();
@@ -137,7 +137,12 @@ public class Main {
             lastTime = currentTime;
         }
 
-        gpuTerrainEroder.downloadMap();
+        System.out.println("Finishing erosion tasks...");
+        erosionManager.finishRunningTasks();
+        double currentTime = glfwGetTime();
+        System.out.println("ran in " + (currentTime - lastTime) + " seconds. (Probably inaccurate because this doesn't sync with the GPU)");
+        lastTime = currentTime;
+
         System.out.println("Saving world...");
         worldStorage.unloadAll();
         System.out.println("Saved world in " + (glfwGetTime() - lastTime) + " seconds.");

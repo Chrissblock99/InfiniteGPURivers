@@ -14,6 +14,8 @@ public class ErosionManager {
 
     private final Vector2i maxChunks;
 
+    private ErosionTask currentTask = null;
+
     public ErosionManager(GPUTerrainEroder eroder, IterableWorld data) {
         this.eroder = eroder;
         this.data = data;
@@ -21,15 +23,33 @@ public class ErosionManager {
         maxChunks = new Vector2i(eroder.getMaxTextureSize()).div(data.chunkSize);
     }
 
-    public boolean findIterate(Area area, int maxIteration) {
-        ErosionTask task = findTask(area,maxIteration);
-        if (task == null)
-            return false;
+    public boolean findIterate(Area area, int maxIteration, int steps) {
+        if (currentTask == null) {
+            ErosionTask task = findTask(area, maxIteration);
+            if (task != null) {
+                currentTask = task;
+                eroder.changeArea(currentTask.getArea());
+            } else
+                return false;
+        }
 
-        eroder.changeArea(task.getArea());
-        while (!task.erosionStep());
-        taskFinished(task);
+
+        boolean done = false;
+        for (int i = 0; i < steps && !done; i++)
+            done = currentTask.erosionStep();
+
+        if (done) {
+            taskFinished(currentTask);
+            currentTask = null;
+        }
         return true;
+    }
+
+    public void finishRunningTasks() {
+        while (!currentTask.erosionStep());
+        taskFinished(currentTask);
+        currentTask = null;
+        eroder.downloadMap();
     }
 
     private ErosionTask findTask(Area area, int maxIteration) {
