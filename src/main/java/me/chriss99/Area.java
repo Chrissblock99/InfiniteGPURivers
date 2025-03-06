@@ -22,11 +22,15 @@ public record Area(Vector2i srcPos, Vector2i endPos) {
     }
 
     public Area(Vector2i srcPos, Vector2i endPos) {
-        if (srcPos.x > endPos.x || srcPos.y > endPos.y)
+        if (!validArea(srcPos, endPos))
             throw new IllegalArgumentException("Src and endPos do not form a valid area! srcPos: " + srcPos + " endPos: " + endPos);
 
         this.srcPos = new Vector2i(srcPos);
         this.endPos = new Vector2i(endPos);
+    }
+
+    private static boolean validArea(Vector2i srcPos, Vector2i endPos) {
+        return srcPos.x <= endPos.x && srcPos.y <= endPos.y;
     }
 
     public boolean contains(Area area) {
@@ -35,6 +39,15 @@ public record Area(Vector2i srcPos, Vector2i endPos) {
 
     public boolean contains(Vector2i pos) {
         return pos.x >= srcPos.x && pos.y >= srcPos.y && pos.x < endPos.x && pos.y < endPos.y;
+    }
+
+    public Area intersection(Area area) {
+        Vector2i srcPos = new Vector2i(Math.max(this.srcPos.x, area.srcPos.x), Math.max(this.srcPos.y, area.srcPos.y));
+        Vector2i endPos = new Vector2i(Math.min(this.endPos.x, area.endPos.x), Math.min(this.endPos.y, area.endPos.y));
+
+        if (validArea(srcPos, endPos))
+            return new Area(srcPos, endPos);
+        return null;
     }
 
     public Area outset(int distance) {
