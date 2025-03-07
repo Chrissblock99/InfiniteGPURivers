@@ -46,6 +46,9 @@ public class ErosionManager {
     }
 
     public void finishRunningTasks() {
+        if (currentTask == null)
+            return;
+
         while (!currentTask.erosionStep());
         taskFinished(currentTask);
         currentTask = null;
