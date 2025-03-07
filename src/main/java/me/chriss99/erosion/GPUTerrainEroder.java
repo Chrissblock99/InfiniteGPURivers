@@ -170,6 +170,17 @@ public class GPUTerrainEroder {
     public void delete() {
         calcOutflow.delete();
         applyOutflowAndRest.delete();
+
+        terrainMap.delete();
+        waterMap.delete();
+        sedimentMap.delete();
+        hardnessMap.delete();
+
+        waterOutflowPipes.delete();
+        sedimentOutflowPipes.delete();
+
+        thermalOutflowPipes1.delete();
+        thermalOutflowPipes2.delete();
     }
 
     public Vector2i getMaxTextureSize() {
