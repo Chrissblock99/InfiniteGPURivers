@@ -53,8 +53,8 @@ public class ErosionManager {
     }
 
     private ErosionTask findChangeArea(Vector2i pos, int maxIteration) {
-        Area findArea = new Area(eroder.getMaxTextureSize().div(64)).add(pos).sub(eroder.getMaxTextureSize().div(64).div(2));
-        Area intersection = findArea.intersection(eroder.getUsedArea().div(64));
+        Area findArea = new Area(eroder.getMaxTextureSize().div(data.chunkSize)).add(pos).sub(eroder.getMaxTextureSize().div(data.chunkSize).div(2));
+        Area intersection = findArea.intersection(eroder.getUsedArea().div(data.chunkSize));
 
         if (intersection != null) {
             ErosionTask task = findTask(intersection, maxIteration);
@@ -67,7 +67,7 @@ public class ErosionManager {
         if (task == null)
             return null;
 
-        eroder.changeArea(findArea.mul(64));
+        eroder.changeArea(findArea.mul(data.chunkSize));
         return task;
     }
 
