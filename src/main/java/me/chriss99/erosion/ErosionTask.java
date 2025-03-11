@@ -50,6 +50,10 @@ public class ErosionTask {
         return hasStarted() && !isDone();
     }
 
+    public int nextIterations() {
+        return area.getArea();
+    }
+
     public Area getArea() {
         return area.copy();
     }

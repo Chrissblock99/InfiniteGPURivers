@@ -23,17 +23,23 @@ public class ErosionManager {
         maxChunks = new Vector2i(eroder.getMaxTextureSize()).div(data.chunkSize);
     }
 
-    public boolean findIterate(Vector2i pos, int maxIteration, int steps) {
+    public boolean findIterate(Vector2i pos, int maxIteration, int iterations) {
         if (currentTask == null) {
-            currentTask = findChangeArea(pos, maxIteration);
+            currentTask = findChangeArea(pos, maxIteration, iterations);
             if (currentTask == null)
                 return false;
         }
 
 
         boolean done = false;
-        for (int i = 0; i < steps && !done; i++)
+        for (int i = 0; !done;) {
+            int nextIterations = currentTask.nextIterations();
+            if (i != 0 && i + nextIterations > iterations)
+                break;
+
             done = currentTask.erosionStep();
+            i += nextIterations;
+        }
 
         if (done) {
             taskFinished(currentTask);
@@ -52,18 +58,18 @@ public class ErosionManager {
         eroder.downloadMap();
     }
 
-    private ErosionTask findChangeArea(Vector2i pos, int maxIteration) {
+    private ErosionTask findChangeArea(Vector2i pos, int maxIteration, int maxSurface) {
         Area findArea = new Area(eroder.getMaxTextureSize().div(data.chunkSize)).add(pos).sub(eroder.getMaxTextureSize().div(data.chunkSize).div(2));
         Area intersection = findArea.intersection(eroder.getUsedArea().div(data.chunkSize));
 
         if (intersection != null) {
-            ErosionTask task = findTask(intersection, maxIteration);
+            ErosionTask task = findTask(intersection, maxIteration, maxSurface);
             if (task != null)
                 return task;
         }
 
 
-        ErosionTask task = findTask(findArea, maxIteration);
+        ErosionTask task = findTask(findArea, maxIteration, maxSurface);
         if (task == null)
             return null;
 
@@ -71,7 +77,7 @@ public class ErosionManager {
         return task;
     }
 
-    private ErosionTask findTask(Area area, int maxIteration) {
+    private ErosionTask findTask(Area area, int maxIteration, int maxSurface) {
         LinkedHashSet<Vector2i> lowestIterable = lowestIterableTiles(area, maxIteration);
         if (lowestIterable == null)
             return null;
@@ -80,7 +86,7 @@ public class ErosionManager {
         Area bestArea = new Area();
 
         for (Vector2i currentPos : lowestIterable) {
-            Area betterArea = betterAreaFrom(currentPos, bestArea, area);
+            Area betterArea = betterAreaFrom(currentPos, bestArea, area, maxSurface);
             if (betterArea != null)
                 bestArea = betterArea;
 
@@ -128,7 +134,7 @@ public class ErosionManager {
     }
 
     private static final Vector4i[] changes = new Vector4i[]{new Vector4i(0, 0, 1, 0), new Vector4i(0, 0, 0, 1), new Vector4i(1, 0, 0, 0), new Vector4i(0, 1, 0, 0)};
-    private Area betterAreaFrom(Vector2i startPos, Area bestArea, Area allowedArea) {
+    private Area betterAreaFrom(Vector2i startPos, Area bestArea, Area allowedArea, int maxSurface) {
         Area betterArea = new Area(startPos, 2);
 
         if (!iterable(betterArea))
@@ -152,7 +158,7 @@ public class ErosionManager {
 
             Area betterAreaTry = betterArea.increase(changes[i].x, changes[i].y, changes[i].z, changes[i].w);
 
-            if (allowedArea.contains(betterAreaTry) && iterable(betterAreaTry))
+            if (allowedArea.contains(betterAreaTry) && betterAreaTry.mul(data.chunkSize).getArea() < maxSurface && iterable(betterAreaTry))
                 betterArea = betterAreaTry;
             else
                 directions[i] = false;
