@@ -23,13 +23,10 @@ public class ErosionManager {
         maxChunks = new Vector2i(eroder.getMaxTextureSize()).div(data.chunkSize);
     }
 
-    public boolean findIterate(Area area, int maxIteration, int steps) {
+    public boolean findIterate(Vector2i pos, int maxIteration, int steps) {
         if (currentTask == null) {
-            ErosionTask task = findTask(area, maxIteration);
-            if (task != null) {
-                currentTask = task;
-                eroder.changeArea(currentTask.getArea());
-            } else
+            currentTask = findChangeArea(pos, maxIteration);
+            if (currentTask == null)
                 return false;
         }
 
@@ -53,6 +50,25 @@ public class ErosionManager {
         taskFinished(currentTask);
         currentTask = null;
         eroder.downloadMap();
+    }
+
+    private ErosionTask findChangeArea(Vector2i pos, int maxIteration) {
+        Area findArea = new Area(eroder.getMaxTextureSize().div(64)).add(pos).sub(eroder.getMaxTextureSize().div(64).div(2));
+        Area intersection = findArea.intersection(eroder.getUsedArea().div(64));
+
+        if (intersection != null) {
+            ErosionTask task = findTask(intersection, maxIteration);
+            if (task != null)
+                return task;
+        }
+
+
+        ErosionTask task = findTask(findArea, maxIteration);
+        if (task == null)
+            return null;
+
+        eroder.changeArea(findArea.mul(64));
+        return task;
     }
 
     private ErosionTask findTask(Area area, int maxIteration) {
