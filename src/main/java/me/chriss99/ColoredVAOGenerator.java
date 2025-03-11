@@ -8,6 +8,54 @@ import org.joml.Vector3d;
 import java.util.Arrays;
 
 public class ColoredVAOGenerator {
+    public static double[] areaToSimpleVertexes(Area area, double height) {
+        double[] vertecies = new double[4*3];
+        int vertexShift = 0;
+
+        vertecies[vertexShift] = area.srcPos().x;
+        vertecies[vertexShift + 1] = height;
+        vertecies[vertexShift + 2] = area.srcPos().y;
+        vertexShift += 3;
+
+        vertecies[vertexShift] = area.endPos().x;
+        vertecies[vertexShift + 1] = height;
+        vertecies[vertexShift + 2] = area.srcPos().y;
+        vertexShift += 3;
+
+        vertecies[vertexShift] = area.srcPos().x;
+        vertecies[vertexShift + 1] = height;
+        vertecies[vertexShift + 2] = area.endPos().y;
+        vertexShift += 3;
+
+        vertecies[vertexShift] = area.endPos().x;
+        vertecies[vertexShift + 1] = height;
+        vertecies[vertexShift + 2] = area.endPos().y;
+
+        return vertecies;
+    }
+
+    public static double[] areaToSimpleColors(double red, double green, double blue) {
+        double[] color = new double[4*3];
+        int vertexShift = 0;
+
+        for (int i = 0; i < 4; i++) {
+            color[vertexShift  ] = red;
+            color[vertexShift+1] = green;
+            color[vertexShift+2] = blue;
+            vertexShift += 3;
+        }
+
+        return color;
+    }
+
+    public static ColoredVAO areaToColoredVAO(Area area, double height, double red, double green, double blue) {
+        double[] vertexes = areaToSimpleVertexes(area, height);
+        double[] color = areaToSimpleColors(red, green, blue);
+        int[] index = heightMapToSimpleIndex(new Vector2i(2));
+
+        return new ColoredVAO(vertexes, color, index);
+    }
+
     public static double[] heightMapToSimpleVertexes(double[][] heightMap, boolean water) {
         double[] vertecies = new double[heightMap.length*heightMap[0].length*3];
         int vertexShift = 0;
