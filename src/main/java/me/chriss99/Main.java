@@ -14,8 +14,11 @@ import java.util.*;
 
 
 public class Main {
+    public static Main main;
+
     public final Window window;
 
+    public final ArrayList<ColoredVAO> vaoList = new ArrayList<>(List.of(/*ColoredVAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
     public final  ListRenderer<ColoredVAO> vaoListProgram;
     public final  PositionCenteredRenderer<TerrainVAO> playerCenteredRenderer;
     public boolean renderIterations = false;
@@ -61,7 +64,7 @@ public class Main {
         gpuTerrainEroder = new GPUTerrainEroder(worldStorage, initErosionArea.getSize(), initErosionArea);
         erosionManager = new ErosionManager(gpuTerrainEroder, worldStorage.iterationInfo);
 
-        vaoListProgram = new ListRenderer<>(new ColoredVAORenderer(cameraMatrix), List.of(/*ColoredVAOGenerator.heightMapToSimpleVAO(new double[][]{{0d, 0d, 0d}, {0d, 1d, 0d}, {0d, 0d, 0d}}, -1, 2, true)*/)); //test case for rendering
+        vaoListProgram = new ListRenderer<>(new ColoredVAORenderer(cameraMatrix), vaoList);
         playerCenteredRenderer = new PositionCenteredRenderer<>(new TerrainVAORenderer(cameraMatrix), (srcPos1, chunkSize1) -> {
             chunkSize1++;
             Area area = new Area(srcPos1, chunkSize1);
