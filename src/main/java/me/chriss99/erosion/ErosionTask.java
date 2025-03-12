@@ -54,6 +54,17 @@ public class ErosionTask {
         return area.getArea();
     }
 
+    public int newSlopes() {
+        int sum = 0;
+
+        sum += l == 0 ? 1 : 0;
+        sum += r == 0 ? 1 : 0;
+        sum += f == 0 ? 1 : 0;
+        sum += b == 0 ? 1 : 0;
+
+        return sum;
+    }
+
     public Area getArea() {
         return area.copy();
     }
