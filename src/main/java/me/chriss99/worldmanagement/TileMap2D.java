@@ -33,7 +33,10 @@ public class TileMap2D<T> {
     }
 
     public void reloadAll() {
-        loadedTiles.replaceAll((k, v) -> tileLoader.apply(k));
+        loadedTiles.replaceAll((k, v) -> {
+            tileUnloader.accept(k, v);
+            return tileLoader.apply(k);
+        });
     }
 
     public void manageLoad() {
