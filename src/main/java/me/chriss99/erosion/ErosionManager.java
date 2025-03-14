@@ -55,7 +55,6 @@ public class ErosionManager {
         while (!currentTask.erosionStep());
         taskFinished(currentTask);
         currentTask = null;
-        eroder.downloadMap();
     }
 
     private ErosionTask findChangeArea(Vector2i pos, int maxIteration, int maxSurface) {

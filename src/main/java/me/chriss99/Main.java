@@ -147,6 +147,7 @@ public class Main {
         lastTime = currentTime;
 
         System.out.println("Saving world...");
+        gpuTerrainEroder.downloadMap();
         worldStorage.unloadAll();
         System.out.println("Saved world in " + (glfwGetTime() - lastTime) + " seconds.");
     }
