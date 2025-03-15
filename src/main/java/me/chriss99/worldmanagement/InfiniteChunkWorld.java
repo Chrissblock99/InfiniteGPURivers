@@ -2,7 +2,7 @@ package me.chriss99.worldmanagement;
 
 import me.chriss99.Area;
 import me.chriss99.Array2DBufferWrapper;
-import me.chriss99.Util;
+import me.chriss99.util.Util;
 import org.joml.Vector2i;
 
 import java.util.function.BiFunction;

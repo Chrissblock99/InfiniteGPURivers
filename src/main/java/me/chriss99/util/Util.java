@@ -1,4 +1,4 @@
-package me.chriss99;
+package me.chriss99.util;
 
 import org.joml.Vector2i;
 import org.lwjgl.BufferUtils;
@@ -36,7 +36,7 @@ public class Util {
         return buffer;
     }
 
-    static int indexOfXZFlattenedArray(int x, int z, int xSize) {
+    public static int indexOfXZFlattenedArray(int x, int z, int xSize) {
         return x + z*xSize;
     }
 

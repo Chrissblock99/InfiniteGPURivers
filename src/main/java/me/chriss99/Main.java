@@ -4,6 +4,7 @@ import me.chriss99.erosion.ErosionManager;
 import me.chriss99.erosion.GPUTerrainEroder;
 import me.chriss99.program.*;
 import me.chriss99.util.FrameCounter;
+import me.chriss99.util.Util;
 import me.chriss99.worldmanagement.ErosionDataStorage;
 import org.joml.Vector2i;
 import org.joml.Vector3f;

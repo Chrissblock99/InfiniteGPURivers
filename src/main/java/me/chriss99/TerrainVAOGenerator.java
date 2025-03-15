@@ -1,5 +1,6 @@
 package me.chriss99;
 
+import me.chriss99.util.Util;
 import org.joml.Vector2i;
 
 public class TerrainVAOGenerator {
