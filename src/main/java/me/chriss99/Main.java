@@ -3,6 +3,7 @@ package me.chriss99;
 import me.chriss99.erosion.ErosionManager;
 import me.chriss99.erosion.GPUTerrainEroder;
 import me.chriss99.program.*;
+import me.chriss99.util.FrameCounter;
 import me.chriss99.worldmanagement.ErosionDataStorage;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
@@ -34,7 +35,7 @@ public class Main {
     public final CameraMatrix cameraMatrix = new CameraMatrix();
     public final InputController inputController;
 
-    private double deltaTime = 1d/60d;
+    public final FrameCounter frameCounter;
 
 
     public static void main(String[] args) {
@@ -80,6 +81,8 @@ public class Main {
 
         inputController = new InputController(window.inputDeviceManager, this);
         GLUtil.setupDebugMessageCallback();
+
+        frameCounter = new FrameCounter(1d/60d);
     }
 
     public void primitiveErosion() {
@@ -92,12 +95,8 @@ public class Main {
     }
 
     private void loop() {
-        double lastTime = glfwGetTime();
-        double lastFramePrint = Double.NEGATIVE_INFINITY;
-        LinkedList<Double> frames = new LinkedList<>();
-
         while(!window.shouldClose()) {
-            inputController.update(deltaTime);
+            inputController.update(frameCounter.getDeltaTime());
 
             window.updateWindowSize();
             cameraMatrix.aspectRatio = window.getAspectRatio();
@@ -122,25 +121,13 @@ public class Main {
 
             window.pollEvents();
 
-
-            double currentTime = glfwGetTime();
-            frames.add(currentTime);
-            Iterator<Double> iterator = frames.iterator();
-            for (int i = 0; i < frames.size(); i++)
-                if (currentTime - iterator.next() >= 1)
-                    iterator.remove();
-                else break;
-
-            deltaTime = currentTime - lastTime;
-            if (!window.getVSync() && currentTime - lastFramePrint > .5) {
-                System.out.println(frames.size() + "   " + Math.round(1/deltaTime) + "   " + deltaTime*1000);
-                lastFramePrint = currentTime;
-            }
-
-            lastTime = currentTime;
+            frameCounter.frameDone();
+            if (!window.getVSync())
+                frameCounter.reportFPS();
         }
 
         System.out.println("Finishing erosion tasks...");
+        double lastTime = glfwGetTime();
         erosionManager.finishRunningTasks();
         double currentTime = glfwGetTime();
         System.out.println("ran in " + (currentTime - lastTime) + " seconds. (Probably inaccurate because this doesn't sync with the GPU)");
