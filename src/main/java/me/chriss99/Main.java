@@ -42,7 +42,7 @@ public class Main {
         glfwInit();
         double start = glfwGetTime();
 
-        Main main = new Main("test64TEST",
+        main = new Main("test64TEST",
                 64, 10, 64, 10,
                 7, 2,
                 new Area(40*64));
