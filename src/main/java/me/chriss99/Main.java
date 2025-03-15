@@ -49,6 +49,7 @@ public class Main {
 
         System.out.println("Started after: " + (glfwGetTime() - start));
         main.loop();
+        main.saveWorld();
         System.out.println("Window closed");
 
         main.cleanGL();
@@ -95,7 +96,7 @@ public class Main {
     }
 
     private void loop() {
-        while(!window.shouldClose()) {
+        while (!window.shouldClose()) {
             inputController.update(frameCounter.getDeltaTime());
 
             window.updateWindowSize();
@@ -125,7 +126,9 @@ public class Main {
             if (!window.getVSync())
                 frameCounter.reportFPS();
         }
+    }
 
+    private void saveWorld() {
         System.out.println("Finishing erosion tasks...");
         double lastTime = glfwGetTime();
         erosionManager.finishRunningTasks();
