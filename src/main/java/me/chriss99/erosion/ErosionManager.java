@@ -81,11 +81,14 @@ public class ErosionManager {
         if (lowestIterable == null)
             return null;
 
+        return bruteForceTask(area, lowestIterable, maxSurface);
+    }
 
+    private ErosionTask bruteForceTask(Area allowed, LinkedHashSet<Vector2i> searchInside, int maxSurface) {
         Area bestArea = new Area();
 
-        for (Vector2i currentPos : lowestIterable) {
-            Area betterArea = betterAreaFrom(currentPos, bestArea, area, maxSurface);
+        for (Vector2i currentPos : searchInside) {
+            Area betterArea = betterAreaFrom(currentPos, bestArea, allowed, maxSurface);
             if (betterArea != null)
                 bestArea = betterArea;
 
