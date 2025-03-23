@@ -1,5 +1,6 @@
 package me.chriss99.worldmanagement.quadtree;
 
+import me.chriss99.Area;
 import org.joml.Vector2i;
 
 import java.util.ArrayList;
@@ -12,8 +13,7 @@ public class Quad<T> {
     private final Quad<T> parent;
     private int greatestNodeDepth;
 
-    private final Vector2i pos;
-    private final int size;
+    private final Area area;
 
     private T value = null;
 
@@ -27,8 +27,7 @@ public class Quad<T> {
         this.parent = parent;
         this.greatestNodeDepth = greatestNodeDepth;
 
-        this.pos = new Vector2i(pos);
-        this.size = size;
+        this.area = new Area(size).add(pos);
 
         this.value = value;
     }
@@ -97,7 +96,8 @@ public class Quad<T> {
         updateGreatestNodeDepth(true);
 
         value = null;
-        int halfSize = size/2;
+        int halfSize = area.getSize().x/2;
+        Vector2i pos = area.srcPos();
         this.topLeft = new Quad<>(this, greatestNodeDepth, topLeft, new Vector2i(pos.x, pos.y + halfSize), halfSize);
         this.topRight = new Quad<>(this, greatestNodeDepth, topRight, new Vector2i(pos.x + halfSize, pos.y + halfSize), halfSize);
         this.bottomLeft = new Quad<>(this, greatestNodeDepth, bottomLeft, new Vector2i(pos), halfSize);
@@ -149,12 +149,8 @@ public class Quad<T> {
 
 
 
-    public Vector2i getPos() {
-        return new Vector2i(pos);
-    }
-
-    public int getSize() {
-        return size;
+    public Area getArea() {
+        return area.copy();
     }
 
     public int getGreatestNodeDepth() {
@@ -187,20 +183,19 @@ public class Quad<T> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Quad<?> quad = (Quad<?>) o;
-        return greatestNodeDepth == quad.greatestNodeDepth && size == quad.size && Objects.equals(pos, quad.pos) && Objects.equals(value, quad.value) && Objects.equals(topLeft, quad.topLeft) && Objects.equals(topRight, quad.topRight) && Objects.equals(bottomLeft, quad.bottomLeft) && Objects.equals(bottomRight, quad.bottomRight);
+        return greatestNodeDepth == quad.greatestNodeDepth && Objects.equals(area, quad.area) && Objects.equals(value, quad.value) && Objects.equals(topLeft, quad.topLeft) && Objects.equals(topRight, quad.topRight) && Objects.equals(bottomLeft, quad.bottomLeft) && Objects.equals(bottomRight, quad.bottomRight);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(greatestNodeDepth, pos, size, value, topLeft, topRight, bottomLeft, bottomRight);
+        return Objects.hash(greatestNodeDepth, area, value, topLeft, topRight, bottomLeft, bottomRight);
     }
 
     @Override
     public String toString() {
         return "Quad{" +
                 "greatestNodeDepth=" + greatestNodeDepth +
-                ", pos=" + pos +
-                ", size=" + size +
+                ", area=" + area +
                 ((!isSubdivided()) ?
                         ", value=" + value
                         :

@@ -1,5 +1,6 @@
 package me.chriss99.worldmanagement.quadtree;
 
+import me.chriss99.Area;
 import me.chriss99.IterationSurfaceType;
 import me.chriss99.worldmanagement.AbstractRegionFileManager;
 import me.chriss99.worldmanagement.Region;
@@ -28,7 +29,7 @@ public class IterationSurfaceRegionFileManager extends AbstractRegionFileManager
             ArrayList<IterationSurfaceType> values = new ArrayList<>();
             Quad<IterationSurfaceType> quad = surface.getQuad();
             flatten(quad, treeBits, values);
-            byte[] bytes = toArray(surface.getIteration(), quad.getPos(), treeBits, values);
+            byte[] bytes = toArray(surface.getIteration(), quad.getArea(), treeBits, values);
 
             bytesList.add(bytes);
             length += bytes.length;
@@ -58,12 +59,12 @@ public class IterationSurfaceRegionFileManager extends AbstractRegionFileManager
         }
     }
 
-    private static byte[] toArray(int iteration, Vector2i pos, ArrayList<Boolean> treeBits, ArrayList<IterationSurfaceType> values) {
+    private static byte[] toArray(int iteration, Area area, ArrayList<Boolean> treeBits, ArrayList<IterationSurfaceType> values) {
         int treeBitsBytes = (int) Math.ceil(((double) treeBits.size())/8d);
         int valuesBytes = (int) Math.ceil(((double) values.size())/2d);
         byte[] bytes = new byte[12 + treeBitsBytes + valuesBytes];
 
-        byte[] posBytes = ByteBuffer.allocate(12).putInt(iteration).putInt(pos.x).putInt(pos.y).array();
+        byte[] posBytes = ByteBuffer.allocate(12).putInt(iteration).putInt(area.srcPos().x).putInt(area.srcPos().y).array();
         System.arraycopy(posBytes, 0, bytes, 0, 12);
 
         for (int i = 0; i < treeBits.size(); i++) {
