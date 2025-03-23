@@ -48,4 +48,8 @@ public class Util {
     public static Vector2i properIntDivide(Vector2i v, int b) {
         return new Vector2i(properIntDivide(v.x, b), properIntDivide(v.y, b));
     }
+
+    public static Vector2i gridSrcOf(Vector2i pos, int scale) {
+        return properIntDivide(pos, scale).mul(scale);
+    }
 }
