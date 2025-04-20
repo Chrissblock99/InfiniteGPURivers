@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>me.chriss99</groupId>
-    <artifactId>ogl_test2</artifactId>
+    <artifactId>infinite-gpu-rivers</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
