@@ -1,122 +1,122 @@
-package me.chriss99;
+package me.chriss99
 
-import org.joml.Vector2i;
+import org.joml.Vector2i
+import java.util.function.Consumer
 
-import java.util.function.Consumer;
+class Area(srcPos: Vector2i, endPos: Vector2i) {
+    @JvmOverloads
+    constructor(size: Int = 0) : this(Vector2i(size))
 
-public record Area(Vector2i srcPos, Vector2i endPos) {
-    public Area() {
-        this(0);
+    constructor(size: Vector2i) : this(Vector2i(), size)
+
+    constructor(srcPos: Vector2i, size: Int) : this(srcPos, Vector2i(size).add(srcPos))
+
+    fun contains(area: Area): Boolean {
+        return area.srcPos.x >= srcPos.x && area.srcPos.y >= srcPos.y && area.endPos.x <= endPos.x && area.endPos.y <= endPos.y
     }
 
-    public Area(int size) {
-        this(new Vector2i(size));
+    fun contains(pos: Vector2i): Boolean {
+        return pos.x >= srcPos.x && pos.y >= srcPos.y && pos.x < endPos.x && pos.y < endPos.y
     }
 
-    public Area(Vector2i size) {
-        this(new Vector2i(), size);
+    fun intersection(area: Area): Area? {
+        val srcPos: Vector2i = Vector2i(
+            Math.max(srcPos.x, area.srcPos.x), Math.max(
+                srcPos.y, area.srcPos.y
+            )
+        )
+        val endPos: Vector2i = Vector2i(
+            Math.min(endPos.x, area.endPos.x), Math.min(
+                endPos.y, area.endPos.y
+            )
+        )
+
+        if (validArea(srcPos, endPos)) return Area(srcPos, endPos)
+        return null
     }
 
-    public Area(Vector2i srcPos, int size) {
-        this(srcPos, new Vector2i(size).add(srcPos));
+    fun outset(distance: Int): Area {
+        return increase(distance, distance, distance, distance)
     }
 
-    public Area(Vector2i srcPos, Vector2i endPos) {
-        if (!validArea(srcPos, endPos))
-            throw new IllegalArgumentException("Src and endPos do not form a valid area! srcPos: " + srcPos + " endPos: " + endPos);
-
-        this.srcPos = new Vector2i(srcPos);
-        this.endPos = new Vector2i(endPos);
+    fun increase(right: Int, up: Int, left: Int, down: Int): Area {
+        return Area(Vector2i(srcPos).sub(left, down), Vector2i(endPos).add(right, up))
     }
 
-    private static boolean validArea(Vector2i srcPos, Vector2i endPos) {
-        return srcPos.x <= endPos.x && srcPos.y <= endPos.y;
+    fun add(shift: Vector2i?): Area {
+        return Area(Vector2i(srcPos).add(shift), Vector2i(endPos).add(shift))
     }
 
-    public boolean contains(Area area) {
-        return area.srcPos.x >= srcPos.x && area.srcPos.y >= srcPos.y && area.endPos.x <= endPos.x && area.endPos.y <= endPos.y;
+    fun sub(shift: Vector2i?): Area {
+        return Area(Vector2i(srcPos).sub(shift), Vector2i(endPos).sub(shift))
     }
 
-    public boolean contains(Vector2i pos) {
-        return pos.x >= srcPos.x && pos.y >= srcPos.y && pos.x < endPos.x && pos.y < endPos.y;
+    fun mul(scalar: Int): Area {
+        return Area(Vector2i(srcPos).mul(scalar), Vector2i(endPos).mul(scalar))
     }
 
-    public Area intersection(Area area) {
-        Vector2i srcPos = new Vector2i(Math.max(this.srcPos.x, area.srcPos.x), Math.max(this.srcPos.y, area.srcPos.y));
-        Vector2i endPos = new Vector2i(Math.min(this.endPos.x, area.endPos.x), Math.min(this.endPos.y, area.endPos.y));
-
-        if (validArea(srcPos, endPos))
-            return new Area(srcPos, endPos);
-        return null;
-    }
-
-    public Area outset(int distance) {
-        return increase(distance, distance, distance, distance);
-    }
-
-    public Area increase(int right, int up, int left, int down) {
-        return new Area(new Vector2i(srcPos).sub(left, down), new Vector2i(endPos).add(right, up));
-    }
-
-    public Area add(Vector2i shift) {
-        return new Area(new Vector2i(srcPos).add(shift), new Vector2i(endPos).add(shift));
-    }
-
-    public Area sub(Vector2i shift) {
-        return new Area(new Vector2i(srcPos).sub(shift), new Vector2i(endPos).sub(shift));
-    }
-
-    public Area mul(int scalar) {
-        return new Area(new Vector2i(srcPos).mul(scalar), new Vector2i(endPos).mul(scalar));
-    }
-
-    public Area div(int scalar) {
-        return new Area(new Vector2i(srcPos).div(scalar), new Vector2i(endPos).div(scalar));
+    fun div(scalar: Int): Area {
+        return Area(Vector2i(srcPos).div(scalar), Vector2i(endPos).div(scalar))
     }
 
 
-    public Vector2i[] allPoints() {
-        Vector2i[] points = new Vector2i[getArea()];
+    fun allPoints(): Array<Vector2i> {
+        val points: Array<Vector2i?> = arrayOfNulls(area)
 
-        for (int x = 0; x < getWidth(); x++)
-            for (int y = 0; y < getHeight(); y++)
-                points[x*getHeight() + y] = new Vector2i(srcPos).add(x, y);
+        for (x in 0..<width)
+            for (y in 0..<height)
+                points[x * height + y] = Vector2i(srcPos).add(x, y)
 
-        return points;
+        return points as Array<Vector2i>
     }
 
-    public void forAllPoints(Consumer<Vector2i> consumer) {
-        for (Vector2i pos : allPoints())
-            consumer.accept(pos);
+    fun forAllPoints(consumer: Consumer<Vector2i>) {
+        for (pos in allPoints())
+            consumer.accept(pos)
     }
 
-    public Vector2i getSize() {
-        return new Vector2i(endPos).sub(srcPos);
+    val size: Vector2i
+        get() = Vector2i(endPos).sub(srcPos)
+
+    val width: Int
+        get() = endPos.x - srcPos.x
+
+    val height: Int
+        get() = endPos.y - srcPos.y
+
+    val area: Int
+        get() = width * height
+
+    fun srcPos(): Vector2i {
+        return Vector2i(srcPos)
     }
 
-    public int getWidth() {
-        return endPos.x - srcPos.x;
+    fun endPos(): Vector2i {
+        return Vector2i(endPos)
     }
 
-    public int getHeight() {
-        return endPos.y - srcPos.y;
+    fun copy(): Area {
+        return Area(srcPos, endPos)
     }
 
-    public int getArea() {
-        return getWidth()*getHeight();
+    val srcPos: Vector2i
+    val endPos: Vector2i
+
+    init {
+        require(
+            validArea(
+                srcPos,
+                endPos
+            )
+        ) { "Src and endPos do not form a valid area! srcPos: $srcPos endPos: $endPos" }
+
+        this.srcPos = Vector2i(srcPos)
+        this.endPos = Vector2i(endPos)
     }
 
-    @Override
-    public Vector2i srcPos() {
-        return new Vector2i(srcPos);
-    }
-
-    @Override
-    public Vector2i endPos() {
-        return new Vector2i(endPos);
-    }
-
-    public Area copy() {
-        return new Area(srcPos, endPos);
+    companion object {
+        private fun validArea(srcPos: Vector2i, endPos: Vector2i): Boolean {
+            return srcPos.x <= endPos.x && srcPos.y <= endPos.y
+        }
     }
 }

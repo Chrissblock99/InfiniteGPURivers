@@ -1,37 +1,49 @@
-package me.chriss99;
+package me.chriss99
 
-import org.lwjgl.opengl.GL;
+import org.lwjgl.glfw.GLFW
+import org.lwjgl.opengl.GL
+import org.lwjgl.opengl.GL11.*
 
-import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.glfw.GLFW.glfwShowWindow;
-import static org.lwjgl.opengl.GL11.*;
+class Window {
+    private val windowId: Long
 
-public class Window {
-    private final long windowId;
+    private var width: Int
+    private var height: Int
 
-    private int width;
-    private int height;
+    val inputDeviceManager: InputDeviceManager
 
-    public final InputDeviceManager inputDeviceManager;
+    var vSync: Boolean = false
+        set(vSync) {
+            field = vSync
+            GLFW.glfwSwapInterval(if (vSync) 1 else 0)
+        }
+    var wireFrame: Boolean = false
+        set(wireFrame) {
+            field = wireFrame
+            if (wireFrame) {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
+                glDisable(GL_CULL_FACE)
+            } else {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+                glEnable(GL_CULL_FACE)
+            }
+        }
 
-    private boolean vSync;
-    private boolean wireFrame;
+    init {
+        width = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor())!!.width()
+        height = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor())!!.height()
 
-    public Window() {
-        width = glfwGetVideoMode(glfwGetPrimaryMonitor()).width();
-        height = glfwGetVideoMode(glfwGetPrimaryMonitor()).height();
+        GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 4)
+        GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 5)
+        GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW.GLFW_OPENGL_CORE_PROFILE)
+        GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GLFW.GLFW_TRUE)
+        GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_TRUE)
 
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+        windowId = GLFW.glfwCreateWindow(width, height, "GLFW OpenGL Window", 0, 0)
 
-        windowId = glfwCreateWindow(width, height, "GLFW OpenGL Window", 0, 0);
-
-        glfwMakeContextCurrent(windowId);
-        if (!GL.createCapabilities().OpenGL45)
-            System.err.println("""
+        GLFW.glfwMakeContextCurrent(windowId)
+        if (!GL.createCapabilities().OpenGL45) System.err.println(
+            """
                     -----------------------------------------
                     
                     This device does not support OpenGL 4.5!
@@ -39,73 +51,51 @@ public class Window {
                     but expect issues like things not
                     rendering or just crashing.
                     
-                    -----------------------------------------""");
-        glViewport(0, 0, width, height);
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glEnable(GL_DEPTH_TEST);
+                    -----------------------------------------
+                    
+                    """.trimIndent()
+        )
+        glViewport(0, 0, width, height)
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
+        glEnable(GL_DEPTH_TEST)
 
-        inputDeviceManager = new InputDeviceManager(windowId);
-        glfwSetInputMode(windowId, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        inputDeviceManager = InputDeviceManager(windowId)
+        GLFW.glfwSetInputMode(windowId, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED)
 
-        setVSync(true);
-        setWireFrame(false);
+        vSync = true
+        wireFrame = false
 
-        glfwShowWindow(windowId);
+        GLFW.glfwShowWindow(windowId)
     }
 
-    public void updateWindowSize() {
-        int[] width = new int[1];
-        int[] height = new int[1];
+    fun updateWindowSize() {
+        val width = IntArray(1)
+        val height = IntArray(1)
 
-        glfwGetWindowSize(windowId, width, height);
+        GLFW.glfwGetWindowSize(windowId, width, height)
 
-        this.width = width[0];
-        this.height = height[0];
+        this.width = width[0]
+        this.height = height[0]
 
-        glViewport(0, 0, this.width, this.height);
+        glViewport(0, 0, this.width, this.height)
     }
 
-    public float getAspectRatio() {
-        return (float) height / (float) width;
+    val aspectRatio: Float
+        get() = height.toFloat() / width.toFloat()
+
+    fun shouldClose(): Boolean {
+        return GLFW.glfwWindowShouldClose(windowId)
     }
 
-    public boolean shouldClose() {
-        return glfwWindowShouldClose(windowId);
+    fun swapBuffers() {
+        GLFW.glfwSwapBuffers(windowId)
     }
 
-    public void swapBuffers() {
-        glfwSwapBuffers(windowId);
+    fun clearBuffers() {
+        glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
     }
 
-    public void clearBuffers() {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    }
-
-    public void pollEvents() {
-        glfwPollEvents();
-    }
-
-    public void setWireFrame(boolean wireFrame) {
-        this.wireFrame = wireFrame;
-        if (wireFrame) {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            glDisable(GL_CULL_FACE);
-        } else {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-            glEnable(GL_CULL_FACE);
-        }
-    }
-
-    public void setVSync(boolean vSync) {
-        this.vSync = vSync;
-        glfwSwapInterval(vSync ? 1 : 0);
-    }
-
-    public boolean getVSync() {
-        return vSync;
-    }
-
-    public boolean getWireFrame() {
-        return wireFrame;
+    fun pollEvents() {
+        GLFW.glfwPollEvents()
     }
 }

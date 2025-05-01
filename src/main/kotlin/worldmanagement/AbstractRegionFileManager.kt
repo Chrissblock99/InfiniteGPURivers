@@ -1,29 +1,32 @@
-package me.chriss99.worldmanagement;
+package me.chriss99.worldmanagement
 
-import org.joml.Vector2i;
+import org.joml.Vector2i
 
-public abstract class AbstractRegionFileManager<T> implements RegionFileManager<T> {
-    private final FileLoadStoreManager<Region<T>> fileManager;
+abstract class AbstractRegionFileManager<T>(worldName: String) : RegionFileManager<T> {
+    private val fileManager: FileLoadStoreManager<Region<T>>
 
-    public AbstractRegionFileManager(String worldName) {
-        fileManager = new FileLoadStoreManager<>("worlds/" + worldName, "quadtree", this::regionFromBytes, this::regionToBytes);
+    init {
+        fileManager = FileLoadStoreManager(
+            "worlds/$worldName",
+            "quadtree",
+            { bytes: ByteArray, pos: Vector2i -> this.regionFromBytes(bytes, pos) },
+            { region: Region<T> -> this.regionToBytes(region) })
     }
 
-    @Override
-    public boolean hasFile(Vector2i key) {
-        return true;
+    override fun hasFile(key: Vector2i): Boolean {
+        return true
     }
 
-    public Region<T> loadFile(Vector2i chunkCoord) {
-        return fileManager.loadFile(chunkCoord);
+    override fun loadFile(chunkCoord: Vector2i): Region<T> {
+        return fileManager.loadFile(chunkCoord)
     }
 
-    public void saveFile(Vector2i pos, Region<T> region) {
-        fileManager.saveFile(region, region.coord);
+    override fun saveFile(pos: Vector2i, region: Region<T>) {
+        fileManager.saveFile(region, region.coord)
     }
 
 
-    protected abstract Region<T> regionFromBytes(byte[] bytes, Vector2i pos);
+    protected abstract fun regionFromBytes(bytes: ByteArray, pos: Vector2i): Region<T>
 
-    protected abstract byte[] regionToBytes(Region<T> region);
+    protected abstract fun regionToBytes(region: Region<T>): ByteArray
 }

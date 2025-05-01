@@ -1,25 +1,23 @@
-package me.chriss99.glabstractions;
+package me.chriss99.glabstractions
 
-import static org.lwjgl.opengl.GL15.*;
+import org.lwjgl.opengl.GL15.*
 
-public class GLBuffer implements GLObject {
-    private final int buffer;
-    public final int target;
-    public final int type;
+open class GLBuffer(target: Int, type: Int) : GLObject {
+    private val buffer: Int
+    val target: Int
+    val type: Int
 
-    public GLBuffer(int target, int type) {
-        buffer = glGenBuffers();
-        this.target = target;
-        this.type = type;
+    init {
+        buffer = glGenBuffers()
+        this.target = target
+        this.type = type
     }
 
-    @Override
-    public void bind() {
-        glBindBuffer(target, buffer);
+    override fun bind() {
+        glBindBuffer(target, buffer)
     }
 
-    @Override
-    public void delete() {
-        glDeleteBuffers(buffer);
+    override fun delete() {
+        glDeleteBuffers(buffer)
     }
 }

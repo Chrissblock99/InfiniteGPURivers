@@ -1,65 +1,67 @@
-package me.chriss99.worldmanagement;
+package me.chriss99.worldmanagement
 
-import me.chriss99.Array2DBufferWrapper;
-import org.joml.Vector2i;
+import me.chriss99.Array2DBufferWrapper
+import org.joml.Vector2i
+import java.nio.ByteBuffer
 
-import java.nio.ByteBuffer;
-import java.util.Map;
+class ChunkRegionFileManager(worldName: String, type: Array2DBufferWrapper.Type, chunkSize: Int) :
+    RegionFileManager<Chunk> {
+    private val fileManager: FileLoadStoreManager<Region<Chunk>>
+    private val chunkByteSize: Int
+    private val chunkDataByteSize: Int
+    val type: Array2DBufferWrapper.Type
+    val chunkSize: Int
 
-public class ChunkRegionFileManager implements RegionFileManager<Chunk> {
-    private final FileLoadStoreManager<Region<Chunk>> fileManager;
-    private final int chunkByteSize;
-    private final int chunkDataByteSize;
-    public final Array2DBufferWrapper.Type type;
-    public final int chunkSize;
+    init {
+        this.fileManager = FileLoadStoreManager(
+            "worlds/$worldName",
+            "region",
+            { array: ByteArray, regionCoord: Vector2i -> this.regionFromByteArray(array, regionCoord) },
+            { region: Region<Chunk> -> this.regionToByteArray(region) })
 
-    public ChunkRegionFileManager(String worldName, Array2DBufferWrapper.Type type, int chunkSize) {
-        this.fileManager = new FileLoadStoreManager<>("worlds/" + worldName, "region", this::regionFromByteArray, this::regionToByteArray);
-
-        chunkDataByteSize = chunkSize*chunkSize*type.elementSize;
-        chunkByteSize = chunkDataByteSize + 4*2;
-        this.type = type;
-        this.chunkSize = chunkSize;
+        chunkDataByteSize = chunkSize * chunkSize * type.elementSize
+        chunkByteSize = chunkDataByteSize + 4 * 2
+        this.type = type
+        this.chunkSize = chunkSize
     }
 
-    @Override
-    public boolean hasFile(Vector2i key) {
-        return true;
+    override fun hasFile(key: Vector2i): Boolean {
+        return true
     }
 
-    public Region<Chunk> loadFile(Vector2i regionCoord) {
-        return fileManager.loadFile(regionCoord);
+    override fun loadFile(regionCoord: Vector2i): Region<Chunk> {
+        return fileManager.loadFile(regionCoord)
     }
 
-    public void saveFile(Vector2i pos, Region<Chunk> region) {
-        fileManager.saveFile(region, region.coord);
+    override fun saveFile(pos: Vector2i, region: Region<Chunk>) {
+        fileManager.saveFile(region, region.coord)
     }
 
-    private Region<Chunk> regionFromByteArray(byte[] array, Vector2i regionCoord) {
-        int chunkNum = array.length/chunkByteSize;
-        Region<Chunk> region = new Region<>(regionCoord);
-        ByteBuffer buffer = ByteBuffer.wrap(array);
+    private fun regionFromByteArray(array: ByteArray, regionCoord: Vector2i): Region<Chunk> {
+        val chunkNum = array.size / chunkByteSize
+        val region: Region<Chunk> = Region(regionCoord)
+        val buffer = ByteBuffer.wrap(array)
 
-        for (int i = 0; i < chunkNum; i++) {
-            Vector2i chunkCoord = new Vector2i(buffer.getInt(), buffer.getInt());
-            byte[] byteArray = new byte[chunkDataByteSize];
-            buffer.get(byteArray);
-            Array2DBufferWrapper data = Array2DBufferWrapper.of(ByteBuffer.wrap(byteArray), type, new Vector2i(chunkSize));
-            region.addChunk(chunkCoord, new Chunk(data));
+        for (i in 0..<chunkNum) {
+            val chunkCoord: Vector2i = Vector2i(buffer.getInt(), buffer.getInt())
+            val byteArray = ByteArray(chunkDataByteSize)
+            buffer[byteArray]
+            val data = Array2DBufferWrapper.of(ByteBuffer.wrap(byteArray), type, Vector2i(chunkSize))
+            region.addChunk(chunkCoord, Chunk(data))
         }
 
-        return region;
+        return region
     }
 
-    private byte[] regionToByteArray(Region<Chunk> region) {
-        ByteBuffer buffer = ByteBuffer.allocate(region.getAllTiles().size()*chunkByteSize);
+    private fun regionToByteArray(region: Region<Chunk>): ByteArray {
+        val buffer = ByteBuffer.allocate(region.allTiles.size * chunkByteSize)
 
-        for (Map.Entry<Vector2i, Chunk> entry : region.getAllTiles()) {
-            buffer.putInt(entry.getKey().x);
-            buffer.putInt(entry.getKey().y);
-            buffer.put(entry.getValue().data().buffer);
+        for ((key, value) in region.allTiles) {
+            buffer.putInt(key.x)
+            buffer.putInt(key.y)
+            buffer.put(value.data.buffer)
         }
 
-        return buffer.array();
+        return buffer.array()
     }
 }

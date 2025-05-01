@@ -1,21 +1,18 @@
-package me.chriss99;
+package me.chriss99
 
-import me.chriss99.glabstractions.VAOImpl;
+import me.chriss99.glabstractions.VAOImpl
 
-public class ColoredVAO extends VAOImpl {
-    public ColoredVAO(double[] triangle, double[] color, int[] index) {
-        super(index, 3, triangle, color);
+open class ColoredVAO(triangle: DoubleArray, color: DoubleArray, index: IntArray) :
+    VAOImpl(index, 3, triangle, color) {
+    fun updatePositions(positions: DoubleArray) {
+        updateVertices(0, positions)
     }
 
-    public void updatePositions(double[] positions) {
-        updateVertices(0, positions);
+    fun updateColors(colors: DoubleArray) {
+        updateVertices(1, colors)
     }
 
-    public void updateColors(double[] colors) {
-        updateVertices(1, colors);
-    }
-
-    public void updateIndex(int[] index) {
-        updateIndices(index);
+    fun updateIndex(index: IntArray) {
+        updateIndices(index)
     }
 }

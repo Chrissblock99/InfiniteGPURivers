@@ -1,51 +1,42 @@
-package me.chriss99.program;
+package me.chriss99.program
 
-import me.chriss99.CameraMatrix;
-import me.chriss99.IterationVAO;
-import me.chriss99.TerrainVAO;
+import me.chriss99.CameraMatrix
+import me.chriss99.IterationVAO
+import org.lwjgl.opengl.GL20.*
+import org.lwjgl.opengl.GL32.GL_GEOMETRY_SHADER
 
-import java.util.Collection;
+class IterationVAORenderer(protected val cameraMatrix: CameraMatrix) : RenderProgram<IterationVAO>() {
+    private val transformMatrix: Int
+    private val cameraPos: Int
+    private val srcPosUniform: Int
+    private val widthUniform: Int
 
-import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL32.GL_GEOMETRY_SHADER;
+    init {
+        addShader("iteration/passThrough.vert", GL_VERTEX_SHADER)
+        addShader("tesselation/normals.geom", GL_GEOMETRY_SHADER)
+        addShader("iteration/different.frag", GL_FRAGMENT_SHADER)
 
-public class IterationVAORenderer extends RenderProgram<IterationVAO> {
-    protected final CameraMatrix cameraMatrix;
+        bindAttribute(0, "position")
 
-    private final int transformMatrix;
-    private final int cameraPos;
-    private final int srcPosUniform;
-    private final int widthUniform;
+        validate()
 
-    public IterationVAORenderer(CameraMatrix cameraMatrix) {
-        this.cameraMatrix = cameraMatrix;
-
-        addShader("iteration/passThrough.vert", GL_VERTEX_SHADER);
-        addShader("tesselation/normals.geom", GL_GEOMETRY_SHADER);
-        addShader("iteration/different.frag", GL_FRAGMENT_SHADER);
-
-        bindAttribute(0, "position");
-
-        validate();
-
-        transformMatrix = getUniform("transformMatrix");
-        cameraPos = getUniform("cameraPos");
-        srcPosUniform = getUniform("srcPos");
-        widthUniform = getUniform("width");
+        transformMatrix = getUniform("transformMatrix")
+        cameraPos = getUniform("cameraPos")
+        srcPosUniform = getUniform("srcPos")
+        widthUniform = getUniform("width")
     }
 
-    @Override
-    public void render(Collection<IterationVAO> vaos) {
-        use();
-        glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
-        glUniform3f(cameraPos, cameraMatrix.position.x, cameraMatrix.position.y, cameraMatrix.position.z);
+    override fun render(vaos: Collection<IterationVAO>) {
+        use()
+        glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(FloatArray(16)))
+        glUniform3f(cameraPos, cameraMatrix.position.x, cameraMatrix.position.y, cameraMatrix.position.z)
 
-        for (IterationVAO vao : vaos) {
-            vao.bind();
-            glUniform2i(srcPosUniform, vao.getSrcPos().x, vao.getSrcPos().y);
-            glUniform1i(widthUniform, vao.getWidth());
+        for (vao in vaos) {
+            vao.bind()
+            glUniform2i(srcPosUniform, vao.srcPos.x, vao.srcPos.y)
+            glUniform1i(widthUniform, vao.width)
 
-            glDrawArrays(GL_TRIANGLES, 0, vao.getIndexLength());
+            glDrawArrays(GL_TRIANGLES, 0, vao.indexLength)
         }
     }
 }

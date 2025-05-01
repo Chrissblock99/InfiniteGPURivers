@@ -1,6 +1,5 @@
-package me.chriss99.worldmanagement;
+package me.chriss99.worldmanagement
 
-import org.joml.Vector2i;
+import org.joml.Vector2i
 
-public interface RegionFileManager<T> extends FileStorage<Vector2i, Region<T>> {
-}
+interface RegionFileManager<T> : FileStorage<Vector2i, Region<T>>

@@ -1,76 +1,68 @@
-package me.chriss99;
+package me.chriss99
 
-import org.joml.Vector2i;
-import org.lwjgl.BufferUtils;
+import org.joml.Vector2i
+import org.lwjgl.BufferUtils
+import java.nio.ByteBuffer
 
-import java.nio.ByteBuffer;
+class Float2DBufferWrapper : Array2DBufferWrapper {
+    constructor(buffer: ByteBuffer, size: Vector2i) : super(buffer, Type.FLOAT, size)
 
-public final class Float2DBufferWrapper extends Array2DBufferWrapper {
-    public Float2DBufferWrapper(ByteBuffer buffer, Vector2i size) {
-        super(buffer, Type.FLOAT, size);
+    constructor(data: Array<FloatArray>) : this(Vector2i(data.size, data[0].size)) {
+        for (i in 0..<size.x) for (j in 0..<size.y) putFloat(i, j, data[i][j])
     }
 
-    public Float2DBufferWrapper(float[][] data) {
-        this(new Vector2i(data.length, data[0].length));
-        for (int i = 0; i < size.x; i++)
-            for (int j = 0; j < size.y; j++)
-                putFloat(i, j, data[i][j]);
+    constructor(size: Vector2i) : super(Type.FLOAT, size)
+
+    constructor(size: Vector2i, fill: Float) : this(size) {
+        for (i in 0..<size.x) for (j in 0..<size.y) buffer.putFloat(fill)
+        buffer.rewind()
     }
 
-    public Float2DBufferWrapper(Vector2i size) {
-        super(Type.FLOAT, size);
-    }
+    override fun mipMap(): Float2DBufferWrapper {
+        val buffer = BufferUtils.createByteBuffer((size.x / 2) * (size.y / 2) * type.elementSize)
 
-    public Float2DBufferWrapper(Vector2i size, float fill) {
-        this(size);
-        for (int i = 0; i < size.x; i++)
-            for (int j = 0; j < size.y; j++)
-                buffer.putFloat(fill);
-        buffer.rewind();
-    }
+        var y = 0
+        while (y < size.y) {
+            var x = 0
+            while (x < size.x) {
+                var avg = 0f
+                avg += getFloat(x, y)
+                avg += getFloat(x + 1, y)
+                avg += getFloat(x, y + 1)
+                avg += getFloat(x + 1, y + 1)
+                avg /= 4f
 
-    public Float2DBufferWrapper mipMap() {
-        ByteBuffer buffer = BufferUtils.createByteBuffer((size.x/2)*(size.y/2)* type.elementSize);
-
-        for (int y = 0; y < size.y; y += 2)
-            for (int x = 0; x < size.x; x += 2) {
-                float avg = 0;
-                avg += getFloat(x, y);
-                avg += getFloat(x+1, y);
-                avg += getFloat(x, y+1);
-                avg += getFloat(x+1, y+1);
-                avg /= 4;
-
-                buffer.putFloat(avg);
+                buffer.putFloat(avg)
+                x += 2
             }
+            y += 2
+        }
 
 
-        return new Float2DBufferWrapper(buffer, new Vector2i(size).div(2));
+        return Float2DBufferWrapper(buffer, Vector2i(size).div(2))
     }
 
-    public float getFloat(int x, int z) {
-        return buffer.getFloat((z*size.x + x)*4);
+    fun getFloat(x: Int, z: Int): Float {
+        return buffer.getFloat((z * size.x + x) * 4)
     }
 
-    public void putFloat(int x, int z, float f) {
-        buffer.putFloat((z*size.x + x)*4, f);
+    fun putFloat(x: Int, z: Int, f: Float) {
+        buffer.putFloat((z * size.x + x) * 4, f)
     }
 
-    public float[][] getArray() {
-        float[][] data = new float[size.x][size.y];
-        for (int i = 0; i < size.x; i++)
-            for (int j = 0; j < size.y; j++)
-                data[i][j] = getFloat(i, j);
+    val array: Array<FloatArray>
+        get() {
+            val data = Array(size.x) { FloatArray(size.y) }
+            for (i in 0..<size.x) for (j in 0..<size.y) data[i][j] = getFloat(i, j)
 
-        return data;
-    }
+            return data
+        }
 
-    public float[][] getRealArray() {
-        float[][] data = new float[size.y][size.x];
-        for (int i = 0; i < size.x; i++)
-            for (int j = 0; j < size.y; j++)
-                data[j][i] = getFloat(i, j);
+    val realArray: Array<FloatArray>
+        get() {
+            val data = Array(size.y) { FloatArray(size.x) }
+            for (i in 0..<size.x) for (j in 0..<size.y) data[j][i] = getFloat(i, j)
 
-        return data;
-    }
+            return data
+        }
 }

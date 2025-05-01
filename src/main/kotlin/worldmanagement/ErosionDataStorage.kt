@@ -1,81 +1,169 @@
-package me.chriss99.worldmanagement;
+package me.chriss99.worldmanagement
 
-import me.chriss99.Float2DBufferWrapper;
-import me.chriss99.LeakingTLM;
-import me.chriss99.TerrainGenerator;
-import me.chriss99.Vec4f2DBufferWrapper;
-import me.chriss99.worldmanagement.iteration.IterableWorld;
-import org.joml.Vector2i;
+import me.chriss99.*
+import me.chriss99.worldmanagement.iteration.IterableWorld
+import me.chriss99.worldmanagement.iteration.IterationTile
+import org.joml.Vector2i
 
-import static me.chriss99.Array2DBufferWrapper.Type;
+class ErosionDataStorage(
+    worldName: String,
+    val chunkSize: Int,
+    val regionSize: Int,
+    val iterationChunkSize: Int,
+    val iterationRegionSize: Int
+) {
+    private val terrainGenerator = TerrainGenerator(chunkSize)
 
-public class ErosionDataStorage {
-    public final int chunkSize;
-    public final int regionSize;
-    public final int iterationChunkSize;
-    public final int iterationRegionSize;
+    val mipMappedTerrain: MipMappedInfiniteChunkWorld
+    val mipMappedWater: MipMappedInfiniteChunkWorld
 
-    private final TerrainGenerator terrainGenerator;
+    val terrain: InfiniteChunkWorld
+    val water: InfiniteChunkWorld
+    val sediment: InfiniteChunkWorld
+    val hardness: InfiniteChunkWorld
 
-    public final MipMappedInfiniteChunkWorld mipMappedTerrain;
-    public final MipMappedInfiniteChunkWorld mipMappedWater;
+    val waterOutflow: InfiniteChunkWorld
+    val sedimentOutflow: InfiniteChunkWorld
 
-    public final InfiniteChunkWorld terrain;
-    public final InfiniteChunkWorld water;
-    public final InfiniteChunkWorld sediment;
-    public final InfiniteChunkWorld hardness;
+    val thermalOutflow1: InfiniteChunkWorld
+    val thermalOutflow2: InfiniteChunkWorld
 
-    public final InfiniteChunkWorld waterOutflow;
-    public final InfiniteChunkWorld sedimentOutflow;
+    val iterationInfo: IterableWorld
 
-    public final InfiniteChunkWorld thermalOutflow1;
-    public final InfiniteChunkWorld thermalOutflow2;
+    val tileLoadManager: TileLoadManager<Region<Chunk>> = LeakingTLM()
+    val tileLoadManager2: TileLoadManager<Region<IterationTile>> = LeakingTLM()
 
-    public final IterableWorld iterationInfo;
+    init {
+        mipMappedTerrain = MipMappedInfiniteChunkWorld(
+            "$worldName/terrain", chunkSize, regionSize,
+            { chunkPos: Vector2i?, chunkSize: Int? ->
+                terrainGenerator.generateChunk(
+                    chunkPos!!, chunkSize!!
+                )
+            },
+            { i: Int -> tileLoadManager })
+        mipMappedWater = MipMappedInfiniteChunkWorld(
+            "$worldName/water", chunkSize, regionSize,
+            { vector2i: Vector2i?, chunkSize1: Int? ->
+                Chunk(
+                    Float2DBufferWrapper(
+                        Vector2i(
+                            chunkSize1!!
+                        )
+                    )
+                )
+            },
+            { i: Int -> tileLoadManager })
 
-    public final TileLoadManager tileLoadManager = new LeakingTLM<>();
+        terrain = mipMappedTerrain.getMipMapLevel(0)
+        water = mipMappedWater.getMipMapLevel(0)
+        sediment = InfiniteChunkWorld(
+            "$worldName/sediment", Array2DBufferWrapper.Type.FLOAT,
+            chunkSize,
+            regionSize,
+            { vector2i: Vector2i, chunkSize1: Int ->
+                Chunk(
+                    Float2DBufferWrapper(
+                        Vector2i(
+                            chunkSize1
+                        )
+                    )
+                )
+            }, tileLoadManager
+        )
+        hardness = InfiniteChunkWorld(
+            "$worldName/hardness", Array2DBufferWrapper.Type.FLOAT,
+            chunkSize,
+            regionSize,
+            { vector2i: Vector2i?, chunkSize1: Int? ->
+                Chunk(
+                    Float2DBufferWrapper(
+                        Vector2i(
+                            chunkSize1!!
+                        ), 1f
+                    )
+                )
+            }, tileLoadManager
+        )
 
-    public ErosionDataStorage(String worldName, int chunkSize, int regionSize, int iterationChunkSize, int iterationRegionSize) {
-        this.chunkSize = chunkSize;
-        this.regionSize = regionSize;
-        this.iterationChunkSize = iterationChunkSize;
-        this.iterationRegionSize = iterationRegionSize;
-        terrainGenerator = new TerrainGenerator(chunkSize);
+        waterOutflow = InfiniteChunkWorld(
+            "$worldName/waterOutflow", Array2DBufferWrapper.Type.VEC4F,
+            chunkSize,
+            regionSize,
+            { vector2i: Vector2i?, chunkSize1: Int? ->
+                Chunk(
+                    Vec4f2DBufferWrapper(
+                        Vector2i(
+                            chunkSize1!!
+                        )
+                    )
+                )
+            }, tileLoadManager
+        )
+        sedimentOutflow = InfiniteChunkWorld(
+            "$worldName/sedimentOutflow", Array2DBufferWrapper.Type.VEC4F,
+            chunkSize,
+            regionSize,
+            { vector2i: Vector2i?, chunkSize1: Int? ->
+                Chunk(
+                    Vec4f2DBufferWrapper(
+                        Vector2i(
+                            chunkSize1!!
+                        )
+                    )
+                )
+            }, tileLoadManager
+        )
 
-        mipMappedTerrain = new MipMappedInfiniteChunkWorld(worldName + "/terrain", chunkSize, regionSize, terrainGenerator::generateChunk, i -> tileLoadManager);
-        mipMappedWater = new MipMappedInfiniteChunkWorld(worldName + "/water", chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Float2DBufferWrapper(new Vector2i(chunkSize1))), i -> tileLoadManager);
+        thermalOutflow1 = InfiniteChunkWorld(
+            "$worldName/thermalOutflow1", Array2DBufferWrapper.Type.VEC4F,
+            chunkSize,
+            regionSize,
+            { vector2i: Vector2i?, chunkSize1: Int? ->
+                Chunk(
+                    Vec4f2DBufferWrapper(
+                        Vector2i(
+                            chunkSize1!!
+                        )
+                    )
+                )
+            }, tileLoadManager
+        )
+        thermalOutflow2 = InfiniteChunkWorld(
+            "$worldName/thermalOutflow2", Array2DBufferWrapper.Type.VEC4F,
+            chunkSize,
+            regionSize,
+            { vector2i: Vector2i?, chunkSize1: Int? ->
+                Chunk(
+                    Vec4f2DBufferWrapper(
+                        Vector2i(
+                            chunkSize1!!
+                        )
+                    )
+                )
+            }, tileLoadManager
+        )
 
-        terrain = mipMappedTerrain.getMipMapLevel(0);
-        water = mipMappedWater.getMipMapLevel(0);
-        sediment = new InfiniteChunkWorld(worldName + "/sediment", Type.FLOAT, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Float2DBufferWrapper(new Vector2i(chunkSize1))), tileLoadManager);
-        hardness = new InfiniteChunkWorld(worldName + "/hardness", Type.FLOAT, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Float2DBufferWrapper(new Vector2i(chunkSize1), 1)), tileLoadManager);
-
-        waterOutflow = new InfiniteChunkWorld(worldName + "/waterOutflow", Type.VEC4F, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Vec4f2DBufferWrapper(new Vector2i(chunkSize1))), tileLoadManager);
-        sedimentOutflow = new InfiniteChunkWorld(worldName + "/sedimentOutflow", Type.VEC4F, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Vec4f2DBufferWrapper(new Vector2i(chunkSize1))), tileLoadManager);
-
-        thermalOutflow1 = new InfiniteChunkWorld(worldName + "/thermalOutflow1", Type.VEC4F, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Vec4f2DBufferWrapper(new Vector2i(chunkSize1))), tileLoadManager);
-        thermalOutflow2 = new InfiniteChunkWorld(worldName + "/thermalOutflow2", Type.VEC4F, chunkSize, regionSize, (vector2i, chunkSize1) -> new Chunk(new Vec4f2DBufferWrapper(new Vector2i(chunkSize1))), tileLoadManager);
-
-        iterationInfo = new IterableWorld(worldName + "/iteration", iterationChunkSize, iterationRegionSize, tileLoadManager);
+        iterationInfo = IterableWorld("$worldName/iteration", iterationChunkSize, iterationRegionSize, tileLoadManager2)
     }
 
-    public void unloadAll() {
-        mipMappedTerrain.unloadAll();
-        mipMappedWater.unloadAll();
+    fun unloadAll() {
+        mipMappedTerrain.unloadAll()
+        mipMappedWater.unloadAll()
 
-        sediment.unloadAllRegions();
-        hardness.unloadAllRegions();
+        sediment.unloadAllRegions()
+        hardness.unloadAllRegions()
 
-        waterOutflow.unloadAllRegions();
-        sedimentOutflow.unloadAllRegions();
+        waterOutflow.unloadAllRegions()
+        sedimentOutflow.unloadAllRegions()
 
-        thermalOutflow1.unloadAllRegions();
-        thermalOutflow2.unloadAllRegions();
+        thermalOutflow1.unloadAllRegions()
+        thermalOutflow2.unloadAllRegions()
 
-        iterationInfo.unloadAllRegions();
+        iterationInfo.unloadAllRegions()
     }
 
-    public void cleanGL() {
-        terrainGenerator.delete();
+    fun cleanGL() {
+        terrainGenerator.delete()
     }
 }

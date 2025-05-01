@@ -1,67 +1,74 @@
-package me.chriss99.program;
+package me.chriss99.program
 
-import me.chriss99.Area;
-import me.chriss99.ChunkVAO;
-import me.chriss99.CutOutRectangleTLM;
-import me.chriss99.worldmanagement.TileMap2D;
-import org.joml.Vector2f;
-import org.joml.Vector2i;
-import org.joml.Vector3f;
+import me.chriss99.Area
+import me.chriss99.ChunkVAO
+import me.chriss99.CutOutRectangleTLM
+import me.chriss99.worldmanagement.TileMap2D
+import org.joml.Vector2f
+import org.joml.Vector2i
+import org.joml.Vector3f
+import java.util.function.BiFunction
 
-import java.util.function.BiFunction;
+class PositionCenteredRenderer<T : ChunkVAO>(
+    renderProgram: RenderProgram<T>,
+    chunkLoader: BiFunction<Vector2i, Int, T>,
+    position: Vector3f,
+    chunkSize: Int,
+    chunkRenderDistance: Int,
+    skipArea: Area
+) {
+    protected val renderProgram: RenderProgram<T> = renderProgram
+    protected val chunkVaos: TileMap2D<T>
+    protected val loadManager: CutOutRectangleTLM<T> =
+        CutOutRectangleTLM<T>(chunkRenderDistance, Vector2f(position.x, position.z), skipArea)
 
-public class PositionCenteredRenderer<T extends ChunkVAO> {
-    protected final RenderProgram<T> renderProgram;
-    protected final TileMap2D<T> chunkVaos;
-    protected final CutOutRectangleTLM<T> loadManager;
+    val chunkSize: Int
+    var chunkRenderDistance: Int
+        get() = loadManager.renderDistance
+        set(value) {
+            loadManager.renderDistance = value
+            chunkVaos.manageLoad()
+        }
 
-    public final int chunkSize;
-    public int chunkRenderDistance;
+    constructor(
+        renderProgram: RenderProgram<T>,
+        chunkLoader: BiFunction<Vector2i, Int, T>,
+        position: Vector3f,
+        chunkSize: Int,
+        chunkRenderDistance: Int
+    ) : this(renderProgram, chunkLoader, position, chunkSize, chunkRenderDistance, Area())
 
-    public PositionCenteredRenderer(RenderProgram<T> renderProgram, BiFunction<Vector2i, Integer, T> chunkLoader, Vector3f position, int chunkSize, int chunkRenderDistance) {
-        this(renderProgram, chunkLoader, position, chunkSize, chunkRenderDistance, new Area());
+    init {
+        this.chunkVaos = TileMap2D(
+            { key -> chunkLoader.apply(Vector2i(key).mul(chunkSize), chunkSize) },
+            { v, t -> t.delete() },
+            loadManager
+        )
+        this.chunkSize = chunkSize
+
+        updateLoadedChunks(position, skipArea)
     }
 
-    public PositionCenteredRenderer(RenderProgram<T> renderProgram, BiFunction<Vector2i, Integer, T> chunkLoader, Vector3f position, int chunkSize, int chunkRenderDistance, Area skipArea) {
-        this.renderProgram = renderProgram;
-        this.loadManager = new CutOutRectangleTLM<>(chunkRenderDistance, new Vector2f(position.x, position.z), skipArea);
-        this.chunkVaos = new TileMap2D<>(key -> chunkLoader.apply(new Vector2i(key).mul(chunkSize), chunkSize), (v, t) -> t.delete(), loadManager);
-        this.chunkSize = chunkSize;
-        this.chunkRenderDistance = chunkRenderDistance;
-
-        updateLoadedChunks(position, skipArea);
+    fun updateLoadedChunks(newPosition: Vector3f) {
+        updateLoadedChunks(newPosition, null)
     }
 
-    public void updateLoadedChunks(Vector3f newPosition) {
-        updateLoadedChunks(newPosition, null);
+    fun updateLoadedChunks(newPosition: Vector3f, skipArea: Area?) {
+        loadManager.position = Vector2f(newPosition.x, newPosition.z).div(chunkSize.toFloat()).floor()
+        if (skipArea != null) loadManager.skipArea = skipArea.div(chunkSize)
+        chunkVaos.manageLoad()
     }
 
-    public void updateLoadedChunks(Vector3f newPosition, Area skipArea) {
-        loadManager.setPosition(new Vector2f(newPosition.x, newPosition.z).div(chunkSize).floor());
-        if (skipArea != null)
-            loadManager.setSkipArea(skipArea.div(chunkSize));
-        chunkVaos.manageLoad();
+    fun reloadAll() {
+        chunkVaos.reloadAll()
     }
 
-    public void reloadAll() {
-        chunkVaos.reloadAll();
+    fun render() {
+        renderProgram.render(chunkVaos.allTiles)
     }
 
-    public int getChunkRenderDistance() {
-        return loadManager.getRenderDistance();
-    }
-
-    public void setChunkRenderDistance(int renderDistance) {
-        loadManager.setRenderDistance(renderDistance);
-        chunkVaos.manageLoad();
-    }
-
-    public void render() {
-        renderProgram.render(chunkVaos.getAllTiles());
-    }
-
-    public void delete() {
-        chunkVaos.unloadAll();
-        renderProgram.delete();
+    fun delete() {
+        chunkVaos.unloadAll()
+        renderProgram.delete()
     }
 }

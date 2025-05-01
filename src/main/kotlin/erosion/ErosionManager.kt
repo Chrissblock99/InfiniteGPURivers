@@ -1,270 +1,240 @@
-package me.chriss99.erosion;
+package me.chriss99.erosion
 
-import me.chriss99.Area;
-import me.chriss99.IterationSurfaceType;
-import me.chriss99.worldmanagement.iteration.IterableWorld;
-import org.joml.Vector2i;
-import org.joml.Vector4i;
+import me.chriss99.Area
+import me.chriss99.IterationSurfaceType
+import me.chriss99.worldmanagement.iteration.IterableWorld
+import org.joml.Vector2i
+import org.joml.Vector4i
 
-import java.util.*;
+class ErosionManager(eroder: GPUTerrainEroder, private val data: IterableWorld) {
+    private val eroder: GPUTerrainEroder = eroder
 
-public class ErosionManager {
-    private final GPUTerrainEroder eroder;
-    private final IterableWorld data;
+    private val maxChunks: Vector2i = Vector2i(eroder.getMaxTextureSize()).div(data.chunkSize)
 
-    private final Vector2i maxChunks;
+    private var currentTask: ErosionTask? = null
 
-    private ErosionTask currentTask = null;
-
-    public ErosionManager(GPUTerrainEroder eroder, IterableWorld data) {
-        this.eroder = eroder;
-        this.data = data;
-
-        maxChunks = new Vector2i(eroder.getMaxTextureSize()).div(data.chunkSize);
-    }
-
-    public boolean findIterate(Vector2i pos, int maxIteration, int iterations) {
+    fun findIterate(pos: Vector2i, maxIteration: Int, iterations: Int): Boolean {
         if (currentTask == null) {
-            currentTask = findChangeArea(pos, maxIteration, iterations);
+            currentTask = findChangeArea(pos, maxIteration, iterations)
             if (currentTask == null)
-                return false;
+                return false
         }
 
+        var done = false
+        var i = 0
+        while (!done) {
+            val nextIterations: Int = currentTask!!.nextIterations()
+            if (i != 0 && i + nextIterations > iterations) break
 
-        boolean done = false;
-        for (int i = 0; !done;) {
-            int nextIterations = currentTask.nextIterations();
-            if (i != 0 && i + nextIterations > iterations)
-                break;
-
-            done = currentTask.erosionStep();
-            i += nextIterations;
+            done = currentTask!!.erosionStep()
+            i += nextIterations
         }
 
         if (done) {
-            taskFinished(currentTask);
-            currentTask = null;
+            taskFinished(currentTask!!)
+            currentTask = null
         }
-        return true;
+        return true
     }
 
-    public void finishRunningTasks() {
-        if (currentTask == null)
-            return;
+    fun finishRunningTasks() {
+        if (currentTask == null) return
 
-        while (!currentTask.erosionStep());
-        taskFinished(currentTask);
-        currentTask = null;
+        while (!currentTask!!.erosionStep());
+        taskFinished(currentTask!!)
+        currentTask = null
     }
 
-    private ErosionTask findChangeArea(Vector2i pos, int maxIteration, int maxSurface) {
-        Area findArea = new Area(eroder.getMaxTextureSize().div(data.chunkSize)).add(pos).sub(eroder.getMaxTextureSize().div(data.chunkSize).div(2));
-        Area intersection = findArea.intersection(eroder.getUsedArea().div(data.chunkSize));
+    private fun findChangeArea(pos: Vector2i, maxIteration: Int, maxSurface: Int): ErosionTask? {
+        val findArea: Area = Area(eroder.getMaxTextureSize().div(data.chunkSize)).add(pos)
+            .sub(eroder.getMaxTextureSize().div(data.chunkSize).div(2))
+        val intersection = findArea.intersection(eroder.getUsedArea().div(data.chunkSize))
 
         if (intersection != null) {
-            ErosionTask task = findTask(intersection, maxIteration, maxSurface);
-            if (task != null)
-                return task;
+            val task: ErosionTask? = findTask(intersection, maxIteration, maxSurface)
+            if (task != null) return task
         }
 
 
-        ErosionTask task = findTask(findArea, maxIteration, maxSurface);
-        if (task == null)
-            return null;
+        val task: ErosionTask = findTask(findArea, maxIteration, maxSurface) ?: return null
 
-        eroder.changeArea(findArea.mul(data.chunkSize));
-        return task;
+        eroder.changeArea(findArea.mul(data.chunkSize))
+        return task
     }
 
-    private ErosionTask findTask(Area area, int maxIteration, int maxSurface) {
-        LinkedHashSet<Vector2i> lowestIterable = lowestIterableTiles(area, maxIteration);
-        if (lowestIterable == null)
-            return null;
+    private fun findTask(area: Area, maxIteration: Int, maxSurface: Int): ErosionTask? {
+        val lowestIterable = lowestIterableTiles(area, maxIteration) ?: return null
 
-        return bruteForceTask(area, lowestIterable, maxSurface);
+        return bruteForceTask(area, lowestIterable, maxSurface)
     }
 
-    private ErosionTask bruteForceTask(Area allowed, LinkedHashSet<Vector2i> searchInside, int maxSurface) {
-        Area bestArea = new Area();
+    private fun bruteForceTask(allowed: Area, searchInside: LinkedHashSet<Vector2i>, maxSurface: Int): ErosionTask? {
+        var bestArea = Area()
 
-        for (Vector2i currentPos : searchInside) {
-            Area betterArea = betterAreaFrom(currentPos, bestArea, allowed, maxSurface);
-            if (betterArea != null)
-                bestArea = betterArea;
+        for (currentPos in searchInside) {
+            val betterArea = betterAreaFrom(currentPos, bestArea, allowed, maxSurface)
+            if (betterArea != null) bestArea = betterArea
 
-            if (bestArea.getSize().equals(maxChunks))
-                break;
+            if (bestArea.size == maxChunks) break
         }
 
-        if (bestArea.equals(new Area()))
-            return null;
+        if (bestArea == Area()) return null
 
-        return createTask(bestArea);
+        return createTask(bestArea)
     }
 
-    private LinkedHashSet<Vector2i> lowestIterableTiles(Area area, int maxIteration) {
-        HashMap<Integer, LinkedHashSet<Vector2i>> tilesAtIteration = new LinkedHashMap<>();
+    private fun lowestIterableTiles(area: Area, maxIteration: Int): LinkedHashSet<Vector2i>? {
+        val tilesAtIteration: HashMap<Int, LinkedHashSet<Vector2i>> = LinkedHashMap()
 
-        area.forAllPoints(pos -> {
-            int iteration = data.getTile(pos).iteration;
-            tilesAtIteration.computeIfAbsent(iteration, k -> new LinkedHashSet<>()).add(pos);
-        });
+        area.forAllPoints { pos: Vector2i ->
+            val iteration = data.getTile(pos).iteration
+            tilesAtIteration.computeIfAbsent(iteration) { k: Int? -> LinkedHashSet() }.add(pos!!)
+        }
 
-        List<Integer> sortedIterations = tilesAtIteration.keySet().stream().sorted(Comparator.naturalOrder()).toList();
+        val sortedIterations = tilesAtIteration.keys.stream().sorted(Comparator.naturalOrder()).toList()
 
-        LinkedHashSet<Vector2i> lowestIterable = null;
-        for (int lowestIteration : sortedIterations) {
-            if (lowestIteration > maxIteration)
-                return null;
+        var lowestIterable: LinkedHashSet<Vector2i>? = null
+        for (lowestIteration in sortedIterations) {
+            if (lowestIteration > maxIteration) return null
 
-            LinkedHashSet<Vector2i> currentCandidates = tilesAtIteration.get(lowestIteration);
+            val currentCandidates = tilesAtIteration[lowestIteration]!!
             if (hasIterable2x2Area(currentCandidates)) {
-                lowestIterable = currentCandidates;
-                break;
+                lowestIterable = currentCandidates
+                break
             }
         }
 
-        return lowestIterable;
+        return lowestIterable
     }
 
-    private boolean hasIterable2x2Area(LinkedHashSet<Vector2i> tiles) {
-        for (Vector2i pos : tiles)
-            if (tiles.contains(new Vector2i(pos).add(1, 0)) && tiles.contains(new Vector2i(pos).add(0, 1)) && tiles.contains(new Vector2i(pos).add(1, 1)) && iterable(new Area(pos, 2)))
-                return true;
+    private fun hasIterable2x2Area(tiles: LinkedHashSet<Vector2i>): Boolean {
+        for (pos in tiles) if (tiles.contains(Vector2i(pos).add(1, 0)) && tiles.contains(
+                Vector2i(pos).add(
+                    0,
+                    1
+                )
+            ) && tiles.contains(Vector2i(pos).add(1, 1)) && iterable(
+                Area(pos, 2)
+            )
+        ) return true
 
-        return false;
+        return false
     }
 
-    private static final Vector4i[] changes = new Vector4i[]{new Vector4i(0, 0, 1, 0), new Vector4i(0, 0, 0, 1), new Vector4i(1, 0, 0, 0), new Vector4i(0, 1, 0, 0)};
-    private Area betterAreaFrom(Vector2i startPos, Area bestArea, Area allowedArea, int maxSurface) {
-        Area betterArea = new Area(startPos, 2);
+    private fun betterAreaFrom(startPos: Vector2i, bestArea: Area, allowedArea: Area, maxSurface: Int): Area? {
+        var betterArea = Area(startPos, 2)
 
-        if (!iterable(betterArea))
-            return null;
+        if (!iterable(betterArea)) return null
 
-        boolean[] directions = new boolean[]{true, true, true, true};
+        val directions = booleanArrayOf(true, true, true, true)
 
-        for (int i = 0; directions[0] || directions[1] || directions[2] || directions[3]; i = (i+1) % 4) {
-            if (betterArea.getWidth() == maxChunks.x) {
-                directions[0] = false;
-                directions[2] = false;
+        var i = 0
+        while (directions[0] || directions[1] || directions[2] || directions[3]) {
+            if (betterArea.width == maxChunks.x) {
+                directions[0] = false
+                directions[2] = false
             }
-            if (betterArea.getHeight() == maxChunks.y) {
-                directions[1] = false;
-                directions[3] = false;
+            if (betterArea.height == maxChunks.y) {
+                directions[1] = false
+                directions[3] = false
             }
 
 
-            if (!directions[i])
-                continue;
+            if (!directions[i]) {
+                i = (i + 1) % 4
+                continue
+            }
 
-            Area betterAreaTry = betterArea.increase(changes[i].x, changes[i].y, changes[i].z, changes[i].w);
+            val betterAreaTry = betterArea.increase(changes[i].x, changes[i].y, changes[i].z, changes[i].w)
 
-            if (allowedArea.contains(betterAreaTry) && betterAreaTry.mul(data.chunkSize).getArea() < maxSurface && iterable(betterAreaTry))
-                betterArea = betterAreaTry;
-            else
-                directions[i] = false;
+            if (allowedArea.contains(betterAreaTry) && betterAreaTry.mul(data.chunkSize).area < maxSurface && iterable(
+                    betterAreaTry
+                )
+            ) betterArea = betterAreaTry
+            else directions[i] = false
+            i = (i + 1) % 4
         }
 
 
-        if (betterArea.getArea() > bestArea.getArea())
-            return betterArea;
-        return null;
+        if (betterArea.area > bestArea.area) return betterArea
+        return null
     }
 
-    private boolean iterable(Area area) {
-        if (area.getWidth() < 2 || area.getHeight() < 2)
-            return false;
+    private fun iterable(area: Area): Boolean {
+        if (area.width < 2 || area.height < 2) return false
 
-        Vector2i length = area.getSize().sub(1, 1);
+        val length = area.size.sub(1, 1)
 
-        int l = getEdgesEqual(area.srcPos(), length.y, true);
-        int r = getEdgesEqual(area.srcPos().add(length.x,0), length.y, true);
-        int f = getEdgesEqual(area.srcPos().add(0,length.y), length.x, false);
-        int b = getEdgesEqual(area.srcPos(), length.x, false);
+        val l = getEdgesEqual(area.srcPos(), length.y, true)
+        val r = getEdgesEqual(area.srcPos().add(length.x, 0), length.y, true)
+        val f = getEdgesEqual(area.srcPos().add(0, length.y), length.x, false)
+        val b = getEdgesEqual(area.srcPos(), length.x, false)
 
-        if (l > 1 || r > 1 || f > 1 || b > 1)
-            return false;
+        if (l > 1 || r > 1 || f > 1 || b > 1) return false
 
-        if (l == -1 || r == 1 || f == 1 || b == -1)
-            return false;
+        if (l == -1 || r == 1 || f == 1 || b == -1) return false
 
-        IterationSurfaceType.SurfaceType allowed = IterationSurfaceType.SurfaceType.FLAT;
-        boolean tl = allowed.equals(data.getIterationSurfaceType(area.srcPos().add(0, length.y)).getSurfaceType());
-        boolean tr = allowed.equals(data.getIterationSurfaceType(area.srcPos().add(length)).getSurfaceType());
-        boolean dl = allowed.equals(data.getIterationSurfaceType(area.srcPos()).getSurfaceType());
-        boolean dr = allowed.equals(data.getIterationSurfaceType(area.srcPos().add(length.x, 0)).getSurfaceType());
+        val allowed = IterationSurfaceType.SurfaceType.FLAT
+        val tl = allowed == data.getIterationSurfaceType(area.srcPos().add(0, length.y)).surfaceType
+        val tr = allowed == data.getIterationSurfaceType(area.srcPos().add(length)).surfaceType
+        val dl = allowed == data.getIterationSurfaceType(area.srcPos()).surfaceType
+        val dr = allowed == data.getIterationSurfaceType(area.srcPos().add(length.x, 0)).surfaceType
 
-        if (l == 0 && f == 0 && !tl || f == 0 && r == 0 && !tr || l == 0 && b == 0 && !dl || b == 0 && r == 0 && !dr)
-            return false;
+        if (l == 0 && f == 0 && !tl || f == 0 && r == 0 && !tr || l == 0 && b == 0 && !dl || b == 0 && r == 0 && !dr) return false
 
-        return iterationsAreSame(area);
+        return iterationsAreSame(area)
     }
 
-    private ErosionTask createTask(Area area) {
-        Vector2i length = area.getSize().sub(1, 1);
+    private fun createTask(area: Area): ErosionTask {
+        val length = area.size.sub(1, 1)
 
-        int l = getEdgesEqual(area.srcPos(), length.y, true);
-        int r = getEdgesEqual(area.srcPos().add(length.x,0), length.y, true);
-        int f = getEdgesEqual(area.srcPos().add(0,length.y), length.x, false);
-        int b = getEdgesEqual(area.srcPos(), length.x, false);
+        val l = getEdgesEqual(area.srcPos(), length.y, true)
+        val r = getEdgesEqual(area.srcPos().add(length.x, 0), length.y, true)
+        val f = getEdgesEqual(area.srcPos().add(0, length.y), length.x, false)
+        val b = getEdgesEqual(area.srcPos(), length.x, false)
 
-        return new ErosionTask(eroder, area.mul(data.chunkSize), data.chunkSize, l, r, f, b);
+        return ErosionTask(eroder, area.mul(data.chunkSize), data.chunkSize, l, r, f, b)
     }
 
-    private void taskFinished(ErosionTask task) {
-        Area area = task.getArea().div(data.chunkSize);
-        Vector2i length = area.getSize().sub(1, 1);
+    private fun taskFinished(task: ErosionTask) {
+        val area: Area = task.getArea().div(data.chunkSize)
+        val length = area.size.sub(1, 1)
 
-        int l = task.getL() - 1;
-        int r = task.getR() + 1;
-        int f = task.getF() + 1;
-        int b = task.getB() - 1;
+        val l: Int = task.l - 1
+        val r: Int = task.r + 1
+        val f: Int = task.f + 1
+        val b: Int = task.b - 1
 
-        setEdges(area.srcPos(), length.y, true, l);
-        setEdges(area.srcPos().add(length.x,0), length.y, true, r);
-        setEdges(area.srcPos().add(0,length.y), length.x, false, f);
-        setEdges(area.srcPos(), length.x, false, b);
+        setEdges(area.srcPos(), length.y, true, l)
+        setEdges(area.srcPos().add(length.x, 0), length.y, true, r)
+        setEdges(area.srcPos().add(0, length.y), length.x, false, f)
+        setEdges(area.srcPos(), length.x, false, b)
 
-        increaseIteration(area, l, r, f, b);
+        increaseIteration(area, l, r, f, b)
     }
 
-    private void increaseIteration(Area area, int l, int r, int f, int b) {
-        Area inner = area.outset(-1);
-        Vector2i size = area.getSize().sub(1, 1);
+    private fun increaseIteration(area: Area, l: Int, r: Int, f: Int, b: Int) {
+        val inner = area.outset(-1)
+        val size = area.size.sub(1, 1)
 
-        inner.forAllPoints(v -> data.getTile(v).iteration += data.chunkSize);
+        inner.forAllPoints { v: Vector2i -> data.getTile(v)!!.iteration += data.chunkSize }
 
-        if (l == 0)
-            for (int y = 1; y < size.y; y++)
-                data.getTile(area.srcPos().add(0, y)).iteration += data.chunkSize;
-        if (r == 0)
-            for (int y = 1; y < size.y; y++)
-                data.getTile(area.srcPos().add(size.x, y)).iteration += data.chunkSize;
-        if (f == 0)
-            for (int x = 1; x < size.x; x++)
-                data.getTile(area.srcPos().add(x, size.y)).iteration += data.chunkSize;
-        if (b == 0)
-            for (int x = 1; x < size.x; x++)
-                data.getTile(area.srcPos().add(x, 0)).iteration += data.chunkSize;
+        if (l == 0) for (y in 1..<size.y) data.getTile(area.srcPos().add(0, y))!!.iteration += data.chunkSize
+        if (r == 0) for (y in 1..<size.y) data.getTile(area.srcPos().add(size.x, y))!!.iteration += data.chunkSize
+        if (f == 0) for (x in 1..<size.x) data.getTile(area.srcPos().add(x, size.y))!!.iteration += data.chunkSize
+        if (b == 0) for (x in 1..<size.x) data.getTile(area.srcPos().add(x, 0))!!.iteration += data.chunkSize
 
-        if (l == 0 && b == 0)
-            data.getTile(area.srcPos()).iteration += data.chunkSize;
-        if (l == 0 && f == 0)
-            data.getTile(area.srcPos().add(0, size.y)).iteration += data.chunkSize;
-        if (r == 0 && b == 0)
-            data.getTile(area.srcPos().add(size.x, 0)).iteration += data.chunkSize;
-        if (r == 0 && f == 0)
-            data.getTile(inner.endPos()).iteration += data.chunkSize;
+        if (l == 0 && b == 0) data.getTile(area.srcPos())!!.iteration += data.chunkSize
+        if (l == 0 && f == 0) data.getTile(area.srcPos().add(0, size.y))!!.iteration += data.chunkSize
+        if (r == 0 && b == 0) data.getTile(area.srcPos().add(size.x, 0))!!.iteration += data.chunkSize
+        if (r == 0 && f == 0) data.getTile(inner.endPos())!!.iteration += data.chunkSize
     }
 
-    private boolean iterationsAreSame(Area area) {
-        int iteration = data.getTile(area.srcPos()).iteration;
+    private fun iterationsAreSame(area: Area): Boolean {
+        val iteration = data.getTile(area.srcPos())!!.iteration
 
-        for (Vector2i pos : area.allPoints())
-            if (iteration != data.getTile(pos).iteration)
-                return false;
-        return true;
+        for (pos in area.allPoints()) if (iteration != data.getTile(pos)!!.iteration) return false
+        return true
     }
 
     /**
@@ -274,25 +244,30 @@ public class ErosionManager {
      * @param upwards whether to check for equality upwards or sideways
      * @return -1, 0 or 1 if all are equal, else the length at which it isn't equal (larger than 1)
      */
-    private int getEdgesEqual(Vector2i pos, int length, boolean upwards) {
-        int edge = getEdge(pos, 1, upwards);
+    private fun getEdgesEqual(pos: Vector2i, length: Int, upwards: Boolean): Int {
+        val edge = getEdge(pos, 1, upwards)
 
-        for (int i = 2; i <= length; i++)
-            if (getEdge(pos, i, upwards) != edge)
-                return i;
+        for (i in 2..length) if (getEdge(pos, i, upwards) != edge) return i
 
-        return edge;
+        return edge
     }
 
-    private int getEdge(Vector2i pos, int offset, boolean upwards) {
-        return upwards ? data.getTile(new Vector2i(pos).add(0, offset)).horizontal : data.getTile(new Vector2i(pos).add(offset, 0)).vertical;
+    private fun getEdge(pos: Vector2i, offset: Int, upwards: Boolean): Int {
+        return if (upwards) data.getTile(Vector2i(pos).add(0, offset))!!.horizontal else data.getTile(
+            Vector2i(pos).add(
+                offset,
+                0
+            )
+        )!!.vertical
     }
 
-    private void setEdges(Vector2i pos, int length, boolean upwards, int value) {
-        for (int i = 1; i <= length; i++)
-            if (upwards)
-                data.getTile(new Vector2i(pos).add(0, i)).horizontal = value;
-            else
-                data.getTile(new Vector2i(pos).add(i, 0)).vertical = value;
+    private fun setEdges(pos: Vector2i, length: Int, upwards: Boolean, value: Int) {
+        for (i in 1..length) if (upwards) data.getTile(Vector2i(pos).add(0, i))!!.horizontal = value
+        else data.getTile(Vector2i(pos).add(i, 0))!!.vertical = value
+    }
+
+    companion object {
+        private val changes =
+            arrayOf(Vector4i(0, 0, 1, 0), Vector4i(0, 0, 0, 1), Vector4i(1, 0, 0, 0), Vector4i(0, 1, 0, 0))
     }
 }

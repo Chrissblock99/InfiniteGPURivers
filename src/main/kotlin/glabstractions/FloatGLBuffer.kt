@@ -1,16 +1,12 @@
-package me.chriss99.glabstractions;
+package me.chriss99.glabstractions
 
-import static org.lwjgl.opengl.GL11.GL_FLOAT;
-import static org.lwjgl.opengl.GL15.glBufferData;
+import org.lwjgl.opengl.GL11.GL_FLOAT
+import org.lwjgl.opengl.GL15.glBufferData
 
-public class FloatGLBuffer extends GLBuffer {
-    public FloatGLBuffer(int target) {
-        super(target, GL_FLOAT);
-    }
-
-    public FloatGLBuffer updateData(float[] data, int usage) {
-        bind();
-        glBufferData(target, data, usage);
-        return this;
+class FloatGLBuffer(target: Int) : GLBuffer(target, GL_FLOAT) {
+    fun updateData(data: FloatArray, usage: Int): FloatGLBuffer {
+        bind()
+        glBufferData(target, data, usage)
+        return this
     }
 }

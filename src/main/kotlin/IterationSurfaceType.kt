@@ -1,111 +1,103 @@
-package me.chriss99;
+package me.chriss99
 
-import org.joml.Vector2i;
+import org.joml.Vector2i
+import java.util.*
+import java.util.function.Function
 
-import java.util.Objects;
-import java.util.function.Function;
+class IterationSurfaceType(bits: Byte) {
+    val surfaceType: SurfaceType
+    private val direction: Vector2i
+    private val bits: Byte
 
-public class IterationSurfaceType {
-    private final SurfaceType surfaceType;
-    private final Vector2i direction;
-    private final byte bits;
-
-    public IterationSurfaceType(byte bits) {
-        surfaceType = SurfaceType.fromBits(bits);
-        this.direction = surfaceType.directionFromBits.apply((byte) (bits & 0b0011));
-        this.bits = (byte) (bits & 0x0F);
+    init {
+        surfaceType = SurfaceType.fromBits(bits)
+        this.direction = surfaceType.directionFromBits.apply((bits.toInt() and 0b0011).toByte())
+        this.bits = (bits.toInt() and 0x0F).toByte()
     }
 
-    public SurfaceType getSurfaceType() {
-        return surfaceType;
+    fun getDirection(): Vector2i {
+        return Vector2i(direction)
     }
 
-    public Vector2i getDirection() {
-        return new Vector2i(direction);
+    fun toBits(): Byte {
+        return bits
     }
 
-    public byte toBits() {
-        return bits;
-    }
-
-    public int[][] getSurface() {
-        int[][] s = surfaceType.surface;
-        return switch (bits & 0b0011) {
-            case 0b00 -> s;
-            case 0b01 -> new int[][]{{s[1][0], s[0][0]}, {s[1][1], s[0][1]}};
-            case 0b10 -> new int[][]{{s[0][1], s[1][1]}, {s[0][0], s[1][0]}};
-            case 0b11 -> new int[][]{{s[1][1], s[1][0]}, {s[0][1], s[0][0]}};
-            default -> throw new IllegalStateException("Unexpected value: " + bits);
-        };
-    }
-
-
-
-
-    private static Vector2i aaDirectionFromBits(byte bits) {
-        return switch (bits) {
-            case 0b00 -> new Vector2i(0, -1);
-            case 0b01 -> new Vector2i(1, 0);
-            case 0b10 -> new Vector2i(-1, 0);
-            case 0b11 -> new Vector2i(0, 1);
-            default -> throw new IllegalStateException("Unexpected value: " + bits);
-        };
-    }
-
-    private static Vector2i diagonalDirectionFromBits(byte bits) {
-        return switch (bits) {
-            case 0b00 -> new Vector2i(-1, -1);
-            case 0b01 -> new Vector2i(1, -1);
-            case 0b10 -> new Vector2i(-1, 1);
-            case 0b11 -> new Vector2i(1, 1);
-            default -> throw new IllegalStateException("Unexpected value: " + bits);
-        };
-    }
-
-
-    public enum SurfaceType {
-        FLAT(IterationSurfaceType::aaDirectionFromBits, new int[2][2]),
-        SLOPE(IterationSurfaceType::aaDirectionFromBits, new int[][]{{0, 0}, {1, 1}}),
-        OUTWARD_SLOPE(IterationSurfaceType::diagonalDirectionFromBits, new int[][]{{0, 0}, {0, 1}}),
-        INWARD_SLOPE(IterationSurfaceType::diagonalDirectionFromBits, new int[][]{{0, 1}, {1, 1}});
-
-        private final Function<Byte, Vector2i> directionFromBits;
-        private final int[][] surface;
-
-        SurfaceType(Function<Byte, Vector2i> directionFromBits, int[][] surface) {
-            this.directionFromBits = directionFromBits;
-            this.surface = surface;
+    val surface: Array<IntArray>
+        get() {
+            val s = surfaceType.surface
+            return when (bits.toInt() and 0b0011) {
+                0b00 -> s
+                0b01 -> arrayOf(intArrayOf(s[1][0], s[0][0]), intArrayOf(s[1][1], s[0][1]))
+                0b10 -> arrayOf(intArrayOf(s[0][1], s[1][1]), intArrayOf(s[0][0], s[1][0]))
+                0b11 -> arrayOf(intArrayOf(s[1][1], s[1][0]), intArrayOf(s[0][1], s[0][0]))
+                else -> throw IllegalStateException("Unexpected value: $bits")
+            }
         }
 
 
-        private static SurfaceType fromBits(byte bits) {
-            bits &= 0b1100;
+    enum class SurfaceType(
+        directionFromBits: Function<Byte, Vector2i>,
+        internal val surface: Array<IntArray>
+    ) {
+        FLAT(Function<Byte, Vector2i> { bits: Byte -> aaDirectionFromBits(bits) }, Array(2) { IntArray(2) }),
+        SLOPE(Function<Byte, Vector2i> { bits: Byte -> aaDirectionFromBits(bits) }, arrayOf(intArrayOf(0, 0), intArrayOf(1, 1))),
+        OUTWARD_SLOPE(Function<Byte, Vector2i> { bits: Byte -> diagonalDirectionFromBits(bits) }, arrayOf(intArrayOf(0, 0), intArrayOf(0, 1))),
+        INWARD_SLOPE(Function<Byte, Vector2i> { bits: Byte -> diagonalDirectionFromBits(bits) }, arrayOf(intArrayOf(0, 1), intArrayOf(1, 1)));
 
-            return switch (bits) {
-                case 0b0000 -> FLAT;
-                case 0b0100 -> SLOPE;
-                case 0b1000 -> OUTWARD_SLOPE;
-                case 0b1100 -> INWARD_SLOPE;
-                default -> throw new IllegalStateException("Unexpected value: " + bits);
-            };
+        val directionFromBits: Function<Byte, Vector2i> = directionFromBits
+
+
+        companion object {
+            fun fromBits(bits: Byte): SurfaceType {
+                var bits = bits
+                bits = (bits.toInt() and 0b1100).toByte()
+
+                return when (bits) {
+                    0b0000.toByte() -> FLAT
+                    0b0100.toByte() -> SLOPE
+                    0b1000.toByte() -> OUTWARD_SLOPE
+                    0b1100.toByte() -> INWARD_SLOPE
+                    else -> throw IllegalStateException("Unexpected value: $bits")
+                }
+            }
         }
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        IterationSurfaceType that = (IterationSurfaceType) o;
-        return bits == that.bits;
+    override fun equals(o: Any?): Boolean {
+        if (this === o) return true
+        if (o == null || javaClass != o.javaClass) return false
+        val that = o as IterationSurfaceType
+        return bits == that.bits
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(bits);
+    override fun hashCode(): Int {
+        return Objects.hashCode(bits)
     }
 
-    @Override
-    public String toString() {
-        return String.format("%4s", Integer.toBinaryString(bits & 0xFF)).replace(' ', '0');
+    override fun toString(): String {
+        return String.format("%4s", Integer.toBinaryString(bits.toInt() and 0xFF)).replace(' ', '0')
+    }
+
+    companion object {
+        private fun aaDirectionFromBits(bits: Byte): Vector2i {
+            return when (bits) {
+                0b00.toByte() -> Vector2i(0, -1)
+                0b01.toByte() -> Vector2i(1, 0)
+                0b10.toByte() -> Vector2i(-1, 0)
+                0b11.toByte() -> Vector2i(0, 1)
+                else -> throw IllegalStateException("Unexpected value: $bits")
+            }
+        }
+
+        private fun diagonalDirectionFromBits(bits: Byte): Vector2i {
+            return when (bits) {
+                0b00.toByte() -> Vector2i(-1, -1)
+                0b01.toByte() -> Vector2i(1, -1)
+                0b10.toByte() -> Vector2i(-1, 1)
+                0b11.toByte() -> Vector2i(1, 1)
+                else -> throw IllegalStateException("Unexpected value: $bits")
+            }
+        }
     }
 }

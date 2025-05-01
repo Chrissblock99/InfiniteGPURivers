@@ -1,47 +1,35 @@
-package me.chriss99.util;
+package me.chriss99.util
 
-import java.util.Iterator;
-import java.util.LinkedList;
+import org.lwjgl.glfw.GLFW
+import java.util.*
 
-import static org.lwjgl.glfw.GLFW.glfwGetTime;
+class FrameCounter(var deltaTime: Double) {
+    private var lastTime: Double
+    private var lastFramePrint = Double.NEGATIVE_INFINITY
+    private val frames = LinkedList<Double>()
 
-public class FrameCounter {
-    private double deltaTime;
-
-    private double lastTime;
-    private double lastFramePrint = Double.NEGATIVE_INFINITY;
-    private final LinkedList<Double> frames = new LinkedList<>();
-
-    public FrameCounter(double initDeltaTime) {
-        deltaTime = initDeltaTime;
-
-        lastTime = glfwGetTime();
+    init {
+        lastTime = GLFW.glfwGetTime()
     }
 
-    public void frameDone() {
-        double currentTime = glfwGetTime();
+    fun frameDone() {
+        val currentTime = GLFW.glfwGetTime()
 
-        frames.add(currentTime);
-        Iterator<Double> iterator = frames.iterator();
-        for (int i = 0; i < frames.size(); i++)
-            if (currentTime - iterator.next() >= 1)
-                iterator.remove();
-            else break;
+        frames.add(currentTime)
+        val iterator = frames.iterator()
+        for (i in frames.indices) if (currentTime - iterator.next() >= 1) iterator.remove()
+        else break
 
-        deltaTime = currentTime - lastTime;
-        lastTime = currentTime;
+        deltaTime = currentTime - lastTime
+        lastTime = currentTime
     }
 
-    public void reportFPS() {
-        double currentTime = glfwGetTime();
+    fun reportFPS() {
+        val currentTime = GLFW.glfwGetTime()
 
         if (currentTime - lastFramePrint > .5) {
-            System.out.println(frames.size() + "   " + Math.round(1/deltaTime) + "   " + deltaTime*1000);
-            lastFramePrint = currentTime;
+            println(frames.size.toString() + "   " + Math.round(1 / deltaTime) + "   " + deltaTime * 1000)
+            lastFramePrint = currentTime
         }
-    }
-
-    public double getDeltaTime() {
-        return deltaTime;
     }
 }

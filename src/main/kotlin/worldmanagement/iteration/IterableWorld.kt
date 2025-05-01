@@ -1,44 +1,51 @@
-package me.chriss99.worldmanagement.iteration;
+package me.chriss99.worldmanagement.iteration
 
-import me.chriss99.IterationSurfaceType;
-import me.chriss99.worldmanagement.InfiniteWorld;
-import me.chriss99.worldmanagement.Region;
-import me.chriss99.worldmanagement.TileLoadManager;
-import org.joml.Vector2i;
+import me.chriss99.IterationSurfaceType
+import me.chriss99.worldmanagement.InfiniteWorld
+import me.chriss99.worldmanagement.Region
+import me.chriss99.worldmanagement.TileLoadManager
+import org.joml.Vector2i
 
-public class IterableWorld extends InfiniteWorld<IterationTile> {
-    public IterableWorld(String worldName, int chunkSize, int regionSize, TileLoadManager<Region<IterationTile>> tileLoadManager) {
-        super(chunkSize, regionSize, (a, b) -> new IterationTile(0, 0, 0), new IterationTileRegionFileManager(worldName), tileLoadManager);
-    }
+class IterableWorld(
+    worldName: String,
+    chunkSize: Int,
+    regionSize: Int,
+    tileLoadManager: TileLoadManager<Region<IterationTile>>
+) :
+    InfiniteWorld<IterationTile>(
+        chunkSize,
+        regionSize,
+        { a, b -> IterationTile(0, 0, 0) },
+        IterationTileRegionFileManager(worldName),
+        tileLoadManager
+    ) {
+    fun getIterationSurfaceType(pos: Vector2i): IterationSurfaceType {
+        val v0: Int = getTile(pos).vertical and 0b11
+        val v1: Int = getTile(Vector2i(pos).add(1, 0)).vertical and 0b11
+        val h0: Int = getTile(pos).horizontal and 0b11
+        val h1: Int = getTile(Vector2i(pos).add(0, 1)).horizontal and 0b11
 
-    public IterationSurfaceType getIterationSurfaceType(Vector2i pos) {
-        int v0 = getTile(pos).vertical & 0b11;
-        int v1 = getTile(new Vector2i(pos).add(1, 0)).vertical & 0b11;
-        int h0 = getTile(pos).horizontal & 0b11;
-        int h1 = getTile(new Vector2i(pos).add(0, 1)).horizontal & 0b11;
+        val combined = h1 or (v0 shl 2) or (v1 shl 4) or (h0 shl 6)
+        val bits = when (combined) {
+            0b00000000 -> 0b0000
 
-        int combined = h1 | (v0 << 2) | (v1 << 4) | (h0 << 6);
-        byte bits = (byte) switch (combined) {
-            case 0b00000000 -> 0b0000;
+            0b00111100 -> 0b0100
+            0b01000001 -> 0b0101
+            0b11000011 -> 0b0110
+            0b00010100 -> 0b0111
 
-            case 0b00111100 -> 0b0100;
-            case 0b01000001 -> 0b0101;
-            case 0b11000011 -> 0b0110;
-            case 0b00010100 -> 0b0111;
+            0b00110011 -> 0b1000
+            0b00001101 -> 0b1001
+            0b11010000 -> 0b1010
+            0b01000100 -> 0b1011
 
-            case 0b00110011 -> 0b1000;
-            case 0b00001101 -> 0b1001;
-            case 0b11010000 -> 0b1010;
-            case 0b01000100 -> 0b1011;
+            0b11001100 -> 0b1100
+            0b01110000 -> 0b1101
+            0b00000111 -> 0b1110
+            0b00010001 -> 0b1111
+            else -> throw IllegalStateException("Illegal combination: $combined")
+        }.toByte()
 
-            case 0b11001100 -> 0b1100;
-            case 0b01110000 -> 0b1101;
-            case 0b00000111 -> 0b1110;
-            case 0b00010001 -> 0b1111;
-
-            default -> throw new IllegalStateException("Illegal combination: " + combined);
-        };
-
-        return new IterationSurfaceType(bits);
+        return IterationSurfaceType(bits)
     }
 }

@@ -1,24 +1,11 @@
-package me.chriss99;
+package me.chriss99
 
-import org.joml.Vector2i;
+import org.joml.Vector2i
 
-public class ColoredChunkVAO extends ColoredVAO implements ChunkVAO {
-    private final Vector2i srcPos;
-    private final int width;
-
-    public ColoredChunkVAO(double[] triangle, double[] color, int[] index, Vector2i srcPos, int width) {
-        super(triangle, color, index);
-        this.srcPos = srcPos;
-        this.width = width;
-    }
-
-    @Override
-    public Vector2i getSrcPos() {
-        return srcPos;
-    }
-
-    @Override
-    public int getWidth() {
-        return width;
-    }
+class ColoredChunkVAO(
+    triangle: DoubleArray, color: DoubleArray, index: IntArray, srcPos: Vector2i,
+    override val width: Int
+) :
+    ColoredVAO(triangle, color, index), ChunkVAO {
+    override val srcPos: Vector2i = srcPos
 }

@@ -1,87 +1,69 @@
-package me.chriss99.erosion;
+package me.chriss99.erosion
 
-import me.chriss99.Area;
+import me.chriss99.Area
 
-public class ErosionTask {
-    private final GPUTerrainEroder eroder;
+class ErosionTask(
+    eroder: GPUTerrainEroder, area: Area,
+    private val steps: Int,
+    val l: Int, val r: Int, val f: Int, val b: Int
+) {
+    private val eroder: GPUTerrainEroder = eroder
 
-    private final Area area;
-    private final int steps;
-    private final int l;
-    private final int r;
-    private final int f;
-    private final int b;
+    private val area = area.copy()
 
-    private Area currentArea;
-    private int currentStep;
+    private var currentArea: Area
+    private var currentStep: Int
 
-    public ErosionTask(GPUTerrainEroder eroder, Area area, int steps, int l, int r, int f, int b) {
-        this.eroder = eroder;
-        this.area = area.copy();
-        this.steps = steps;
-        this.l = l;
-        this.r = r;
-        this.f = f;
-        this.b = b;
-
-        currentArea = area.increase(r == 0 ? 0 : -steps, f == 0 ? 0 : -steps, l == 0 ? 0 : -steps, b == 0 ? 0 : -steps);
-        currentStep = 0;
+    init {
+        currentArea = area.increase(
+            if (r == 0) 0 else -steps,
+            if (f == 0) 0 else -steps,
+            if (l == 0) 0 else -steps,
+            if (b == 0) 0 else -steps
+        )
+        currentStep = 0
     }
 
-    public boolean erosionStep() {
-        if (isDone())
-            return true;
+    fun erosionStep(): Boolean {
+        if (isDone) return true
 
-        eroder.erode(currentArea);
-        currentArea = currentArea.increase(r == 0 ? -1 : 1, f == 0 ? -1 : 1, l == 0 ? -1 : 1, b == 0 ? -1 : 1);
-        currentStep++;
-        return false;
+        eroder.erode(currentArea)
+        currentArea = currentArea.increase(
+            if (r == 0) -1 else 1,
+            if (f == 0) -1 else 1,
+            if (l == 0) -1 else 1,
+            if (b == 0) -1 else 1
+        )
+        currentStep++
+        return false
     }
 
-    public boolean hasStarted() {
-        return currentStep != 0;
+    fun hasStarted(): Boolean {
+        return currentStep != 0
     }
 
-    public boolean isDone() {
-        return currentStep >= steps;
+    val isDone: Boolean
+        get() = currentStep >= steps
+
+    val isRunning: Boolean
+        get() = hasStarted() && !isDone
+
+    fun nextIterations(): Int {
+        return area.area
     }
 
-    public boolean isRunning() {
-        return hasStarted() && !isDone();
+    fun newSlopes(): Int {
+        var sum = 0
+
+        sum += if (l == 0) 1 else 0
+        sum += if (r == 0) 1 else 0
+        sum += if (f == 0) 1 else 0
+        sum += if (b == 0) 1 else 0
+
+        return sum
     }
 
-    public int nextIterations() {
-        return area.getArea();
-    }
-
-    public int newSlopes() {
-        int sum = 0;
-
-        sum += l == 0 ? 1 : 0;
-        sum += r == 0 ? 1 : 0;
-        sum += f == 0 ? 1 : 0;
-        sum += b == 0 ? 1 : 0;
-
-        return sum;
-    }
-
-    public Area getArea() {
-        return area.copy();
-    }
-
-    public int getB() {
-        return b;
-    }
-
-    public int getF() {
-        return f;
-    }
-
-    public int getR() {
-        return r;
-    }
-
-    public int getL() {
-        return l;
+    fun getArea(): Area {
+        return area.copy()
     }
 }

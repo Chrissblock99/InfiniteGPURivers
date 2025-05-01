@@ -1,5 +1,5 @@
-package me.chriss99.glabstractions;
+package me.chriss99.glabstractions
 
-public interface VAO extends GLObject {
-    int getIndexLength();
+interface VAO : GLObject {
+    val indexLength: Int
 }

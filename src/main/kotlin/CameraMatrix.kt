@@ -1,54 +1,57 @@
-package me.chriss99;
+package me.chriss99
 
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
+import org.joml.Matrix4f
+import org.joml.Vector3f
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.tan
 
-public class CameraMatrix {
-    public float aspectRatio = 1;
-    public float FOV = 90;
-    public float zNear = 0;
-    public float zFar = 20000;
+class CameraMatrix {
+    var aspectRatio: Float = 1f
+    var FOV: Float = 90f
+    var zNear: Float = 0f
+    var zFar: Float = 20000f
 
-    public Vector3f position = new Vector3f();
-    public float yaw = 0;
-    public float pitch = 0;
-    public float roll = 0;
+    var position: Vector3f = Vector3f()
+    var yaw: Float = 0f
+    var pitch: Float = 0f
+    var roll: Float = 0f
 
-    public Matrix4f generateMatrix() {
-        Matrix4f viewMatrix = new Matrix4f();
-        viewMatrix.m30(-position.x);
-        viewMatrix.m31(-position.y);
-        viewMatrix.m32(-position.z);
+    fun generateMatrix(): Matrix4f {
+        val viewMatrix: Matrix4f = Matrix4f()
+        viewMatrix.m30(-position.x)
+        viewMatrix.m31(-position.y)
+        viewMatrix.m32(-position.z)
 
-        Matrix4f yawMatrix = new Matrix4f();
-        yawMatrix.m00((float) Math.cos(yaw));
-        yawMatrix.m02((float) -Math.sin(yaw));
-        yawMatrix.m20((float) Math.sin(yaw));
-        yawMatrix.m22((float) Math.cos(yaw));
+        val yawMatrix: Matrix4f = Matrix4f()
+        yawMatrix.m00(cos(yaw.toDouble()).toFloat())
+        yawMatrix.m02(-sin(yaw.toDouble()).toFloat())
+        yawMatrix.m20(sin(yaw.toDouble()).toFloat())
+        yawMatrix.m22(cos(yaw.toDouble()).toFloat())
 
-        Matrix4f pitchMatrix = new Matrix4f();
-        pitchMatrix.m11((float) Math.cos(pitch));
-        pitchMatrix.m12((float) Math.sin(pitch));
-        pitchMatrix.m21((float) -Math.sin(pitch));
-        pitchMatrix.m22((float) Math.cos(pitch));
+        val pitchMatrix: Matrix4f = Matrix4f()
+        pitchMatrix.m11(cos(pitch.toDouble()).toFloat())
+        pitchMatrix.m12(sin(pitch.toDouble()).toFloat())
+        pitchMatrix.m21(-sin(pitch.toDouble()).toFloat())
+        pitchMatrix.m22(cos(pitch.toDouble()).toFloat())
 
-        Matrix4f rollMatrix = new Matrix4f();
-        rollMatrix.m00((float) Math.cos(roll));
-        rollMatrix.m01((float) Math.sin(roll));
-        rollMatrix.m10((float) -Math.sin(roll));
-        rollMatrix.m11((float) Math.cos(roll));
+        val rollMatrix: Matrix4f = Matrix4f()
+        rollMatrix.m00(cos(roll.toDouble()).toFloat())
+        rollMatrix.m01(sin(roll.toDouble()).toFloat())
+        rollMatrix.m10(-sin(roll.toDouble()).toFloat())
+        rollMatrix.m11(cos(roll.toDouble()).toFloat())
 
-        float f = (float) (1 / Math.tan(Math.toRadians(FOV)/2));
-        float DNF = 1/(zNear-zFar);
+        val f = (1 / tan(Math.toRadians(FOV.toDouble()) / 2)).toFloat()
+        val DNF = 1 / (zNear - zFar)
 
-        Matrix4f projectionMatrix = new Matrix4f();
-        projectionMatrix.m00(aspectRatio * f);
-        projectionMatrix.m11(f);
-        projectionMatrix.m22(-2 * DNF);
-        projectionMatrix.m32(1 + (2*zFar) * DNF);
-        projectionMatrix.m23(1);
-        projectionMatrix.m33(0);
+        val projectionMatrix: Matrix4f = Matrix4f()
+        projectionMatrix.m00(aspectRatio * f)
+        projectionMatrix.m11(f)
+        projectionMatrix.m22(-2 * DNF)
+        projectionMatrix.m32(1 + (2 * zFar) * DNF)
+        projectionMatrix.m23(1f)
+        projectionMatrix.m33(0f)
 
-        return projectionMatrix.mul(rollMatrix.mul(pitchMatrix.mul(yawMatrix.mul(viewMatrix))));
+        return projectionMatrix.mul(rollMatrix.mul(pitchMatrix.mul(yawMatrix.mul(viewMatrix))))
     }
 }

@@ -1,25 +1,14 @@
-package me.chriss99.program;
+package me.chriss99.program
 
-import me.chriss99.glabstractions.VAO;
+import me.chriss99.glabstractions.VAO
 
-import java.util.List;
-
-public class ListRenderer<T extends VAO> {
-    protected final RenderProgram<T> renderProgram;
-    private final List<T> vaoList;
-
-    public ListRenderer(RenderProgram<T> renderProgram, List<T> vaoList) {
-        this.renderProgram = renderProgram;
-        this.vaoList = vaoList;
+class ListRenderer<T : VAO>(protected val renderProgram: RenderProgram<T>, private val vaoList: List<T>) {
+    fun render() {
+        renderProgram.render(vaoList)
     }
 
-    public void render() {
-        renderProgram.render(vaoList);
-    }
-
-    public void delete() {
-        for (T vao : vaoList)
-            vao.delete();
-        renderProgram.delete();
+    fun delete() {
+        for (vao in vaoList) vao!!.delete()
+        renderProgram.delete()
     }
 }

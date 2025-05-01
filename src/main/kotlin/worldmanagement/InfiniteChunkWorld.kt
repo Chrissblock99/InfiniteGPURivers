@@ -1,69 +1,95 @@
-package me.chriss99.worldmanagement;
+package me.chriss99.worldmanagement
 
-import me.chriss99.Area;
-import me.chriss99.Array2DBufferWrapper;
-import me.chriss99.util.Util;
-import org.joml.Vector2i;
+import me.chriss99.Area
+import me.chriss99.Array2DBufferWrapper
+import me.chriss99.util.Util
+import org.joml.Vector2i
+import java.util.function.BiFunction
+import kotlin.math.max
+import kotlin.math.min
 
-import java.util.function.BiFunction;
-
-public class InfiniteChunkWorld extends InfiniteWorld<Chunk> {
-    public final Array2DBufferWrapper.Type type;
-
-    public InfiniteChunkWorld(String worldName, Array2DBufferWrapper.Type type, int chunkSize, int regionSize, BiFunction<Vector2i, Integer, Chunk> chunkGenerator, TileLoadManager<Region<Chunk>> tileLoadManager) {
-        super(chunkSize, regionSize, chunkGenerator, new ChunkRegionFileManager(worldName, type, chunkSize), tileLoadManager);
-        this.type = type;
+class InfiniteChunkWorld(
+    worldName: String,
+    val type: Array2DBufferWrapper.Type,
+    chunkSize: Int,
+    regionSize: Int,
+    chunkGenerator: BiFunction<Vector2i, Int, Chunk>,
+    tileLoadManager: TileLoadManager<Region<Chunk>>
+) :
+    InfiniteWorld<Chunk>(
+        chunkSize,
+        regionSize,
+        chunkGenerator,
+        ChunkRegionFileManager(worldName, type, chunkSize),
+        tileLoadManager
+    ) {
+    fun readArea(area: Area): Array2DBufferWrapper {
+        return readWriteArea(area.srcPos(), Array2DBufferWrapper.of(type, area.size), true)
     }
 
-    public Array2DBufferWrapper readArea(Area area) {
-        return readWriteArea(area.srcPos(), Array2DBufferWrapper.of(type, area.getSize()), true);
+    fun writeArea(pos: Vector2i, data: Array2DBufferWrapper) {
+        readWriteArea(pos, data, false)
     }
 
-    public void writeArea(Vector2i pos, Array2DBufferWrapper data) {
-        readWriteArea(pos, data, false);
-    }
-
-    private Array2DBufferWrapper readWriteArea(Vector2i pos, Array2DBufferWrapper data, boolean read) {
-        int x = pos.x;
-        int y = pos.y;
-        int width = data.getSize().x;
-        int height = data.getSize().y;
+    private fun readWriteArea(pos: Vector2i, data: Array2DBufferWrapper, read: Boolean): Array2DBufferWrapper {
+        val x: Int = pos.x
+        val y: Int = pos.y
+        val width: Int = data.size.x
+        val height: Int = data.size.y
 
 
-        int chunkX = Util.properIntDivide(x, chunkSize);
-        int chunkY = Util.properIntDivide(y, chunkSize);
-        int chunksX = Util.properIntDivide(x+width-1, chunkSize) - chunkX + 1;
-        int chunksY = Util.properIntDivide(y+height-1, chunkSize) - chunkY + 1;
+        val chunkX: Int = Util.properIntDivide(x, chunkSize)
+        val chunkY: Int = Util.properIntDivide(y, chunkSize)
+        val chunksX: Int = Util.properIntDivide(x + width - 1, chunkSize) - chunkX + 1
+        val chunksY: Int = Util.properIntDivide(y + height - 1, chunkSize) - chunkY + 1
 
-        for (int currentChunkX = chunkX; currentChunkX < chunkX+chunksX; currentChunkX++)
-            for (int currentChunkY = chunkY; currentChunkY < chunkY+chunksY; currentChunkY++) {
-                Chunk currentChunk = getTile(new Vector2i(currentChunkX, currentChunkY));
+        for (currentChunkX in chunkX..<chunkX + chunksX) for (currentChunkY in chunkY..<chunkY + chunksY) {
+            val currentChunk: Chunk = getTile(Vector2i(currentChunkX, currentChunkY))
 
-                int currentChunkMinX = (Math.max(currentChunkX*chunkSize, x)%chunkSize+chunkSize)%chunkSize;
-                int currentChunkMaxX = (Math.min(currentChunkX*chunkSize +chunkSize-1, x+width-1)%chunkSize+chunkSize)%chunkSize;
-                int currentChunkMinY = (Math.max(currentChunkY*chunkSize, y)%chunkSize+chunkSize)%chunkSize;
-                int currentChunkMaxY = (Math.min(currentChunkY*chunkSize +chunkSize-1, y+height-1)%chunkSize+chunkSize)%chunkSize;
+            val currentChunkMinX = ((max(
+                (currentChunkX * chunkSize).toDouble(),
+                x.toDouble()
+            ) % chunkSize + chunkSize) % chunkSize).toInt()
+            val currentChunkMaxX =
+                ((min(
+                    (currentChunkX * chunkSize + chunkSize - 1).toDouble(),
+                    (x + width - 1).toDouble()
+                ) % chunkSize + chunkSize) % chunkSize).toInt()
+            val currentChunkMinY = ((max(
+                (currentChunkY * chunkSize).toDouble(),
+                y.toDouble()
+            ) % chunkSize + chunkSize) % chunkSize).toInt()
+            val currentChunkMaxY =
+                ((min(
+                    (currentChunkY * chunkSize + chunkSize - 1).toDouble(),
+                    (y + height - 1).toDouble()
+                ) % chunkSize + chunkSize) % chunkSize).toInt()
 
-                for (int i = currentChunkMinY; i <= currentChunkMaxY; i++) {
-                    Array2DBufferWrapper src = data.slice(currentChunkY*chunkSize + i - y);
-                    int srcPos = currentChunkX*chunkSize + currentChunkMinX - x;
-                    Array2DBufferWrapper dest = currentChunk.data().slice(i);
-                    int destPos = currentChunkMinX;
+            for (i in currentChunkMinY..currentChunkMaxY) {
+                var src = data.slice(currentChunkY * chunkSize + i - y)
+                var srcPos = currentChunkX * chunkSize + currentChunkMinX - x
+                var dest: Array2DBufferWrapper = currentChunk.data.slice(i)
+                var destPos = currentChunkMinX
 
-                    if (read) {
-                        Array2DBufferWrapper temp = dest;
-                        dest = src;
-                        src = temp;
+                if (read) {
+                    val temp = dest
+                    dest = src
+                    src = temp
 
-                        int tempPos = destPos;
-                        destPos = srcPos;
-                        srcPos = tempPos;
-                    }
-
-                    dest.buffer.put(destPos*type.elementSize, src.buffer, srcPos*type.elementSize, (currentChunkMaxX-currentChunkMinX + 1)*type.elementSize);
+                    val tempPos = destPos
+                    destPos = srcPos
+                    srcPos = tempPos
                 }
-            }
 
-        return data;
+                dest.buffer.put(
+                    destPos * type.elementSize,
+                    src.buffer,
+                    srcPos * type.elementSize,
+                    (currentChunkMaxX - currentChunkMinX + 1) * type.elementSize
+                )
+            }
+        }
+
+        return data
     }
 }

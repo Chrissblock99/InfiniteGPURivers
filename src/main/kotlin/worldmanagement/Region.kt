@@ -1,52 +1,39 @@
-package me.chriss99.worldmanagement;
+package me.chriss99.worldmanagement
 
-import org.joml.Vector2i;
+import org.joml.Vector2i
+import java.util.*
+import java.util.function.Function
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Function;
+class Region<T>(coord: Vector2i) {
+    val coord: Vector2i = coord
+    private val tiles: LinkedHashMap<Vector2i, T> = LinkedHashMap<Vector2i, T>()
 
-public class Region<T> {
-    public final Vector2i coord;
-    private final LinkedHashMap<Vector2i, T> tiles = new LinkedHashMap<>();
-
-    public Region(Vector2i coord) {
-        this.coord = coord;
+    fun addChunk(coord: Vector2i, chunk: T) {
+        val oldTile = tiles.put(coord, chunk)
+        if (oldTile != null) IllegalStateException("Tile " + coord.x + ", " + coord.y + " was overwritten!").printStackTrace()
     }
 
-    public void addChunk(Vector2i coord, T chunk) {
-        T oldTile = tiles.put(coord, chunk);
-        if (oldTile != null)
-            new IllegalStateException("Tile " + coord.x + ", " + coord.y+ " was overwritten!").printStackTrace();
+    fun getTile(coord: Vector2i, tileGenerator: Function<Vector2i, T>?): T {
+        return tiles.computeIfAbsent(coord, tileGenerator!!)
     }
 
-    public T getTile(Vector2i coord, Function<Vector2i, T> tileGenerator) {
-        return tiles.computeIfAbsent(coord, tileGenerator);
-    }
+    val allTiles: Set<Map.Entry<Vector2i, T>>
+        get() = tiles.entries
 
-    public Set<Map.Entry<Vector2i, T>> getAllTiles() {
-        return tiles.entrySet();
-    }
-
-    @Override
-    public String toString() {
+    override fun toString(): String {
         return "Region{" +
                 "coord=" + coord +
                 ", tiles=" + tiles +
-                '}';
+                '}'
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Region<?> region = (Region<?>) o;
-        return Objects.equals(coord, region.coord) && Objects.equals(tiles, region.tiles);
+    override fun equals(o: Any?): Boolean {
+        if (o == null || javaClass != o.javaClass) return false
+        val region = o as Region<*>
+        return coord == region.coord && tiles == region.tiles
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(coord, tiles);
+    override fun hashCode(): Int {
+        return Objects.hash(coord, tiles)
     }
 }

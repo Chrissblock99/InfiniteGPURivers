@@ -1,9 +1,7 @@
-package me.chriss99.program;
+package me.chriss99.program
 
-import me.chriss99.glabstractions.VAO;
+import me.chriss99.glabstractions.VAO
 
-import java.util.Collection;
-
-public abstract class RenderProgram<T extends VAO> extends GLProgram {
-    public abstract void render(Collection<T> vao);
+abstract class RenderProgram<T : VAO> : GLProgram() {
+    abstract fun render(vao: Collection<T>)
 }

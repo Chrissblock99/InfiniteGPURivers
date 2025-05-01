@@ -1,7 +1,7 @@
-package me.chriss99.worldmanagement;
+package me.chriss99.worldmanagement
 
-public interface FileStorage<K, V> {
-    boolean hasFile(K key);
-    V loadFile(K key);
-    void saveFile(K key, V file);
+interface FileStorage<K, V> {
+    fun hasFile(key: K): Boolean
+    fun loadFile(key: K): V
+    fun saveFile(key: K, file: V)
 }

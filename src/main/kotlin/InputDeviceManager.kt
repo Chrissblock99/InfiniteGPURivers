@@ -1,99 +1,91 @@
-package me.chriss99;
+package me.chriss99
 
-import static org.lwjgl.glfw.GLFW.*;
+import org.lwjgl.glfw.GLFW
+import java.util.function.BiConsumer
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.function.BiConsumer;
+class InputDeviceManager(windowId: Long) {
+    private val keyPressRunnables = HashMap<Int, ArrayList<Runnable>>()
+    private val keyReleaseRunnables = HashMap<Int, ArrayList<Runnable>>()
+    private val mouseAbsoluteMovementConsumers = ArrayList<BiConsumer<Double, Double>>()
+    private val mouseRelativeMovementConsumers = ArrayList<BiConsumer<Double, Double>>()
+    private val mouseScrollConsumers = ArrayList<BiConsumer<Double, Double>>()
 
-public class InputDeviceManager {
-    private final HashMap<Integer, ArrayList<Runnable>> keyPressRunnables = new HashMap<>();
-    private final HashMap<Integer, ArrayList<Runnable>> keyReleaseRunnables = new HashMap<>();
-    private final ArrayList<BiConsumer<Double, Double>> mouseAbsoluteMovementConsumers = new ArrayList<>();
-    private final ArrayList<BiConsumer<Double, Double>> mouseRelativeMovementConsumers = new ArrayList<>();
-    private final ArrayList<BiConsumer<Double, Double>> mouseScrollConsumers = new ArrayList<>();
+    private var lastMouseX = Double.NaN
+    private var lastMouseY = Double.NaN
 
-    private double lastMouseX = Double.NaN;
-    private double lastMouseY = Double.NaN;
-
-    public InputDeviceManager(long windowId) {
-        glfwSetKeyCallback(windowId, (window, key, scancode, action, mods) -> {
-            ArrayList<Runnable> runnables = new ArrayList<>();
-            switch (action) {
-                case GLFW_PRESS -> runnables = keyPressRunnables.get(key);
-                case GLFW_RELEASE -> runnables = keyReleaseRunnables.get(key);
+    init {
+        GLFW.glfwSetKeyCallback(windowId) { window: Long, key: Int, scancode: Int, action: Int, mods: Int ->
+            var runnables: ArrayList<Runnable>? = ArrayList()
+            when (action) {
+                GLFW.GLFW_PRESS -> runnables = keyPressRunnables[key]
+                GLFW.GLFW_RELEASE -> runnables = keyReleaseRunnables[key]
             }
 
-            if (runnables == null)
-                return;
+            if (runnables == null) return@glfwSetKeyCallback
+            for (runnable in runnables) runnable.run()
+        }
 
-            for (Runnable runnable : runnables)
-                runnable.run();
-        });
-
-        glfwSetCursorPosCallback(windowId, (win, x, y) -> {
-            for (BiConsumer<Double, Double> consumer : mouseAbsoluteMovementConsumers)
-                consumer.accept(x, y);
-
-            if (Double.isNaN(lastMouseX)) {
-                lastMouseX = x;
-                lastMouseY = y;
-                return;
+        GLFW.glfwSetCursorPosCallback(windowId) { win: Long, x: Double, y: Double ->
+            for (consumer in mouseAbsoluteMovementConsumers) consumer.accept(x, y)
+            if (java.lang.Double.isNaN(lastMouseX)) {
+                lastMouseX = x
+                lastMouseY = y
+                return@glfwSetCursorPosCallback
             }
 
-            double dx = x - lastMouseX;
-            double dy = y - lastMouseY;
-            for (BiConsumer<Double, Double> consumer : mouseRelativeMovementConsumers)
-                consumer.accept(dx, dy);
+            val dx = x - lastMouseX
+            val dy = y - lastMouseY
+            for (consumer in mouseRelativeMovementConsumers) consumer.accept(dx, dy)
 
-            lastMouseX = x;
-            lastMouseY = y;
-        });
+            lastMouseX = x
+            lastMouseY = y
+        }
 
-        glfwSetScrollCallback(windowId, (win, dx, dy) -> {
-            for (BiConsumer<Double, Double> consumer : mouseScrollConsumers)
-                consumer.accept(dx, dy);
-        });
+        GLFW.glfwSetScrollCallback(
+            windowId
+        ) { win: Long, dx: Double, dy: Double ->
+            for (consumer in mouseScrollConsumers) consumer.accept(dx, dy)
+        }
     }
 
 
-    public void addKeyPressRunnable(int key, Runnable runnable) {
-        keyPressRunnables.computeIfAbsent(key, k -> new ArrayList<>()).add(runnable);
+    fun addKeyPressRunnable(key: Int, runnable: Runnable) {
+        keyPressRunnables.computeIfAbsent(key) { k: Int? -> ArrayList() }.add(runnable)
     }
 
-    public void addKeyReleaseRunnable(int key, Runnable runnable) {
-        keyReleaseRunnables.computeIfAbsent(key, k -> new ArrayList<>()).add(runnable);
+    fun addKeyReleaseRunnable(key: Int, runnable: Runnable) {
+        keyReleaseRunnables.computeIfAbsent(key) { k: Int? -> ArrayList() }.add(runnable)
     }
 
-    public void addMouseAbsoluteMovementConsumer(BiConsumer<Double, Double> consumer) {
-        mouseAbsoluteMovementConsumers.add(consumer);
+    fun addMouseAbsoluteMovementConsumer(consumer: BiConsumer<Double, Double>) {
+        mouseAbsoluteMovementConsumers.add(consumer)
     }
 
-    public void addMouseRelativeMovementConsumer(BiConsumer<Double, Double> consumer) {
-        mouseRelativeMovementConsumers.add(consumer);
+    fun addMouseRelativeMovementConsumer(consumer: BiConsumer<Double, Double>) {
+        mouseRelativeMovementConsumers.add(consumer)
     }
 
-    public void addMouseScrollConsumer(BiConsumer<Double, Double> consumer) {
-        mouseScrollConsumers.add(consumer);
+    fun addMouseScrollConsumer(consumer: BiConsumer<Double, Double>) {
+        mouseScrollConsumers.add(consumer)
     }
 
-    public boolean removeKeyPressRunnable(int key, Runnable runnable) {
-        return keyPressRunnables.computeIfAbsent(key, k -> new ArrayList<>()).add(runnable);
+    fun removeKeyPressRunnable(key: Int, runnable: Runnable): Boolean {
+        return keyPressRunnables.computeIfAbsent(key) { k: Int? -> ArrayList() }.add(runnable)
     }
 
-    public boolean removeKeyReleaseRunnable(int key, Runnable runnable) {
-        return keyReleaseRunnables.computeIfAbsent(key, k -> new ArrayList<>()).remove(runnable);
+    fun removeKeyReleaseRunnable(key: Int, runnable: Runnable): Boolean {
+        return keyReleaseRunnables.computeIfAbsent(key) { k: Int? -> ArrayList() }.remove(runnable)
     }
 
-    public boolean removeMouseAbsoluteMovementConsumer(BiConsumer<Double, Double> consumer) {
-        return mouseAbsoluteMovementConsumers.add(consumer);
+    fun removeMouseAbsoluteMovementConsumer(consumer: BiConsumer<Double, Double>): Boolean {
+        return mouseAbsoluteMovementConsumers.add(consumer)
     }
 
-    public boolean removeMouseRelativeMovementConsumer(BiConsumer<Double, Double> consumer) {
-        return mouseRelativeMovementConsumers.add(consumer);
+    fun removeMouseRelativeMovementConsumer(consumer: BiConsumer<Double, Double>): Boolean {
+        return mouseRelativeMovementConsumers.add(consumer)
     }
 
-    public boolean removeMouseScrollConsumer(BiConsumer<Double, Double> consumer) {
-        return mouseScrollConsumers.add(consumer);
+    fun removeMouseScrollConsumer(consumer: BiConsumer<Double, Double>): Boolean {
+        return mouseScrollConsumers.add(consumer)
     }
 }

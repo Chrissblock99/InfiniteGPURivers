@@ -1,30 +1,40 @@
-package me.chriss99.worldmanagement;
+package me.chriss99.worldmanagement
 
-import me.chriss99.util.Util;
-import org.joml.Vector2i;
+import me.chriss99.util.Util
+import org.joml.Vector2i
+import java.util.function.BiFunction
 
-import java.util.function.BiFunction;
+open class InfiniteWorld<T>(
+    chunkSize: Int,
+    regionSize: Int,
+    chunkGenerator: BiFunction<Vector2i, Int, T>,
+    regionFileManager: RegionFileManager<T>,
+    tileLoadManager: TileLoadManager<Region<T>>
+) {
+    private val storage: FileBackedTileMap2D<Region<T>>
+    private val chunkGenerator: BiFunction<Vector2i, Int, T>
 
-public class InfiniteWorld<T> {
-    private final FileBackedTileMap2D<Region<T>> storage;
-    private final BiFunction<Vector2i, Integer, T> chunkGenerator;
+    val chunkSize: Int
+    val regionSize: Int
 
-    public final int chunkSize;
-    public final int regionSize;
+    init {
+        this.storage = FileBackedTileMap2D(regionFileManager::loadFile, regionFileManager, tileLoadManager)
+        this.chunkGenerator = chunkGenerator
 
-    public InfiniteWorld(int chunkSize, int regionSize, BiFunction<Vector2i, Integer, T> chunkGenerator, RegionFileManager<T> regionFileManager, TileLoadManager<Region<T>> tileLoadManager) {
-        this.storage = new FileBackedTileMap2D<>(regionFileManager::loadFile, regionFileManager, tileLoadManager);
-        this.chunkGenerator = chunkGenerator;
-
-        this.chunkSize = chunkSize;
-        this.regionSize = regionSize;
+        this.chunkSize = chunkSize
+        this.regionSize = regionSize
     }
 
-    public T getTile(Vector2i pos) {
-        return storage.getTile(Util.properIntDivide(pos, regionSize)).getTile(pos, vector2i -> chunkGenerator.apply(vector2i, chunkSize));
+    fun getTile(pos: Vector2i): T {
+        return storage.getTile(Util.properIntDivide(pos, regionSize)).getTile(pos) { vector2i ->
+            chunkGenerator.apply(
+                vector2i,
+                chunkSize
+            )
+        }
     }
 
-    public void unloadAllRegions() {
-        storage.unloadAll();
+    fun unloadAllRegions() {
+        storage.unloadAll()
     }
 }

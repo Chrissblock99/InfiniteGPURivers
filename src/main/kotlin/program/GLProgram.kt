@@ -1,90 +1,86 @@
-package me.chriss99.program;
+package me.chriss99.program
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Scanner;
+import org.lwjgl.opengl.GL45.*
+import java.io.File
+import java.io.FileNotFoundException
+import java.util.*
 
-import static org.lwjgl.opengl.GL45.*;
+open class GLProgram {
+    val program: Int
+    private val shaders = ArrayList<Int>()
 
-public class GLProgram {
-    public final int program;
-    private final ArrayList<Integer> shaders = new ArrayList<>();
-
-    public GLProgram() {
-        this.program = glCreateProgram();
+    init {
+        this.program = glCreateProgram()
     }
 
-    public void addShader(String name, int type) {
-        int shader = loadShader(new File("src/main/glsl/" + name), type);
-        if (glGetShaderi(shader,  GL_COMPILE_STATUS) != 1)
-            System.out.println("Shader " + name + " did not compile!");
+    fun addShader(name: String, type: Int) {
+        val shader = loadShader(File("src/main/glsl/$name"), type)
+        if (glGetShaderi(shader, GL_COMPILE_STATUS) !== 1) println("Shader $name did not compile!")
 
-        shaders.add(shader);
-        glAttachShader(program, shader);
+        shaders.add(shader)
+        glAttachShader(program, shader)
     }
 
-    public void bindAttribute(int index, String name) {
-        glBindAttribLocation(program, index, name);
+    fun bindAttribute(index: Int, name: String) {
+        glBindAttribLocation(program, index, name)
     }
 
-    public void validate() {
-        glLinkProgram(program);
-        glValidateProgram(program);
+    fun validate() {
+        glLinkProgram(program)
+        glValidateProgram(program)
 
-        int link =     glGetProgrami(program, GL_LINK_STATUS);
-        int validate = glGetProgrami(program, GL_VALIDATE_STATUS);
+        val link: Int = glGetProgrami(program, GL_LINK_STATUS)
+        val validate: Int = glGetProgrami(program, GL_VALIDATE_STATUS)
 
-        if (link == 1 && validate == 1)
-            return;
+        if (link == 1 && validate == 1) return
 
-        System.out.println("Program Linked: "    + link);
-        System.out.println("Program Validated: " + validate);
+        println("Program Linked: $link")
+        println("Program Validated: $validate")
     }
 
-    public void use() {
-        glUseProgram(program);
+    fun use() {
+        glUseProgram(program)
     }
 
-    public int getUniform(String name) {
-        return glGetUniformLocation(program, name);
+    fun getUniform(name: String): Int {
+        return glGetUniformLocation(program, name)
     }
 
-    public void delete() {
+    open fun delete() {
         //detach the shaders from the program object
-        for (Integer shader : shaders) {
-            glDetachShader(program, shader);
-            glDeleteShader(shader);
+        for (shader in shaders) {
+            glDetachShader(program, shader)
+            glDeleteShader(shader)
         }
 
         //stop using the shader program
-        glUseProgram(0);
+        glUseProgram(0)
 
         //delete the program now that the shaders are detached and the program isn't being used
-        glDeleteProgram(program);
+        glDeleteProgram(program)
     }
 
-    public static int loadShader(File file, int type) {
-        try {
-            Scanner sc = new Scanner(file);
-            StringBuilder data = new StringBuilder();
+    companion object {
+        fun loadShader(file: File, type: Int): Int {
+            try {
+                val sc = Scanner(file)
+                val data = StringBuilder()
 
-            if(file.exists()) {
-                while(sc.hasNextLine()) {
-                    data.append(sc.nextLine()).append("\n");
+                if (file.exists()) {
+                    while (sc.hasNextLine()) {
+                        data.append(sc.nextLine()).append("\n")
+                    }
+
+                    sc.close()
                 }
-
-                sc.close();
+                val id: Int = glCreateShader(type)
+                glShaderSource(id, data)
+                glCompileShader(id)
+                return id
+            } catch (e: FileNotFoundException) {
+                e.printStackTrace()
+                return -1
             }
-            int id = glCreateShader(type);
-            glShaderSource(id, data);
-            glCompileShader(id);
-            return id;
-        }
-
-        catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return -1;
         }
     }
 }

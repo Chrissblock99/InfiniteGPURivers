@@ -1,6 +1,6 @@
-package me.chriss99;
+package me.chriss99
 
-public enum BufferType {
+enum class BufferType {
     FLOAT,
-    VEC4F;
+    VEC4F
 }

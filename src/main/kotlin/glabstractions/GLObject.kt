@@ -1,6 +1,6 @@
-package me.chriss99.glabstractions;
+package me.chriss99.glabstractions
 
-public interface GLObject {
-    void bind();
-    void delete();
+interface GLObject {
+    fun bind()
+    fun delete()
 }

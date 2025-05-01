@@ -1,67 +1,58 @@
-package me.chriss99.program;
+package me.chriss99.program
 
-import me.chriss99.CameraMatrix;
-import me.chriss99.TerrainVAO;
+import me.chriss99.CameraMatrix
+import me.chriss99.TerrainVAO
+import org.lwjgl.opengl.GL20.*
+import org.lwjgl.opengl.GL32.GL_GEOMETRY_SHADER
 
-import java.util.Collection;
+class TerrainVAORenderer(protected val cameraMatrix: CameraMatrix) : TerrainRenderer() {
+    private val transformMatrix: Int
+    private val cameraPos: Int
+    private val waterUniform: Int
+    private val srcPosUniform: Int
+    private val widthUniform: Int
+    private val scaleUniform: Int
 
-import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL32.GL_GEOMETRY_SHADER;
+    init {
+        addShader("terrain/passThrough.vert", GL_VERTEX_SHADER)
+        addShader("tesselation/normals.geom", GL_GEOMETRY_SHADER)
+        addShader("tesselation/different.frag", GL_FRAGMENT_SHADER)
 
-public class TerrainVAORenderer extends TerrainRenderer {
-    protected final CameraMatrix cameraMatrix;
+        bindAttribute(0, "position")
 
-    private final int transformMatrix;
-    private final int cameraPos;
-    private final int waterUniform;
-    private final int srcPosUniform;
-    private final int widthUniform;
-    private final int scaleUniform;
+        validate()
 
-    public TerrainVAORenderer(CameraMatrix cameraMatrix) {
-        this.cameraMatrix = cameraMatrix;
-
-        addShader("terrain/passThrough.vert", GL_VERTEX_SHADER);
-        addShader("tesselation/normals.geom", GL_GEOMETRY_SHADER);
-        addShader("tesselation/different.frag", GL_FRAGMENT_SHADER);
-
-        bindAttribute(0, "position");
-
-        validate();
-
-        transformMatrix = getUniform("transformMatrix");
-        cameraPos = getUniform("cameraPos");
-        waterUniform = getUniform("water");
-        srcPosUniform = getUniform("srcPos");
-        widthUniform = getUniform("width");
-        scaleUniform = getUniform("scale");
+        transformMatrix = getUniform("transformMatrix")
+        cameraPos = getUniform("cameraPos")
+        waterUniform = getUniform("water")
+        srcPosUniform = getUniform("srcPos")
+        widthUniform = getUniform("width")
+        scaleUniform = getUniform("scale")
     }
 
-    @Override
-    public void renderTerrain(Collection<TerrainVAO> vaos) {
-        use();
-        glUniform1i(waterUniform, 0);
-        renderAll(vaos);
+    override fun renderTerrain(vaos: Collection<TerrainVAO>) {
+        use()
+        glUniform1i(waterUniform, 0)
+        renderAll(vaos)
     }
 
-    @Override
-    public void renderWater(Collection<TerrainVAO> vaos) {
-        use();
-        glUniform1i(waterUniform, 1);
-        renderAll(vaos);
+    override fun renderWater(vaos: Collection<TerrainVAO>) {
+        use()
+        glUniform1i(waterUniform, 1)
+        renderAll(vaos)
     }
 
-    private void renderAll(Collection<TerrainVAO> vaos) {
-        glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
-        glUniform3f(cameraPos, cameraMatrix.position.x, cameraMatrix.position.y, cameraMatrix.position.z);
+    private fun renderAll(vaos: Collection<TerrainVAO>) {
+        glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(FloatArray(16)))
+        glUniform3f(cameraPos, cameraMatrix.position.x, cameraMatrix.position.y, cameraMatrix.position.z)
 
-        for (TerrainVAO vao : vaos) {
-            vao.bind();
-            glUniform2i(srcPosUniform, vao.getSrcPos().x, vao.getSrcPos().y);
-            glUniform1i(widthUniform, vao.getWidth());
-            glUniform1i(scaleUniform, vao.getScale());
+        for (vao in vaos) {
+            vao.bind()
+            glUniform2i(srcPosUniform, vao.srcPos.x, vao.srcPos.y)
+            glUniform1i(widthUniform, vao.width)
+            glUniform1i(scaleUniform, vao.scale)
 
-            glDrawElements(GL_TRIANGLES, vao.getIndexLength(), GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, vao.indexLength, GL_UNSIGNED_INT, 0)
         }
     }
 }

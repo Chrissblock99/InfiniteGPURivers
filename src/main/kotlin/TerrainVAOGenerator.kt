@@ -1,53 +1,54 @@
-package me.chriss99;
+package me.chriss99
 
-import me.chriss99.util.Util;
-import org.joml.Vector2i;
+import me.chriss99.util.Util
+import org.joml.Vector2i
 
-public class TerrainVAOGenerator {
-    public static float[] heightMapToSimpleVertexes(Float2DBufferWrapper terrain, Float2DBufferWrapper water) {
-        float[] vertecies = new float[terrain.getSize().x* terrain.getSize().y*2];
-        int vertexShift = 0;
+object TerrainVAOGenerator {
+    fun heightMapToSimpleVertexes(terrain: Float2DBufferWrapper, water: Float2DBufferWrapper): FloatArray {
+        val vertecies = FloatArray(terrain.size.x * terrain.size.y * 2)
+        var vertexShift = 0
 
-        for (int z = 0; z < terrain.getSize().y; z++)
-            for (int x = 0; x < terrain.getSize().x; x++) {
-                float terrainHeight = terrain.getFloat(x, z);
-                vertecies[vertexShift] = terrainHeight;
+        for (z in 0..<terrain.size.y) for (x in 0..<terrain.size.x) {
+            val terrainHeight: Float = terrain.getFloat(x, z)
+            vertecies[vertexShift] = terrainHeight
 
-                float waterHeight = water.getFloat(x, z) - .03f;
-                vertecies[vertexShift + 1] = terrainHeight + waterHeight - ((waterHeight <= 0) ? .1f : 0);
+            val waterHeight: Float = water.getFloat(x, z) - .03f
+            vertecies[vertexShift + 1] = terrainHeight + waterHeight - (if (waterHeight <= 0) .1f else 0f)
 
-                vertexShift += 2;
-            }
+            vertexShift += 2
+        }
 
-        return vertecies;
+        return vertecies
     }
 
-    public static int[] heightMapToSimpleIndex(int width, int height) {
-        int[] index = new int[(width-1)*(height-1)*6];
-        int indexShift = 0;
+    fun heightMapToSimpleIndex(width: Int, height: Int): IntArray {
+        val index = IntArray((width - 1) * (height - 1) * 6)
+        var indexShift = 0
 
-        for (int z = 0; z < height; z++)
-            for (int x = 0; x < width; x++) {
+        for (z in 0..<height) for (x in 0..<width) {
+            if (z == height - 1 || x == width - 1) continue
 
-                if (z == height-1 || x == width-1)
-                    continue;
+            index[indexShift + 0] = Util.indexOfXZFlattenedArray(x, z, width)
+            index[indexShift + 1] = Util.indexOfXZFlattenedArray(x + 1, z + 1, width)
+            index[indexShift + 2] = Util.indexOfXZFlattenedArray(x, z + 1, width)
+            index[indexShift + 3] = Util.indexOfXZFlattenedArray(x, z, width)
+            index[indexShift + 4] = Util.indexOfXZFlattenedArray(x + 1, z, width)
+            index[indexShift + 5] = Util.indexOfXZFlattenedArray(x + 1, z + 1, width)
+            indexShift += 6
+        }
 
-                index[indexShift+0] = Util.indexOfXZFlattenedArray(x, z, width);
-                index[indexShift+1] = Util.indexOfXZFlattenedArray(x+1, z+1, width);
-                index[indexShift+2] = Util.indexOfXZFlattenedArray(x, z+1, width);
-                index[indexShift+3] = Util.indexOfXZFlattenedArray(x, z, width);
-                index[indexShift+4] = Util.indexOfXZFlattenedArray(x+1, z, width);
-                index[indexShift+5] = Util.indexOfXZFlattenedArray(x+1, z+1, width);
-                indexShift += 6;
-            }
-
-        return index;
+        return index
     }
 
-    public static TerrainVAO heightMapToSimpleVAO(Float2DBufferWrapper terrain, Float2DBufferWrapper water, Vector2i srcPos, int scale) {
-        float[] vertices = heightMapToSimpleVertexes(terrain, water);
-        int[] index = heightMapToSimpleIndex(terrain.getSize().x, terrain.getSize().y);
+    fun heightMapToSimpleVAO(
+        terrain: Float2DBufferWrapper,
+        water: Float2DBufferWrapper,
+        srcPos: Vector2i,
+        scale: Int
+    ): TerrainVAO {
+        val vertices = heightMapToSimpleVertexes(terrain, water)
+        val index = heightMapToSimpleIndex(terrain.size.x, terrain.size.y)
 
-        return new TerrainVAO(vertices, index, srcPos, terrain.getSize().x, scale);
+        return TerrainVAO(vertices, index, srcPos, terrain.size.x, scale)
     }
 }

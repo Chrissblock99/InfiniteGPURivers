@@ -1,43 +1,34 @@
-package me.chriss99.program;
+package me.chriss99.program
 
-import me.chriss99.CameraMatrix;
-import me.chriss99.ColoredVAO;
+import me.chriss99.CameraMatrix
+import me.chriss99.ColoredVAO
+import org.lwjgl.opengl.GL20.*
 
-import java.util.Collection;
-import java.util.List;
+class ColoredVAORenderer(private val cameraMatrix: CameraMatrix) : RenderProgram<ColoredVAO>() {
+    private val transformMatrix: Int
 
-import static org.lwjgl.opengl.GL20.*;
+    init {
+        addShader("shader.vert", GL_VERTEX_SHADER)
+        addShader("shader.frag", GL_FRAGMENT_SHADER)
 
-public class ColoredVAORenderer extends RenderProgram<ColoredVAO> {
-    private final CameraMatrix cameraMatrix;
-    private final int transformMatrix;
+        bindAttribute(0, "position")
+        bindAttribute(1, "color")
 
-    public ColoredVAORenderer(CameraMatrix cameraMatrix) {
-        this.cameraMatrix = cameraMatrix;
+        validate()
 
-        addShader("shader.vert", GL_VERTEX_SHADER);
-        addShader("shader.frag", GL_FRAGMENT_SHADER);
-
-        bindAttribute(0, "position");
-        bindAttribute(1, "color");
-
-        validate();
-
-        transformMatrix = getUniform("transformMatrix");
+        transformMatrix = getUniform("transformMatrix")
     }
 
-    @Override
-    public void render(Collection<ColoredVAO> vaos) {
-        if (vaos.isEmpty())
-            return;
+    override fun render(vaos: Collection<ColoredVAO>) {
+        if (vaos.isEmpty()) return
 
-        use();
-        glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(new float[16]));
+        use()
+        glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(FloatArray(16)))
 
-        for (ColoredVAO vao : vaos) {
-            vao.bind();
+        for (vao in vaos) {
+            vao.bind()
 
-            glDrawElements(GL_TRIANGLES, vao.getIndexLength(), GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, vao.indexLength, GL_UNSIGNED_INT, 0)
         }
     }
 }

@@ -1,51 +1,34 @@
-package me.chriss99;
+package me.chriss99
 
-import me.chriss99.glabstractions.VAOImpl;
-import org.joml.Vector2i;
+import me.chriss99.glabstractions.VAOImpl
+import org.joml.Vector2i
 
-public class TerrainVAO implements ChunkVAO {
-    private final VAOImpl vao;
-    private final Vector2i srcPos;
-    private final int width;
-    private final int scale;
+class TerrainVAO(triangle: FloatArray, index: IntArray?, srcPos: Vector2i, width: Int, scale: Int) :
+    ChunkVAO {
+    private val vao: VAOImpl
+    override val srcPos: Vector2i get() = Vector2i(field)
+    override val width: Int
+    val scale: Int
 
-    public TerrainVAO(float[] triangle, int[] index, Vector2i srcPos, int width, int scale) {
-        vao = new VAOImpl(index, 2, triangle);
-        this.srcPos = srcPos;
-        this.width = width;
-        this.scale = scale;
+    init {
+        vao = VAOImpl(index, 2, triangle)
+        this.srcPos = srcPos
+        this.width = width
+        this.scale = scale
     }
 
-    public void updatePositions(float[] positions) {
-        vao.updateVertices(0, positions);
+    fun updatePositions(positions: FloatArray) {
+        vao.updateVertices(0, positions)
     }
 
-    @Override
-    public Vector2i getSrcPos() {
-        return new Vector2i(srcPos);
+    override val indexLength: Int
+        get() = vao.indexLength
+
+    override fun bind() {
+        vao.bind()
     }
 
-    @Override
-    public int getWidth() {
-        return width;
-    }
-
-    public int getScale() {
-        return scale;
-    }
-
-    @Override
-    public int getIndexLength() {
-        return vao.getIndexLength();
-    }
-
-    @Override
-    public void bind() {
-        vao.bind();
-    }
-
-    @Override
-    public void delete() {
-        vao.delete();
+    override fun delete() {
+        vao.delete()
     }
 }

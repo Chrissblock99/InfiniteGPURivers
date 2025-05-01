@@ -1,14 +1,12 @@
-package me.chriss99;
+package me.chriss99
 
-import me.chriss99.worldmanagement.TileLoadManager;
-import org.joml.Vector2i;
+import me.chriss99.worldmanagement.TileLoadManager
+import org.joml.Vector2i
 
-import java.util.Collection;
-import java.util.List;
-
-public class LeakingTLM<T> implements TileLoadManager<T> {
-    public LeakingTLM() {
-        System.err.println("""
+class LeakingTLM<T> : TileLoadManager<T> {
+    init {
+        System.err.println(
+            """
                 -------------------------------------
                 
                 This is (probably) leaking memory!
@@ -18,16 +16,17 @@ public class LeakingTLM<T> implements TileLoadManager<T> {
                 Restarting often enough might
                 prevent crashes.
                 
-                -------------------------------------""");
+                -------------------------------------
+                
+                """.trimIndent()
+        )
     }
 
-    @Override
-    public boolean loadPolicy(Vector2i tilePos, T tile) {
-        return true;
+    override fun loadPolicy(tilePos: Vector2i, tile: T): Boolean {
+        return true
     }
 
-    @Override
-    public Collection<Vector2i> loadCommander() {
-        return List.of();
+    override fun loadCommander(): Collection<Vector2i> {
+        return listOf<Vector2i>()
     }
 }

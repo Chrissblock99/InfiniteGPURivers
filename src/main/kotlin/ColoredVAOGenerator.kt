@@ -1,410 +1,397 @@
-package me.chriss99;
+package me.chriss99
 
-import me.chriss99.util.Util;
-import org.joml.Math;
-import org.joml.Vector2d;
-import org.joml.Vector2i;
-import org.joml.Vector3d;
+import me.chriss99.util.Util
+import org.joml.Vector2d
+import org.joml.Vector2i
+import org.joml.Vector3d
+import java.util.*
 
-import java.util.Arrays;
+object ColoredVAOGenerator {
+    fun areaToSimpleVertexes(area: Area, height: Double): DoubleArray {
+        val vertecies = DoubleArray(4 * 3)
+        var vertexShift = 0
 
-public class ColoredVAOGenerator {
-    public static double[] areaToSimpleVertexes(Area area, double height) {
-        double[] vertecies = new double[4*3];
-        int vertexShift = 0;
+        vertecies[vertexShift] = area.srcPos().x.toDouble()
+        vertecies[vertexShift + 1] = height
+        vertecies[vertexShift + 2] = area.srcPos().y.toDouble()
+        vertexShift += 3
 
-        vertecies[vertexShift] = area.srcPos().x;
-        vertecies[vertexShift + 1] = height;
-        vertecies[vertexShift + 2] = area.srcPos().y;
-        vertexShift += 3;
+        vertecies[vertexShift] = area.endPos().x.toDouble()
+        vertecies[vertexShift + 1] = height
+        vertecies[vertexShift + 2] = area.srcPos().y.toDouble()
+        vertexShift += 3
 
-        vertecies[vertexShift] = area.endPos().x;
-        vertecies[vertexShift + 1] = height;
-        vertecies[vertexShift + 2] = area.srcPos().y;
-        vertexShift += 3;
+        vertecies[vertexShift] = area.srcPos().x.toDouble()
+        vertecies[vertexShift + 1] = height
+        vertecies[vertexShift + 2] = area.endPos().y.toDouble()
+        vertexShift += 3
 
-        vertecies[vertexShift] = area.srcPos().x;
-        vertecies[vertexShift + 1] = height;
-        vertecies[vertexShift + 2] = area.endPos().y;
-        vertexShift += 3;
+        vertecies[vertexShift] = area.endPos().x.toDouble()
+        vertecies[vertexShift + 1] = height
+        vertecies[vertexShift + 2] = area.endPos().y.toDouble()
 
-        vertecies[vertexShift] = area.endPos().x;
-        vertecies[vertexShift + 1] = height;
-        vertecies[vertexShift + 2] = area.endPos().y;
-
-        return vertecies;
+        return vertecies
     }
 
-    public static double[] areaToSimpleColors(double red, double green, double blue) {
-        double[] color = new double[4*3];
-        int vertexShift = 0;
+    fun areaToSimpleColors(red: Double, green: Double, blue: Double): DoubleArray {
+        val color = DoubleArray(4 * 3)
+        var vertexShift = 0
 
-        for (int i = 0; i < 4; i++) {
-            color[vertexShift  ] = red;
-            color[vertexShift+1] = green;
-            color[vertexShift+2] = blue;
-            vertexShift += 3;
+        for (i in 0..3) {
+            color[vertexShift] = red
+            color[vertexShift + 1] = green
+            color[vertexShift + 2] = blue
+            vertexShift += 3
         }
 
-        return color;
+        return color
     }
 
-    public static ColoredVAO areaToColoredVAO(Area area, double height, double red, double green, double blue) {
-        double[] vertexes = areaToSimpleVertexes(area, height);
-        double[] color = areaToSimpleColors(red, green, blue);
-        int[] index = heightMapToSimpleIndex(new Vector2i(2));
+    fun areaToColoredVAO(area: Area, height: Double, red: Double, green: Double, blue: Double): ColoredVAO {
+        val vertexes = areaToSimpleVertexes(area, height)
+        val color = areaToSimpleColors(red, green, blue)
+        val index = heightMapToSimpleIndex(Vector2i(2))
 
-        return new ColoredVAO(vertexes, color, index);
+        return ColoredVAO(vertexes, color, index)
     }
 
-    public static double[] heightMapToSimpleVertexes(double[][] heightMap, boolean water) {
-        double[] vertecies = new double[heightMap.length*heightMap[0].length*3];
-        int vertexShift = 0;
+    fun heightMapToSimpleVertexes(heightMap: Array<DoubleArray>, water: Boolean): DoubleArray {
+        val vertecies = DoubleArray(heightMap.size * heightMap[0].size * 3)
+        var vertexShift = 0
 
-        for (int z = 0; z < heightMap[0].length; z++)
-            for (int x = 0; x < heightMap.length; x++) {
-                vertecies[vertexShift] = x;
-                vertecies[vertexShift + 1] = heightMap[x][z] - ((water) ? .03 : 0);
-                vertecies[vertexShift + 2] = z;
+        for (z in heightMap[0].indices) for (x in heightMap.indices) {
+            vertecies[vertexShift] = x.toDouble()
+            vertecies[vertexShift + 1] = heightMap[x][z] - (if (water) .03 else 0.0)
+            vertecies[vertexShift + 2] = z.toDouble()
 
-                vertexShift += 3;
+            vertexShift += 3
+        }
+
+        return vertecies
+    }
+
+    fun heightMapToSimpleColors(heightMap: Array<DoubleArray>, min: Double, max: Double, water: Boolean): DoubleArray {
+        val color = DoubleArray(heightMap.size * heightMap[0].size * 3)
+        var vertexShift = 0
+
+        for (z in heightMap[0].indices) for (x in heightMap.indices) {
+            val gradient = (heightMap[x][z] - min) / (max - min)
+
+            if (!water) {
+                color[vertexShift] = gradient * .7 + .3
+                color[vertexShift + 1] = gradient * .8 + .2
+                color[vertexShift + 2] = if (x % 2 == 0) .33 else 0 + (if (z % 2 == 0) .33 else 0.0)
+            } else {
+                color[vertexShift] = 0.0
+                color[vertexShift + 1] = if (x % 2 == 0) .33 else 0 + (if (z % 2 == 0) .33 else 0.0)
+                color[vertexShift + 2] = gradient
             }
 
-        return vertecies;
+            vertexShift += 3
+        }
+
+        return color
     }
 
-    public static double[] heightMapToSimpleColors(double[][] heightMap, double min, double max, boolean water) {
-        double[] color = new double[heightMap.length*heightMap[0].length*3];
-        int vertexShift = 0;
+    fun heightMapToSimpleIndex(size: Vector2i): IntArray {
+        val index = IntArray((size.x - 1) * (size.y - 1) * 6)
+        var indexShift = 0
 
-        for (int z = 0; z < heightMap[0].length; z++)
-            for (int x = 0; x < heightMap.length; x++) {
-                double gradient = (heightMap[x][z] - min) / (max - min);
+        for (z in 0..<size.y) for (x in 0..<size.x) {
+            if (z == size.y - 1 || x == size.x - 1) continue
 
-                if (!water) {
-                    color[vertexShift  ] = gradient*.7+.3;
-                    color[vertexShift+1] = gradient*.8+.2;
-                    color[vertexShift+2] = (x%2==0) ? .33 : 0 + ((z%2==0) ? .33 : 0);
-                } else {
-                    color[vertexShift  ] = 0;
-                    color[vertexShift+1] = (x%2==0) ? .33 : 0 + ((z%2==0) ? .33 : 0);
-                    color[vertexShift+2] = gradient;
-                }
+            index[indexShift + 0] = Util.indexOfXZFlattenedArray(x, z, size.x)
+            index[indexShift + 1] = Util.indexOfXZFlattenedArray(x + 1, z, size.x)
+            index[indexShift + 2] = Util.indexOfXZFlattenedArray(x, z + 1, size.x)
+            index[indexShift + 3] = Util.indexOfXZFlattenedArray(x + 1, z, size.x)
+            index[indexShift + 4] = Util.indexOfXZFlattenedArray(x + 1, z + 1, size.x)
+            index[indexShift + 5] = Util.indexOfXZFlattenedArray(x, z + 1, size.x)
+            indexShift += 6
+        }
 
-                vertexShift += 3;
+        return index
+    }
+
+    fun heightMapToSimpleVAO(heightMap: Array<DoubleArray>, min: Double, max: Double, water: Boolean): ColoredVAO {
+        val vertexes = heightMapToSimpleVertexes(heightMap, water)
+        val color = heightMapToSimpleColors(heightMap, min, max, water)
+        val index = heightMapToSimpleIndex(Vector2i(heightMap.size, heightMap[0].size))
+
+        return ColoredVAO(vertexes, color, index)
+    }
+
+    fun heightMapToSquareVertexes(heightMap: Array<DoubleArray>): DoubleArray {
+        val vertexes = DoubleArray(heightMap.size * heightMap[0].size * 4 * 3)
+        var vertexShift = 0
+
+        for (z in heightMap[0].indices) for (x in heightMap.indices) for (n in 0..3) {
+            vertexes[vertexShift] = x + (if (n > 1) 1 else 0) - .5
+            vertexes[vertexShift + 1] = heightMap[x][z]
+            vertexes[vertexShift + 2] = z + (if (n % 2 == 0) 1 else 0) - .5
+            vertexShift += 3
+        }
+
+        return vertexes
+    }
+
+    fun heightMapToSquareColors(heightMap: Array<DoubleArray>): DoubleArray {
+        val color = DoubleArray(heightMap.size * heightMap[0].size * 4 * 3)
+        for (i in color.indices) color[i] = Math.random() * .5 + .5
+
+        return color
+    }
+
+    fun heightMapToSquareIndex(heightMap: Array<DoubleArray>): IntArray {
+        val index = IntArray(heightMap.size * heightMap[0].size * 6)
+        var indexShift = 0
+        var indexShift2 = 0
+
+        for (z in heightMap[0].indices) for (x in heightMap.indices) {
+            index[indexShift + 0] = indexShift2 + 0
+            index[indexShift + 1] = indexShift2 + 1
+            index[indexShift + 2] = indexShift2 + 2
+            index[indexShift + 3] = indexShift2 + 1
+            index[indexShift + 4] = indexShift2 + 3
+            index[indexShift + 5] = indexShift2 + 2
+            indexShift += 6
+            indexShift2 += 4
+        }
+
+        return index
+    }
+
+    fun heightMapToSquareVAO(heightMap: Array<DoubleArray>): ColoredVAO {
+        val vertexes = heightMapToSquareVertexes(heightMap)
+        val color = heightMapToSquareColors(heightMap)
+        val index = heightMapToSquareIndex(heightMap)
+
+        return ColoredVAO(vertexes, color, index)
+    }
+
+    private val offsets = arrayOf(
+        doubleArrayOf(.5, .5),
+        doubleArrayOf(-.5, .5),
+        doubleArrayOf(-.5, .5),
+        doubleArrayOf(-.5, -.5),
+        doubleArrayOf(.5, -.5),
+        doubleArrayOf(.5, .5),
+        doubleArrayOf(-.5, -.5),
+        doubleArrayOf(.5, -.5)
+    )
+
+    fun heightMapToCrossVertexes(heightMap: Array<DoubleArray>): DoubleArray {
+        val vertexes = DoubleArray(heightMap.size * heightMap[0].size * 9 * 3)
+        var vertexShift = 0
+
+        for (z in heightMap[0].indices) for (x in heightMap.indices) {
+            for (i in 0..7) {
+                vertexes[vertexShift] = x + offsets[i][0]
+                vertexes[vertexShift + 1] = heightMap[x][z]
+                vertexes[vertexShift + 2] = z + offsets[i][1]
+                vertexShift += 3
             }
 
-        return color;
+            vertexes[vertexShift] = x.toDouble()
+            vertexes[vertexShift + 1] = heightMap[x][z]
+            vertexes[vertexShift + 2] = z.toDouble()
+            vertexShift += 3
+        }
+
+        return vertexes
     }
 
-    public static int[] heightMapToSimpleIndex(Vector2i size) {
-        int[] index = new int[(size.x-1)*(size.y-1)*6];
-        int indexShift = 0;
+    fun heightMapToCrossColors(heightMap: Array<DoubleArray>, outflowPipes: Array<Array<DoubleArray>>): DoubleArray {
+        val color = DoubleArray(heightMap.size * heightMap[0].size * 9 * 3)
+        var vertexShift = 0
 
-        for (int z = 0; z < size.y; z++)
-            for (int x = 0; x < size.x; x++) {
-
-                if (z == size.y-1 || x == size.x-1)
-                    continue;
-
-                index[indexShift+0] = Util.indexOfXZFlattenedArray(x, z, size.x);
-                index[indexShift+1] = Util.indexOfXZFlattenedArray(x+1, z, size.x);
-                index[indexShift+2] = Util.indexOfXZFlattenedArray(x, z+1, size.x);
-                index[indexShift+3] = Util.indexOfXZFlattenedArray(x+1, z, size.x);
-                index[indexShift+4] = Util.indexOfXZFlattenedArray(x+1, z+1, size.x);
-                index[indexShift+5] = Util.indexOfXZFlattenedArray(x, z+1, size.x);
-                indexShift += 6;
+        for (z in heightMap[0].indices) for (x in heightMap.indices) {
+            for (i in 0..7) {
+                color[vertexShift] = -outflowPipes[x][z][i / 2] * 100
+                color[vertexShift + 1] = outflowPipes[x][z][i / 2] * 100
+                color[vertexShift + 2] = 0.0
+                vertexShift += 3
             }
 
-        return index;
+            color[vertexShift] = 0.0
+            color[vertexShift + 1] = 0.0
+            color[vertexShift + 2] = .5
+            vertexShift += 3
+        }
+
+        return color
     }
 
-    public static ColoredVAO heightMapToSimpleVAO(double[][] heightMap, double min, double max, boolean water) {
-        double[] vertexes = heightMapToSimpleVertexes(heightMap, water);
-        double[] color = heightMapToSimpleColors(heightMap, min, max, water);
-        int[] index = heightMapToSimpleIndex(new Vector2i(heightMap.length, heightMap[0].length));
+    fun heightMapToCrossIndex(heightMap: Array<DoubleArray>): IntArray {
+        val index = IntArray(heightMap.size * heightMap[0].size * 12)
+        var indexShift = 0
+        var indexShift2 = 0
 
-        return new ColoredVAO(vertexes, color, index);
-    }
-
-    public static double[] heightMapToSquareVertexes(double[][] heightMap) {
-        double[] vertexes = new double[heightMap.length*heightMap[0].length*4*3];
-        int vertexShift = 0;
-
-        for (int z = 0; z < heightMap[0].length; z++)
-            for (int x = 0; x < heightMap.length; x++)
-                for (int n = 0; n < 4; n++) {
-                    vertexes[vertexShift] = x + ((n>1) ? 1:0) - .5;
-                    vertexes[vertexShift + 1] = heightMap[x][z];
-                    vertexes[vertexShift + 2] = z + ((n%2==0) ? 1:0) - .5;
-                    vertexShift += 3;
-                }
-
-        return vertexes;
-    }
-
-    public static double[] heightMapToSquareColors(double[][] heightMap) {
-        double[] color = new double[heightMap.length*heightMap[0].length*4*3];
-        for (int i = 0; i < color.length; i++)
-            color[i] = Math.random()*.5+.5;
-
-        return color;
-    }
-
-    public static int[] heightMapToSquareIndex(double[][] heightMap) {
-        int[] index = new int[heightMap.length*heightMap[0].length*6];
-        int indexShift = 0;
-        int indexShift2 = 0;
-
-        for (int z = 0; z < heightMap[0].length; z++)
-            for (int x = 0; x < heightMap.length; x++) {
-                index[indexShift+0] = indexShift2+0;
-                index[indexShift+1] = indexShift2+1;
-                index[indexShift+2] = indexShift2+2;
-                index[indexShift+3] = indexShift2+1;
-                index[indexShift+4] = indexShift2+3;
-                index[indexShift+5] = indexShift2+2;
-                indexShift += 6;
-                indexShift2 += 4;
+        for (z in heightMap[0].indices) for (x in heightMap.indices) {
+            var indexShift3 = 0
+            for (i in 0..3) {
+                index[indexShift] = indexShift2 + indexShift3
+                index[indexShift + 1] = indexShift2 + indexShift3 + 1
+                index[indexShift + 2] = indexShift2 + 8
+                indexShift3 += 2
+                indexShift += 3
             }
+            indexShift2 += 9
+        }
 
-        return index;
+        return index
     }
 
-    public static ColoredVAO heightMapToSquareVAO(double[][] heightMap) {
-        double[] vertexes = heightMapToSquareVertexes(heightMap);
-        double[] color = heightMapToSquareColors(heightMap);
-        int[] index = heightMapToSquareIndex(heightMap);
+    fun heightMapToCrossVAO(heightMap: Array<DoubleArray>, outflowPipes: Array<Array<DoubleArray>>): ColoredVAO {
+        val vertexes = heightMapToCrossVertexes(heightMap)
+        val color = heightMapToCrossColors(heightMap, outflowPipes)
+        val index = heightMapToCrossIndex(heightMap)
 
-        return new ColoredVAO(vertexes, color, index);
+        return ColoredVAO(vertexes, color, index)
     }
 
-    private static final double[][] offsets = new double[][]{
-            { .5,  .5},
-            {-.5,  .5},
-            {-.5,  .5},
-            {-.5, -.5},
-            { .5, -.5},
-            { .5,  .5},
-            {-.5, -.5},
-            { .5, -.5}
-    };
+    fun heightMapToVectorVertexes(heightMap: Array<DoubleArray>, vectorField: Array<Array<DoubleArray>>): DoubleArray {
+        val vertexes = DoubleArray(heightMap.size * heightMap[0].size * 3 * 3)
+        var vertexShift = 0
 
-    public static double[] heightMapToCrossVertexes(double[][] heightMap) {
-        double[] vertexes = new double[heightMap.length*heightMap[0].length*9*3];
-        int vertexShift = 0;
+        for (z in heightMap[0].indices) for (x in heightMap.indices) {
+            val vector: Vector2d = Vector2d(vectorField[x][z][0], vectorField[x][z][1])
+            vector.normalize().mul(.3)
 
-        for (int z = 0; z < heightMap[0].length; z++)
-            for (int x = 0; x < heightMap.length; x++) {
-                for (int i = 0; i < 8; i++) {
-                    vertexes[vertexShift    ] = x + offsets[i][0];
-                    vertexes[vertexShift + 1] = heightMap[x][z];
-                    vertexes[vertexShift + 2] = z + offsets[i][1];
-                    vertexShift += 3;
-                }
+            vertexes[vertexShift] = x - vector.y * .6 - vector.x
+            vertexes[vertexShift + 1] = heightMap[x][z] + .1
+            vertexes[vertexShift + 2] = z + vector.x * .6 - vector.y
+            vertexShift += 3
 
-                vertexes[vertexShift    ] = x;
-                vertexes[vertexShift + 1] = heightMap[x][z];
-                vertexes[vertexShift + 2] = z;
-                vertexShift += 3;
-            }
+            vertexes[vertexShift] = x + vector.y * .6 - vector.x
+            vertexes[vertexShift + 1] = heightMap[x][z] + .1
+            vertexes[vertexShift + 2] = z - vector.x * .6 - vector.y
+            vertexShift += 3
 
-        return vertexes;
+            vertexes[vertexShift] = x + vector.x * 1.5
+            vertexes[vertexShift + 1] = heightMap[x][z] + .1
+            vertexes[vertexShift + 2] = z + vector.y * 1.5
+            vertexShift += 3
+        }
+
+        return vertexes
     }
 
-    public static double[] heightMapToCrossColors(double[][] heightMap, double[][][] outflowPipes) {
-        double[] color = new double[heightMap.length*heightMap[0].length*9*3];
-        int vertexShift = 0;
+    fun heightMapToVectorColors(heightMap: Array<DoubleArray>): DoubleArray {
+        val color = DoubleArray(heightMap.size * heightMap[0].size * 3 * 3)
+        Arrays.fill(color, 1.0)
 
-        for (int z = 0; z < heightMap[0].length; z++)
-            for (int x = 0; x < heightMap.length; x++) {
-                for (int i = 0; i < 8 ; i++) {
-                    color[vertexShift    ] = -outflowPipes[x][z][i/2]*100;
-                    color[vertexShift + 1] =  outflowPipes[x][z][i/2]*100;
-                    color[vertexShift + 2] = 0;
-                    vertexShift += 3;
-                }
-
-                color[vertexShift    ] =  0;
-                color[vertexShift + 1] =  0;
-                color[vertexShift + 2] = .5;
-                vertexShift += 3;
-            }
-
-        return color;
+        return color
     }
 
-    public static int[] heightMapToCrossIndex(double[][] heightMap) {
-        int[] index = new int[heightMap.length*heightMap[0].length*12];
-        int indexShift = 0;
-        int indexShift2 = 0;
+    fun heightMapToVectorIndex(heightMap: Array<DoubleArray>): IntArray {
+        val index = IntArray(heightMap.size * heightMap[0].size * 3)
+        var indexShift = 0
+        var indexShift2 = 0
 
-        for (int z = 0; z < heightMap[0].length; z++)
-            for (int x = 0; x < heightMap.length; x++) {
-                int indexShift3 = 0;
-                for (int i = 0; i < 4; i++) {
-                    index[indexShift] = indexShift2 + indexShift3;
-                    index[indexShift + 1] = indexShift2 + indexShift3 + 1;
-                    index[indexShift + 2] = indexShift2 + 8;
-                    indexShift3 += 2;
-                    indexShift += 3;
-                }
-                indexShift2 += 9;
-            }
+        for (z in heightMap[0].indices) for (x in heightMap.indices) {
+            index[indexShift] = indexShift2
+            index[indexShift + 1] = indexShift2 + 1
+            index[indexShift + 2] = indexShift2 + 2
+            indexShift += 3
+            indexShift2 += 3
+        }
 
-        return index;
+        return index
     }
 
-    public static ColoredVAO heightMapToCrossVAO(double[][] heightMap, double[][][] outflowPipes) {
-        double[] vertexes = heightMapToCrossVertexes(heightMap);
-        double[] color = heightMapToCrossColors(heightMap, outflowPipes);
-        int[] index = heightMapToCrossIndex(heightMap);
+    fun heightMapToVectorVAO(heightMap: Array<DoubleArray>, vectorField: Array<Array<DoubleArray>>): ColoredVAO {
+        val vertexes = heightMapToVectorVertexes(heightMap, vectorField)
+        val color = heightMapToVectorColors(heightMap)
+        val index = heightMapToVectorIndex(heightMap)
 
-        return new ColoredVAO(vertexes, color, index);
+        return ColoredVAO(vertexes, color, index)
     }
 
-    public static double[] heightMapToVectorVertexes(double[][] heightMap, double[][][] vectorField) {
-        double[] vertexes = new double[heightMap.length*heightMap[0].length*3*3];
-        int vertexShift = 0;
+    fun heightMapToNormalVertexes(heightMap: Array<DoubleArray>): DoubleArray {
+        val vertexes = DoubleArray(heightMap.size * heightMap[0].size * 3 * 3)
+        var vertexShift = 0
 
-        for (int z = 0; z < heightMap[0].length; z++)
-            for (int x = 0; x < heightMap.length; x++) {
-                Vector2d vector = new Vector2d(vectorField[x][z][0], vectorField[x][z][1]);
-                vector.normalize().mul(.3);
+        for (z in heightMap[0].indices) for (x in heightMap.indices) {
+            val normal: Vector3d = normalAt(heightMap, x, z)
 
-                vertexes[vertexShift    ] = x - vector.y * .6 - vector.x;
-                vertexes[vertexShift + 1] = heightMap[x][z] + .1;
-                vertexes[vertexShift + 2] = z + vector.x * .6 - vector.y;
-                vertexShift += 3;
+            vertexes[vertexShift] = x - normal.z * .3
+            vertexes[vertexShift + 1] = heightMap[x][z] + .1
+            vertexes[vertexShift + 2] = z + normal.x * .3
+            vertexShift += 3
 
-                vertexes[vertexShift    ] = x + vector.y * .6 - vector.x;
-                vertexes[vertexShift + 1] = heightMap[x][z] + .1;
-                vertexes[vertexShift + 2] = z - vector.x * .6 - vector.y;
-                vertexShift += 3;
+            vertexes[vertexShift] = x + normal.z * .3
+            vertexes[vertexShift + 1] = heightMap[x][z] + .1
+            vertexes[vertexShift + 2] = z - normal.x * .3
+            vertexShift += 3
 
-                vertexes[vertexShift    ] = x + vector.x * 1.5;
-                vertexes[vertexShift + 1] = heightMap[x][z] + .1;
-                vertexes[vertexShift + 2] = z + vector.y * 1.5;
-                vertexShift += 3;
-            }
+            vertexes[vertexShift] = x + normal.x
+            vertexes[vertexShift + 1] = heightMap[x][z] + normal.y + .1
+            vertexes[vertexShift + 2] = z + normal.z
+            vertexShift += 3
+        }
 
-        return vertexes;
+        return vertexes
     }
 
-    public static double[] heightMapToVectorColors(double[][] heightMap) {
-        double[] color = new double[heightMap.length * heightMap[0].length * 3 * 3];
-        Arrays.fill(color, 1);
+    fun heightMapToNormalVAO(heightMap: Array<DoubleArray>): ColoredVAO {
+        val vertexes = heightMapToNormalVertexes(heightMap)
+        val color = heightMapToVectorColors(heightMap)
+        val index = heightMapToVectorIndex(heightMap)
 
-        return color;
+        return ColoredVAO(vertexes, color, index)
     }
 
-    public static int[] heightMapToVectorIndex(double[][] heightMap) {
-        int[] index = new int[heightMap.length*heightMap[0].length*3];
-        int indexShift = 0;
-        int indexShift2 = 0;
+    fun tesselationGridVertexesTest(xSize: Int, zSize: Int, step: Double): DoubleArray {
+        val vertexes = DoubleArray(xSize * zSize * 8)
+        var i = 0
 
-        for (int z = 0; z < heightMap[0].length; z++)
-            for (int x = 0; x < heightMap.length; x++) {
-                index[indexShift  ] = indexShift2  ;
-                index[indexShift+1] = indexShift2+1;
-                index[indexShift+2] = indexShift2+2;
-                indexShift += 3;
-                indexShift2 += 3;
-            }
+        for (z in 0..<zSize) for (x in 0..<xSize) {
+            vertexes[i] = x * step
+            vertexes[i + 1] = z * step
 
-        return index;
+            vertexes[i + 2] = (x + 1) * step
+            vertexes[i + 3] = z * step
+
+            vertexes[i + 4] = x * step
+            vertexes[i + 5] = (z + 1) * step
+
+            vertexes[i + 6] = (x + 1) * step
+            vertexes[i + 7] = (z + 1) * step
+
+            i += 8
+        }
+
+        return vertexes
     }
 
-    public static ColoredVAO heightMapToVectorVAO(double[][] heightMap, double[][][] vectorField) {
-        double[] vertexes = heightMapToVectorVertexes(heightMap, vectorField);
-        double[] color = heightMapToVectorColors(heightMap);
-        int[] index = heightMapToVectorIndex(heightMap);
+    fun normalAt(heightMap: Array<DoubleArray>, x: Int, z: Int): Vector3d {
+        val heights = DoubleArray(4)
+        for (i in vonNeumannNeighbourhood.indices) heights[i] =
+            heightMap[wrapOffsetCoordinateVonNeumann(x, heightMap.size, i, 0)][wrapOffsetCoordinateVonNeumann(
+                z,
+                heightMap[0].size,
+                i,
+                1
+            )]
 
-        return new ColoredVAO(vertexes, color, index);
+        return Vector3d(heights[1] - heights[2], 1.0, heights[3] - heights[0]).normalize()
     }
 
-    public static double[] heightMapToNormalVertexes(double[][] heightMap) {
-        double[] vertexes = new double[heightMap.length*heightMap[0].length*3*3];
-        int vertexShift = 0;
-
-        for (int z = 0; z < heightMap[0].length; z++)
-            for (int x = 0; x < heightMap.length; x++) {
-                Vector3d normal = normalAt(heightMap, x, z);
-
-                vertexes[vertexShift    ] = x - normal.z * .3;
-                vertexes[vertexShift + 1] = heightMap[x][z] + .1;
-                vertexes[vertexShift + 2] = z + normal.x * .3;
-                vertexShift += 3;
-
-                vertexes[vertexShift    ] = x + normal.z * .3;
-                vertexes[vertexShift + 1] = heightMap[x][z] + .1;
-                vertexes[vertexShift + 2] = z - normal.x * .3;
-                vertexShift += 3;
-
-                vertexes[vertexShift    ] = x + normal.x;
-                vertexes[vertexShift + 1] = heightMap[x][z] + normal.y + .1;
-                vertexes[vertexShift + 2] = z + normal.z;
-                vertexShift += 3;
-            }
-
-        return vertexes;
-    }
-
-    public static ColoredVAO heightMapToNormalVAO(double[][] heightMap) {
-        double[] vertexes = heightMapToNormalVertexes(heightMap);
-        double[] color = heightMapToVectorColors(heightMap);
-        int[] index = heightMapToVectorIndex(heightMap);
-
-        return new ColoredVAO(vertexes, color, index);
-    }
-
-    public static double[] tesselationGridVertexesTest(int xSize, int zSize, double step) {
-        double[] vertexes = new double[xSize*zSize*8];
-        int i = 0;
-
-        for (int z = 0; z < zSize; z++)
-            for (int x = 0; x < xSize; x++) {
-                vertexes[i] = x*step;
-                vertexes[i+1] = z*step;
-
-                vertexes[i+2] = (x+1)*step;
-                vertexes[i+3] = z*step;
-
-                vertexes[i+4] = x*step;
-                vertexes[i+5] = (z+1)*step;
-
-                vertexes[i+6] = (x+1)*step;
-                vertexes[i+7] = (z+1)*step;
-
-                i += 8;
-            }
-
-        return vertexes;
-    }
-
-    public static Vector3d normalAt(double[][] heightMap, int x, int z) {
-        double[] heights = new double[4];
-        for (int i = 0; i < vonNeumannNeighbourhood.length; i++)
-            heights[i] = heightMap[wrapOffsetCoordinateVonNeumann(x, heightMap.length, i, 0)][wrapOffsetCoordinateVonNeumann(z, heightMap[0].length, i, 1)];
-
-        return new Vector3d(heights[1] - heights[2], 1, heights[3] - heights[0]).normalize();
-    }
-
-    public static int wrapOffsetCoordinateVonNeumann(int index, int length, int offset, int xz) {
-        return wrapNumber(index + vonNeumannNeighbourhood[offset][xz], length);
+    fun wrapOffsetCoordinateVonNeumann(index: Int, length: Int, offset: Int, xz: Int): Int {
+        return wrapNumber(index + vonNeumannNeighbourhood[offset][xz], length)
     }
 
     //  0
     //1   2
     //  3
-    public static final int[][] vonNeumannNeighbourhood = new int[][]{
-            { 0,  1},
-            {-1,  0},
-            { 1,  0},
-            { 0, -1}
-    };
+    val vonNeumannNeighbourhood: Array<IntArray> = arrayOf(
+        intArrayOf(0, 1),
+        intArrayOf(-1, 0),
+        intArrayOf(1, 0),
+        intArrayOf(0, -1)
+    )
 
-    public static int wrapNumber(int num, int length) {
-        return (num + length) % length;
+    fun wrapNumber(num: Int, length: Int): Int {
+        return (num + length) % length
     }
 }

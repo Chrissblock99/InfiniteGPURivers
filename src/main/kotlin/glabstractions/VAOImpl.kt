@@ -1,78 +1,68 @@
-package me.chriss99.glabstractions;
+package me.chriss99.glabstractions
 
-import static org.lwjgl.opengl.GL30.*;
+import org.lwjgl.opengl.GL30.*
 
-public class VAOImpl implements VAO {
-    private final int vao;
-    private final VBO<?>[] vbos;
-    private final IntGLBuffer ibo;
-    private int indexLength;
+open class VAOImpl : VAO {
+    private val vao: Int
+    private val vbos: Array<VBO<*>>
+    private val ibo: IntGLBuffer?
+    final override var indexLength: Int = 0
+        private set
 
-    public VAOImpl(int[] index, int vertexSize, double[]... vbos) {
-        vao = glGenVertexArrays();
-        bind();
+    constructor(index: IntArray?, vertexSize: Int, vararg vbos: DoubleArray) {
+        vao = glGenVertexArrays()
+        bind()
 
-        this.vbos = new VBO[vbos.length];
-        for (int i = 0; i < vbos.length; i++) {
-            VBO<?> vbo = new VBO<>(new DoubleGLBuffer(GL_ARRAY_BUFFER).updateData(vbos[i], GL_STATIC_DRAW), vertexSize);
+        this.vbos = Array(vbos.size) {
+            val vbo: VBO<*> = VBO(DoubleGLBuffer(GL_ARRAY_BUFFER).updateData(vbos[it], GL_STATIC_DRAW), vertexSize)
 
-            glVertexAttribPointer(i, vbo.vertexSize, GL_DOUBLE, false, 0, 0);
-            glEnableVertexAttribArray(i);
+            glVertexAttribPointer(it, vbo.vertexSize, GL_DOUBLE, false, 0, 0)
+            glEnableVertexAttribArray(it)
 
-            this.vbos[i] = vbo;
+            return@Array vbo
         }
 
-        ibo = (index != null) ? new IntGLBuffer(GL_ELEMENT_ARRAY_BUFFER).updateData(index, GL_STATIC_DRAW) : null;
-        indexLength = (index != null) ? index.length : vbos[0].length/vertexSize;
+        ibo = if (index != null) IntGLBuffer(GL_ELEMENT_ARRAY_BUFFER).updateData(index, GL_STATIC_DRAW) else null
+        indexLength = index?.size ?: (vbos[0].size / vertexSize)
     }
 
-    public VAOImpl(int[] index, int vertexSize, float[]... vbos) {
-        vao = glGenVertexArrays();
-        bind();
+    constructor(index: IntArray?, vertexSize: Int, vararg vbos: FloatArray) {
+        vao = glGenVertexArrays()
+        bind()
 
-        this.vbos = new VBO[vbos.length];
-        for (int i = 0; i < vbos.length; i++) {
-            VBO<?> vbo = new VBO<>(new FloatGLBuffer(GL_ARRAY_BUFFER).updateData(vbos[i], GL_STATIC_DRAW), vertexSize);
+        this.vbos = Array(vbos.size) {
+            val vbo: VBO<*> = VBO(FloatGLBuffer(GL_ARRAY_BUFFER).updateData(vbos[it], GL_STATIC_DRAW), vertexSize)
 
-            glVertexAttribPointer(i, vbo.vertexSize, GL_FLOAT, false, 0, 0);
-            glEnableVertexAttribArray(i);
+            glVertexAttribPointer(it, vbo.vertexSize, GL_FLOAT, false, 0, 0)
+            glEnableVertexAttribArray(it)
 
-            this.vbos[i] = vbo;
+            return@Array vbo
         }
 
-        ibo = (index != null) ? new IntGLBuffer(GL_ELEMENT_ARRAY_BUFFER).updateData(index, GL_STATIC_DRAW) : null;
-        indexLength = (index != null) ? index.length : vbos[0].length/vertexSize;
+        ibo = if (index != null) IntGLBuffer(GL_ELEMENT_ARRAY_BUFFER).updateData(index, GL_STATIC_DRAW) else null
+        indexLength = index?.size ?: vbos[0].size / vertexSize
     }
 
-    public void updateVertices(int index, double[] vertices) {
-        ((DoubleGLBuffer) vbos[index].buffer).updateData(vertices, GL_STREAM_DRAW);
+    fun updateVertices(index: Int, vertices: DoubleArray) {
+        (vbos[index].buffer as DoubleGLBuffer).updateData(vertices, GL_STREAM_DRAW)
     }
 
-    public void updateVertices(int index, float[] vertices) {
-        ((FloatGLBuffer) vbos[index].buffer).updateData(vertices, GL_STREAM_DRAW);
+    fun updateVertices(index: Int, vertices: FloatArray) {
+        (vbos[index].buffer as FloatGLBuffer).updateData(vertices, GL_STREAM_DRAW)
     }
 
-    public void updateIndices(int[] indices) {
-        ibo.updateData(indices, GL_STREAM_DRAW);
-        indexLength = indices.length;
+    fun updateIndices(indices: IntArray) {
+        ibo?.updateData(indices, GL_STREAM_DRAW) ?: throw IllegalArgumentException("This doesn't have an IBO!")
+        indexLength = indices.size
     }
 
-    @Override
-    public int getIndexLength() {
-        return indexLength;
+    override fun bind() {
+        glBindVertexArray(vao)
     }
 
-    @Override
-    public void bind() {
-        glBindVertexArray(vao);
-    }
-
-    @Override
-    public void delete() {
-        for (VBO vbo : vbos)
-            vbo.delete();
-        if (ibo != null)
-            ibo.delete();
-        glDeleteVertexArrays(vao);
+    override fun delete() {
+        for (vbo in vbos) vbo.delete()
+        ibo?.delete()
+        glDeleteVertexArrays(vao)
     }
 }

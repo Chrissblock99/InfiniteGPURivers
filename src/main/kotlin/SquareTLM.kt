@@ -1,47 +1,27 @@
-package me.chriss99;
+package me.chriss99
 
-import me.chriss99.worldmanagement.TileLoadManager;
-import org.joml.Vector2f;
-import org.joml.Vector2i;
+import me.chriss99.worldmanagement.TileLoadManager
+import org.joml.Vector2f
+import org.joml.Vector2i
 
-import java.util.ArrayList;
-import java.util.Collection;
-
-public class SquareTLM<T> implements TileLoadManager<T> {
-    protected int renderDistance;
-    protected Vector2f position;
-
-    public SquareTLM(int renderDistance, Vector2f initPos) {
-        this.renderDistance = renderDistance;
-        this.position = initPos;
+open class SquareTLM<T>(var renderDistance: Int, initPos: Vector2f) : TileLoadManager<T> {
+    var position: Vector2f = Vector2f(initPos)
+        set(value) {
+        field = Vector2f(value)
     }
 
-    @Override
-    public boolean loadPolicy(Vector2i tilePos, T tile) {
-        Vector2f distance = new Vector2f(tilePos).sub(position).absolute();
-        return distance.x < renderDistance && distance.y < renderDistance;
+    override fun loadPolicy(tilePos: Vector2i, tile: T): Boolean {
+        val distance: Vector2f = Vector2f(tilePos).sub(position).absolute()
+        return distance.x < renderDistance && distance.y < renderDistance
     }
 
-    @Override
-    public Collection<Vector2i> loadCommander() {
-        ArrayList<Vector2i> toLoad = new ArrayList<>();
+    override fun loadCommander(): Collection<Vector2i> {
+        val toLoad: ArrayList<Vector2i> = ArrayList<Vector2i>()
 
-        for (int x = -renderDistance; x < renderDistance+1; x++)
-            for (int y = -renderDistance; y < renderDistance+1; y++)
-                toLoad.add(new Vector2i((int) position.x + x, (int) position.y + y));
+        for (x in -renderDistance..<renderDistance + 1) for (y in -renderDistance..<renderDistance + 1) toLoad.add(
+            Vector2i(position.x.toInt() + x, position.y.toInt() + y)
+        )
 
-        return toLoad;
-    }
-
-    public int getRenderDistance() {
-        return renderDistance;
-    }
-
-    public void setRenderDistance(int renderDistance) {
-        this.renderDistance = renderDistance;
-    }
-
-    public void setPosition(Vector2f position) {
-        this.position = new Vector2f(position);
+        return toLoad
     }
 }

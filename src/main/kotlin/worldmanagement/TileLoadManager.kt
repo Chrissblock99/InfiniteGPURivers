@@ -1,10 +1,8 @@
-package me.chriss99.worldmanagement;
+package me.chriss99.worldmanagement
 
-import org.joml.Vector2i;
+import org.joml.Vector2i
 
-import java.util.Collection;
-
-public interface TileLoadManager<T> {
-    boolean loadPolicy(Vector2i tilePos, T tile);
-    Collection<Vector2i> loadCommander();
+interface TileLoadManager<T> {
+    fun loadPolicy(tilePos: Vector2i, tile: T): Boolean
+    fun loadCommander(): Collection<Vector2i>
 }

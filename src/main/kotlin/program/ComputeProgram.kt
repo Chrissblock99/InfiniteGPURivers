@@ -1,10 +1,10 @@
-package me.chriss99.program;
+package me.chriss99.program
 
-import static org.lwjgl.opengl.GL45.*;
+import org.lwjgl.opengl.GL45.*
 
-public class ComputeProgram extends GLProgram {
-    public ComputeProgram(String name) {
-        addShader( "compute/" + name + ".comp", GL_COMPUTE_SHADER);
-        validate();
+open class ComputeProgram(name: String) : GLProgram() {
+    init {
+        addShader("compute/$name.comp", GL_COMPUTE_SHADER)
+        validate()
     }
 }

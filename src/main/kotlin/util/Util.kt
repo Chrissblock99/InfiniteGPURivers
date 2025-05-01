@@ -1,55 +1,52 @@
-package me.chriss99.util;
+package me.chriss99.util
 
-import org.joml.Vector2i;
-import org.lwjgl.BufferUtils;
+import org.joml.Vector2i
+import org.lwjgl.BufferUtils
+import java.nio.ByteBuffer
+import kotlin.math.floor
 
-import java.nio.ByteBuffer;
+object Util {
+    fun storeArrayInBuffer(array: DoubleArray): ByteBuffer {
+        val buffer = BufferUtils.createByteBuffer(array.size * 8)
 
-public class Util {
-    public static ByteBuffer storeArrayInBuffer(double[] array) {
-        ByteBuffer buffer = BufferUtils.createByteBuffer(array.length * 8);
+        for (i in array) buffer.putDouble(i)
 
-        for(double i : array)
-            buffer.putDouble(i);
-
-        buffer.position(0);
-        return buffer;
+        buffer.position(0)
+        return buffer
     }
 
-    public static ByteBuffer storeArrayInBuffer(float[] array) {
-        ByteBuffer buffer = BufferUtils.createByteBuffer(array.length * 4);
+    fun storeArrayInBuffer(array: FloatArray): ByteBuffer {
+        val buffer = BufferUtils.createByteBuffer(array.size * 4)
 
-        for(float i : array)
-            buffer.putFloat(i);
+        for (i in array) buffer.putFloat(i)
 
-        buffer.position(0);
-        return buffer;
+        buffer.position(0)
+        return buffer
     }
 
-    public static ByteBuffer storeArrayInBuffer(int[] array) {
-        ByteBuffer buffer = BufferUtils.createByteBuffer(array.length * 4);
+    fun storeArrayInBuffer(array: IntArray): ByteBuffer {
+        val buffer = BufferUtils.createByteBuffer(array.size * 4)
 
-        for(int i : array)
-            buffer.putInt(i);
+        for (i in array) buffer.putInt(i)
 
-        buffer.position(0);
-        return buffer;
+        buffer.position(0)
+        return buffer
     }
 
-    public static int indexOfXZFlattenedArray(int x, int z, int xSize) {
-        return x + z*xSize;
+    fun indexOfXZFlattenedArray(x: Int, z: Int, xSize: Int): Int {
+        return x + z * xSize
     }
 
-    public static int properIntDivide(int a, int b) {
+    fun properIntDivide(a: Int, b: Int): Int {
         //yes this is horrible, but I was too lazy to do it better
-        return (int) Math.floor(((double) a)/((double) b));
+        return floor((a.toDouble()) / (b.toDouble())).toInt()
     }
 
-    public static Vector2i properIntDivide(Vector2i v, int b) {
-        return new Vector2i(properIntDivide(v.x, b), properIntDivide(v.y, b));
+    fun properIntDivide(v: Vector2i, b: Int): Vector2i {
+        return Vector2i(properIntDivide(v.x, b), properIntDivide(v.y, b))
     }
 
-    public static Vector2i gridSrcOf(Vector2i pos, int scale) {
-        return properIntDivide(pos, scale).mul(scale);
+    fun gridSrcOf(pos: Vector2i, scale: Int): Vector2i {
+        return properIntDivide(pos, scale).mul(scale)
     }
 }
