@@ -3,8 +3,6 @@ package me.chriss99;
 import org.joml.Vector2i;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class IterationSurfaceTypeTest {
 
     @Test
