@@ -3,7 +3,7 @@ package me.chriss99.worldmanagement
 import me.chriss99.*
 import me.chriss99.worldmanagement.iteration.IterableWorld
 import me.chriss99.worldmanagement.iteration.IterationTile
-import org.joml.Vector2i
+import glm_.vec2.Vec2i
 
 class ErosionDataStorage(
     worldName: String,
@@ -36,7 +36,7 @@ class ErosionDataStorage(
     init {
         mipMappedTerrain = MipMappedInfiniteChunkWorld(
             "$worldName/terrain", chunkSize, regionSize,
-            { chunkPos: Vector2i?, chunkSize: Int? ->
+            { chunkPos: Vec2i?, chunkSize: Int? ->
                 terrainGenerator.generateChunk(
                     chunkPos!!, chunkSize!!
                 )
@@ -44,10 +44,10 @@ class ErosionDataStorage(
             { i: Int -> tileLoadManager })
         mipMappedWater = MipMappedInfiniteChunkWorld(
             "$worldName/water", chunkSize, regionSize,
-            { vector2i: Vector2i?, chunkSize1: Int? ->
+            { vec2i: Vec2i?, chunkSize1: Int? ->
                 Chunk(
                     Float2DBufferWrapper(
-                        Vector2i(
+                        Vec2i(
                             chunkSize1!!
                         )
                     )
@@ -61,10 +61,10 @@ class ErosionDataStorage(
             "$worldName/sediment", Array2DBufferWrapper.Type.FLOAT,
             chunkSize,
             regionSize,
-            { vector2i: Vector2i, chunkSize1: Int ->
+            { vec2i: Vec2i, chunkSize1: Int ->
                 Chunk(
                     Float2DBufferWrapper(
-                        Vector2i(
+                        Vec2i(
                             chunkSize1
                         )
                     )
@@ -75,10 +75,10 @@ class ErosionDataStorage(
             "$worldName/hardness", Array2DBufferWrapper.Type.FLOAT,
             chunkSize,
             regionSize,
-            { vector2i: Vector2i?, chunkSize1: Int? ->
+            { vec2i: Vec2i?, chunkSize1: Int? ->
                 Chunk(
                     Float2DBufferWrapper(
-                        Vector2i(
+                        Vec2i(
                             chunkSize1!!
                         ), 1f
                     )
@@ -90,10 +90,10 @@ class ErosionDataStorage(
             "$worldName/waterOutflow", Array2DBufferWrapper.Type.VEC4F,
             chunkSize,
             regionSize,
-            { vector2i: Vector2i?, chunkSize1: Int? ->
+            { vec2i: Vec2i?, chunkSize1: Int? ->
                 Chunk(
                     Vec4f2DBufferWrapper(
-                        Vector2i(
+                        Vec2i(
                             chunkSize1!!
                         )
                     )
@@ -104,10 +104,10 @@ class ErosionDataStorage(
             "$worldName/sedimentOutflow", Array2DBufferWrapper.Type.VEC4F,
             chunkSize,
             regionSize,
-            { vector2i: Vector2i?, chunkSize1: Int? ->
+            { vec2i: Vec2i?, chunkSize1: Int? ->
                 Chunk(
                     Vec4f2DBufferWrapper(
-                        Vector2i(
+                        Vec2i(
                             chunkSize1!!
                         )
                     )
@@ -119,10 +119,10 @@ class ErosionDataStorage(
             "$worldName/thermalOutflow1", Array2DBufferWrapper.Type.VEC4F,
             chunkSize,
             regionSize,
-            { vector2i: Vector2i?, chunkSize1: Int? ->
+            { vec2i: Vec2i?, chunkSize1: Int? ->
                 Chunk(
                     Vec4f2DBufferWrapper(
-                        Vector2i(
+                        Vec2i(
                             chunkSize1!!
                         )
                     )
@@ -133,10 +133,10 @@ class ErosionDataStorage(
             "$worldName/thermalOutflow2", Array2DBufferWrapper.Type.VEC4F,
             chunkSize,
             regionSize,
-            { vector2i: Vector2i?, chunkSize1: Int? ->
+            { vec2i: Vec2i?, chunkSize1: Int? ->
                 Chunk(
                     Vec4f2DBufferWrapper(
-                        Vector2i(
+                        Vec2i(
                             chunkSize1!!
                         )
                     )

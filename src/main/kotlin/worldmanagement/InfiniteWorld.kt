@@ -1,18 +1,18 @@
 package me.chriss99.worldmanagement
 
 import me.chriss99.util.Util
-import org.joml.Vector2i
+import glm_.vec2.Vec2i
 import java.util.function.BiFunction
 
 open class InfiniteWorld<T>(
     chunkSize: Int,
     regionSize: Int,
-    chunkGenerator: BiFunction<Vector2i, Int, T>,
+    chunkGenerator: BiFunction<Vec2i, Int, T>,
     regionFileManager: RegionFileManager<T>,
     tileLoadManager: TileLoadManager<Region<T>>
 ) {
     private val storage: FileBackedTileMap2D<Region<T>>
-    private val chunkGenerator: BiFunction<Vector2i, Int, T>
+    private val chunkGenerator: BiFunction<Vec2i, Int, T>
 
     val chunkSize: Int
     val regionSize: Int
@@ -25,10 +25,10 @@ open class InfiniteWorld<T>(
         this.regionSize = regionSize
     }
 
-    fun getTile(pos: Vector2i): T {
-        return storage.getTile(Util.properIntDivide(pos, regionSize)).getTile(pos) { vector2i ->
+    fun getTile(pos: Vec2i): T {
+        return storage.getTile(Util.properIntDivide(pos, regionSize)).getTile(pos) { vec2i ->
             chunkGenerator.apply(
-                vector2i,
+                vec2i,
                 chunkSize
             )
         }

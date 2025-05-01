@@ -1,15 +1,12 @@
 package me.chriss99
 
 import me.chriss99.ImageWriter.writeImageHeightMap
-import org.joml.Vector3f
+import glm_.vec3.Vec3
 import org.lwjgl.glfw.GLFW
-import kotlin.math.ln
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.pow
+import kotlin.math.*
 
 class InputController(private val inputDeviceManager: InputDeviceManager, private val main: Main) {
-    private val movementDirection = Vector3f()
+    private val movementDirection = Vec3()
     private var movementSpeed = 3f
 
     init {
@@ -33,7 +30,7 @@ class InputController(private val inputDeviceManager: InputDeviceManager, privat
 
         inputDeviceManager.addMouseScrollConsumer { dx: Double?, dy: Double ->
             movementSpeed =
-                max(0.005, 1.5.pow(log(1.5, movementSpeed.toDouble()) + dy / 4))
+                max(0.005, 1.5.pow(log(movementSpeed.toDouble(), 1.5) + dy / 4))
                     .toFloat()
         }
 
@@ -90,14 +87,6 @@ class InputController(private val inputDeviceManager: InputDeviceManager, privat
     }
 
     fun update(deltaTime: Double) {
-        main.cameraMatrix.position.add(
-            Vector3f(movementDirection).mul((movementSpeed * deltaTime).toFloat()).rotateY(-main.cameraMatrix.yaw)
-        )
-    }
-
-    companion object {
-        private fun log(b: Double, x: Double): Double {
-            return ln(x) / ln(b)
-        }
+        main.cameraMatrix.position.plusAssign(main.cameraMatrix.copy(yaw = -main.cameraMatrix.yaw).yawMatrix.toMat3() * (movementDirection * (movementSpeed * deltaTime)))
     }
 }

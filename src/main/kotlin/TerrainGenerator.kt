@@ -2,7 +2,7 @@ package me.chriss99
 
 import me.chriss99.program.ComputeProgram
 import me.chriss99.worldmanagement.Chunk
-import org.joml.Vector2i
+import glm_.vec2.Vec2i
 import org.lwjgl.opengl.GL11.GL_FLOAT
 import org.lwjgl.opengl.GL11.GL_RED
 import org.lwjgl.opengl.GL15.GL_WRITE_ONLY
@@ -13,7 +13,7 @@ import org.lwjgl.opengl.GL42.glMemoryBarrier
 import org.lwjgl.opengl.GL43.glDispatchCompute
 
 class TerrainGenerator(chunkSize: Int) : ComputeProgram("genHeightMap") {
-    val terrainMap: Texture2D = Texture2D(GL_R32F, Vector2i(chunkSize))
+    val terrainMap: Texture2D = Texture2D(GL_R32F, Vec2i(chunkSize))
     val srcPosUniform: Int
 
     init {
@@ -22,7 +22,7 @@ class TerrainGenerator(chunkSize: Int) : ComputeProgram("genHeightMap") {
         terrainMap.bindUniformImage(program, 8, "terrainMap", GL_WRITE_ONLY)
     }
 
-    fun generateChunk(chunkPos: Vector2i, chunkSize: Int): Chunk {
+    fun generateChunk(chunkPos: Vec2i, chunkSize: Int): Chunk {
         use()
         glUniform2i(srcPosUniform, chunkPos.x * chunkSize, chunkPos.y * chunkSize)
 
@@ -30,7 +30,7 @@ class TerrainGenerator(chunkSize: Int) : ComputeProgram("genHeightMap") {
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT)
 
 
-        val buffer: Float2DBufferWrapper = Float2DBufferWrapper(Vector2i(chunkSize))
+        val buffer: Float2DBufferWrapper = Float2DBufferWrapper(Vec2i(chunkSize))
         terrainMap.downloadFullData(GL_RED, GL_FLOAT, buffer.buffer)
 
         return Chunk(buffer)

@@ -2,17 +2,17 @@ package me.chriss99.worldmanagement.iteration
 
 import me.chriss99.worldmanagement.AbstractRegionFileManager
 import me.chriss99.worldmanagement.Region
-import org.joml.Vector2i
+import glm_.vec2.Vec2i
 import java.nio.ByteBuffer
 
 class IterationTileRegionFileManager(worldName: String) : AbstractRegionFileManager<IterationTile>(worldName) {
 
-    protected override fun regionFromBytes(bytes: ByteArray, pos: Vector2i): Region<IterationTile> {
+    protected override fun regionFromBytes(bytes: ByteArray, pos: Vec2i): Region<IterationTile> {
         val region: Region<IterationTile> = Region(pos)
         val buffer = ByteBuffer.wrap(bytes)
 
         while (buffer.hasRemaining()) {
-            val tilePos: Vector2i = Vector2i(buffer.getInt(), buffer.getInt())
+            val tilePos: Vec2i = Vec2i(buffer.getInt(), buffer.getInt())
             val iteration = buffer.getInt()
             val bits = buffer.get()
 
@@ -36,7 +36,7 @@ class IterationTileRegionFileManager(worldName: String) : AbstractRegionFileMana
     }
 
     protected override fun regionToBytes(region: Region<IterationTile>): ByteArray {
-        val tileEntrySet: Set<Map.Entry<Vector2i, IterationTile>> = region.allTiles
+        val tileEntrySet: Set<Map.Entry<Vec2i, IterationTile>> = region.allTiles
         val array = ByteArray(tileEntrySet.size * (4 + 4 + 4 + 1))
         val buffer = ByteBuffer.wrap(array)
 

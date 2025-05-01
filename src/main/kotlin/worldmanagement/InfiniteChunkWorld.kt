@@ -3,7 +3,7 @@ package me.chriss99.worldmanagement
 import me.chriss99.Area
 import me.chriss99.Array2DBufferWrapper
 import me.chriss99.util.Util
-import org.joml.Vector2i
+import glm_.vec2.Vec2i
 import java.util.function.BiFunction
 import kotlin.math.max
 import kotlin.math.min
@@ -13,7 +13,7 @@ class InfiniteChunkWorld(
     val type: Array2DBufferWrapper.Type,
     chunkSize: Int,
     regionSize: Int,
-    chunkGenerator: BiFunction<Vector2i, Int, Chunk>,
+    chunkGenerator: BiFunction<Vec2i, Int, Chunk>,
     tileLoadManager: TileLoadManager<Region<Chunk>>
 ) :
     InfiniteWorld<Chunk>(
@@ -27,11 +27,11 @@ class InfiniteChunkWorld(
         return readWriteArea(area.srcPos(), Array2DBufferWrapper.of(type, area.size), true)
     }
 
-    fun writeArea(pos: Vector2i, data: Array2DBufferWrapper) {
+    fun writeArea(pos: Vec2i, data: Array2DBufferWrapper) {
         readWriteArea(pos, data, false)
     }
 
-    private fun readWriteArea(pos: Vector2i, data: Array2DBufferWrapper, read: Boolean): Array2DBufferWrapper {
+    private fun readWriteArea(pos: Vec2i, data: Array2DBufferWrapper, read: Boolean): Array2DBufferWrapper {
         val x: Int = pos.x
         val y: Int = pos.y
         val width: Int = data.size.x
@@ -44,7 +44,7 @@ class InfiniteChunkWorld(
         val chunksY: Int = Util.properIntDivide(y + height - 1, chunkSize) - chunkY + 1
 
         for (currentChunkX in chunkX..<chunkX + chunksX) for (currentChunkY in chunkY..<chunkY + chunksY) {
-            val currentChunk: Chunk = getTile(Vector2i(currentChunkX, currentChunkY))
+            val currentChunk: Chunk = getTile(Vec2i(currentChunkX, currentChunkY))
 
             val currentChunkMinX = ((max(
                 (currentChunkX * chunkSize).toDouble(),

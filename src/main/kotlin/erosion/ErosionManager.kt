@@ -3,17 +3,17 @@ package me.chriss99.erosion
 import me.chriss99.Area
 import me.chriss99.IterationSurfaceType
 import me.chriss99.worldmanagement.iteration.IterableWorld
-import org.joml.Vector2i
-import org.joml.Vector4i
+import glm_.vec2.Vec2i
+import glm_.vec4.Vec4i
 
 class ErosionManager(eroder: GPUTerrainEroder, private val data: IterableWorld) {
     private val eroder: GPUTerrainEroder = eroder
 
-    private val maxChunks: Vector2i = Vector2i(eroder.getMaxTextureSize()).div(data.chunkSize)
+    private val maxChunks: Vec2i = Vec2i(eroder.getMaxTextureSize()).div(data.chunkSize)
 
     private var currentTask: ErosionTask? = null
 
-    fun findIterate(pos: Vector2i, maxIteration: Int, iterations: Int): Boolean {
+    fun findIterate(pos: Vec2i, maxIteration: Int, iterations: Int): Boolean {
         if (currentTask == null) {
             currentTask = findChangeArea(pos, maxIteration, iterations)
             if (currentTask == null)
@@ -45,9 +45,9 @@ class ErosionManager(eroder: GPUTerrainEroder, private val data: IterableWorld) 
         currentTask = null
     }
 
-    private fun findChangeArea(pos: Vector2i, maxIteration: Int, maxSurface: Int): ErosionTask? {
-        val findArea: Area = Area(eroder.getMaxTextureSize().div(data.chunkSize)).add(pos)
-            .sub(eroder.getMaxTextureSize().div(data.chunkSize).div(2))
+    private fun findChangeArea(pos: Vec2i, maxIteration: Int, maxSurface: Int): ErosionTask? {
+        val findArea: Area = Area(eroder.getMaxTextureSize().div(data.chunkSize)).plus(pos)
+            .minus(eroder.getMaxTextureSize().div(data.chunkSize).div(2))
         val intersection = findArea.intersection(eroder.getUsedArea().div(data.chunkSize))
 
         if (intersection != null) {
@@ -58,7 +58,7 @@ class ErosionManager(eroder: GPUTerrainEroder, private val data: IterableWorld) 
 
         val task: ErosionTask = findTask(findArea, maxIteration, maxSurface) ?: return null
 
-        eroder.changeArea(findArea.mul(data.chunkSize))
+        eroder.changeArea(findArea.times(data.chunkSize))
         return task
     }
 
@@ -68,7 +68,7 @@ class ErosionManager(eroder: GPUTerrainEroder, private val data: IterableWorld) 
         return bruteForceTask(area, lowestIterable, maxSurface)
     }
 
-    private fun bruteForceTask(allowed: Area, searchInside: LinkedHashSet<Vector2i>, maxSurface: Int): ErosionTask? {
+    private fun bruteForceTask(allowed: Area, searchInside: LinkedHashSet<Vec2i>, maxSurface: Int): ErosionTask? {
         var bestArea = Area()
 
         for (currentPos in searchInside) {
@@ -83,17 +83,17 @@ class ErosionManager(eroder: GPUTerrainEroder, private val data: IterableWorld) 
         return createTask(bestArea)
     }
 
-    private fun lowestIterableTiles(area: Area, maxIteration: Int): LinkedHashSet<Vector2i>? {
-        val tilesAtIteration: HashMap<Int, LinkedHashSet<Vector2i>> = LinkedHashMap()
+    private fun lowestIterableTiles(area: Area, maxIteration: Int): LinkedHashSet<Vec2i>? {
+        val tilesAtIteration: HashMap<Int, LinkedHashSet<Vec2i>> = LinkedHashMap()
 
-        area.forAllPoints { pos: Vector2i ->
+        area.forAllPoints { pos: Vec2i ->
             val iteration = data.getTile(pos).iteration
-            tilesAtIteration.computeIfAbsent(iteration) { k: Int? -> LinkedHashSet() }.add(pos!!)
+            tilesAtIteration.computeIfAbsent(iteration) { _ -> LinkedHashSet() }.add(pos)
         }
 
         val sortedIterations = tilesAtIteration.keys.stream().sorted(Comparator.naturalOrder()).toList()
 
-        var lowestIterable: LinkedHashSet<Vector2i>? = null
+        var lowestIterable: LinkedHashSet<Vec2i>? = null
         for (lowestIteration in sortedIterations) {
             if (lowestIteration > maxIteration) return null
 
@@ -107,21 +107,18 @@ class ErosionManager(eroder: GPUTerrainEroder, private val data: IterableWorld) 
         return lowestIterable
     }
 
-    private fun hasIterable2x2Area(tiles: LinkedHashSet<Vector2i>): Boolean {
-        for (pos in tiles) if (tiles.contains(Vector2i(pos).add(1, 0)) && tiles.contains(
-                Vector2i(pos).add(
-                    0,
-                    1
-                )
-            ) && tiles.contains(Vector2i(pos).add(1, 1)) && iterable(
-                Area(pos, 2)
-            )
-        ) return true
+    private fun hasIterable2x2Area(tiles: LinkedHashSet<Vec2i>): Boolean {
+        for (pos in tiles)
+            if (tiles.contains(pos + Vec2i(1, 0)) &&
+                tiles.contains(pos + Vec2i(0, 1)) &&
+                tiles.contains(pos + Vec2i(1, 1)) &&
+                iterable(Area(pos, 2)))
+                return true
 
         return false
     }
 
-    private fun betterAreaFrom(startPos: Vector2i, bestArea: Area, allowedArea: Area, maxSurface: Int): Area? {
+    private fun betterAreaFrom(startPos: Vec2i, bestArea: Area, allowedArea: Area, maxSurface: Int): Area? {
         var betterArea = Area(startPos, 2)
 
         if (!iterable(betterArea)) return null
@@ -147,10 +144,8 @@ class ErosionManager(eroder: GPUTerrainEroder, private val data: IterableWorld) 
 
             val betterAreaTry = betterArea.increase(changes[i].x, changes[i].y, changes[i].z, changes[i].w)
 
-            if (allowedArea.contains(betterAreaTry) && betterAreaTry.mul(data.chunkSize).area < maxSurface && iterable(
-                    betterAreaTry
-                )
-            ) betterArea = betterAreaTry
+            if (allowedArea.contains(betterAreaTry) && betterAreaTry.times(data.chunkSize).area < maxSurface && iterable(betterAreaTry))
+                betterArea = betterAreaTry
             else directions[i] = false
             i = (i + 1) % 4
         }
@@ -163,11 +158,11 @@ class ErosionManager(eroder: GPUTerrainEroder, private val data: IterableWorld) 
     private fun iterable(area: Area): Boolean {
         if (area.width < 2 || area.height < 2) return false
 
-        val length = area.size.sub(1, 1)
+        val length = area.size - Vec2i(1, 1)
 
         val l = getEdgesEqual(area.srcPos(), length.y, true)
-        val r = getEdgesEqual(area.srcPos().add(length.x, 0), length.y, true)
-        val f = getEdgesEqual(area.srcPos().add(0, length.y), length.x, false)
+        val r = getEdgesEqual(area.srcPos().plus(length.x, 0), length.y, true)
+        val f = getEdgesEqual(area.srcPos().plus(0, length.y), length.x, false)
         val b = getEdgesEqual(area.srcPos(), length.x, false)
 
         if (l > 1 || r > 1 || f > 1 || b > 1) return false
@@ -175,30 +170,31 @@ class ErosionManager(eroder: GPUTerrainEroder, private val data: IterableWorld) 
         if (l == -1 || r == 1 || f == 1 || b == -1) return false
 
         val allowed = IterationSurfaceType.SurfaceType.FLAT
-        val tl = allowed == data.getIterationSurfaceType(area.srcPos().add(0, length.y)).surfaceType
-        val tr = allowed == data.getIterationSurfaceType(area.srcPos().add(length)).surfaceType
+        val tl = allowed == data.getIterationSurfaceType(area.srcPos().plus(0, length.y)).surfaceType
+        val tr = allowed == data.getIterationSurfaceType(area.srcPos().plus(length)).surfaceType
         val dl = allowed == data.getIterationSurfaceType(area.srcPos()).surfaceType
-        val dr = allowed == data.getIterationSurfaceType(area.srcPos().add(length.x, 0)).surfaceType
+        val dr = allowed == data.getIterationSurfaceType(area.srcPos().plus(length.x, 0)).surfaceType
 
-        if (l == 0 && f == 0 && !tl || f == 0 && r == 0 && !tr || l == 0 && b == 0 && !dl || b == 0 && r == 0 && !dr) return false
+        if (l == 0 && f == 0 && !tl || f == 0 && r == 0 && !tr || l == 0 && b == 0 && !dl || b == 0 && r == 0 && !dr)
+            return false
 
         return iterationsAreSame(area)
     }
 
     private fun createTask(area: Area): ErosionTask {
-        val length = area.size.sub(1, 1)
+        val length = area.size.minus(1, 1)
 
         val l = getEdgesEqual(area.srcPos(), length.y, true)
-        val r = getEdgesEqual(area.srcPos().add(length.x, 0), length.y, true)
-        val f = getEdgesEqual(area.srcPos().add(0, length.y), length.x, false)
+        val r = getEdgesEqual(area.srcPos().plus(length.x, 0), length.y, true)
+        val f = getEdgesEqual(area.srcPos().plus(0, length.y), length.x, false)
         val b = getEdgesEqual(area.srcPos(), length.x, false)
 
-        return ErosionTask(eroder, area.mul(data.chunkSize), data.chunkSize, l, r, f, b)
+        return ErosionTask(eroder, area.times(data.chunkSize), data.chunkSize, l, r, f, b)
     }
 
     private fun taskFinished(task: ErosionTask) {
         val area: Area = task.getArea().div(data.chunkSize)
-        val length = area.size.sub(1, 1)
+        val length = area.size.minus(1, 1)
 
         val l: Int = task.l - 1
         val r: Int = task.r + 1
@@ -206,8 +202,8 @@ class ErosionManager(eroder: GPUTerrainEroder, private val data: IterableWorld) 
         val b: Int = task.b - 1
 
         setEdges(area.srcPos(), length.y, true, l)
-        setEdges(area.srcPos().add(length.x, 0), length.y, true, r)
-        setEdges(area.srcPos().add(0, length.y), length.x, false, f)
+        setEdges(area.srcPos().plus(length.x, 0), length.y, true, r)
+        setEdges(area.srcPos().plus(0, length.y), length.x, false, f)
         setEdges(area.srcPos(), length.x, false, b)
 
         increaseIteration(area, l, r, f, b)
@@ -215,18 +211,18 @@ class ErosionManager(eroder: GPUTerrainEroder, private val data: IterableWorld) 
 
     private fun increaseIteration(area: Area, l: Int, r: Int, f: Int, b: Int) {
         val inner = area.outset(-1)
-        val size = area.size.sub(1, 1)
+        val size = area.size.minus(1, 1)
 
-        inner.forAllPoints { v: Vector2i -> data.getTile(v)!!.iteration += data.chunkSize }
+        inner.forAllPoints { v: Vec2i -> data.getTile(v)!!.iteration += data.chunkSize }
 
-        if (l == 0) for (y in 1..<size.y) data.getTile(area.srcPos().add(0, y))!!.iteration += data.chunkSize
-        if (r == 0) for (y in 1..<size.y) data.getTile(area.srcPos().add(size.x, y))!!.iteration += data.chunkSize
-        if (f == 0) for (x in 1..<size.x) data.getTile(area.srcPos().add(x, size.y))!!.iteration += data.chunkSize
-        if (b == 0) for (x in 1..<size.x) data.getTile(area.srcPos().add(x, 0))!!.iteration += data.chunkSize
+        if (l == 0) for (y in 1..<size.y) data.getTile(area.srcPos().plus(0, y))!!.iteration += data.chunkSize
+        if (r == 0) for (y in 1..<size.y) data.getTile(area.srcPos().plus(size.x, y))!!.iteration += data.chunkSize
+        if (f == 0) for (x in 1..<size.x) data.getTile(area.srcPos().plus(x, size.y))!!.iteration += data.chunkSize
+        if (b == 0) for (x in 1..<size.x) data.getTile(area.srcPos().plus(x, 0))!!.iteration += data.chunkSize
 
         if (l == 0 && b == 0) data.getTile(area.srcPos())!!.iteration += data.chunkSize
-        if (l == 0 && f == 0) data.getTile(area.srcPos().add(0, size.y))!!.iteration += data.chunkSize
-        if (r == 0 && b == 0) data.getTile(area.srcPos().add(size.x, 0))!!.iteration += data.chunkSize
+        if (l == 0 && f == 0) data.getTile(area.srcPos().plus(0, size.y))!!.iteration += data.chunkSize
+        if (r == 0 && b == 0) data.getTile(area.srcPos().plus(size.x, 0))!!.iteration += data.chunkSize
         if (r == 0 && f == 0) data.getTile(inner.endPos())!!.iteration += data.chunkSize
     }
 
@@ -244,7 +240,7 @@ class ErosionManager(eroder: GPUTerrainEroder, private val data: IterableWorld) 
      * @param upwards whether to check for equality upwards or sideways
      * @return -1, 0 or 1 if all are equal, else the length at which it isn't equal (larger than 1)
      */
-    private fun getEdgesEqual(pos: Vector2i, length: Int, upwards: Boolean): Int {
+    private fun getEdgesEqual(pos: Vec2i, length: Int, upwards: Boolean): Int {
         val edge = getEdge(pos, 1, upwards)
 
         for (i in 2..length) if (getEdge(pos, i, upwards) != edge) return i
@@ -252,22 +248,23 @@ class ErosionManager(eroder: GPUTerrainEroder, private val data: IterableWorld) 
         return edge
     }
 
-    private fun getEdge(pos: Vector2i, offset: Int, upwards: Boolean): Int {
-        return if (upwards) data.getTile(Vector2i(pos).add(0, offset))!!.horizontal else data.getTile(
-            Vector2i(pos).add(
-                offset,
-                0
-            )
-        )!!.vertical
+    private fun getEdge(pos: Vec2i, offset: Int, upwards: Boolean): Int {
+        return if (upwards)
+            data.getTile(Vec2i(pos).plus(0, offset)).horizontal
+        else
+            data.getTile(Vec2i(pos).plus(offset, 0)).vertical
     }
 
-    private fun setEdges(pos: Vector2i, length: Int, upwards: Boolean, value: Int) {
-        for (i in 1..length) if (upwards) data.getTile(Vector2i(pos).add(0, i))!!.horizontal = value
-        else data.getTile(Vector2i(pos).add(i, 0))!!.vertical = value
+    private fun setEdges(pos: Vec2i, length: Int, upwards: Boolean, value: Int) {
+        for (i in 1..length)
+            if (upwards)
+                data.getTile(Vec2i(pos).plus(0, i))!!.horizontal = value
+            else
+                data.getTile(Vec2i(pos).plus(i, 0))!!.vertical = value
     }
 
     companion object {
         private val changes =
-            arrayOf(Vector4i(0, 0, 1, 0), Vector4i(0, 0, 0, 1), Vector4i(1, 0, 0, 0), Vector4i(0, 1, 0, 0))
+            arrayOf(Vec4i(0, 0, 1, 0), Vec4i(0, 0, 0, 1), Vec4i(1, 0, 0, 0), Vec4i(0, 1, 0, 0))
     }
 }

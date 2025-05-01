@@ -4,7 +4,7 @@ import me.chriss99.IterationSurfaceType
 import me.chriss99.worldmanagement.InfiniteWorld
 import me.chriss99.worldmanagement.Region
 import me.chriss99.worldmanagement.TileLoadManager
-import org.joml.Vector2i
+import glm_.vec2.Vec2i
 
 class IterableWorld(
     worldName: String,
@@ -19,11 +19,11 @@ class IterableWorld(
         IterationTileRegionFileManager(worldName),
         tileLoadManager
     ) {
-    fun getIterationSurfaceType(pos: Vector2i): IterationSurfaceType {
+    fun getIterationSurfaceType(pos: Vec2i): IterationSurfaceType {
         val v0: Int = getTile(pos).vertical and 0b11
-        val v1: Int = getTile(Vector2i(pos).add(1, 0)).vertical and 0b11
+        val v1: Int = getTile(Vec2i(pos).plus(1, 0)).vertical and 0b11
         val h0: Int = getTile(pos).horizontal and 0b11
-        val h1: Int = getTile(Vector2i(pos).add(0, 1)).horizontal and 0b11
+        val h1: Int = getTile(Vec2i(pos).plus(0, 1)).horizontal and 0b11
 
         val combined = h1 or (v0 shl 2) or (v1 shl 4) or (h0 shl 6)
         val bits = when (combined) {

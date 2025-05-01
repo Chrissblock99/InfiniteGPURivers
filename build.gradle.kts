@@ -18,8 +18,8 @@ dependencies {
 
     implementation(platform("org.lwjgl:lwjgl-bom:$lwjglVersion"))
 
-    // https://mvnrepository.com/artifact/org.joml/joml
-    implementation("org.joml:joml:1.10.8")
+    implementation("io.github.kotlin-graphics:glm:0.9.9.1-12")
+    implementation("io.github.kotlin-graphics:kool:0.9.79")
 
     implementation("org.lwjgl", "lwjgl")
     implementation("org.lwjgl", "lwjgl-glfw")

@@ -3,6 +3,7 @@ package me.chriss99.program
 import me.chriss99.CameraMatrix
 import me.chriss99.ColoredVAO
 import org.lwjgl.opengl.GL20.*
+import java.nio.FloatBuffer
 
 class ColoredVAORenderer(private val cameraMatrix: CameraMatrix) : RenderProgram<ColoredVAO>() {
     private val transformMatrix: Int
@@ -23,7 +24,7 @@ class ColoredVAORenderer(private val cameraMatrix: CameraMatrix) : RenderProgram
         if (vaos.isEmpty()) return
 
         use()
-        glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(FloatArray(16)))
+        glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix() to FloatBuffer.allocate(16))
 
         for (vao in vaos) {
             vao.bind()

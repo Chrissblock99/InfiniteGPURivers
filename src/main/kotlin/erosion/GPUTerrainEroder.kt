@@ -6,10 +6,10 @@ import me.chriss99.Texture2D
 import me.chriss99.program.ComputeProgram
 import me.chriss99.worldmanagement.ErosionDataStorage
 import me.chriss99.worldmanagement.InfiniteChunkWorld
-import org.joml.Vector2i
+import glm_.vec2.Vec2i
 import org.lwjgl.opengl.*
 
-class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, maxTextureSize: Vector2i, usedArea: Area) {
+class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, maxTextureSize: Vec2i, usedArea: Area) {
     /*
     double deltaT = 0.02; //[0;0.05]
 
@@ -27,7 +27,7 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, maxTe
     double minimumHardness = 0.25; //[0;1]
     double voidSediment = 0.3; //[0;1]
     */
-    private val maxTextureSize = Vector2i()
+    private val maxTextureSize = Vec2i()
 
     private var usedArea: Area
 
@@ -55,7 +55,7 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, maxTe
         this.usedArea = usedArea.copy()
 
         //read buffer in all directions (avoids implicit out of bound reads when iterating near edges)
-        val buffedMaxSize = Vector2i(maxTextureSize).add(2, 2)
+        val buffedMaxSize = Vec2i(maxTextureSize).plus(2, 2)
 
         terrainMap = Texture2D(GL30.GL_R32F, buffedMaxSize)
         waterMap = Texture2D(GL30.GL_R32F, buffedMaxSize)
@@ -103,7 +103,7 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, maxTe
         var area = area
         require(usedArea.contains(area)) { "Area exceeds usedArea! area: $area, usedArea:$usedArea" }
 
-        area = area.sub(usedArea.srcPos())
+        area = area.minus(usedArea.srcPos())
 
         execShader(calcOutflow, srcPosUniform1, area)
         execShader(applyOutflowAndRest, srcPosUniform2, area)
@@ -112,7 +112,7 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, maxTe
     private fun execShader(program: ComputeProgram, srcPosUniform: Int, area: Area) {
         //correct for texture being one larger in all directions
         var area = area
-        area = area.add(Vector2i(1))
+        area = area.plus(Vec2i(1))
 
         program.use()
         GL20.glUniform2i(srcPosUniform, area.srcPos().x, area.srcPos().y)
@@ -143,13 +143,13 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, maxTe
 
     private fun downloadHelper(download: Texture2D, write: InfiniteChunkWorld) {
         val bufferWrapper = Array2DBufferWrapper.of(write.type, usedArea.size)
-        download.downloadData(Vector2i(1), bufferWrapper)
+        download.downloadData(Vec2i(1), bufferWrapper)
         write.writeArea(usedArea.srcPos(), bufferWrapper)
     }
 
     fun uploadMap() {
         val area = usedArea.outset(1)
-        val zero = Vector2i()
+        val zero = Vec2i()
 
         terrainMap.uploadData(zero, erosionDataStorage.terrain.readArea(area))
         waterMap.uploadData(zero, erosionDataStorage.water.readArea(area))
@@ -179,8 +179,8 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, maxTe
         thermalOutflowPipes2.delete()
     }
 
-    fun getMaxTextureSize(): Vector2i {
-        return Vector2i(maxTextureSize)
+    fun getMaxTextureSize(): Vec2i {
+        return Vec2i(maxTextureSize)
     }
 
     fun getUsedArea(): Area {

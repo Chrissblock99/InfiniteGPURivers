@@ -1,6 +1,6 @@
 package me.chriss99.util
 
-import org.joml.Vector2i
+import glm_.vec2.Vec2i
 import org.lwjgl.BufferUtils
 import java.nio.ByteBuffer
 import kotlin.math.floor
@@ -42,11 +42,11 @@ object Util {
         return floor((a.toDouble()) / (b.toDouble())).toInt()
     }
 
-    fun properIntDivide(v: Vector2i, b: Int): Vector2i {
-        return Vector2i(properIntDivide(v.x, b), properIntDivide(v.y, b))
+    fun properIntDivide(v: Vec2i, b: Int): Vec2i {
+        return Vec2i(properIntDivide(v.x, b), properIntDivide(v.y, b))
     }
 
-    fun gridSrcOf(pos: Vector2i, scale: Int): Vector2i {
-        return properIntDivide(pos, scale).mul(scale)
+    fun gridSrcOf(pos: Vec2i, scale: Int): Vec2i {
+        return properIntDivide(pos, scale).times(scale)
     }
 }

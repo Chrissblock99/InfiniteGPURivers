@@ -1,18 +1,19 @@
 package me.chriss99.program
 
+import glm_.func.common.floor
 import me.chriss99.Area
 import me.chriss99.ChunkVAO
 import me.chriss99.CutOutRectangleTLM
 import me.chriss99.worldmanagement.TileMap2D
-import org.joml.Vector2f
-import org.joml.Vector2i
-import org.joml.Vector3f
+import glm_.vec2.Vec2
+import glm_.vec2.Vec2i
+import glm_.vec3.Vec3
 import java.util.function.BiFunction
 
 class PositionCenteredRenderer<T : ChunkVAO>(
     renderProgram: RenderProgram<T>,
-    chunkLoader: BiFunction<Vector2i, Int, T>,
-    position: Vector3f,
+    chunkLoader: BiFunction<Vec2i, Int, T>,
+    position: Vec3,
     chunkSize: Int,
     chunkRenderDistance: Int,
     skipArea: Area
@@ -20,7 +21,7 @@ class PositionCenteredRenderer<T : ChunkVAO>(
     protected val renderProgram: RenderProgram<T> = renderProgram
     protected val chunkVaos: TileMap2D<T>
     protected val loadManager: CutOutRectangleTLM<T> =
-        CutOutRectangleTLM<T>(chunkRenderDistance, Vector2f(position.x, position.z), skipArea)
+        CutOutRectangleTLM<T>(chunkRenderDistance, Vec2(position.x, position.z), skipArea)
 
     val chunkSize: Int
     var chunkRenderDistance: Int
@@ -32,15 +33,15 @@ class PositionCenteredRenderer<T : ChunkVAO>(
 
     constructor(
         renderProgram: RenderProgram<T>,
-        chunkLoader: BiFunction<Vector2i, Int, T>,
-        position: Vector3f,
+        chunkLoader: BiFunction<Vec2i, Int, T>,
+        position: Vec3,
         chunkSize: Int,
         chunkRenderDistance: Int
     ) : this(renderProgram, chunkLoader, position, chunkSize, chunkRenderDistance, Area())
 
     init {
         this.chunkVaos = TileMap2D(
-            { key -> chunkLoader.apply(Vector2i(key).mul(chunkSize), chunkSize) },
+            { key -> chunkLoader.apply(Vec2i(key).times(chunkSize), chunkSize) },
             { v, t -> t.delete() },
             loadManager
         )
@@ -49,12 +50,12 @@ class PositionCenteredRenderer<T : ChunkVAO>(
         updateLoadedChunks(position, skipArea)
     }
 
-    fun updateLoadedChunks(newPosition: Vector3f) {
+    fun updateLoadedChunks(newPosition: Vec3) {
         updateLoadedChunks(newPosition, null)
     }
 
-    fun updateLoadedChunks(newPosition: Vector3f, skipArea: Area?) {
-        loadManager.position = Vector2f(newPosition.x, newPosition.z).div(chunkSize.toFloat()).floor()
+    fun updateLoadedChunks(newPosition: Vec3, skipArea: Area?) {
+        loadManager.position = Vec2(newPosition.x, newPosition.z).div(chunkSize.toFloat()).let { Vec2(it.x.floor, it.y.floor) }
         if (skipArea != null) loadManager.skipArea = skipArea.div(chunkSize)
         chunkVaos.manageLoad()
     }

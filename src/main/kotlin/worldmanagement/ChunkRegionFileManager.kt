@@ -1,7 +1,7 @@
 package me.chriss99.worldmanagement
 
 import me.chriss99.Array2DBufferWrapper
-import org.joml.Vector2i
+import glm_.vec2.Vec2i
 import java.nio.ByteBuffer
 
 class ChunkRegionFileManager(worldName: String, type: Array2DBufferWrapper.Type, chunkSize: Int) :
@@ -16,7 +16,7 @@ class ChunkRegionFileManager(worldName: String, type: Array2DBufferWrapper.Type,
         this.fileManager = FileLoadStoreManager(
             "worlds/$worldName",
             "region",
-            { array: ByteArray, regionCoord: Vector2i -> this.regionFromByteArray(array, regionCoord) },
+            { array: ByteArray, regionCoord: Vec2i -> this.regionFromByteArray(array, regionCoord) },
             { region: Region<Chunk> -> this.regionToByteArray(region) })
 
         chunkDataByteSize = chunkSize * chunkSize * type.elementSize
@@ -25,28 +25,28 @@ class ChunkRegionFileManager(worldName: String, type: Array2DBufferWrapper.Type,
         this.chunkSize = chunkSize
     }
 
-    override fun hasFile(key: Vector2i): Boolean {
+    override fun hasFile(key: Vec2i): Boolean {
         return true
     }
 
-    override fun loadFile(regionCoord: Vector2i): Region<Chunk> {
+    override fun loadFile(regionCoord: Vec2i): Region<Chunk> {
         return fileManager.loadFile(regionCoord)
     }
 
-    override fun saveFile(pos: Vector2i, region: Region<Chunk>) {
+    override fun saveFile(pos: Vec2i, region: Region<Chunk>) {
         fileManager.saveFile(region, region.coord)
     }
 
-    private fun regionFromByteArray(array: ByteArray, regionCoord: Vector2i): Region<Chunk> {
+    private fun regionFromByteArray(array: ByteArray, regionCoord: Vec2i): Region<Chunk> {
         val chunkNum = array.size / chunkByteSize
         val region: Region<Chunk> = Region(regionCoord)
         val buffer = ByteBuffer.wrap(array)
 
         for (i in 0..<chunkNum) {
-            val chunkCoord: Vector2i = Vector2i(buffer.getInt(), buffer.getInt())
+            val chunkCoord: Vec2i = Vec2i(buffer.getInt(), buffer.getInt())
             val byteArray = ByteArray(chunkDataByteSize)
             buffer[byteArray]
-            val data = Array2DBufferWrapper.of(ByteBuffer.wrap(byteArray), type, Vector2i(chunkSize))
+            val data = Array2DBufferWrapper.of(ByteBuffer.wrap(byteArray), type, Vec2i(chunkSize))
             region.addChunk(chunkCoord, Chunk(data))
         }
 

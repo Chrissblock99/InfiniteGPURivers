@@ -1,17 +1,17 @@
 package me.chriss99
 
 import me.chriss99.glabstractions.GLObject
-import org.joml.Vector2i
+import glm_.vec2.Vec2i
 import org.lwjgl.opengl.GL45.*
 import java.nio.ByteBuffer
 
-class Texture2D(private val internalFormat: Int, size: Vector2i) : GLObject {
+class Texture2D(private val internalFormat: Int, size: Vec2i) : GLObject {
     private val texture: Int
 
-    private val size: Vector2i
+    private val size: Vec2i
 
     init {
-        this.size = Vector2i(size)
+        this.size = Vec2i(size)
 
         texture = glGenTextures()
         bind()
@@ -26,7 +26,7 @@ class Texture2D(private val internalFormat: Int, size: Vector2i) : GLObject {
         glUniform1i(location, bindingUnit)
     }
 
-    fun uploadData(offset: Vector2i, data: Array2DBufferWrapper) {
+    fun uploadData(offset: Vec2i, data: Array2DBufferWrapper) {
         bind()
         glTexSubImage2D(
             GL_TEXTURE_2D,
@@ -41,7 +41,7 @@ class Texture2D(private val internalFormat: Int, size: Vector2i) : GLObject {
         )
     }
 
-    fun downloadData(offset: Vector2i, writeTo: Array2DBufferWrapper) {
+    fun downloadData(offset: Vec2i, writeTo: Array2DBufferWrapper) {
         bind()
         //excuse me the docs say that I have to use "GL_TEXTURE_2D" instead of "texture"
         glGetTextureSubImage(
@@ -64,8 +64,8 @@ class Texture2D(private val internalFormat: Int, size: Vector2i) : GLObject {
         glGetTexImage(GL_TEXTURE_2D, 0, format, type, buffer)
     }
 
-    fun getSize(): Vector2i {
-        return Vector2i(size)
+    fun getSize(): Vec2i {
+        return Vec2i(size)
     }
 
     override fun bind() {

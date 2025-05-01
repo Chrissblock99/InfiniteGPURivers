@@ -1,9 +1,9 @@
 package me.chriss99
 
 import me.chriss99.glabstractions.VAO
-import org.joml.Vector2i
+import glm_.vec2.Vec2i
 
 interface ChunkVAO : VAO {
-    val srcPos: Vector2i
+    val srcPos: Vec2i
     val width: Int
 }

@@ -1,23 +1,23 @@
 package me.chriss99.worldmanagement
 
-import org.joml.Vector2i
+import glm_.vec2.Vec2i
 import java.util.*
 import java.util.function.Function
 
-class Region<T>(coord: Vector2i) {
-    val coord: Vector2i = coord
-    private val tiles: LinkedHashMap<Vector2i, T> = LinkedHashMap<Vector2i, T>()
+class Region<T>(coord: Vec2i) {
+    val coord: Vec2i = coord
+    private val tiles: LinkedHashMap<Vec2i, T> = LinkedHashMap<Vec2i, T>()
 
-    fun addChunk(coord: Vector2i, chunk: T) {
+    fun addChunk(coord: Vec2i, chunk: T) {
         val oldTile = tiles.put(coord, chunk)
         if (oldTile != null) IllegalStateException("Tile " + coord.x + ", " + coord.y + " was overwritten!").printStackTrace()
     }
 
-    fun getTile(coord: Vector2i, tileGenerator: Function<Vector2i, T>?): T {
+    fun getTile(coord: Vec2i, tileGenerator: Function<Vec2i, T>?): T {
         return tiles.computeIfAbsent(coord, tileGenerator!!)
     }
 
-    val allTiles: Set<Map.Entry<Vector2i, T>>
+    val allTiles: Set<Map.Entry<Vec2i, T>>
         get() = tiles.entries
 
     override fun toString(): String {

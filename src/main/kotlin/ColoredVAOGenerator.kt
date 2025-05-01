@@ -1,9 +1,9 @@
 package me.chriss99
 
 import me.chriss99.util.Util
-import org.joml.Vector2d
-import org.joml.Vector2i
-import org.joml.Vector3d
+import glm_.vec2.Vec2d
+import glm_.vec2.Vec2i
+import glm_.vec3.Vec3d
 import java.util.*
 
 object ColoredVAOGenerator {
@@ -50,7 +50,7 @@ object ColoredVAOGenerator {
     fun areaToColoredVAO(area: Area, height: Double, red: Double, green: Double, blue: Double): ColoredVAO {
         val vertexes = areaToSimpleVertexes(area, height)
         val color = areaToSimpleColors(red, green, blue)
-        val index = heightMapToSimpleIndex(Vector2i(2))
+        val index = heightMapToSimpleIndex(Vec2i(2))
 
         return ColoredVAO(vertexes, color, index)
     }
@@ -93,7 +93,7 @@ object ColoredVAOGenerator {
         return color
     }
 
-    fun heightMapToSimpleIndex(size: Vector2i): IntArray {
+    fun heightMapToSimpleIndex(size: Vec2i): IntArray {
         val index = IntArray((size.x - 1) * (size.y - 1) * 6)
         var indexShift = 0
 
@@ -115,7 +115,7 @@ object ColoredVAOGenerator {
     fun heightMapToSimpleVAO(heightMap: Array<DoubleArray>, min: Double, max: Double, water: Boolean): ColoredVAO {
         val vertexes = heightMapToSimpleVertexes(heightMap, water)
         val color = heightMapToSimpleColors(heightMap, min, max, water)
-        val index = heightMapToSimpleIndex(Vector2i(heightMap.size, heightMap[0].size))
+        val index = heightMapToSimpleIndex(Vec2i(heightMap.size, heightMap[0].size))
 
         return ColoredVAO(vertexes, color, index)
     }
@@ -249,41 +249,41 @@ object ColoredVAOGenerator {
         return ColoredVAO(vertexes, color, index)
     }
 
-    fun heightMapToVectorVertexes(heightMap: Array<DoubleArray>, vectorField: Array<Array<DoubleArray>>): DoubleArray {
+    fun heightMapToVecVertexes(heightMap: Array<DoubleArray>, VecField: Array<Array<DoubleArray>>): DoubleArray {
         val vertexes = DoubleArray(heightMap.size * heightMap[0].size * 3 * 3)
         var vertexShift = 0
 
         for (z in heightMap[0].indices) for (x in heightMap.indices) {
-            val vector: Vector2d = Vector2d(vectorField[x][z][0], vectorField[x][z][1])
-            vector.normalize().mul(.3)
+            val vec: Vec2d = Vec2d(VecField[x][z][0], VecField[x][z][1])
+            vec.normalize().times(.3)
 
-            vertexes[vertexShift] = x - vector.y * .6 - vector.x
+            vertexes[vertexShift] = x - vec.y * .6 - vec.x
             vertexes[vertexShift + 1] = heightMap[x][z] + .1
-            vertexes[vertexShift + 2] = z + vector.x * .6 - vector.y
+            vertexes[vertexShift + 2] = z + vec.x * .6 - vec.y
             vertexShift += 3
 
-            vertexes[vertexShift] = x + vector.y * .6 - vector.x
+            vertexes[vertexShift] = x + vec.y * .6 - vec.x
             vertexes[vertexShift + 1] = heightMap[x][z] + .1
-            vertexes[vertexShift + 2] = z - vector.x * .6 - vector.y
+            vertexes[vertexShift + 2] = z - vec.x * .6 - vec.y
             vertexShift += 3
 
-            vertexes[vertexShift] = x + vector.x * 1.5
+            vertexes[vertexShift] = x + vec.x * 1.5
             vertexes[vertexShift + 1] = heightMap[x][z] + .1
-            vertexes[vertexShift + 2] = z + vector.y * 1.5
+            vertexes[vertexShift + 2] = z + vec.y * 1.5
             vertexShift += 3
         }
 
         return vertexes
     }
 
-    fun heightMapToVectorColors(heightMap: Array<DoubleArray>): DoubleArray {
+    fun heightMapToVecColors(heightMap: Array<DoubleArray>): DoubleArray {
         val color = DoubleArray(heightMap.size * heightMap[0].size * 3 * 3)
         Arrays.fill(color, 1.0)
 
         return color
     }
 
-    fun heightMapToVectorIndex(heightMap: Array<DoubleArray>): IntArray {
+    fun heightMapToVecIndex(heightMap: Array<DoubleArray>): IntArray {
         val index = IntArray(heightMap.size * heightMap[0].size * 3)
         var indexShift = 0
         var indexShift2 = 0
@@ -299,10 +299,10 @@ object ColoredVAOGenerator {
         return index
     }
 
-    fun heightMapToVectorVAO(heightMap: Array<DoubleArray>, vectorField: Array<Array<DoubleArray>>): ColoredVAO {
-        val vertexes = heightMapToVectorVertexes(heightMap, vectorField)
-        val color = heightMapToVectorColors(heightMap)
-        val index = heightMapToVectorIndex(heightMap)
+    fun heightMapToVecVAO(heightMap: Array<DoubleArray>, VecField: Array<Array<DoubleArray>>): ColoredVAO {
+        val vertexes = heightMapToVecVertexes(heightMap, VecField)
+        val color = heightMapToVecColors(heightMap)
+        val index = heightMapToVecIndex(heightMap)
 
         return ColoredVAO(vertexes, color, index)
     }
@@ -312,7 +312,7 @@ object ColoredVAOGenerator {
         var vertexShift = 0
 
         for (z in heightMap[0].indices) for (x in heightMap.indices) {
-            val normal: Vector3d = normalAt(heightMap, x, z)
+            val normal: Vec3d = normalAt(heightMap, x, z)
 
             vertexes[vertexShift] = x - normal.z * .3
             vertexes[vertexShift + 1] = heightMap[x][z] + .1
@@ -335,8 +335,8 @@ object ColoredVAOGenerator {
 
     fun heightMapToNormalVAO(heightMap: Array<DoubleArray>): ColoredVAO {
         val vertexes = heightMapToNormalVertexes(heightMap)
-        val color = heightMapToVectorColors(heightMap)
-        val index = heightMapToVectorIndex(heightMap)
+        val color = heightMapToVecColors(heightMap)
+        val index = heightMapToVecIndex(heightMap)
 
         return ColoredVAO(vertexes, color, index)
     }
@@ -364,7 +364,7 @@ object ColoredVAOGenerator {
         return vertexes
     }
 
-    fun normalAt(heightMap: Array<DoubleArray>, x: Int, z: Int): Vector3d {
+    fun normalAt(heightMap: Array<DoubleArray>, x: Int, z: Int): Vec3d {
         val heights = DoubleArray(4)
         for (i in vonNeumannNeighbourhood.indices) heights[i] =
             heightMap[wrapOffsetCoordinateVonNeumann(x, heightMap.size, i, 0)][wrapOffsetCoordinateVonNeumann(
@@ -374,7 +374,7 @@ object ColoredVAOGenerator {
                 1
             )]
 
-        return Vector3d(heights[1] - heights[2], 1.0, heights[3] - heights[0]).normalize()
+        return Vec3d(heights[1] - heights[2], 1.0, heights[3] - heights[0]).normalize()
     }
 
     fun wrapOffsetCoordinateVonNeumann(index: Int, length: Int, offset: Int, xz: Int): Int {

@@ -1,11 +1,11 @@
 package me.chriss99
 
 import me.chriss99.glabstractions.VAOImpl
-import org.joml.Vector2i
+import glm_.vec2.Vec2i
 
-class IterationVAO(triangle: FloatArray, srcPos: Vector2i, width: Int) : ChunkVAO {
+class IterationVAO(triangle: FloatArray, srcPos: Vec2i, width: Int) : ChunkVAO {
     private val vao: VAOImpl
-    override val srcPos: Vector2i get() = Vector2i(field)
+    override val srcPos: Vec2i get() = Vec2i(field)
     override val width: Int
 
     init {

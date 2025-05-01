@@ -1,12 +1,12 @@
 package me.chriss99
 
 import me.chriss99.glabstractions.VAOImpl
-import org.joml.Vector2i
+import glm_.vec2.Vec2i
 
-class TerrainVAO(triangle: FloatArray, index: IntArray?, srcPos: Vector2i, width: Int, scale: Int) :
+class TerrainVAO(triangle: FloatArray, index: IntArray?, srcPos: Vec2i, width: Int, scale: Int) :
     ChunkVAO {
     private val vao: VAOImpl
-    override val srcPos: Vector2i get() = Vector2i(field)
+    override val srcPos: Vec2i get() = Vec2i(field)
     override val width: Int
     val scale: Int
 

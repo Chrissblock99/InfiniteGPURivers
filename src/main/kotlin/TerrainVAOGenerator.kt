@@ -1,7 +1,7 @@
 package me.chriss99
 
 import me.chriss99.util.Util
-import org.joml.Vector2i
+import glm_.vec2.Vec2i
 
 object TerrainVAOGenerator {
     fun heightMapToSimpleVertexes(terrain: Float2DBufferWrapper, water: Float2DBufferWrapper): FloatArray {
@@ -43,7 +43,7 @@ object TerrainVAOGenerator {
     fun heightMapToSimpleVAO(
         terrain: Float2DBufferWrapper,
         water: Float2DBufferWrapper,
-        srcPos: Vector2i,
+        srcPos: Vec2i,
         scale: Int
     ): TerrainVAO {
         val vertices = heightMapToSimpleVertexes(terrain, water)

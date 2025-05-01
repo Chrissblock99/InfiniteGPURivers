@@ -1,20 +1,20 @@
 package me.chriss99
 
-import org.joml.Vector2i
-import org.joml.Vector4f
+import glm_.vec2.Vec2i
+import glm_.vec4.Vec4
 import java.nio.ByteBuffer
 
 class Vec4f2DBufferWrapper : Array2DBufferWrapper {
-    constructor(buffer: ByteBuffer, size: Vector2i) : super(buffer, Type.VEC4F, size)
+    constructor(buffer: ByteBuffer, size: Vec2i) : super(buffer, Type.VEC4F, size)
 
-    constructor(size: Vector2i) : super(Type.VEC4F, size)
+    constructor(size: Vec2i) : super(Type.VEC4F, size)
 
     override fun mipMap(): Vec4f2DBufferWrapper? {
         throw UnsupportedOperationException("Vec4f can't be mipMapped!")
     }
 
-    fun getVec(x: Int, z: Int): Vector4f {
-        return Vector4f(
+    fun getVec(x: Int, z: Int): Vec4 {
+        return Vec4(
             buffer.getFloat(((z * size.x + x) * 4 + 0) * 4),
             buffer.getFloat(((z * size.x + x) * 4 + 1) * 4),
             buffer.getFloat(((z * size.x + x) * 4 + 2) * 4),
@@ -22,7 +22,7 @@ class Vec4f2DBufferWrapper : Array2DBufferWrapper {
         )
     }
 
-    fun putVec(x: Int, z: Int, v: Vector4f) {
+    fun putVec(x: Int, z: Int, v: Vec4) {
         buffer.putFloat(((z * size.x + x) * 4 + 0) * 4, v.x)
         buffer.putFloat(((z * size.x + x) * 4 + 1) * 4, v.y)
         buffer.putFloat(((z * size.x + x) * 4 + 2) * 4, v.z)

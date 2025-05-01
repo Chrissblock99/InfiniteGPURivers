@@ -6,10 +6,10 @@ import me.chriss99.program.*
 import me.chriss99.util.FrameCounter
 import me.chriss99.util.Util
 import me.chriss99.worldmanagement.ErosionDataStorage
-import org.joml.Vector2i
-import org.joml.Vector3f
+import glm_.vec2.Vec2i
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.opengl.*
+import kotlin.collections.ArrayList
 
 class Main(
     worldName: String,
@@ -56,10 +56,10 @@ class Main(
         }, cameraMatrix.position, worldStorage.chunkSize, chunkRenderDistance, initErosionArea)
         iterationRenderer = PositionCenteredRenderer(
             IterationVAORenderer(cameraMatrix),
-            { vector2i, chunkSize1 ->
+            { vec2i, chunkSize1 ->
                 IterationVAOGenerator.heightMapToIterationVAO(
-                    vector2i,
-                    Vector2i(chunkSize1),
+                    vec2i,
+                    Vec2i(chunkSize1),
                     worldStorage.iterationInfo
                 )
             },
@@ -74,9 +74,9 @@ class Main(
     }
 
     fun primitiveErosion() {
-        val pos: Vector2i = Vector2i(
+        val pos: Vec2i = Vec2i(
             Util.properIntDivide(
-                Vector2i(cameraMatrix.position.x.toInt(), cameraMatrix.position.z.toInt()),
+                Vec2i(cameraMatrix.position.x.toInt(), cameraMatrix.position.z.toInt()),
                 worldStorage.chunkSize
             )
         )
@@ -95,7 +95,8 @@ class Main(
             cameraMatrix.aspectRatio = window.aspectRatio
 
             playerCenteredRenderer.updateLoadedChunks(cameraMatrix.position, gpuTerrainEroder.getUsedArea())
-            if (renderIterations) iterationRenderer.updateLoadedChunks(Vector3f(cameraMatrix.position).div(worldStorage.iterationInfo.chunkSize.toFloat()))
+            if (renderIterations)
+                iterationRenderer.updateLoadedChunks(cameraMatrix.position / worldStorage.iterationInfo.chunkSize)
 
             window.clearBuffers()
 
@@ -152,7 +153,7 @@ class Main(
                 "test64",
                 64, 10, 64, 10,
                 7, 2,
-                Area(60 * 64)
+                Area(20 * 64)
             )
 
             println("Started after: " + (GLFW.glfwGetTime() - start))

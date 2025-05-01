@@ -1,6 +1,6 @@
 package me.chriss99.worldmanagement
 
-import org.joml.Vector2i
+import glm_.vec2.Vec2i
 
 abstract class AbstractRegionFileManager<T>(worldName: String) : RegionFileManager<T> {
     private val fileManager: FileLoadStoreManager<Region<T>>
@@ -9,24 +9,24 @@ abstract class AbstractRegionFileManager<T>(worldName: String) : RegionFileManag
         fileManager = FileLoadStoreManager(
             "worlds/$worldName",
             "quadtree",
-            { bytes: ByteArray, pos: Vector2i -> this.regionFromBytes(bytes, pos) },
+            { bytes: ByteArray, pos: Vec2i -> this.regionFromBytes(bytes, pos) },
             { region: Region<T> -> this.regionToBytes(region) })
     }
 
-    override fun hasFile(key: Vector2i): Boolean {
+    override fun hasFile(key: Vec2i): Boolean {
         return true
     }
 
-    override fun loadFile(chunkCoord: Vector2i): Region<T> {
+    override fun loadFile(chunkCoord: Vec2i): Region<T> {
         return fileManager.loadFile(chunkCoord)
     }
 
-    override fun saveFile(pos: Vector2i, region: Region<T>) {
+    override fun saveFile(pos: Vec2i, region: Region<T>) {
         fileManager.saveFile(region, region.coord)
     }
 
 
-    protected abstract fun regionFromBytes(bytes: ByteArray, pos: Vector2i): Region<T>
+    protected abstract fun regionFromBytes(bytes: ByteArray, pos: Vec2i): Region<T>
 
     protected abstract fun regionToBytes(region: Region<T>): ByteArray
 }

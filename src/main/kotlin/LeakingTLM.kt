@@ -1,7 +1,7 @@
 package me.chriss99
 
 import me.chriss99.worldmanagement.TileLoadManager
-import org.joml.Vector2i
+import glm_.vec2.Vec2i
 
 class LeakingTLM<T> : TileLoadManager<T> {
     init {
@@ -22,11 +22,11 @@ class LeakingTLM<T> : TileLoadManager<T> {
         )
     }
 
-    override fun loadPolicy(tilePos: Vector2i, tile: T): Boolean {
+    override fun loadPolicy(tilePos: Vec2i, tile: T): Boolean {
         return true
     }
 
-    override fun loadCommander(): Collection<Vector2i> {
-        return listOf<Vector2i>()
+    override fun loadCommander(): Collection<Vec2i> {
+        return listOf<Vec2i>()
     }
 }

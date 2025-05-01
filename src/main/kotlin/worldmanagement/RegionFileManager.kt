@@ -1,5 +1,5 @@
 package me.chriss99.worldmanagement
 
-import org.joml.Vector2i
+import glm_.vec2.Vec2i
 
-interface RegionFileManager<T> : FileStorage<Vector2i, Region<T>>
+interface RegionFileManager<T> : FileStorage<Vec2i, Region<T>>

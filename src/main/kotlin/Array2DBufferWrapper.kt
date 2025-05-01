@@ -1,16 +1,16 @@
 package me.chriss99
 
-import org.joml.Vector2i
+import glm_.vec2.Vec2i
 import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.GL11.*
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-abstract class Array2DBufferWrapper protected constructor(buffer: ByteBuffer, type: Type, size: Vector2i) {
+abstract class Array2DBufferWrapper protected constructor(buffer: ByteBuffer, type: Type, size: Vec2i) {
     val buffer: ByteBuffer
     val type: Type
 
-    val size: Vector2i get() = Vector2i(field)
+    val size: Vec2i get() = Vec2i(field)
 
     init {
         val correctCapacity: Int = size.x * size.y * type.elementSize
@@ -19,12 +19,12 @@ abstract class Array2DBufferWrapper protected constructor(buffer: ByteBuffer, ty
         this.buffer = buffer
         this.type = type
 
-        this.size = Vector2i(size)
+        this.size = Vec2i(size)
     }
 
     protected constructor(
         type: Type,
-        size: Vector2i
+        size: Vec2i
     ) : this(BufferUtils.createByteBuffer(size.x * size.y * type.elementSize), type, size)
 
     abstract fun mipMap(): Array2DBufferWrapper?
@@ -34,7 +34,7 @@ abstract class Array2DBufferWrapper protected constructor(buffer: ByteBuffer, ty
         return of(
             buffer.slice(size.x * type.elementSize * z, size.x * type.elementSize).order(ByteOrder.LITTLE_ENDIAN),
             type,
-            Vector2i(size.x, 1)
+            Vec2i(size.x, 1)
         )
     }
 
@@ -67,7 +67,7 @@ abstract class Array2DBufferWrapper protected constructor(buffer: ByteBuffer, ty
     }
 
     companion object {
-        fun of(buffer: ByteBuffer?, type: Type, size: Vector2i): Array2DBufferWrapper {
+        fun of(buffer: ByteBuffer?, type: Type, size: Vec2i): Array2DBufferWrapper {
             var buffer = buffer
             if (buffer == null) buffer = BufferUtils.createByteBuffer(size.x * size.y * type.elementSize)
 
@@ -77,7 +77,7 @@ abstract class Array2DBufferWrapper protected constructor(buffer: ByteBuffer, ty
             }
         }
 
-        fun of(type: Type, size: Vector2i): Array2DBufferWrapper {
+        fun of(type: Type, size: Vec2i): Array2DBufferWrapper {
             return of(null, type, size)
         }
     }

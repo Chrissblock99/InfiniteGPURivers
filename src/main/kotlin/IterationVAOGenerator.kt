@@ -2,30 +2,30 @@ package me.chriss99
 
 import me.chriss99.util.FloatArrayList
 import me.chriss99.worldmanagement.iteration.IterableWorld
-import org.joml.Vector2i
-import org.joml.Vector3i
+import glm_.vec2.Vec2i
+import glm_.vec3.Vec3i
 
 object IterationVAOGenerator {
     fun heightMapToIterationVAO(
-        srcPosInChunks: Vector2i,
-        sizeInChunks: Vector2i,
+        srcPosInChunks: Vec2i,
+        sizeInChunks: Vec2i,
         iterationInfo: IterableWorld
     ): IterationVAO {
         val vertecies: FloatArrayList = FloatArrayList()
 
         for (z in 0..<sizeInChunks.y) for (x in 0..<sizeInChunks.x) {
-            val position: Vector2i = Vector2i(x, z).add(srcPosInChunks)
+            val position: Vec2i = Vec2i(x, z).plus(srcPosInChunks)
             val surfaceType: IterationSurfaceType = iterationInfo.getIterationSurfaceType(position)
             val iteration: Int = iterationInfo.getTile(position).iteration / iterationInfo.chunkSize
 
-            val pos: Vector3i = Vector3i(position.x, iteration, position.y).mul(iterationInfo.chunkSize)
+            val pos: Vec3i = Vec3i(position.x, iteration, position.y).times(iterationInfo.chunkSize)
             addSurface(vertecies, surfaceType, pos, iterationInfo.chunkSize)
         }
 
         return IterationVAO(vertecies.getArray(), srcPosInChunks, sizeInChunks.x)
     }
 
-    private fun addSurface(vertecies: FloatArrayList, surfaceType: IterationSurfaceType, pos: Vector3i, scale: Int) {
+    private fun addSurface(vertecies: FloatArrayList, surfaceType: IterationSurfaceType, pos: Vec3i, scale: Int) {
         val bits: Byte = surfaceType.toBits()
         val type = (bits.toInt() and 12).toByte()
         val dir = (bits.toInt() and 3).toByte().toInt()

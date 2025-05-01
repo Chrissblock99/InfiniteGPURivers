@@ -1,12 +1,12 @@
 package me.chriss99
 
-import org.joml.Vector2i
+import glm_.vec2.Vec2i
 import java.util.*
 import java.util.function.Function
 
 class IterationSurfaceType(bits: Byte) {
     val surfaceType: SurfaceType
-    private val direction: Vector2i
+    private val direction: Vec2i
     private val bits: Byte
 
     init {
@@ -15,8 +15,8 @@ class IterationSurfaceType(bits: Byte) {
         this.bits = (bits.toInt() and 0x0F).toByte()
     }
 
-    fun getDirection(): Vector2i {
-        return Vector2i(direction)
+    fun getDirection(): Vec2i {
+        return Vec2i(direction)
     }
 
     fun toBits(): Byte {
@@ -37,15 +37,15 @@ class IterationSurfaceType(bits: Byte) {
 
 
     enum class SurfaceType(
-        directionFromBits: Function<Byte, Vector2i>,
+        directionFromBits: Function<Byte, Vec2i>,
         internal val surface: Array<IntArray>
     ) {
-        FLAT(Function<Byte, Vector2i> { bits: Byte -> aaDirectionFromBits(bits) }, Array(2) { IntArray(2) }),
-        SLOPE(Function<Byte, Vector2i> { bits: Byte -> aaDirectionFromBits(bits) }, arrayOf(intArrayOf(0, 0), intArrayOf(1, 1))),
-        OUTWARD_SLOPE(Function<Byte, Vector2i> { bits: Byte -> diagonalDirectionFromBits(bits) }, arrayOf(intArrayOf(0, 0), intArrayOf(0, 1))),
-        INWARD_SLOPE(Function<Byte, Vector2i> { bits: Byte -> diagonalDirectionFromBits(bits) }, arrayOf(intArrayOf(0, 1), intArrayOf(1, 1)));
+        FLAT(Function<Byte, Vec2i> { bits: Byte -> aaDirectionFromBits(bits) }, Array(2) { IntArray(2) }),
+        SLOPE(Function<Byte, Vec2i> { bits: Byte -> aaDirectionFromBits(bits) }, arrayOf(intArrayOf(0, 0), intArrayOf(1, 1))),
+        OUTWARD_SLOPE(Function<Byte, Vec2i> { bits: Byte -> diagonalDirectionFromBits(bits) }, arrayOf(intArrayOf(0, 0), intArrayOf(0, 1))),
+        INWARD_SLOPE(Function<Byte, Vec2i> { bits: Byte -> diagonalDirectionFromBits(bits) }, arrayOf(intArrayOf(0, 1), intArrayOf(1, 1)));
 
-        val directionFromBits: Function<Byte, Vector2i> = directionFromBits
+        val directionFromBits: Function<Byte, Vec2i> = directionFromBits
 
 
         companion object {
@@ -80,22 +80,22 @@ class IterationSurfaceType(bits: Byte) {
     }
 
     companion object {
-        private fun aaDirectionFromBits(bits: Byte): Vector2i {
+        private fun aaDirectionFromBits(bits: Byte): Vec2i {
             return when (bits) {
-                0b00.toByte() -> Vector2i(0, -1)
-                0b01.toByte() -> Vector2i(1, 0)
-                0b10.toByte() -> Vector2i(-1, 0)
-                0b11.toByte() -> Vector2i(0, 1)
+                0b00.toByte() -> Vec2i(0, -1)
+                0b01.toByte() -> Vec2i(1, 0)
+                0b10.toByte() -> Vec2i(-1, 0)
+                0b11.toByte() -> Vec2i(0, 1)
                 else -> throw IllegalStateException("Unexpected value: $bits")
             }
         }
 
-        private fun diagonalDirectionFromBits(bits: Byte): Vector2i {
+        private fun diagonalDirectionFromBits(bits: Byte): Vec2i {
             return when (bits) {
-                0b00.toByte() -> Vector2i(-1, -1)
-                0b01.toByte() -> Vector2i(1, -1)
-                0b10.toByte() -> Vector2i(-1, 1)
-                0b11.toByte() -> Vector2i(1, 1)
+                0b00.toByte() -> Vec2i(-1, -1)
+                0b01.toByte() -> Vec2i(1, -1)
+                0b10.toByte() -> Vec2i(-1, 1)
+                0b11.toByte() -> Vec2i(1, 1)
                 else -> throw IllegalStateException("Unexpected value: $bits")
             }
         }

@@ -1,19 +1,19 @@
 package me.chriss99
 
-import org.joml.Vector2i
+import glm_.vec2.Vec2i
 import org.lwjgl.BufferUtils
 import java.nio.ByteBuffer
 
 class Float2DBufferWrapper : Array2DBufferWrapper {
-    constructor(buffer: ByteBuffer, size: Vector2i) : super(buffer, Type.FLOAT, size)
+    constructor(buffer: ByteBuffer, size: Vec2i) : super(buffer, Type.FLOAT, size)
 
-    constructor(data: Array<FloatArray>) : this(Vector2i(data.size, data[0].size)) {
+    constructor(data: Array<FloatArray>) : this(Vec2i(data.size, data[0].size)) {
         for (i in 0..<size.x) for (j in 0..<size.y) putFloat(i, j, data[i][j])
     }
 
-    constructor(size: Vector2i) : super(Type.FLOAT, size)
+    constructor(size: Vec2i) : super(Type.FLOAT, size)
 
-    constructor(size: Vector2i, fill: Float) : this(size) {
+    constructor(size: Vec2i, fill: Float) : this(size) {
         for (i in 0..<size.x) for (j in 0..<size.y) buffer.putFloat(fill)
         buffer.rewind()
     }
@@ -39,7 +39,7 @@ class Float2DBufferWrapper : Array2DBufferWrapper {
         }
 
 
-        return Float2DBufferWrapper(buffer, Vector2i(size).div(2))
+        return Float2DBufferWrapper(buffer, Vec2i(size).div(2))
     }
 
     fun getFloat(x: Int, z: Int): Float {

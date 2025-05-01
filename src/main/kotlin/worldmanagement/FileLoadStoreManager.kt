@@ -1,6 +1,6 @@
 package me.chriss99.worldmanagement
 
-import org.joml.Vector2i
+import glm_.vec2.Vec2i
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -9,18 +9,18 @@ import java.util.function.BiFunction
 import java.util.function.Function
 
 class FileLoadStoreManager<T>(
-    folderPath: String, fileExtension: String, fileFromBytes: BiFunction<ByteArray, Vector2i, T>,
+    folderPath: String, fileExtension: String, fileFromBytes: BiFunction<ByteArray, Vec2i, T>,
     private val fileToBytes: Function<T, ByteArray>
 ) {
     private val folderPath = "$folderPath/"
     private val fileExtension = ".$fileExtension"
-    private val fileFromBytes: BiFunction<ByteArray, Vector2i, T> = fileFromBytes
+    private val fileFromBytes: BiFunction<ByteArray, Vec2i, T> = fileFromBytes
 
     init {
         File(folderPath).mkdirs()
     }
 
-    fun loadFile(coord: Vector2i): T {
+    fun loadFile(coord: Vec2i): T {
         try {
             FileInputStream(getFile(coord)).use { inputStream ->
                 return fileFromBytes.apply(inputStream.readAllBytes(), coord)
@@ -30,7 +30,7 @@ class FileLoadStoreManager<T>(
         }
     }
 
-    fun saveFile(type: T, coord: Vector2i) {
+    fun saveFile(type: T, coord: Vec2i) {
         try {
             FileOutputStream(getFile(coord)).use { outputStream ->
                 outputStream.write(fileToBytes.apply(type))
@@ -40,7 +40,7 @@ class FileLoadStoreManager<T>(
         }
     }
 
-    private fun getFile(coord: Vector2i): File {
+    private fun getFile(coord: Vec2i): File {
         val file = File(folderPath + coord.x + ";" + coord.y + fileExtension)
 
         if (!file.exists()) try {

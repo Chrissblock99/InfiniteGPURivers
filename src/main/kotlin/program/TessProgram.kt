@@ -5,13 +5,14 @@ import me.chriss99.CameraMatrix
 import me.chriss99.ColoredVAOGenerator.tesselationGridVertexesTest
 import me.chriss99.glabstractions.VAO
 import me.chriss99.glabstractions.VAOImpl
-import org.joml.Vector2i
+import glm_.vec2.Vec2i
 import org.lwjgl.opengl.GL40.*
+import java.nio.FloatBuffer
 
 class TessProgram(private val cameraMatrix: CameraMatrix, area: Area) : GLProgram() {
     private val vao: VAO
     private var area: Area? = null
-    private val maxSize: Vector2i
+    private val maxSize: Vec2i
 
     private val transformMatrix: Int
     private val cameraPos: Int
@@ -53,14 +54,15 @@ class TessProgram(private val cameraMatrix: CameraMatrix, area: Area) : GLProgra
     private fun render(water: Boolean) {
         use()
         glUniform2i(srcPosUniform, area!!.srcPos().x * 64, area!!.srcPos().y * 64)
-        glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix().get(FloatArray(16)))
+        glUniformMatrix4fv(transformMatrix, false, (cameraMatrix.generateMatrix() to FloatBuffer.allocate(16)).array())
         glUniform3f(cameraPos, cameraMatrix.position.x, cameraMatrix.position.y, cameraMatrix.position.z)
         vao.bind()
 
         glUniform1i(waterUniform, if (water) 1 else 0)
 
-        val size: Vector2i = area!!.size
-        for (y in 0..<size.y) glDrawArrays(GL_PATCHES, maxSize.x * y * 4, size.x * 4)
+        val size: Vec2i = area!!.size
+        for (y in 0..<size.y)
+            glDrawArrays(GL_PATCHES, maxSize.x * y * 4, size.x * 4)
     }
 
     fun setArea(area: Area) {
