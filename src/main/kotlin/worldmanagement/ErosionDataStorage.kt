@@ -36,24 +36,12 @@ class ErosionDataStorage(
     init {
         mipMappedTerrain = MipMappedInfiniteChunkWorld(
             "$worldName/terrain", chunkSize, regionSize,
-            { chunkPos: Vec2i?, chunkSize: Int? ->
-                terrainGenerator.generateChunk(
-                    chunkPos!!, chunkSize!!
-                )
-            },
-            { i: Int -> tileLoadManager })
+            terrainGenerator::generateChunk,
+            { _ -> tileLoadManager })
         mipMappedWater = MipMappedInfiniteChunkWorld(
             "$worldName/water", chunkSize, regionSize,
-            { vec2i: Vec2i?, chunkSize1: Int? ->
-                Chunk(
-                    Float2DBufferWrapper(
-                        Vec2i(
-                            chunkSize1!!
-                        )
-                    )
-                )
-            },
-            { i: Int -> tileLoadManager })
+            { _, chunkSize -> Chunk(Float2DBufferWrapper(Vec2i(chunkSize))) },
+            { _ -> tileLoadManager })
 
         terrain = mipMappedTerrain.getMipMapLevel(0)
         water = mipMappedWater.getMipMapLevel(0)
@@ -61,87 +49,45 @@ class ErosionDataStorage(
             "$worldName/sediment", Array2DBufferWrapper.Type.FLOAT,
             chunkSize,
             regionSize,
-            { vec2i: Vec2i, chunkSize1: Int ->
-                Chunk(
-                    Float2DBufferWrapper(
-                        Vec2i(
-                            chunkSize1
-                        )
-                    )
-                )
-            }, tileLoadManager
+            { _, chunkSize -> Chunk(Float2DBufferWrapper(Vec2i(chunkSize))) },
+            tileLoadManager
         )
         hardness = InfiniteChunkWorld(
             "$worldName/hardness", Array2DBufferWrapper.Type.FLOAT,
             chunkSize,
             regionSize,
-            { vec2i: Vec2i?, chunkSize1: Int? ->
-                Chunk(
-                    Float2DBufferWrapper(
-                        Vec2i(
-                            chunkSize1!!
-                        ), 1f
-                    )
-                )
-            }, tileLoadManager
+            { _, chunkSize -> Chunk(Float2DBufferWrapper(Vec2i(chunkSize), 1f)) },
+            tileLoadManager
         )
 
         waterOutflow = InfiniteChunkWorld(
             "$worldName/waterOutflow", Array2DBufferWrapper.Type.VEC4F,
             chunkSize,
             regionSize,
-            { vec2i: Vec2i?, chunkSize1: Int? ->
-                Chunk(
-                    Vec4f2DBufferWrapper(
-                        Vec2i(
-                            chunkSize1!!
-                        )
-                    )
-                )
-            }, tileLoadManager
+            { _, chunkSize -> Chunk(Vec4f2DBufferWrapper(Vec2i(chunkSize))) },
+            tileLoadManager
         )
         sedimentOutflow = InfiniteChunkWorld(
             "$worldName/sedimentOutflow", Array2DBufferWrapper.Type.VEC4F,
             chunkSize,
             regionSize,
-            { vec2i: Vec2i?, chunkSize1: Int? ->
-                Chunk(
-                    Vec4f2DBufferWrapper(
-                        Vec2i(
-                            chunkSize1!!
-                        )
-                    )
-                )
-            }, tileLoadManager
+            { _, chunkSize -> Chunk(Vec4f2DBufferWrapper(Vec2i(chunkSize))) },
+            tileLoadManager
         )
 
         thermalOutflow1 = InfiniteChunkWorld(
             "$worldName/thermalOutflow1", Array2DBufferWrapper.Type.VEC4F,
             chunkSize,
             regionSize,
-            { vec2i: Vec2i?, chunkSize1: Int? ->
-                Chunk(
-                    Vec4f2DBufferWrapper(
-                        Vec2i(
-                            chunkSize1!!
-                        )
-                    )
-                )
-            }, tileLoadManager
+            { _, chunkSize -> Chunk(Vec4f2DBufferWrapper(Vec2i(chunkSize))) },
+            tileLoadManager
         )
         thermalOutflow2 = InfiniteChunkWorld(
             "$worldName/thermalOutflow2", Array2DBufferWrapper.Type.VEC4F,
             chunkSize,
             regionSize,
-            { vec2i: Vec2i?, chunkSize1: Int? ->
-                Chunk(
-                    Vec4f2DBufferWrapper(
-                        Vec2i(
-                            chunkSize1!!
-                        )
-                    )
-                )
-            }, tileLoadManager
+            { _, chunkSize -> Chunk(Vec4f2DBufferWrapper(Vec2i(chunkSize))) },
+            tileLoadManager
         )
 
         iterationInfo = IterableWorld("$worldName/iteration", iterationChunkSize, iterationRegionSize, tileLoadManager2)

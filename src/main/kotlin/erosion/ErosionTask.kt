@@ -3,13 +3,11 @@ package me.chriss99.erosion
 import me.chriss99.Area
 
 class ErosionTask(
-    eroder: GPUTerrainEroder, area: Area,
+    eroder: GPUTerrainEroder, val area: Area,
     private val steps: Int,
     val l: Int, val r: Int, val f: Int, val b: Int
 ) {
     private val eroder: GPUTerrainEroder = eroder
-
-    private val area = area.copy()
 
     private var currentArea: Area
     private var currentStep: Int
@@ -61,9 +59,5 @@ class ErosionTask(
         sum += if (b == 0) 1 else 0
 
         return sum
-    }
-
-    fun getArea(): Area {
-        return area.copy()
     }
 }

@@ -56,7 +56,7 @@ class PositionCenteredRenderer<T : ChunkVAO>(
 
     fun updateLoadedChunks(newPosition: Vec3, skipArea: Area?) {
         loadManager.position = Vec2(newPosition.x, newPosition.z).div(chunkSize.toFloat()).let { Vec2(it.x.floor, it.y.floor) }
-        if (skipArea != null) loadManager.skipArea = skipArea.div(chunkSize)
+        if (skipArea != null) loadManager.skipArea = skipArea / chunkSize
         chunkVaos.manageLoad()
     }
 

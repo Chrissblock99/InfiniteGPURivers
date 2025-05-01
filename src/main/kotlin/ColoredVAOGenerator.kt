@@ -11,24 +11,24 @@ object ColoredVAOGenerator {
         val vertecies = DoubleArray(4 * 3)
         var vertexShift = 0
 
-        vertecies[vertexShift] = area.srcPos().x.toDouble()
+        vertecies[vertexShift] = area.srcPos.x.toDouble()
         vertecies[vertexShift + 1] = height
-        vertecies[vertexShift + 2] = area.srcPos().y.toDouble()
+        vertecies[vertexShift + 2] = area.srcPos.y.toDouble()
         vertexShift += 3
 
-        vertecies[vertexShift] = area.endPos().x.toDouble()
+        vertecies[vertexShift] = area.endPos.x.toDouble()
         vertecies[vertexShift + 1] = height
-        vertecies[vertexShift + 2] = area.srcPos().y.toDouble()
+        vertecies[vertexShift + 2] = area.srcPos.y.toDouble()
         vertexShift += 3
 
-        vertecies[vertexShift] = area.srcPos().x.toDouble()
+        vertecies[vertexShift] = area.srcPos.x.toDouble()
         vertecies[vertexShift + 1] = height
-        vertecies[vertexShift + 2] = area.endPos().y.toDouble()
+        vertecies[vertexShift + 2] = area.endPos.y.toDouble()
         vertexShift += 3
 
-        vertecies[vertexShift] = area.endPos().x.toDouble()
+        vertecies[vertexShift] = area.endPos.x.toDouble()
         vertecies[vertexShift + 1] = height
-        vertecies[vertexShift + 2] = area.endPos().y.toDouble()
+        vertecies[vertexShift + 2] = area.endPos.y.toDouble()
 
         return vertecies
     }

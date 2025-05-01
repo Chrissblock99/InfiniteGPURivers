@@ -74,12 +74,12 @@ class InputController(private val inputDeviceManager: InputDeviceManager, privat
         inputDeviceManager.addKeyReleaseRunnable(GLFW.GLFW_KEY_F) {
             main.gpuTerrainEroder.downloadMap()
             writeImageHeightMap(
-                main.worldStorage.terrain.readArea(main.gpuTerrainEroder.getUsedArea()) as Float2DBufferWrapper,
+                main.worldStorage.terrain.readArea(main.gpuTerrainEroder.usedArea) as Float2DBufferWrapper,
                 "terrain",
                 true
             )
             writeImageHeightMap(
-                main.worldStorage.water.readArea(main.gpuTerrainEroder.getUsedArea()) as Float2DBufferWrapper,
+                main.worldStorage.water.readArea(main.gpuTerrainEroder.usedArea) as Float2DBufferWrapper,
                 "water",
                 false
             )

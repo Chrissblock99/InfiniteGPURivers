@@ -31,7 +31,7 @@ class MipMappedInfiniteChunkWorld(
     private fun mipMapChunk(mipMapLevel: Int, srcPos: Vec2i, chunkSize: Int): Chunk {
         if (mipMapLevel == 0) return chunkGenerator.apply(srcPos, chunkSize)
 
-        val mipMapFrom = getMipMapLevel(mipMapLevel - 1).readArea(Area(srcPos, chunkSize).times(2))
+        val mipMapFrom = getMipMapLevel(mipMapLevel - 1).readArea(Area(srcPos, chunkSize) * 2)
         return Chunk(mipMapFrom.mipMap()!!)
     }
 

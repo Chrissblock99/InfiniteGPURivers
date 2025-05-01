@@ -24,7 +24,7 @@ class InfiniteChunkWorld(
         tileLoadManager
     ) {
     fun readArea(area: Area): Array2DBufferWrapper {
-        return readWriteArea(area.srcPos(), Array2DBufferWrapper.of(type, area.size), true)
+        return readWriteArea(area.srcPos, Array2DBufferWrapper.of(type, area.size), true)
     }
 
     fun writeArea(pos: Vec2i, data: Array2DBufferWrapper) {

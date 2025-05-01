@@ -81,7 +81,7 @@ class Main(
             )
         )
         if (erosionManager.findIterate(pos, 2000, 100 * 1000 * 1000 / 60)) {
-            tessProgram.setArea(gpuTerrainEroder.getUsedArea())
+            tessProgram.area = gpuTerrainEroder.usedArea
 
             iterationRenderer.reloadAll()
         } else simulateErosion = false
@@ -94,7 +94,7 @@ class Main(
             window.updateWindowSize()
             cameraMatrix.aspectRatio = window.aspectRatio
 
-            playerCenteredRenderer.updateLoadedChunks(cameraMatrix.position, gpuTerrainEroder.getUsedArea())
+            playerCenteredRenderer.updateLoadedChunks(cameraMatrix.position, gpuTerrainEroder.usedArea)
             if (renderIterations)
                 iterationRenderer.updateLoadedChunks(cameraMatrix.position / worldStorage.iterationInfo.chunkSize)
 

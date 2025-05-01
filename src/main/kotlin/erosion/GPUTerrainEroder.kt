@@ -29,7 +29,14 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, maxTe
     */
     private val maxTextureSize = Vec2i()
 
-    private var usedArea: Area
+    var usedArea: Area = usedArea
+        set(value) {
+            require(!(value.size.x > maxTextureSize.x || value.size.y > maxTextureSize.y)) { "New area cannot exceed maxTextureSize!" }
+
+            downloadMap()
+            field = value
+            uploadMap()
+        }
 
     private val terrainMap: Texture2D
     private val waterMap: Texture2D
@@ -51,8 +58,6 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, maxTe
     init {
         this.maxTextureSize.x = maxTextureSize.x
         this.maxTextureSize.y = maxTextureSize.y
-
-        this.usedArea = usedArea.copy()
 
         //read buffer in all directions (avoids implicit out of bound reads when iterating near edges)
         val buffedMaxSize = Vec2i(maxTextureSize).plus(2, 2)
@@ -101,9 +106,9 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, maxTe
 
     fun erode(area: Area) {
         var area = area
-        require(usedArea.contains(area)) { "Area exceeds usedArea! area: $area, usedArea:$usedArea" }
+        require(area in usedArea) { "Area exceeds usedArea! area: $area, usedArea:$usedArea" }
 
-        area = area.minus(usedArea.srcPos())
+        area -= usedArea.srcPos
 
         execShader(calcOutflow, srcPosUniform1, area)
         execShader(applyOutflowAndRest, srcPosUniform2, area)
@@ -112,20 +117,12 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, maxTe
     private fun execShader(program: ComputeProgram, srcPosUniform: Int, area: Area) {
         //correct for texture being one larger in all directions
         var area = area
-        area = area.plus(Vec2i(1))
+        area += Vec2i(1)
 
         program.use()
-        GL20.glUniform2i(srcPosUniform, area.srcPos().x, area.srcPos().y)
+        GL20.glUniform2i(srcPosUniform, area.srcPos.x, area.srcPos.y)
         GL43.glDispatchCompute(area.width, area.height, 1)
         GL42.glMemoryBarrier(GL42.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT)
-    }
-
-    fun changeArea(area: Area) {
-        require(!(area.size.x > maxTextureSize.x || area.size.y > maxTextureSize.y)) { "New area cannot exceed maxTextureSize!" }
-
-        downloadMap()
-        usedArea = area
-        uploadMap()
     }
 
     fun downloadMap() {
@@ -144,7 +141,7 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, maxTe
     private fun downloadHelper(download: Texture2D, write: InfiniteChunkWorld) {
         val bufferWrapper = Array2DBufferWrapper.of(write.type, usedArea.size)
         download.downloadData(Vec2i(1), bufferWrapper)
-        write.writeArea(usedArea.srcPos(), bufferWrapper)
+        write.writeArea(usedArea.srcPos, bufferWrapper)
     }
 
     fun uploadMap() {
@@ -181,9 +178,5 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, maxTe
 
     fun getMaxTextureSize(): Vec2i {
         return Vec2i(maxTextureSize)
-    }
-
-    fun getUsedArea(): Area {
-        return usedArea.copy()
     }
 }
