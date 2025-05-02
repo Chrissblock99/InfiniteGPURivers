@@ -121,7 +121,7 @@ class ErosionManager(eroder: GPUTerrainEroder, private val data: IterableWorld) 
     private fun betterAreaFrom(startPos: Vec2i, bestArea: Area, allowedArea: Area, maxSurface: Int): Area? {
         var betterArea = Area(startPos, 2)
 
-        if (!iterable(betterArea)) return null
+        if (betterArea !in allowedArea || !iterable(betterArea)) return null
 
         val directions = booleanArrayOf(true, true, true, true)
 
