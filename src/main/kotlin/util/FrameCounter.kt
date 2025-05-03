@@ -16,9 +16,7 @@ class FrameCounter(var deltaTime: Double) {
         val currentTime = GLFW.glfwGetTime()
 
         frames.add(currentTime)
-        val iterator = frames.iterator()
-        for (i in frames.indices) if (currentTime - iterator.next() >= 1) iterator.remove()
-        else break
+        frames.removeIf { currentTime - it >= 1 }
 
         deltaTime = currentTime - lastTime
         lastTime = currentTime
