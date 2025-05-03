@@ -2,9 +2,9 @@ package me.chriss99.worldmanagement
 
 import glm_.vec2.Vec2i
 
-abstract class AbstractRegionFileManager<T>(worldName: String) : RegionFileManager<T> {
+abstract class AbstractRegionFileManager<T>(worldName: String, fileExtension: String) : RegionFileManager<T> {
     private val fileManager: FileLoadStoreManager<Region<T>> = FileLoadStoreManager(
-        "worlds/$worldName", "quadtree",
+        "worlds/$worldName", fileExtension,
         ::regionFromBytes, ::regionToBytes
     )
 

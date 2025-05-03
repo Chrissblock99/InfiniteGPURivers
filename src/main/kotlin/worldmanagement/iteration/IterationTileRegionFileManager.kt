@@ -5,7 +5,7 @@ import me.chriss99.worldmanagement.Region
 import glm_.vec2.Vec2i
 import java.nio.ByteBuffer
 
-class IterationTileRegionFileManager(worldName: String) : AbstractRegionFileManager<IterationTile>(worldName) {
+class IterationTileRegionFileManager(worldName: String) : AbstractRegionFileManager<IterationTile>(worldName, "quadtree") {
     override fun regionFromBytes(bytes: ByteArray, pos: Vec2i): Region<IterationTile> {
         val region: Region<IterationTile> = Region(pos)
         val buffer = ByteBuffer.wrap(bytes)
