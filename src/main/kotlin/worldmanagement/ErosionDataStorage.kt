@@ -109,7 +109,5 @@ class ErosionDataStorage(
         iterationInfo.unloadAllRegions()
     }
 
-    fun cleanGL() {
-        terrainGenerator.delete()
-    }
+    fun cleanGL() = terrainGenerator.delete()
 }
