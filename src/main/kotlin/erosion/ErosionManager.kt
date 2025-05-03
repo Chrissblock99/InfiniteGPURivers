@@ -9,7 +9,7 @@ import glm_.vec4.Vec4i
 class ErosionManager(eroder: GPUTerrainEroder, private val data: IterableWorld) {
     private val eroder: GPUTerrainEroder = eroder
 
-    private val maxChunks: Vec2i = Vec2i(eroder.getMaxTextureSize()).div(data.chunkSize)
+    private val maxChunks: Vec2i = Vec2i(eroder.maxTextureSize).div(data.chunkSize)
 
     private var currentTask: ErosionTask? = null
 
@@ -46,8 +46,8 @@ class ErosionManager(eroder: GPUTerrainEroder, private val data: IterableWorld) 
     }
 
     private fun findChangeArea(pos: Vec2i, maxIteration: Int, maxSurface: Int): ErosionTask? {
-        val findArea: Area = Area(eroder.getMaxTextureSize().div(data.chunkSize)) + pos
-            .minus(eroder.getMaxTextureSize().div(data.chunkSize).div(2))
+        val findArea: Area = Area(eroder.maxTextureSize.div(data.chunkSize)) + pos
+            .minus(eroder.maxTextureSize.div(data.chunkSize).div(2))
         val intersection = findArea intersect (eroder.usedArea / data.chunkSize)
 
         if (intersection != null) {

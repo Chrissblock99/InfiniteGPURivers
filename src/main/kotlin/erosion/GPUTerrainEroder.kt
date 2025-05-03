@@ -9,7 +9,7 @@ import me.chriss99.worldmanagement.InfiniteChunkWorld
 import glm_.vec2.Vec2i
 import org.lwjgl.opengl.*
 
-class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, maxTextureSize: Vec2i, usedArea: Area) {
+class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, val maxTextureSize: Vec2i, usedArea: Area) {
     /*
     double deltaT = 0.02; //[0;0.05]
 
@@ -27,11 +27,10 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, maxTe
     double minimumHardness = 0.25; //[0;1]
     double voidSediment = 0.3; //[0;1]
     */
-    private val maxTextureSize = Vec2i()
-
+    init { verifyAreaSize(usedArea.size) }
     var usedArea: Area = usedArea
         set(value) {
-            require(!(value.size.x > maxTextureSize.x || value.size.y > maxTextureSize.y)) { "New area cannot exceed maxTextureSize!" }
+            verifyAreaSize(value.size)
 
             downloadMap()
             field = value
@@ -56,11 +55,8 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, maxTe
     private val srcPosUniform2: Int
 
     init {
-        this.maxTextureSize.x = maxTextureSize.x
-        this.maxTextureSize.y = maxTextureSize.y
-
         //read buffer in all directions (avoids implicit out of bound reads when iterating near edges)
-        val buffedMaxSize = Vec2i(maxTextureSize).plus(2, 2)
+        val buffedMaxSize = maxTextureSize + 2
 
         terrainMap = Texture2D(GL30.GL_R32F, buffedMaxSize)
         waterMap = Texture2D(GL30.GL_R32F, buffedMaxSize)
@@ -102,6 +98,10 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, maxTe
 
 
         uploadMap()
+    }
+
+    private fun verifyAreaSize(size: Vec2i) {
+        require(size.allLessThanEqual(maxTextureSize)) { "Area cannot exceed maxTextureSize!" }
     }
 
     fun erode(area: Area) {
@@ -174,9 +174,5 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, maxTe
 
         thermalOutflowPipes1.delete()
         thermalOutflowPipes2.delete()
-    }
-
-    fun getMaxTextureSize(): Vec2i {
-        return Vec2i(maxTextureSize)
     }
 }
