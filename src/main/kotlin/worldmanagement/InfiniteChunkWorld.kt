@@ -4,7 +4,6 @@ import me.chriss99.Area
 import me.chriss99.Array2DBufferWrapper
 import me.chriss99.util.Util
 import glm_.vec2.Vec2i
-import java.util.function.BiFunction
 import kotlin.math.max
 import kotlin.math.min
 
@@ -13,7 +12,7 @@ class InfiniteChunkWorld(
     val type: Array2DBufferWrapper.Type,
     chunkSize: Int,
     regionSize: Int,
-    chunkGenerator: BiFunction<Vec2i, Int, Chunk>,
+    chunkGenerator: (pos: Vec2i, size: Int) -> Chunk,
     tileLoadManager: TileLoadManager<Region<Chunk>>
 ) :
     InfiniteWorld<Chunk>(
@@ -44,7 +43,7 @@ class InfiniteChunkWorld(
         val chunksY: Int = Util.properIntDivide(y + height - 1, chunkSize) - chunkY + 1
 
         for (currentChunkX in chunkX..<chunkX + chunksX) for (currentChunkY in chunkY..<chunkY + chunksY) {
-            val currentChunk: Chunk = getTile(Vec2i(currentChunkX, currentChunkY))
+            val currentChunk: Chunk = get(Vec2i(currentChunkX, currentChunkY))
 
             val currentChunkMinX = ((max(
                 (currentChunkX * chunkSize).toDouble(),

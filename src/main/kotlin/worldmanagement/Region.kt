@@ -7,18 +7,15 @@ import java.util.function.Function
 class Region<T>(coord: Vec2i) {
     val coord: Vec2i = coord
     private val tiles: LinkedHashMap<Vec2i, T> = LinkedHashMap<Vec2i, T>()
+    val allTiles get() = tiles.entries.toList()
 
     fun addChunk(coord: Vec2i, chunk: T) {
         val oldTile = tiles.put(coord, chunk)
-        if (oldTile != null) IllegalStateException("Tile " + coord.x + ", " + coord.y + " was overwritten!").printStackTrace()
+        if (oldTile != null)
+            IllegalStateException("Tile " + coord.x + ", " + coord.y + " was overwritten!").printStackTrace()
     }
 
-    fun getTile(coord: Vec2i, tileGenerator: Function<Vec2i, T>?): T {
-        return tiles.computeIfAbsent(coord, tileGenerator!!)
-    }
-
-    val allTiles: Set<Map.Entry<Vec2i, T>>
-        get() = tiles.entries
+    operator fun get(coord: Vec2i, tileGenerator: Function<Vec2i, T>): T = tiles.computeIfAbsent(coord, tileGenerator)
 
     override fun toString(): String {
         return "Region{" +

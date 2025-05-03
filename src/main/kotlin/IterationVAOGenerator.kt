@@ -16,7 +16,7 @@ object IterationVAOGenerator {
         for (z in 0..<sizeInChunks.y) for (x in 0..<sizeInChunks.x) {
             val position: Vec2i = Vec2i(x, z).plus(srcPosInChunks)
             val surfaceType: IterationSurfaceType = iterationInfo.getIterationSurfaceType(position)
-            val iteration: Int = iterationInfo.getTile(position).iteration / iterationInfo.chunkSize
+            val iteration: Int = iterationInfo[position].iteration / iterationInfo.chunkSize
 
             val pos: Vec3i = Vec3i(position.x, iteration, position.y).times(iterationInfo.chunkSize)
             addSurface(vertecies, surfaceType, pos, iterationInfo.chunkSize)

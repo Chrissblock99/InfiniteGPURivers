@@ -15,15 +15,15 @@ class IterableWorld(
     InfiniteWorld<IterationTile>(
         chunkSize,
         regionSize,
-        { a, b -> IterationTile(0, 0, 0) },
+        { _, _ -> IterationTile(0, 0, 0) },
         IterationTileRegionFileManager(worldName),
         tileLoadManager
     ) {
     fun getIterationSurfaceType(pos: Vec2i): IterationSurfaceType {
-        val v0: Int = getTile(pos).vertical and 0b11
-        val v1: Int = getTile(Vec2i(pos).plus(1, 0)).vertical and 0b11
-        val h0: Int = getTile(pos).horizontal and 0b11
-        val h1: Int = getTile(Vec2i(pos).plus(0, 1)).horizontal and 0b11
+        val v0: Int = get(pos).vertical and 0b11
+        val v1: Int = get(pos.plus(1, 0)).vertical and 0b11
+        val h0: Int = get(pos).horizontal and 0b11
+        val h1: Int = get(pos.plus(0, 1)).horizontal and 0b11
 
         val combined = h1 or (v0 shl 2) or (v1 shl 4) or (h0 shl 6)
         val bits = when (combined) {

@@ -1,8 +1,6 @@
 package me.chriss99.worldmanagement
 
 import glm_.vec2.Vec2i
-import java.util.function.BiConsumer
-import java.util.function.Function
 
 /**
  * Represents a map of Tiles, guarantees that ANY Vec2i can be asked for and stores previously loaded Tiles <br></br>
@@ -11,37 +9,24 @@ import java.util.function.Function
  * @param <T> Type of the Tiles to be managed
 </T> */
 open class TileMap2D<T>(
-    tileLoader: Function<Vec2i, T>,
-    tileUnloader: BiConsumer<Vec2i, T>,
-    loadManager: TileLoadManager<T>
+    private val loadTile: (pos: Vec2i) -> T,
+    private val unloadTile: (pos: Vec2i, tile: T) -> Unit,
+    private var loadManager: TileLoadManager<T>
 ) {
-    protected val loadedTiles: HashMap<Vec2i, T> = LinkedHashMap<Vec2i, T>()
-    protected val tileLoader: Function<Vec2i, T>
-    protected val tileUnloader: BiConsumer<Vec2i, T>
-    protected var loadManager: TileLoadManager<T>
+    private val loadedTiles: HashMap<Vec2i, T> = LinkedHashMap<Vec2i, T>()
+    val allTiles get() = loadedTiles.values.toList()
 
-    init {
-        this.tileLoader = tileLoader
-        this.tileUnloader = tileUnloader
-        this.loadManager = loadManager
-    }
-
-    fun getTile(coord: Vec2i): T {
-        return loadedTiles.computeIfAbsent(coord, tileLoader)
-    }
-
-    val allTiles: Collection<T>
-        get() = loadedTiles.values.toList()
+    operator fun get(coord: Vec2i): T = loadedTiles.computeIfAbsent(coord, loadTile)
 
     fun reloadAll() {
         loadedTiles.replaceAll { k: Vec2i, v: T ->
-            tileUnloader.accept(k, v)
-            tileLoader.apply(k)
+            unloadTile(k, v)
+            loadTile(k)
         }
     }
 
     fun manageLoad() {
-        val toRemove: HashSet<Vec2i> = HashSet<Vec2i>()
+        val toRemove = HashSet<Vec2i>()
 
         loadedTiles.forEach { (v: Vec2i, t: T) ->
             if (!loadManager.loadPolicy(v, t))
@@ -50,14 +35,14 @@ open class TileMap2D<T>(
 
         for (v in loadManager.loadCommander())
             if (!toRemove.remove(v))
-                getTile(v)
+                get(v)
 
         for (v in toRemove)
-            tileUnloader.accept(v, loadedTiles.remove(v)!!)
+            unloadTile(v, loadedTiles.remove(v)!!)
     }
 
     fun unloadAll() {
-        loadedTiles.forEach(tileUnloader)
+        loadedTiles.forEach(unloadTile)
         loadedTiles.clear()
     }
 }

@@ -36,7 +36,7 @@ class IterationTileRegionFileManager(worldName: String) : AbstractRegionFileMana
     }
 
     protected override fun regionToBytes(region: Region<IterationTile>): ByteArray {
-        val tileEntrySet: Set<Map.Entry<Vec2i, IterationTile>> = region.allTiles
+        val tileEntrySet = region.allTiles
         val array = ByteArray(tileEntrySet.size * (4 + 4 + 4 + 1))
         val buffer = ByteBuffer.wrap(array)
 
