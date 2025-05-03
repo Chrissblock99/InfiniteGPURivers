@@ -56,12 +56,10 @@ open class VAOImpl : VAO {
         indexLength = indices.size
     }
 
-    override fun bind() {
-        glBindVertexArray(vao)
-    }
+    override fun bind() = glBindVertexArray(vao)
 
     override fun delete() {
-        for (vbo in vbos) vbo.delete()
+        vbos.forEach { it.delete() }
         ibo?.delete()
         glDeleteVertexArrays(vao)
     }
