@@ -43,13 +43,8 @@ class TessProgram(private val cameraMatrix: CameraMatrix, area: Area) : GLProgra
         srcPosUniform = getUniform("srcPos")
     }
 
-    fun renderTerrain() {
-        render(false)
-    }
-
-    fun renderWater() {
-        render(true)
-    }
+    fun renderTerrain() = render(false)
+    fun renderWater() = render(true)
 
     private fun render(water: Boolean) {
         use()
