@@ -23,7 +23,7 @@ class ErosionManager(eroder: GPUTerrainEroder, private val data: IterableWorld) 
         var done = false
         var i = 0
         while (!done) {
-            val nextIterations: Int = currentTask!!.nextIterations()
+            val nextIterations: Int = currentTask!!.nextIterations
             if (i != 0 && i + nextIterations > iterations) break
 
             done = currentTask!!.erosionStep()

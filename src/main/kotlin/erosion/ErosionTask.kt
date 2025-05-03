@@ -3,27 +3,22 @@ package me.chriss99.erosion
 import me.chriss99.Area
 
 class ErosionTask(
-    eroder: GPUTerrainEroder, val area: Area,
-    private val steps: Int,
+    val eroder: GPUTerrainEroder, val area: Area, val steps: Int,
     val l: Int, val r: Int, val f: Int, val b: Int
 ) {
-    private val eroder: GPUTerrainEroder = eroder
-
-    private var currentArea: Area
-    private var currentStep: Int
-
-    init {
-        currentArea = area.increase(
+    var currentArea = area.increase(
             if (r == 0) 0 else -steps,
             if (f == 0) 0 else -steps,
             if (l == 0) 0 else -steps,
             if (b == 0) 0 else -steps
         )
-        currentStep = 0
-    }
+        private set
+    var currentStep = 0
+        private set
 
     fun erosionStep(): Boolean {
-        if (isDone) return true
+        if (isDone)
+            return true
 
         eroder.erode(currentArea)
         currentArea = currentArea.increase(
@@ -36,21 +31,12 @@ class ErosionTask(
         return false
     }
 
-    fun hasStarted(): Boolean {
-        return currentStep != 0
-    }
+    val hasStarted get() = currentStep != 0
+    val isDone get() = currentStep >= steps
+    val isRunning get() = hasStarted && !isDone
 
-    val isDone: Boolean
-        get() = currentStep >= steps
-
-    val isRunning: Boolean
-        get() = hasStarted() && !isDone
-
-    fun nextIterations(): Int {
-        return area.area
-    }
-
-    fun newSlopes(): Int {
+    val nextIterations get() = currentArea.area
+    val newSlopes: Int get() {
         var sum = 0
 
         sum += if (l == 0) 1 else 0
