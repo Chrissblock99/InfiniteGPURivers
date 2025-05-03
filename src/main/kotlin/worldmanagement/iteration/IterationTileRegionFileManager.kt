@@ -6,8 +6,7 @@ import glm_.vec2.Vec2i
 import java.nio.ByteBuffer
 
 class IterationTileRegionFileManager(worldName: String) : AbstractRegionFileManager<IterationTile>(worldName) {
-
-    protected override fun regionFromBytes(bytes: ByteArray, pos: Vec2i): Region<IterationTile> {
+    override fun regionFromBytes(bytes: ByteArray, pos: Vec2i): Region<IterationTile> {
         val region: Region<IterationTile> = Region(pos)
         val buffer = ByteBuffer.wrap(bytes)
 
@@ -35,7 +34,7 @@ class IterationTileRegionFileManager(worldName: String) : AbstractRegionFileMana
         return region
     }
 
-    protected override fun regionToBytes(region: Region<IterationTile>): ByteArray {
+    override fun regionToBytes(region: Region<IterationTile>): ByteArray {
         val tileEntrySet = region.allTiles
         val array = ByteArray(tileEntrySet.size * (4 + 4 + 4 + 1))
         val buffer = ByteBuffer.wrap(array)
