@@ -10,9 +10,8 @@ object ImageWriter {
     @JvmStatic
     fun main(args: Array<String>) {
         writeImageHeightMap(
-            Float2DBufferWrapper(arrayOf<FloatArray>(floatArrayOf(1f, 0.5f), floatArrayOf(0f, .75f))),
-            "test",
-            true
+            Float2DBufferWrapper(arrayOf(floatArrayOf(1f, 0.5f), floatArrayOf(0f, .75f))),
+            "test", true
         )
     }
 
@@ -21,9 +20,7 @@ object ImageWriter {
 
         for (i in 0..<heightMap.size.x) for (j in 0..<heightMap.size.y) {
             val heightValue: Float = heightMap.getFloat(i, j) / 250 + (if (negative) .5f else 0f)
-            val myRGB = Color(heightValue, heightValue, heightValue)
-            val rgb = myRGB.rgb
-            image.setRGB(i, j, rgb)
+            image.setRGB(i, j, Color(heightValue, heightValue, heightValue).rgb)
         }
 
         val file = File("images/$filename.png")
