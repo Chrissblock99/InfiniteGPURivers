@@ -31,7 +31,7 @@ class MipMappedInfiniteChunkWorld(
             return chunkGenerator(srcPos, chunkSize)
 
         val mipMapFrom = getMipMapLevel(mipMapLevel - 1).readArea(Area(srcPos, chunkSize) * 2)
-        return Chunk(mipMapFrom.mipMap()!!)
+        return Chunk(mipMapFrom.mipMap())
     }
 
     fun unloadAll() = mipmaps.values.forEach { it.unloadAllRegions() }

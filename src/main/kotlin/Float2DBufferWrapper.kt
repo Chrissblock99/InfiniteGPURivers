@@ -21,10 +21,8 @@ class Float2DBufferWrapper : Array2DBufferWrapper {
     override fun mipMap(): Float2DBufferWrapper {
         val buffer = BufferUtils.createByteBuffer((size.x / 2) * (size.y / 2) * type.elementSize)
 
-        var y = 0
-        while (y < size.y) {
-            var x = 0
-            while (x < size.x) {
+        for (y in 0..size.y step 2)
+            for (x in 0..size.x step 2) {
                 var avg = 0f
                 avg += getFloat(x, y)
                 avg += getFloat(x + 1, y)
@@ -33,13 +31,9 @@ class Float2DBufferWrapper : Array2DBufferWrapper {
                 avg /= 4f
 
                 buffer.putFloat(avg)
-                x += 2
             }
-            y += 2
-        }
 
-
-        return Float2DBufferWrapper(buffer, Vec2i(size).div(2))
+        return Float2DBufferWrapper(buffer, size / 2)
     }
 
     fun getFloat(x: Int, z: Int): Float {
@@ -49,20 +43,4 @@ class Float2DBufferWrapper : Array2DBufferWrapper {
     fun putFloat(x: Int, z: Int, f: Float) {
         buffer.putFloat((z * size.x + x) * 4, f)
     }
-
-    val array: Array<FloatArray>
-        get() {
-            val data = Array(size.x) { FloatArray(size.y) }
-            for (i in 0..<size.x) for (j in 0..<size.y) data[i][j] = getFloat(i, j)
-
-            return data
-        }
-
-    val realArray: Array<FloatArray>
-        get() {
-            val data = Array(size.y) { FloatArray(size.x) }
-            for (i in 0..<size.x) for (j in 0..<size.y) data[j][i] = getFloat(i, j)
-
-            return data
-        }
 }

@@ -9,7 +9,7 @@ class Vec4f2DBufferWrapper : Array2DBufferWrapper {
 
     constructor(size: Vec2i) : super(Type.VEC4F, size)
 
-    override fun mipMap(): Vec4f2DBufferWrapper? {
+    override fun mipMap(): Vec4f2DBufferWrapper {
         throw UnsupportedOperationException("Vec4f can't be mipMapped!")
     }
 

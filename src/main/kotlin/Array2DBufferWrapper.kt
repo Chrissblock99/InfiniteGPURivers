@@ -6,79 +6,48 @@ import org.lwjgl.opengl.GL11.*
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-abstract class Array2DBufferWrapper protected constructor(buffer: ByteBuffer, type: Type, size: Vec2i) {
-    val buffer: ByteBuffer
-    val type: Type
-
-    val size: Vec2i get() = Vec2i(field)
-
+abstract class Array2DBufferWrapper(val buffer: ByteBuffer, val type: Type, val size: Vec2i) {
     init {
-        val correctCapacity: Int = size.x * size.y * type.elementSize
-        require(buffer.capacity() == correctCapacity) { "Buffer has to be of size " + correctCapacity + " but is " + buffer.capacity() }
-
-        this.buffer = buffer
-        this.type = type
-
-        this.size = Vec2i(size)
+        val correctCapacity = size.x * size.y * type.elementSize
+        require(buffer.capacity() == correctCapacity) { "Buffer has to be of size $correctCapacity but is ${buffer.capacity()}!" }
     }
 
-    protected constructor(
-        type: Type,
-        size: Vec2i
-    ) : this(BufferUtils.createByteBuffer(size.x * size.y * type.elementSize), type, size)
+    constructor(type: Type, size: Vec2i)
+            : this(BufferUtils.createByteBuffer(size.x * size.y * type.elementSize), type, size)
 
-    abstract fun mipMap(): Array2DBufferWrapper?
+    abstract fun mipMap(): Array2DBufferWrapper
 
-
-    fun slice(z: Int): Array2DBufferWrapper {
-        return of(
+    fun slice(z: Int) = of(
             buffer.slice(size.x * type.elementSize * z, size.x * type.elementSize).order(ByteOrder.LITTLE_ENDIAN),
-            type,
-            Vec2i(size.x, 1)
+            type, Vec2i(size.x, 1)
         )
-    }
 
 
     enum class Type(val glFormat: Int, val glType: Int) {
         FLOAT(GL_RED, GL_FLOAT),
         VEC4F(GL_RGBA, GL_FLOAT);
 
-        val elementSize: Int
+        val elementSize: Int = sizeOf(glFormat, glType)
 
-        init {
-            elementSize = sizeOf(glFormat, glType)
-        }
-
-        private fun sizeOf(format: Int, type: Int): Int {
-            var length = when (type) {
+        private fun sizeOf(format: Int, type: Int) = when (type) {
                 GL_FLOAT, GL_INT -> 4
                 GL_DOUBLE -> 8
                 else -> throw IllegalArgumentException("Array2DBufferWrapper does not support type: $type")
-            }
-
-            length *= when (format) {
+            } * when (format) {
                 GL_RED -> 1
                 GL_RGBA -> 4
                 else -> throw IllegalArgumentException("Array2DBufferWrapper does not support format: $format")
             }
-
-            return length
-        }
     }
 
     companion object {
-        fun of(buffer: ByteBuffer?, type: Type, size: Vec2i): Array2DBufferWrapper {
-            var buffer = buffer
-            if (buffer == null) buffer = BufferUtils.createByteBuffer(size.x * size.y * type.elementSize)
-
-            return when (type) {
+        fun of(buffer: ByteBuffer, type: Type, size: Vec2i) = when (type) {
                 Type.FLOAT -> Float2DBufferWrapper(buffer, size)
                 Type.VEC4F -> Vec4f2DBufferWrapper(buffer, size)
             }
-        }
 
         fun of(type: Type, size: Vec2i): Array2DBufferWrapper {
-            return of(null, type, size)
+            return of(BufferUtils.createByteBuffer(size.x * size.y * type.elementSize), type, size)
         }
     }
 }
