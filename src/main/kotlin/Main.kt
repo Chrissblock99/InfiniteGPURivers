@@ -18,7 +18,7 @@ class Main(
     chunkRenderDistance: Int, iterationRenderDistance: Int,
     initErosionArea: Area
 ) {
-    val window = Window()
+    val window = Window("InfiniteGPURivers")
 
     val cameraMatrix = CameraMatrix()
     init { cameraMatrix.aspectRatio = window.aspectRatio }
@@ -131,7 +131,7 @@ class Main(
                 "test64",
                 64, 10, 64, 10,
                 7, 2,
-                Area(20 * 64)
+                Area(60 * 64)
             )
 
             println("Started after: " + (GLFW.glfwGetTime() - start))

@@ -4,7 +4,7 @@ import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11.*
 
-class Window {
+class Window(title: String) {
     private val windowId: Long
 
     private var width: Int
@@ -39,7 +39,7 @@ class Window {
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE)
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE)
 
-        windowId = glfwCreateWindow(width, height, "GLFW OpenGL Window", 0, 0)
+        windowId = glfwCreateWindow(width, height, title, 0, 0)
 
         glfwMakeContextCurrent(windowId)
         if (!GL.createCapabilities().OpenGL45)
