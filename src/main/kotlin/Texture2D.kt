@@ -5,14 +5,10 @@ import glm_.vec2.Vec2i
 import org.lwjgl.opengl.GL45.*
 import java.nio.ByteBuffer
 
-class Texture2D(private val internalFormat: Int, size: Vec2i) : GLObject {
+class Texture2D(private val internalFormat: Int, val size: Vec2i) : GLObject {
     private val texture: Int
 
-    private val size: Vec2i
-
     init {
-        this.size = Vec2i(size)
-
         texture = glGenTextures()
         bind()
         glTexStorage2D(GL_TEXTURE_2D, 1, internalFormat, size.x, size.y)
@@ -64,15 +60,6 @@ class Texture2D(private val internalFormat: Int, size: Vec2i) : GLObject {
         glGetTexImage(GL_TEXTURE_2D, 0, format, type, buffer)
     }
 
-    fun getSize(): Vec2i {
-        return Vec2i(size)
-    }
-
-    override fun bind() {
-        glBindTexture(GL_TEXTURE_2D, texture)
-    }
-
-    override fun delete() {
-        glDeleteTextures(texture)
-    }
+    override fun bind() = glBindTexture(GL_TEXTURE_2D, texture)
+    override fun delete() = glDeleteTextures(texture)
 }
