@@ -2,26 +2,11 @@ package me.chriss99
 
 import glm_.vec2.Vec2i
 import java.util.*
-import java.util.function.Function
 
 class IterationSurfaceType(bits: Byte) {
-    val surfaceType: SurfaceType
-    private val direction: Vec2i
-    private val bits: Byte
-
-    init {
-        surfaceType = SurfaceType.fromBits(bits)
-        this.direction = surfaceType.directionFromBits.apply((bits.toInt() and 0b0011).toByte())
-        this.bits = (bits.toInt() and 0x0F).toByte()
-    }
-
-    fun getDirection(): Vec2i {
-        return Vec2i(direction)
-    }
-
-    fun toBits(): Byte {
-        return bits
-    }
+    val bits: Byte = (bits.toInt() and 0x0F).toByte()
+    val surfaceType: SurfaceType = SurfaceType.fromBits(bits)
+    val direction: Vec2i = surfaceType.directionFromBits((bits.toInt() and 0b0011).toByte())
 
     val surface: Array<IntArray>
         get() {
@@ -36,17 +21,11 @@ class IterationSurfaceType(bits: Byte) {
         }
 
 
-    enum class SurfaceType(
-        directionFromBits: Function<Byte, Vec2i>,
-        internal val surface: Array<IntArray>
-    ) {
-        FLAT(Function<Byte, Vec2i> { bits: Byte -> aaDirectionFromBits(bits) }, Array(2) { IntArray(2) }),
-        SLOPE(Function<Byte, Vec2i> { bits: Byte -> aaDirectionFromBits(bits) }, arrayOf(intArrayOf(0, 0), intArrayOf(1, 1))),
-        OUTWARD_SLOPE(Function<Byte, Vec2i> { bits: Byte -> diagonalDirectionFromBits(bits) }, arrayOf(intArrayOf(0, 0), intArrayOf(0, 1))),
-        INWARD_SLOPE(Function<Byte, Vec2i> { bits: Byte -> diagonalDirectionFromBits(bits) }, arrayOf(intArrayOf(0, 1), intArrayOf(1, 1)));
-
-        val directionFromBits: Function<Byte, Vec2i> = directionFromBits
-
+    enum class SurfaceType(val directionFromBits: (direction: Byte) -> Vec2i, internal val surface: Array<IntArray>) {
+        FLAT(::aaDirectionFromBits, Array(2) { IntArray(2) }),
+        SLOPE(::aaDirectionFromBits, arrayOf(intArrayOf(0, 0), intArrayOf(1, 1))),
+        OUTWARD_SLOPE(::diagonalDirectionFromBits, arrayOf(intArrayOf(0, 0), intArrayOf(0, 1))),
+        INWARD_SLOPE(::diagonalDirectionFromBits, arrayOf(intArrayOf(0, 1), intArrayOf(1, 1)));
 
         companion object {
             fun fromBits(bits: Byte): SurfaceType {

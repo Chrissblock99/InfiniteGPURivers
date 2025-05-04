@@ -26,7 +26,7 @@ object IterationVAOGenerator {
     }
 
     private fun addSurface(vertecies: FloatArrayList, surfaceType: IterationSurfaceType, pos: Vec3i, scale: Int) {
-        val bits: Byte = surfaceType.toBits()
+        val bits: Byte = surfaceType.bits
         val type = (bits.toInt() and 12).toByte()
         val dir = (bits.toInt() and 3).toByte().toInt()
         val otherOrdering = (type.toInt() == 8 || type.toInt() == 12) && (dir == 0 || dir == 3)

@@ -45,81 +45,81 @@ class IterationSurfaceTypeTest {
     }
 
     @Test
-    void getDirection() {
+    void direction() {
         byte b = 0;
-        assertEquals(new Vector2i(0, -1), new IterationSurfaceType(b).getDirection());
+        assertEquals(new Vector2i(0, -1), new IterationSurfaceType(b).direction);
         b++;
-        assertEquals(new Vector2i(1, 0), new IterationSurfaceType(b).getDirection());
+        assertEquals(new Vector2i(1, 0), new IterationSurfaceType(b).direction);
         b++;
-        assertEquals(new Vector2i(-1, 0), new IterationSurfaceType(b).getDirection());
+        assertEquals(new Vector2i(-1, 0), new IterationSurfaceType(b).direction);
         b++;
-        assertEquals(new Vector2i(0, 1), new IterationSurfaceType(b).getDirection());
+        assertEquals(new Vector2i(0, 1), new IterationSurfaceType(b).direction);
 
         b++;
-        assertEquals(new Vector2i(0, -1), new IterationSurfaceType(b).getDirection());
+        assertEquals(new Vector2i(0, -1), new IterationSurfaceType(b).direction);
         b++;
-        assertEquals(new Vector2i(1, 0), new IterationSurfaceType(b).getDirection());
+        assertEquals(new Vector2i(1, 0), new IterationSurfaceType(b).direction);
         b++;
-        assertEquals(new Vector2i(-1, 0), new IterationSurfaceType(b).getDirection());
+        assertEquals(new Vector2i(-1, 0), new IterationSurfaceType(b).direction);
         b++;
-        assertEquals(new Vector2i(0, 1), new IterationSurfaceType(b).getDirection());
+        assertEquals(new Vector2i(0, 1), new IterationSurfaceType(b).direction);
 
         b++;
-        assertEquals(new Vector2i(-1, -1), new IterationSurfaceType(b).getDirection());
+        assertEquals(new Vector2i(-1, -1), new IterationSurfaceType(b).direction);
         b++;
-        assertEquals(new Vector2i(1, -1), new IterationSurfaceType(b).getDirection());
+        assertEquals(new Vector2i(1, -1), new IterationSurfaceType(b).direction);
         b++;
-        assertEquals(new Vector2i(-1, 1), new IterationSurfaceType(b).getDirection());
+        assertEquals(new Vector2i(-1, 1), new IterationSurfaceType(b).direction);
         b++;
-        assertEquals(new Vector2i(1, 1), new IterationSurfaceType(b).getDirection());
+        assertEquals(new Vector2i(1, 1), new IterationSurfaceType(b).direction);
 
         b++;
-        assertEquals(new Vector2i(-1, -1), new IterationSurfaceType(b).getDirection());
+        assertEquals(new Vector2i(-1, -1), new IterationSurfaceType(b).direction);
         b++;
-        assertEquals(new Vector2i(1, -1), new IterationSurfaceType(b).getDirection());
+        assertEquals(new Vector2i(1, -1), new IterationSurfaceType(b).direction);
         b++;
-        assertEquals(new Vector2i(-1, 1), new IterationSurfaceType(b).getDirection());
+        assertEquals(new Vector2i(-1, 1), new IterationSurfaceType(b).direction);
         b++;
-        assertEquals(new Vector2i(1, 1), new IterationSurfaceType(b).getDirection());
+        assertEquals(new Vector2i(1, 1), new IterationSurfaceType(b).direction);
     }
 
     @Test
-    void toBits() {
+    void bits() {
         byte b = 0;
-        assertEquals(b, new IterationSurfaceType(b).toBits());
+        assertEquals(b, new IterationSurfaceType(b).bits);
         b++;
-        assertEquals(b, new IterationSurfaceType(b).toBits());
+        assertEquals(b, new IterationSurfaceType(b).bits);
         b++;
-        assertEquals(b, new IterationSurfaceType(b).toBits());
+        assertEquals(b, new IterationSurfaceType(b).bits);
         b++;
-        assertEquals(b, new IterationSurfaceType(b).toBits());
+        assertEquals(b, new IterationSurfaceType(b).bits);
 
         b++;
-        assertEquals(b, new IterationSurfaceType(b).toBits());
+        assertEquals(b, new IterationSurfaceType(b).bits);
         b++;
-        assertEquals(b, new IterationSurfaceType(b).toBits());
+        assertEquals(b, new IterationSurfaceType(b).bits);
         b++;
-        assertEquals(b, new IterationSurfaceType(b).toBits());
+        assertEquals(b, new IterationSurfaceType(b).bits);
         b++;
-        assertEquals(b, new IterationSurfaceType(b).toBits());
+        assertEquals(b, new IterationSurfaceType(b).bits);
 
         b++;
-        assertEquals(b, new IterationSurfaceType(b).toBits());
+        assertEquals(b, new IterationSurfaceType(b).bits);
         b++;
-        assertEquals(b, new IterationSurfaceType(b).toBits());
+        assertEquals(b, new IterationSurfaceType(b).bits);
         b++;
-        assertEquals(b, new IterationSurfaceType(b).toBits());
+        assertEquals(b, new IterationSurfaceType(b).bits);
         b++;
-        assertEquals(b, new IterationSurfaceType(b).toBits());
+        assertEquals(b, new IterationSurfaceType(b).bits);
 
         b++;
-        assertEquals(b, new IterationSurfaceType(b).toBits());
+        assertEquals(b, new IterationSurfaceType(b).bits);
         b++;
-        assertEquals(b, new IterationSurfaceType(b).toBits());
+        assertEquals(b, new IterationSurfaceType(b).bits);
         b++;
-        assertEquals(b, new IterationSurfaceType(b).toBits());
+        assertEquals(b, new IterationSurfaceType(b).bits);
         b++;
-        assertEquals(b, new IterationSurfaceType(b).toBits());
+        assertEquals(b, new IterationSurfaceType(b).bits);
     }
 
     @Test
