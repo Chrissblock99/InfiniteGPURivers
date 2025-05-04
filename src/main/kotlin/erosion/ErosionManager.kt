@@ -43,8 +43,7 @@ class ErosionManager(private val eroder: GPUTerrainEroder, private val data: Ite
     }
 
     private fun findChangeArea(pos: Vec2i, maxIteration: Int, maxSurface: Int): ErosionTask? {
-        val findArea = Area(eroder.maxTextureSize / data.chunkSize) + pos
-                - (eroder.maxTextureSize / data.chunkSize / 2)
+        val findArea = Area(eroder.maxTextureSize / data.chunkSize) + pos - (eroder.maxTextureSize / data.chunkSize / 2)
         val intersection = findArea intersect (eroder.usedArea / data.chunkSize)
 
         if (intersection != null) {
