@@ -14,11 +14,9 @@ import org.lwjgl.opengl.GL43.glDispatchCompute
 
 class TerrainGenerator(chunkSize: Int) : ComputeProgram("genHeightMap") {
     val terrainMap: Texture2D = Texture2D(GL_R32F, Vec2i(chunkSize))
-    val srcPosUniform: Int
+    val srcPosUniform: Int = getUniform("srcPos")
 
     init {
-        srcPosUniform = getUniform("srcPos")
-
         terrainMap.bindUniformImage(program, 8, "terrainMap", GL_WRITE_ONLY)
     }
 
@@ -30,7 +28,7 @@ class TerrainGenerator(chunkSize: Int) : ComputeProgram("genHeightMap") {
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT)
 
 
-        val buffer: Float2DBufferWrapper = Float2DBufferWrapper(Vec2i(chunkSize))
+        val buffer = Float2DBufferWrapper(Vec2i(chunkSize))
         terrainMap.downloadFullData(GL_RED, GL_FLOAT, buffer.buffer)
 
         return Chunk(buffer)
