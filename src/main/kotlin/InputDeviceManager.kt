@@ -70,7 +70,7 @@ class InputDeviceManager(windowId: Long) {
     }
 
     fun removeKeyPressRunnable(key: Int, runnable: Runnable): Boolean {
-        return keyPressRunnables.computeIfAbsent(key) { k: Int? -> ArrayList() }.add(runnable)
+        return keyPressRunnables.computeIfAbsent(key) { k: Int? -> ArrayList() }.remove(runnable)
     }
 
     fun removeKeyReleaseRunnable(key: Int, runnable: Runnable): Boolean {
@@ -78,14 +78,14 @@ class InputDeviceManager(windowId: Long) {
     }
 
     fun removeMouseAbsoluteMovementConsumer(consumer: BiConsumer<Double, Double>): Boolean {
-        return mouseAbsoluteMovementConsumers.add(consumer)
+        return mouseAbsoluteMovementConsumers.remove(consumer)
     }
 
     fun removeMouseRelativeMovementConsumer(consumer: BiConsumer<Double, Double>): Boolean {
-        return mouseRelativeMovementConsumers.add(consumer)
+        return mouseRelativeMovementConsumers.remove(consumer)
     }
 
     fun removeMouseScrollConsumer(consumer: BiConsumer<Double, Double>): Boolean {
-        return mouseScrollConsumers.add(consumer)
+        return mouseScrollConsumers.remove(consumer)
     }
 }
