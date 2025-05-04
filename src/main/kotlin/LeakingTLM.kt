@@ -22,11 +22,6 @@ class LeakingTLM<T> : TileLoadManager<T> {
         )
     }
 
-    override fun loadPolicy(tilePos: Vec2i, tile: T): Boolean {
-        return true
-    }
-
-    override fun loadCommander(): Collection<Vec2i> {
-        return listOf<Vec2i>()
-    }
+    override fun loadPolicy(tilePos: Vec2i, tile: T) = true
+    override fun loadCommander() = listOf<Vec2i>()
 }
