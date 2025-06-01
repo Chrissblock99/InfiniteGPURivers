@@ -14,7 +14,7 @@ open class InfiniteWorld<T>(
         FileBackedTileMap2D(regionFileManager::loadFile, regionFileManager, tileLoadManager)
 
     operator fun get(pos: Vec2i): T {
-        return storage[Util.properIntDivide(pos, regionSize)][pos, { generateChunk(it, chunkSize) }]
+        return storage[Util.floorDiv(pos, regionSize)][pos, { generateChunk(it, chunkSize) }]
     }
 
     fun unloadAllRegions() = storage.unloadAll()

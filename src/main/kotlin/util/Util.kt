@@ -37,16 +37,15 @@ object Util {
         return x + z * xSize
     }
 
-    fun properIntDivide(a: Int, b: Int): Int {
-        //yes this is horrible, but I was too lazy to do it better
-        return floor((a.toDouble()) / (b.toDouble())).toInt()
+    fun floorDiv(a: Int, b: Int): Int {
+        return Math.floorDiv(a, b);
     }
 
-    fun properIntDivide(v: Vec2i, b: Int): Vec2i {
-        return Vec2i(properIntDivide(v.x, b), properIntDivide(v.y, b))
+    fun floorDiv(v: Vec2i, b: Int): Vec2i {
+        return Vec2i(floorDiv(v.x, b), floorDiv(v.y, b))
     }
 
     fun gridSrcOf(pos: Vec2i, scale: Int): Vec2i {
-        return properIntDivide(pos, scale).times(scale)
+        return floorDiv(pos, scale).times(scale)
     }
 }

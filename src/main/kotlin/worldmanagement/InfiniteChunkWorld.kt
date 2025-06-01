@@ -37,10 +37,10 @@ class InfiniteChunkWorld(
         val height: Int = data.size.y
 
 
-        val chunkX: Int = Util.properIntDivide(x, chunkSize)
-        val chunkY: Int = Util.properIntDivide(y, chunkSize)
-        val chunksX: Int = Util.properIntDivide(x + width - 1, chunkSize) - chunkX + 1
-        val chunksY: Int = Util.properIntDivide(y + height - 1, chunkSize) - chunkY + 1
+        val chunkX: Int = Util.floorDiv(x, chunkSize)
+        val chunkY: Int = Util.floorDiv(y, chunkSize)
+        val chunksX: Int = Util.floorDiv(x + width - 1, chunkSize) - chunkX + 1
+        val chunksY: Int = Util.floorDiv(y + height - 1, chunkSize) - chunkY + 1
 
         for (currentChunkX in chunkX..<chunkX + chunksX) for (currentChunkY in chunkY..<chunkY + chunksY) {
             val currentChunk: Chunk = get(Vec2i(currentChunkX, currentChunkY))
