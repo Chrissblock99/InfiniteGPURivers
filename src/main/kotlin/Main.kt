@@ -19,9 +19,7 @@ class Main(
     initErosionArea: Area
 ) {
     val window = Window("InfiniteGPURivers")
-
-    val cameraMatrix = CameraMatrix()
-    init { cameraMatrix.aspectRatio = window.aspectRatio }
+    val cameraMatrix = CameraMatrix(aspectRatio = window.aspectRatio)
 
     val worldStorage = ErosionDataStorage(worldName, chunkSize, regionSize, iterationChunkSize, iterationRegionSize)
     val gpuTerrainEroder = GPUTerrainEroder(worldStorage, initErosionArea.size, initErosionArea)
