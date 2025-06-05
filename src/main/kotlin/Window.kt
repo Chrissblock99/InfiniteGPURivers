@@ -57,7 +57,7 @@ class Window(title: String) {
             """.trimIndent()
         )
         glViewport(0, 0, width, height)
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
+        glClearColor(0.49f, 0.67f, 1.0f, 1.0f)
         glEnable(GL_DEPTH_TEST)
 
         inputDeviceManager = InputDeviceManager(windowId)
