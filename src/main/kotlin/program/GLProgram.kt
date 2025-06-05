@@ -2,23 +2,25 @@ package me.chriss99.program
 
 import org.lwjgl.opengl.GL45.*
 import java.io.File
-import java.io.FileNotFoundException
 import java.util.*
 
 open class GLProgram {
     val program: Int = glCreateProgram()
-    private val shaders = ArrayList<Int>()
+    private val shaders = ArrayList<Pair<Int, String>>()
 
     fun addShader(name: String, type: Int) {
         val shader = loadShader(File("src/main/glsl/$name"), type)
-        if (glGetShaderi(shader, GL_COMPILE_STATUS) != 1)
-            System.err.println("Shader $name did not compile!")
 
-        shaders.add(shader)
+        shaders.add(shader to name)
         glAttachShader(program, shader)
     }
 
     fun validate() {
+        for ((shader, name) in shaders) {
+            glCompileShader(shader)
+            if (glGetShaderi(shader, GL_COMPILE_STATUS) != 1)
+                System.err.println("Shader $name did not compile!")
+        }
         glLinkProgram(program)
         glValidateProgram(program)
 
@@ -28,8 +30,10 @@ open class GLProgram {
         if (link == 1 && validate == 1)
             return
 
-        println("Program Linked: $link")
-        println("Program Validated: $validate")
+        System.err.println("Program Linked: $link")
+        System.err.println("Program Validated: $validate")
+
+        throw IllegalStateException("A program broke!")
     }
 
     fun bindAttribute(index: Int, name: String) = glBindAttribLocation(program, index, name)
@@ -37,7 +41,7 @@ open class GLProgram {
     fun getUniform(name: String) = glGetUniformLocation(program, name)
 
     open fun delete() {
-        for (shader in shaders) {
+        for ((shader, _) in shaders) {
             glDetachShader(program, shader)
             glDeleteShader(shader)
         }
@@ -60,7 +64,6 @@ open class GLProgram {
             }
             val id: Int = glCreateShader(type)
             glShaderSource(id, data)
-            glCompileShader(id)
             return id
         }
     }
