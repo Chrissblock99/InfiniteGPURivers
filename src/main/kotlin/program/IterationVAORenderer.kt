@@ -14,7 +14,7 @@ class IterationVAORenderer(protected val cameraMatrix: CameraMatrix) : RenderPro
 
     init {
         addShader("iteration/passThrough.vert", GL_VERTEX_SHADER)
-        addShader("tesselation/normals.geom", GL_GEOMETRY_SHADER)
+        addShader("iteration/normals.geom", GL_GEOMETRY_SHADER)
         addShader("iteration/different.frag", GL_FRAGMENT_SHADER)
 
         bindAttribute(0, "position")
