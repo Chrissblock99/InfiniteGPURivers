@@ -25,10 +25,10 @@ class TessProgram(private val cameraMatrix: CameraMatrix, area: Area) : GLProgra
         this.vao = VAOImpl(null, 2, tesselationGridVertexesTest(maxSize.x, maxSize.y, 64.0))
 
         addShader("tesselation/passThrough.vert", GL_VERTEX_SHADER)
-        addShader("tesselation/tess.tesc", GL_TESS_CONTROL_SHADER)
-        addShader("tesselation/tess.tese", GL_TESS_EVALUATION_SHADER)
+        addShader("tesselation/constant.tesc", GL_TESS_CONTROL_SHADER)
+        addShader("tesselation/readSimulation.tese", GL_TESS_EVALUATION_SHADER)
         addShader("tesselation/normals.geom", GL_GEOMETRY_SHADER)
-        addShader("tesselation/different.frag", GL_FRAGMENT_SHADER)
+        addShader("tesselation/colors.frag", GL_FRAGMENT_SHADER)
 
         glPatchParameteri(GL_PATCH_VERTICES, 4)
         glEnable(GL_BLEND)

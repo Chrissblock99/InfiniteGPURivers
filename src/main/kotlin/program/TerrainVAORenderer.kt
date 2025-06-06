@@ -17,7 +17,7 @@ class TerrainVAORenderer(protected val cameraMatrix: CameraMatrix) : TerrainRend
     init {
         addShader("terrain/passThrough.vert", GL_VERTEX_SHADER)
         addShader("tesselation/normals.geom", GL_GEOMETRY_SHADER)
-        addShader("tesselation/different.frag", GL_FRAGMENT_SHADER)
+        addShader("tesselation/colors.frag", GL_FRAGMENT_SHADER)
 
         bindAttribute(0, "position")
 
