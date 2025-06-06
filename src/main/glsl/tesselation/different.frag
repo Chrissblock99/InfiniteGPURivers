@@ -5,6 +5,7 @@ uniform bool water;
 
 in vec3 pos;
 in vec3 normal;
+in float otherHeight;
 
 out vec4 FragColor;
 
@@ -187,10 +188,12 @@ void main(void) {
         color = vec3(.2, .24, .6);
     else if (angle0to1 < 0.4)
         color = vec3(0.375);
-    else if (pos.y < 75 + simplexFBM(pos.xz, seed, 4, freq, amp, lacunarity, persistence, false).z)
+    else if (pos.y > 75 + simplexFBM(pos.xz, seed, 4, freq, amp, lacunarity, persistence, false).z)
+        color = vec3(0.8, 0.8, 0.9);
+    else if (pos.y > otherHeight)
         color = vec3(.31, .47, .22);
     else
-        color = vec3(0.8, 0.8, 0.9);
+        color = vec3(0.3, 0.2, 0.2);
 
 
     float diffuse = dot(normal, lightDir);
@@ -205,5 +208,5 @@ void main(void) {
     }
 
 
-    FragColor = vec4(color * (diffuse + specular), water ? 0.6 : 1.0);
+    FragColor = vec4(color * (diffuse + specular), water ? ((otherHeight > pos.y) ? 0.0 : 0.6) : 1.0);
 }

@@ -7,6 +7,8 @@ uniform int scale;
 
 in vec2 position;
 
+out float oHeight;
+
 void main(void) {
     int i = gl_VertexID;
 
@@ -14,4 +16,5 @@ void main(void) {
     int z = (i - x) / width;
 
     gl_Position = vec4(x*scale + srcPos.x, water ? position.y : position.x, z*scale + srcPos.y, 1);
+    oHeight = water ? position.x : position.y;
 }

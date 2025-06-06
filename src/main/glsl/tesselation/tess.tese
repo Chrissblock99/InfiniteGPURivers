@@ -6,6 +6,8 @@ layout(binding = 1, r32f) restrict readonly uniform image2D waterMap;
 uniform bool water;
 uniform ivec2 srcPos;
 
+out float oHeight;
+
 void main() {
     vec2 uv = gl_TessCoord.xy;
 
@@ -16,10 +18,14 @@ void main() {
     ivec2 texPosition = ivec2(position)+1;
 
     float height = imageLoad(terrainMap, texPosition).x;
-    if (water) {
-        float waterHeight = imageLoad(waterMap, texPosition).x - .03;
+    float otherHeight = height;
+
+    float waterHeight = imageLoad(waterMap, texPosition).x - .03;
+    if (water)
         height += waterHeight - ((waterHeight <= 0) ? .1 : 0);
-    }
+    else
+        otherHeight += waterHeight - ((waterHeight <= 0) ? .1 : 0);
 
     gl_Position =  vec4(position.x + srcPos.x, height, position.y + srcPos.y, 1);
+    oHeight = otherHeight;
 }
