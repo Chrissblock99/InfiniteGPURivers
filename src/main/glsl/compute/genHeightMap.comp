@@ -146,6 +146,15 @@ vec3 simplexNoiseDeriv(vec2 p, int seed, bool deriv) {
 }
 // end - credit to Stefan Gustavson AKA stegu
 
+float lengthSq(vec2 v) {
+    return dot(v, v);
+}
+
+float distanceSq(vec2 a, vec2 b) {
+    a -= b;
+    return lengthSq(a);
+}
+
 vec3 simplexFBM(vec2 pos, int seed, int octaves, float freq, float amp, float lacunarity, float persistence, bool deriv) {
     vec3 sum = vec3(0);
 
