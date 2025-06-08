@@ -146,6 +146,10 @@ vec3 simplexNoiseDeriv(vec2 p, int seed, bool deriv) {
 }
 // end - credit to Stefan Gustavson AKA stegu
 
+float random0to1(ivec2 pos, int seed) {
+    return float(random(ivec2(pos), seed)) / 256.0;
+}
+
 float lengthSq(vec2 v) {
     return dot(v, v);
 }
