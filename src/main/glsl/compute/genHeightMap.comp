@@ -191,6 +191,97 @@ vec3 simplexFBMPositive(vec2 pos, int seed, int octaves, float freq, float amp, 
     return sum;
 }
 
+struct VoroniData {
+    vec2 srcPos;
+    float distSq;
+    vec2 nearestOtherPos;
+    float distSqToBorder;
+};
+
+vec2 shortestPointToLine(vec2 a, vec2 n, vec2 p) {
+    n = normalize(n);
+    vec2 b = a-p;
+    return b - dot(b, n)*n;
+}
+
+vec2 randomVec2(ivec2 pos, int seed) {
+    return vec2(float(random(pos, seed))/256.0, float(random(pos, seed+1))/256.0);
+}
+
+vec2 srcPointOf(vec2 pos, int seed) {
+    ivec2 gridPos = ivec2(floor(pos));
+    vec2 srcPoint = vec2(gridPos) + randomVec2(gridPos, seed);
+
+    return srcPoint;
+}
+
+vec2 voroni(vec2 pos, int seed, float freq) {
+    pos /= freq;
+
+    float shortest = 1.0/0.0;
+    vec2 closest = vec2(0);
+
+    for (int x = -1; x <= 1; x++)
+    for (int y = -1; y <= 1; y++) {
+        vec2 srcPoint = srcPointOf(pos+vec2(x,y), seed);
+        float dist = distanceSq(pos, srcPoint);
+
+        if (dist < shortest) {
+            shortest = dist;
+            closest = srcPoint;
+        }
+    }
+
+    return closest*freq;
+}
+
+VoroniData voroniDist(vec2 pos, int seed, float freq) {
+    pos /= freq;
+
+    float shortest = 1.0/0.0;
+    vec2 closest = vec2(0);
+
+    for (int x = -1; x <= 1; x++)
+    for (int y = -1; y <= 1; y++) {
+        vec2 srcPoint = srcPointOf(pos+vec2(x,y), seed);
+        float dist = distanceSq(pos, srcPoint);
+
+        if (dist < shortest) {
+            shortest = dist;
+            closest = srcPoint;
+        }
+    }
+
+    float otherShortest = 1.0/0.0;
+    vec2 otherClosest = vec2(0);
+
+    for (int x = -2; x <= 2; x++)
+    for (int y = -2; y <= 2; y++) {
+        vec2 srcPoint = srcPointOf(pos+vec2(x,y), seed);
+        if (closest == srcPoint)
+            continue;
+        float dist = lengthSq(shortestPointToLine(closest/2 + srcPoint/2, (closest-srcPoint).yx*vec2(1,-1), pos));
+
+        if (dist < otherShortest) {
+            otherShortest = dist;
+            otherClosest = srcPoint;
+        }
+    }
+
+    return VoroniData(closest*freq, shortest*freq, otherClosest*freq, otherShortest*freq);
+}
+
+vec2 fbmVoroni(vec2 pos, int seed, int octaves, float freq, float lacunarity) {
+    pos /= pow(lacunarity, float(octaves));
+
+    for (int i = 0; i < octaves; i++) {
+        pos *= lacunarity;
+        pos = voroni(pos, seed + octaves - i -1, freq);
+    }
+
+    return pos;
+}
+
 const int seed = 0;
 
 const int octaves = 8;
