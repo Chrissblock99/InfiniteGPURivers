@@ -63,6 +63,7 @@ class InputController(private val inputDeviceManager: InputDeviceManager, privat
 
 
 
+        inputDeviceManager.addKeyReleaseCallback(GLFW.GLFW_KEY_X) { println("${main.cameraMatrix.position} (${main.cameraMatrix.pitch}, ${main.cameraMatrix.yaw})") }
         inputDeviceManager.addKeyReleaseCallback(GLFW.GLFW_KEY_T) { main.simulateErosion = !main.simulateErosion }
         inputDeviceManager.addKeyReleaseCallback(GLFW.GLFW_KEY_I) { main.renderIterations = !main.renderIterations }
         inputDeviceManager.addKeyReleaseCallback(GLFW.GLFW_KEY_R) { main.primitiveErosion() }
