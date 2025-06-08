@@ -293,28 +293,23 @@ const float persistence = .5;
 void main() {
     vec2 pos = vec2(gl_GlobalInvocationID.xy + vec2(srcPos));
 
-    vec2 warpedPos = pos + vec2(simplexFBM(pos, seed+100, 2, freq, amp, lacunarity*2, persistence*.5, false).z,
-                                simplexFBM(pos, seed+102, 2, freq, amp, lacunarity*2, persistence*.5, false).z);
-    vec2 strongWarpedPos = pos + vec2(simplexFBM(pos, seed+104, 1, freq, amp*3, 0, 0, false).z,
-                                      simplexFBM(pos, seed+106, 1, freq, amp*3, 0, 0, false).z);
+    vec2 warpedPos = pos + vec2(simplexFBM(pos, seed+110, 3, freq, amp, lacunarity*2, persistence*.5, false).z,
+                                simplexFBM(pos, seed+120, 3, freq, amp, lacunarity*2, persistence*.5, false).z);
+    vec2 strongWarpedPos = pos + vec2(simplexFBM(pos, seed+130, 1, freq, amp*3, 0, 0, false).z,
+                                      simplexFBM(pos, seed+140, 1, freq, amp*3, 0, 0, false).z);
 
 
-    float height = simplexFBMPositive(pos, seed, 3, freq, amp, lacunarity, persistence, false).z;
-    float mul = simplexFBMPositive(strongWarpedPos, seed+1000, 1, freq/4, 1, 0, 0, false).z;
-    height *= smoothstep(.5, .7, mul);
-
-    float height2 = simplexFBMPositive(pos, seed+10, 3, freq, amp, lacunarity, persistence, false).z;
-    float mul2 = simplexFBMPositive(strongWarpedPos, seed+1100, 1, freq/4, 1, 0, 0, false).z;
-    height += height2*smoothstep(.5, .7, mul2);
-
-    float height3 = simplexFBMRidge(warpedPos, seed+20, 3, freq/2, amp*1.5, lacunarity, persistence, false).z;
-    float mul3 = simplexFBMPositive(strongWarpedPos, seed+1200, 1, freq/4, 1, 0, 0, false).z;
-    height += height3*smoothstep(.5, .7, mul3);
+    VoroniData res = voroniDist(warpedPos, seed, 100);
+    float height = res.distSqToBorder + res.distSq;
+    height = (log(height+10)-2) * amp;
+    float mul = simplexFBMPositive(strongWarpedPos, seed+1100, 1, freq/4, 1, 0, 0, false).z;
+    height *= smoothstep(.3, .8, mul);
+    height += smoothstep(.4, .9, mul)*amp/2;
 
 
-    float detail = simplexFBMPositive(pos, seed+5, 5, freq*lacunarity*lacunarity*lacunarity, amp*persistence*persistence*persistence, lacunarity, persistence, false).z;
+    float detail = simplexFBMPositive(pos, seed+2000, 5, freq*lacunarity*lacunarity*lacunarity, amp*persistence*persistence*persistence, lacunarity, persistence, false).z;
     height += detail;
-    float detail2 = simplexFBMPositive(pos, seed-5, 2, freq*.5, amp, lacunarity, persistence, false).z;
+    float detail2 = simplexFBMPositive(pos, seed+2100, 2, freq*.5, amp, lacunarity, persistence, false).z;
     height += detail2;
 
     imageStore(terrainMap, ivec2(gl_GlobalInvocationID.xy), vec4(height));
