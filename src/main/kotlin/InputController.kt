@@ -37,6 +37,7 @@ class InputController(private val inputDeviceManager: InputDeviceManager, privat
 
         inputDeviceManager.addMouseRelativeMovementConsumer { change: Vec2d ->
             main.cameraMatrix.yaw -= (change.x / 300.0).toFloat()
+            main.cameraMatrix.yaw %= (Math.PI*2).toFloat()
             main.cameraMatrix.pitch = max(
                 -Math.PI / 2,
                 min(main.cameraMatrix.pitch - (change.y / 300.0), Math.PI / 2)
@@ -44,8 +45,8 @@ class InputController(private val inputDeviceManager: InputDeviceManager, privat
         }
 
 
-        inputDeviceManager.addKeyReleaseCallback(GLFW.GLFW_KEY_LEFT) { main.cameraMatrix.roll -= 0.05f }
-        inputDeviceManager.addKeyReleaseCallback(GLFW.GLFW_KEY_RIGHT) { main.cameraMatrix.roll += 0.05f }
+        inputDeviceManager.addKeyReleaseCallback(GLFW.GLFW_KEY_LEFT) { main.cameraMatrix.roll = (main.cameraMatrix.roll-0.05f) % (Math.PI*2).toFloat() }
+        inputDeviceManager.addKeyReleaseCallback(GLFW.GLFW_KEY_RIGHT) { main.cameraMatrix.roll = (main.cameraMatrix.roll+0.05f) % (Math.PI*2).toFloat() }
 
         inputDeviceManager.addKeyReleaseCallback(GLFW.GLFW_KEY_O) { main.cameraMatrix.FOV++ }
         inputDeviceManager.addKeyReleaseCallback(GLFW.GLFW_KEY_P) { main.cameraMatrix.FOV-- }
