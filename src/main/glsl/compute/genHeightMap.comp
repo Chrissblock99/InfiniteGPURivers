@@ -36,6 +36,10 @@ int permutate(int i, int seed) {
     return permA[(i + seed * 5 + 134) & 0xff];
 }
 
+int random(ivec2 pos, int seed) {
+    return permutate(pos.x + permutate(pos.y, seed), seed);
+}
+
 const float F2 = 0.366025403;
 const float G2 = 0.211324865;
 
@@ -88,7 +92,7 @@ vec3 simplexNoiseDeriv(vec2 p, int seed, bool deriv) {
     if (t0 < 0.0f)
     t40 = t20 = t0 = n0 = g0.x = g0.y = 0.0f; /* No influence */
     else {
-        g0 = grad2(permutate(ii + permutate(jj, seed), seed));
+        g0 = grad2(random(ivec2(ii, jj), seed));
         t20 = t0 * t0;
         t40 = t20 * t20;
         n0 = t40 * (g0.x * x0 + g0.y * y0);
@@ -98,7 +102,7 @@ vec3 simplexNoiseDeriv(vec2 p, int seed, bool deriv) {
     if (t1 < 0.0f)
     t21 = t41 = t1 = n1 = g1.x = g1.y = 0.0f; /* No influence */
     else {
-        g1 = grad2(permutate(ii + i1 + permutate(jj + j1, seed), seed));
+        g1 = grad2(random(ivec2(ii + i1, jj + j1), seed));
         t21 = t1 * t1;
         t41 = t21 * t21;
         n1 = t41 * (g1.x * x1 + g1.y * y1);
@@ -108,7 +112,7 @@ vec3 simplexNoiseDeriv(vec2 p, int seed, bool deriv) {
     if (t2 < 0.0f)
     t42 = t22 = t2 = n2 = g2.x = g2.y = 0.0f; /* No influence */
     else {
-        g2 = grad2(permutate(ii + 1 + permutate(jj + 1, seed), seed));
+        g2 = grad2(random(ivec2(ii + 1, jj + 1), seed));
         t22 = t2 * t2;
         t42 = t22 * t22;
         n2 = t42 * (g2.x * x2 + g2.y * y2);
