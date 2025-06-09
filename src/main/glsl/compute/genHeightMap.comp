@@ -4,6 +4,8 @@ layout(binding = 8, r32f) restrict writeonly uniform image2D terrainMap;
 
 uniform ivec2 srcPos;
 
+#define PI 3.1415926538
+
 // start - credit to Stefan Gustavson AKA stegu
 // https://github.com/stegu/perlin-noise/blob/master/src/sdnoise1234.c
 const int[] permA = {151,160,137,91,90,15,
@@ -148,6 +150,15 @@ vec3 simplexNoiseDeriv(vec2 p, int seed, bool deriv) {
 
 float random0to1(ivec2 pos, int seed) {
     return float(random(ivec2(pos), seed)) / 256.0;
+}
+
+vec2 randomUnitVec(ivec2 pos, int seed) {
+    float radians = random0to1(pos, seed)*2*PI;
+    return vec2(cos(radians), sin(radians));
+}
+
+vec2 randomCircleVec(ivec2 pos, int seed, float maxRadius) {
+    return randomUnitVec(pos, seed)*random0to1(pos, seed+1)*maxRadius;
 }
 
 float lengthSq(vec2 v) {
