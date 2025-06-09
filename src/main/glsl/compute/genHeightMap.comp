@@ -204,8 +204,8 @@ struct VoroniData {
 
 vec2 shortestPointToLine(vec2 a, vec2 n, vec2 p) {
     n = normalize(n);
-    vec2 b = a-p;
-    return b - dot(b, n)*n;
+    a -= p;
+    return a - dot(a, n)*n;
 }
 
 vec2 randomVec2(ivec2 pos, int seed) {
