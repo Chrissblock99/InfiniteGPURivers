@@ -219,6 +219,12 @@ vec2 shortestPointToLine(vec2 a, vec2 n, vec2 p) {
     return a - dot(a, n)*n;
 }
 
+vec2 pointToLineSegment(vec2 a, vec2 n, vec2 p, float start, float end) {
+    n = -normalize(n);
+    a -= p;
+    return a - clamp(dot(a, n), start, end)*n;
+}
+
 vec2 randomVec2(ivec2 pos, int seed) {
     return vec2(float(random(pos, seed))/256.0, float(random(pos, seed+1))/256.0);
 }
