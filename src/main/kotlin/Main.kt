@@ -118,7 +118,7 @@ class Main(
     }
 
     companion object {
-        var main: Main? = null
+        lateinit var main: Main
 
         @JvmStatic
         fun main(args: Array<String>) {
@@ -133,11 +133,11 @@ class Main(
             )
 
             println("Started after: " + (GLFW.glfwGetTime() - start))
-            main!!.loop()
-            main!!.saveWorld()
+            main.loop()
+            main.saveWorld()
             println("Window closed")
 
-            main!!.cleanGL()
+            main.cleanGL()
         }
     }
 }
