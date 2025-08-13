@@ -7,13 +7,18 @@ import glm_.vec4.Vec4i
 
 class ErosionManager(private val eroder: GPUTerrainEroder, private val data: IterableWorld) {
     private val maxChunks: Vec2i = eroder.maxTextureSize / data.chunkSize
+    private var currentArea: Area = eroder.usedArea / data.chunkSize
     private var currentTask: ErosionTask? = null
 
     fun findIterate(pos: Vec2i, maxIteration: Int, iterations: Int): Boolean {
         if (currentTask == null) {
-            currentTask = findChangeArea(pos, maxIteration, iterations)
-            if (currentTask == null)
-                return false
+            currentTask = findTask(maxIteration, iterations)
+            if (currentTask == null) {
+                findAndUseNewArea(pos)
+                currentTask = findTask(maxIteration, iterations)
+                if (currentTask == null)
+                    return false
+            }
         }
 
         var done = false
@@ -41,33 +46,22 @@ class ErosionManager(private val eroder: GPUTerrainEroder, private val data: Ite
         currentTask = null
     }
 
-    private fun findChangeArea(pos: Vec2i, maxIteration: Int, maxSurface: Int): ErosionTask? {
-        val findArea = Area(eroder.maxTextureSize / data.chunkSize) + pos - (eroder.maxTextureSize / data.chunkSize / 2)
-        val intersection = findArea intersect (eroder.usedArea / data.chunkSize)
-
-        if (intersection != null) {
-            val task: ErosionTask? = findTask(intersection, maxIteration, maxSurface)
-            if (task != null) return task
-        }
-
-
-        val task: ErosionTask = findTask(findArea, maxIteration, maxSurface) ?: return null
-
-        eroder.usedArea = findArea * data.chunkSize
-        return task
+    private fun findAndUseNewArea(pos: Vec2i) {
+        currentArea = Area(eroder.maxTextureSize / data.chunkSize) + pos - (eroder.maxTextureSize / data.chunkSize / 2)
+        eroder.usedArea = currentArea * data.chunkSize
     }
 
-    private fun findTask(area: Area, maxIteration: Int, maxSurface: Int): ErosionTask? {
-        val lowestIterable = lowestIterableTiles(area, maxIteration) ?: return null
+    private fun findTask(maxIteration: Int, maxSurface: Int): ErosionTask? {
+        val lowestIterable = lowestIterableTiles(maxIteration) ?: return null
 
-        return bruteForceTask(area, lowestIterable, maxSurface)
+        return bruteForceTask(lowestIterable, maxSurface)
     }
 
-    private fun bruteForceTask(allowed: Area, searchInside: LinkedHashSet<Vec2i>, maxSurface: Int): ErosionTask? {
+    private fun bruteForceTask(searchInside: LinkedHashSet<Vec2i>, maxSurface: Int): ErosionTask? {
         var bestArea = Area()
 
         for (currentPos in searchInside) {
-            val betterArea = betterAreaFrom(currentPos, bestArea, allowed, maxSurface)
+            val betterArea = betterAreaFrom(currentPos, bestArea, currentArea, maxSurface)
             if (betterArea != null) bestArea = betterArea
 
             if (bestArea.size == maxChunks) break
@@ -78,10 +72,10 @@ class ErosionManager(private val eroder: GPUTerrainEroder, private val data: Ite
         return createTask(bestArea)
     }
 
-    private fun lowestIterableTiles(area: Area, maxIteration: Int): LinkedHashSet<Vec2i>? {
+    private fun lowestIterableTiles(maxIteration: Int): LinkedHashSet<Vec2i>? {
         val tilesAtIteration: HashMap<Int, LinkedHashSet<Vec2i>> = LinkedHashMap()
 
-        area.innerPoints.forEach {
+        currentArea.innerPoints.forEach {
             val iteration = data[it].iteration
             tilesAtIteration.computeIfAbsent(iteration) { _ -> LinkedHashSet() }.add(it)
         }

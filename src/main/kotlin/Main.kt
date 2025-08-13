@@ -56,11 +56,10 @@ class Main(
 
     fun primitiveErosion() {
         val pos = Util.floorDiv(Vec2i(cameraMatrix.position.xz), worldStorage.chunkSize)
-        if (erosionManager.findIterate(pos, 2000, 100 * 1000 * 1000 / 60)) {
-            tessProgram.area = gpuTerrainEroder.usedArea
-
+        if (erosionManager.findIterate(pos, 2000, 100 * 1000 * 1000 / 60))
             iterationRenderer.reloadAll()
-        } else simulateErosion = false
+        else simulateErosion = false
+        tessProgram.area = gpuTerrainEroder.usedArea
     }
 
     private fun loop() {
