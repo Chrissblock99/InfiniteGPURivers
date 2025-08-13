@@ -1,7 +1,6 @@
 package me.chriss99.erosion
 
 import me.chriss99.Area
-import me.chriss99.IterationSurfaceType
 import me.chriss99.worldmanagement.iteration.IterableWorld
 import glm_.vec2.Vec2i
 import glm_.vec4.Vec4i
@@ -107,7 +106,7 @@ class ErosionManager(private val eroder: GPUTerrainEroder, private val data: Ite
         (it + Vec2i(1, 0)) in tiles &&
         (it + Vec2i(0, 1)) in tiles &&
         (it + Vec2i(1, 1)) in tiles &&
-        iterable(Area(it, 2))
+        iterable(it)
     }
 
     private fun betterAreaFrom(startPos: Vec2i, bestArea: Area, allowedArea: Area, maxSurface: Int): Area? {
@@ -148,29 +147,23 @@ class ErosionManager(private val eroder: GPUTerrainEroder, private val data: Ite
     }
 
     private fun iterable(area: Area): Boolean {
-        if (area.size.anyLessThan(2)) return false
+        return area.increase(-1, -1, 0, 0) .innerPoints.all { iterable(it) }
+    }
 
-        val length = area.size - 1
-
-        val l = getEdgesEqual(area.srcPos, length.y, true)
-        val r = getEdgesEqual(area.srcPos.plus(length.x, 0), length.y, true)
-        val f = getEdgesEqual(area.srcPos.plus(0, length.y), length.x, false)
-        val b = getEdgesEqual(area.srcPos, length.x, false)
-
-        if (l > 1 || r > 1 || f > 1 || b > 1) return false
+    private fun iterable(pos: Vec2i): Boolean {
+        val l = data[pos + Vec2i(0, 1)].horizontal
+        val r = data[pos + Vec2i(1, 1)].horizontal
+        val f = data[pos + Vec2i(1, 1)].vertical
+        val b = data[pos + Vec2i(1, 0)].vertical
 
         if (l == -1 || r == 1 || f == 1 || b == -1) return false
 
-        val allowed = IterationSurfaceType.SurfaceType.FLAT
-        val tl = allowed == data.getIterationSurfaceType(area.srcPos.plus(0, length.y)).surfaceType
-        val tr = allowed == data.getIterationSurfaceType(area.srcPos.plus(length)).surfaceType
-        val dl = allowed == data.getIterationSurfaceType(area.srcPos).surfaceType
-        val dr = allowed == data.getIterationSurfaceType(area.srcPos.plus(length.x, 0)).surfaceType
+        val tl = data[pos + Vec2i(0, 1)].vertical == 0
+        val tr = data[pos + Vec2i(2, 1)].vertical == 0
+        val dl = data[pos + Vec2i(0, 0)].vertical == 0
+        val dr = data[pos + Vec2i(2, 0)].vertical == 0
 
-        if (l == 0 && f == 0 && !tl || f == 0 && r == 0 && !tr || l == 0 && b == 0 && !dl || b == 0 && r == 0 && !dr)
-            return false
-
-        return iterationsAreSame(area)
+        return !(l == 0 && f == 0 && !tl || f == 0 && r == 0 && !tr || l == 0 && b == 0 && !dl || b == 0 && r == 0 && !dr)
     }
 
     private fun createTask(area: Area): ErosionTask {
@@ -216,12 +209,6 @@ class ErosionManager(private val eroder: GPUTerrainEroder, private val data: Ite
         if (l == 0 && f == 0) data[area.srcPos.plus(0, size.y)].iteration += data.chunkSize
         if (r == 0 && b == 0) data[area.srcPos.plus(size.x, 0)].iteration += data.chunkSize
         if (r == 0 && f == 0) data[inner.endPos].iteration += data.chunkSize
-    }
-
-    private fun iterationsAreSame(area: Area): Boolean {
-        val iteration = data[area.srcPos].iteration
-
-        return area.innerPoints.all { iteration == data[it].iteration }
     }
 
     /**
