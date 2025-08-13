@@ -1,14 +1,20 @@
 package me.chriss99.erosion
 
 import me.chriss99.Area
-import me.chriss99.worldmanagement.iteration.IterableWorld
 import glm_.vec2.Vec2i
 import glm_.vec4.Vec4i
+import me.chriss99.worldmanagement.ErosionDataStorage
 
-class ErosionManager(private val eroder: GPUTerrainEroder, private val data: IterableWorld) {
-    private val maxChunks: Vec2i = eroder.maxTextureSize / data.chunkSize
-    private var currentArea: Area = eroder.usedArea / data.chunkSize
+class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage: ErosionDataStorage) {
+    private val data = worldStorage.iterationInfo
+    private val maxChunks: Vec2i = maxTextureSize / data.chunkSize
+
+    private var currentArea: Area = findNewArea(pos)
     private var currentTask: ErosionTask? = null
+
+    private val eroder: GPUTerrainEroder = GPUTerrainEroder(worldStorage, maxTextureSize, currentArea * data.chunkSize)
+    val usedArea: Area get() = eroder.usedArea
+    fun downloadMap() = eroder.downloadMap()
 
     fun findIterate(pos: Vec2i, maxIteration: Int, iterations: Int): Boolean {
         if (currentTask == null) {
@@ -44,10 +50,15 @@ class ErosionManager(private val eroder: GPUTerrainEroder, private val data: Ite
         while (!currentTask!!.erosionStep());
         taskFinished(currentTask!!)
         currentTask = null
+        eroder.downloadMap()
+    }
+
+    private fun findNewArea(pos: Vec2i): Area {
+        return Area(maxTextureSize / data.chunkSize) + pos - (maxTextureSize / data.chunkSize / 2)
     }
 
     private fun findAndUseNewArea(pos: Vec2i) {
-        currentArea = Area(eroder.maxTextureSize / data.chunkSize) + pos - (eroder.maxTextureSize / data.chunkSize / 2)
+        currentArea = findNewArea(pos)
         eroder.usedArea = currentArea * data.chunkSize
     }
 
@@ -233,6 +244,10 @@ class ErosionManager(private val eroder: GPUTerrainEroder, private val data: Ite
                 data[Vec2i(pos).plus(0, i)].horizontal = value
             else
                 data[Vec2i(pos).plus(i, 0)].vertical = value
+    }
+    
+    fun delete() {
+        eroder.delete()
     }
 
     companion object {

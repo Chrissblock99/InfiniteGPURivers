@@ -69,14 +69,14 @@ class InputController(private val inputDeviceManager: InputDeviceManager, privat
         inputDeviceManager.addKeyReleaseCallback(GLFW.GLFW_KEY_I) { main.renderIterations = !main.renderIterations }
         inputDeviceManager.addKeyReleaseCallback(GLFW.GLFW_KEY_R) { main.primitiveErosion() }
         inputDeviceManager.addKeyReleaseCallback(GLFW.GLFW_KEY_F) {
-            main.gpuTerrainEroder.downloadMap()
+            main.erosionManager.downloadMap()
             writeImageHeightMap(
-                main.worldStorage.terrain.readArea(main.gpuTerrainEroder.usedArea) as Float2DBufferWrapper,
+                main.worldStorage.terrain.readArea(main.erosionManager.usedArea) as Float2DBufferWrapper,
                 "terrain",
                 true
             )
             writeImageHeightMap(
-                main.worldStorage.water.readArea(main.gpuTerrainEroder.usedArea) as Float2DBufferWrapper,
+                main.worldStorage.water.readArea(main.erosionManager.usedArea) as Float2DBufferWrapper,
                 "water",
                 false
             )

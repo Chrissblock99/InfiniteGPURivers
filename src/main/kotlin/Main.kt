@@ -1,7 +1,6 @@
 package me.chriss99
 
 import me.chriss99.erosion.ErosionManager
-import me.chriss99.erosion.GPUTerrainEroder
 import me.chriss99.program.*
 import me.chriss99.util.FrameCounter
 import me.chriss99.util.Util
@@ -16,15 +15,14 @@ class Main(
     worldName: String,
     chunkSize: Int, regionSize: Int, iterationChunkSize: Int, iterationRegionSize: Int,
     chunkRenderDistance: Int, iterationRenderDistance: Int,
-    initErosionArea: Area
+    maxErosionSize: Vec2i
 ) {
     val window = Window("InfiniteGPURivers")
     val cameraMatrix = CameraMatrix(aspectRatio = window.aspectRatio)
 
     val worldStorage = ErosionDataStorage(worldName, chunkSize, regionSize, iterationChunkSize, iterationRegionSize)
-    val gpuTerrainEroder = GPUTerrainEroder(worldStorage, initErosionArea.size, initErosionArea)
     var simulateErosion = false
-    val erosionManager = ErosionManager(gpuTerrainEroder, worldStorage.iterationInfo)
+    val erosionManager = ErosionManager(Vec2i(cameraMatrix.position.xz), maxErosionSize, worldStorage)
 
     val vaoList = ArrayList<ColoredVAO>(listOf<ColoredVAO>()) //test case for rendering
     val vaoListProgram = ListRenderer(ColoredVAORenderer(cameraMatrix), vaoList)
@@ -33,7 +31,7 @@ class Main(
         val terrain = worldStorage.terrain.readArea(area) as Float2DBufferWrapper
         val water = worldStorage.water.readArea(area) as Float2DBufferWrapper
         TerrainVAOGenerator.heightMapToSimpleVAO(terrain, water, srcPos1, 1)
-    }, cameraMatrix.position, worldStorage.chunkSize, chunkRenderDistance, initErosionArea)
+    }, cameraMatrix.position, worldStorage.chunkSize, chunkRenderDistance, erosionManager.usedArea)
     val iterationRenderer = PositionCenteredRenderer(
         IterationVAORenderer(cameraMatrix),
         { vec2i, chunkSize1 ->
@@ -46,7 +44,7 @@ class Main(
         cameraMatrix.position, worldStorage.iterationChunkSize, iterationRenderDistance
     )
     var renderIterations = false
-    val tessProgram = TessProgram(cameraMatrix, initErosionArea)
+    val tessProgram = TessProgram(cameraMatrix, erosionManager.usedArea)
 
     val inputController = InputController(window.inputDeviceManager, this)
     init { GLUtil.setupDebugMessageCallback() }
@@ -59,7 +57,7 @@ class Main(
         if (erosionManager.findIterate(pos, 2000, 100 * 1000 * 1000 / 60))
             iterationRenderer.reloadAll()
         else simulateErosion = false
-        tessProgram.area = gpuTerrainEroder.usedArea
+        tessProgram.area = erosionManager.usedArea
     }
 
     private fun loop() {
@@ -69,7 +67,7 @@ class Main(
             window.updateWindowSize()
             cameraMatrix.aspectRatio = window.aspectRatio
 
-            playerCenteredRenderer.updateLoadedChunks(cameraMatrix.position, gpuTerrainEroder.usedArea)
+            playerCenteredRenderer.updateLoadedChunks(cameraMatrix.position, erosionManager.usedArea)
             if (renderIterations)
                 iterationRenderer.updateLoadedChunks(cameraMatrix.position / worldStorage.iterationInfo.chunkSize)
 
@@ -101,7 +99,6 @@ class Main(
         lastTime = currentTime
 
         println("Saving world...")
-        gpuTerrainEroder.downloadMap()
         worldStorage.unloadAll()
         println("Saved world in " + (GLFW.glfwGetTime() - lastTime) + " seconds.")
     }
@@ -113,7 +110,7 @@ class Main(
         tessProgram.delete()
 
         worldStorage.cleanGL()
-        gpuTerrainEroder.delete()
+        erosionManager.delete()
     }
 
     companion object {
@@ -128,7 +125,7 @@ class Main(
                 "test64",
                 64, 10, 64, 10,
                 7, 2,
-                Area(60 * 64)
+                Vec2i(60 * 64)
             )
 
             println("Started after: " + (GLFW.glfwGetTime() - start))
