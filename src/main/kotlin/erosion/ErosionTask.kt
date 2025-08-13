@@ -39,10 +39,10 @@ class ErosionTask(
     val newSlopes: Int get() {
         var sum = 0
 
-        sum += if (l == 0) 1 else 0
-        sum += if (r == 0) 1 else 0
-        sum += if (f == 0) 1 else 0
-        sum += if (b == 0) 1 else 0
+        if (l == 0) sum++
+        if (r == 0) sum++
+        if (f == 0) sum++
+        if (b == 0) sum++
 
         return sum
     }
