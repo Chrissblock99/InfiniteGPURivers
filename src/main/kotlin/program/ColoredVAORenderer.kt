@@ -24,7 +24,7 @@ class ColoredVAORenderer(private val cameraMatrix: CameraMatrix) : RenderProgram
         if (vaos.isEmpty()) return
 
         use()
-        glUniformMatrix4fv(transformMatrix, false, cameraMatrix.generateMatrix() to FloatBuffer.allocate(16))
+        glUniformMatrix4fv(transformMatrix, false, (cameraMatrix.generateMatrix() to FloatBuffer.allocate(16)).array())
 
         for (vao in vaos) {
             vao.bind()
