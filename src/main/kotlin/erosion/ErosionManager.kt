@@ -15,7 +15,9 @@ class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage
 
     private val eroder: GPUTerrainEroder = GPUTerrainEroder(worldStorage, maxTextureSize, currentArea * data.chunkSize)
     val usedArea: Area get() = eroder.usedArea
+
     fun downloadMap() = eroder.downloadMap()
+    val iterabilityInfoCopy get() = iterabilityInfo.copyOf()
 
     fun findIterate(pos: Vec2i, maxIteration: Int, iterations: Int): Boolean {
         if (currentTask == null) {
