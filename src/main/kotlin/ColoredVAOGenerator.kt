@@ -4,6 +4,7 @@ import me.chriss99.util.Util
 import glm_.vec2.Vec2d
 import glm_.vec2.Vec2i
 import glm_.vec3.Vec3d
+import me.chriss99.erosion.ErosionManager.IterabilityInfo
 import java.util.*
 
 object ColoredVAOGenerator {
@@ -221,12 +222,12 @@ object ColoredVAOGenerator {
         return color
     }
 
-    fun heightMapToCrossIndex(heightMap: Array<DoubleArray>): IntArray {
-        val index = IntArray(heightMap.size * heightMap[0].size * 12)
+    fun sizeToCrossIndex(size: Vec2i): IntArray {
+        val index = IntArray(size.x * size.y * 12)
         var indexShift = 0
         var indexShift2 = 0
 
-        for (z in heightMap[0].indices) for (x in heightMap.indices) {
+        for (z in 0..<size.y) for (x in 0..<size.x) {
             var indexShift3 = 0
             for (i in 0..3) {
                 index[indexShift] = indexShift2 + indexShift3
@@ -244,7 +245,63 @@ object ColoredVAOGenerator {
     fun heightMapToCrossVAO(heightMap: Array<DoubleArray>, outflowPipes: Array<Array<DoubleArray>>): ColoredVAO {
         val vertexes = heightMapToCrossVertexes(heightMap)
         val color = heightMapToCrossColors(heightMap, outflowPipes)
-        val index = heightMapToCrossIndex(heightMap)
+        val index = sizeToCrossIndex(Vec2i(heightMap.size, heightMap[0].size))
+
+        return ColoredVAO(vertexes, color, index)
+    }
+
+    fun iterabilityInfoToCrossVertexes(pos: Vec2i, iterabilityInfo: Array<Array<IterabilityInfo?>>, scale: Int): DoubleArray {
+        val vertexes = DoubleArray(iterabilityInfo.size * iterabilityInfo[0].size * 9 * 3)
+        var vertexShift = 0
+
+        for (z in iterabilityInfo[0].indices) for (x in iterabilityInfo.indices) {
+            for (i in 0..7) {
+                vertexes[vertexShift    ] = (pos.x + x + offsets[i][0] + .5) * scale
+                vertexes[vertexShift + 1] = (iterabilityInfo[x][z]?.iteration ?: -100).toDouble()
+                vertexes[vertexShift + 2] = (pos.y + z + offsets[i][1] + .5) * scale
+                vertexShift += 3
+            }
+
+            vertexes[vertexShift    ] = (pos.x + x + .5) * scale
+            vertexes[vertexShift + 1] = (iterabilityInfo[x][z]?.iteration ?: -100).toDouble()
+            vertexes[vertexShift + 2] = (pos.y + z + .5) * scale
+            vertexShift += 3
+        }
+
+        return vertexes
+    }
+
+    fun iterabilityInfoToCrossColors(iterabilityInfo: Array<Array<IterabilityInfo?>>): DoubleArray {
+        val color = DoubleArray(iterabilityInfo.size * iterabilityInfo[0].size * 9 * 3)
+        var vertexShift = 0
+
+        for (z in iterabilityInfo[0].indices) for (x in iterabilityInfo.indices) {
+            val iterabilityInfo = iterabilityInfo[x][z] ?: IterabilityInfo(0, 0, 0, 0, -100)
+            val edges: Array<Boolean> = arrayOf(iterabilityInfo.f != 0, iterabilityInfo.l != 0, iterabilityInfo.r != 0, iterabilityInfo.b != 0)
+
+            for (i in 0..7) {
+                color[vertexShift    ] = if (edges[i / 2]) 1.0 else 0.0
+                color[vertexShift + 1] = if (edges[i / 2]) 1.0 else 0.0
+                color[vertexShift + 2] = 0.0
+                vertexShift += 3
+            }
+
+            val colorNum = if (iterabilityInfo.iteration == -100) .5 else 0.0
+            color[vertexShift    ] = colorNum
+            color[vertexShift + 1] = colorNum
+            color[vertexShift + 2] = colorNum
+            vertexShift += 3
+        }
+
+        return color
+    }
+
+    fun iterabilityInfoToCrossVAO(pos: Vec2i, iterabilityInfo: Array<Array<IterabilityInfo?>>, scale: Int): ColoredVAO {
+        val iterabilityInfo = Array(iterabilityInfo[0].size) { i -> Array(iterabilityInfo.size) { j -> iterabilityInfo[j][i] } }
+
+        val vertexes = iterabilityInfoToCrossVertexes(pos, iterabilityInfo, scale)
+        val color = iterabilityInfoToCrossColors(iterabilityInfo)
+        val index = sizeToCrossIndex(Vec2i(iterabilityInfo.size, iterabilityInfo[0].size))
 
         return ColoredVAO(vertexes, color, index)
     }
