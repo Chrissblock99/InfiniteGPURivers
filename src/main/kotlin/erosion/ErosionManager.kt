@@ -10,6 +10,7 @@ class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage
     private val maxChunks: Vec2i = maxTextureSize / data.chunkSize
 
     private var currentArea: Area = findNewArea(pos)
+    private var iterabilityInfo: Array<Array<IterabilityInfo?>> = computeIterability()
     private var currentTask: ErosionTask? = null
 
     private val eroder: GPUTerrainEroder = GPUTerrainEroder(worldStorage, maxTextureSize, currentArea * data.chunkSize)
@@ -59,7 +60,16 @@ class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage
 
     private fun findAndUseNewArea(pos: Vec2i) {
         currentArea = findNewArea(pos)
+        iterabilityInfo = computeIterability()
         eroder.usedArea = currentArea * data.chunkSize
+    }
+
+    private fun computeIterability(): Array<Array<IterabilityInfo?>> {
+        return Array(maxChunks.y - 1) { y ->
+            Array(maxChunks.x - 1) { x ->
+                iterabilityInfo(currentArea.srcPos + Vec2i(x, y))
+            }
+        }
     }
 
     private fun findTask(maxIteration: Int, maxSurface: Int): ErosionTask? {
@@ -170,6 +180,27 @@ class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage
 
         return !(l == 0 && f == 0 && !tl || f == 0 && r == 0 && !tr || l == 0 && b == 0 && !dl || b == 0 && r == 0 && !dr)
     }
+
+    private fun iterabilityInfo(pos: Vec2i): IterabilityInfo? {
+        val l = data[pos + Vec2i(0, 1)].horizontal
+        val r = data[pos + Vec2i(1, 1)].horizontal
+        val f = data[pos + Vec2i(1, 1)].vertical
+        val b = data[pos + Vec2i(1, 0)].vertical
+
+        if (l == -1 || r == 1 || f == 1 || b == -1) return null
+
+        val tl = data[pos + Vec2i(0, 1)].vertical == 0
+        val tr = data[pos + Vec2i(2, 1)].vertical == 0
+        val dl = data[pos + Vec2i(0, 0)].vertical == 0
+        val dr = data[pos + Vec2i(2, 0)].vertical == 0
+
+        if (l == 0 && f == 0 && !tl || f == 0 && r == 0 && !tr || l == 0 && b == 0 && !dl || b == 0 && r == 0 && !dr)
+            return null
+
+        return IterabilityInfo(l, r, f, b, data[pos].iteration)
+    }
+
+    data class IterabilityInfo(val l: Int, val r: Int, val f: Int, val b: Int, val iteration: Int)
 
     private fun createTask(area: Area): ErosionTask {
         val length = area.size - 1
