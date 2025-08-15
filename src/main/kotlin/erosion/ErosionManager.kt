@@ -83,6 +83,7 @@ class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage
         val right = Array(xSize) { xSize }
 
         var maxArea = 0
+        var minIteration = maxIteration-1
         var area = Area()
 
         for (y in 0..<iterabilityInfo.size) {
@@ -104,8 +105,11 @@ class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage
                     right[x] = min(right[x], curRight)
 
                     val currentArea = height[x] * (right[x] - left[x])
-                    if (currentArea > maxArea) {
+                    val currentIteration = iterabilityInfo[y][x]!!.iteration
+
+                    if (isBetterArea(maxArea, currentArea, minIteration, currentIteration)) {
                         maxArea = currentArea
+                        minIteration = currentIteration
                         area = Area(Vec2i(right[x] - left[x], height[x])) + Vec2i(left[x], y-height[x]+1)
                     }
                 } else {
@@ -118,6 +122,15 @@ class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage
             return null
 
         return createTask(area.increase(1, 1, 0, 0) + currentArea.srcPos)
+    }
+
+    private fun isBetterArea(maxArea: Int, currentArea: Int,
+                             minIteration: Int, currentIteration: Int): Boolean {
+        if (currentIteration != minIteration)
+            return currentIteration < minIteration
+        if (currentArea != maxArea)
+            return currentArea > maxArea
+        return false
     }
 
     private fun iterabilityInfo(pos: Vec2i): IterabilityInfo? {
@@ -216,7 +229,7 @@ class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage
             else
                 data[Vec2i(pos).plus(i, 0)].vertical = value
     }
-    
+
     fun delete() {
         eroder.delete()
     }
