@@ -2,8 +2,9 @@ package me.chriss99.erosion
 
 import me.chriss99.Area
 import glm_.vec2.Vec2i
-import glm_.vec4.Vec4i
 import me.chriss99.worldmanagement.ErosionDataStorage
+import kotlin.math.max
+import kotlin.math.min
 
 class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage: ErosionDataStorage) {
     private val data = worldStorage.iterationInfo
@@ -75,112 +76,48 @@ class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage
     }
 
     private fun findTask(maxIteration: Int, maxSurface: Int): ErosionTask? {
-        val lowestIterable = lowestIterableTiles(maxIteration) ?: return null
+        val xSize = iterabilityInfo[0].size
 
-        return bruteForceTask(lowestIterable, maxSurface)
-    }
+        val height = Array(xSize) { 0 }
+        val left = Array(xSize) { 0 }
+        val right = Array(xSize) { xSize }
 
-    private fun bruteForceTask(searchInside: LinkedHashSet<Vec2i>, maxSurface: Int): ErosionTask? {
-        var bestArea = Area()
+        var maxArea = 0
+        var area = Area()
 
-        for (currentPos in searchInside) {
-            val betterArea = betterAreaFrom(currentPos, bestArea, currentArea, maxSurface)
-            if (betterArea != null) bestArea = betterArea
+        for (y in 0..<iterabilityInfo.size) {
+            var curLeft = 0
+            var curRight = xSize
 
-            if (bestArea.size == maxChunks) break
+            for (x in 0..<xSize)
+                if (iterabilityInfo[y][x] != null) {
+                    height[x]++
+                    left[x] = max(left[x], curLeft)
+                } else {
+                    height[x] = 0
+                    left[x] = 0
+                    curLeft = x + 1
+                }
+
+            for (x in xSize-1 downTo 0)
+                if (iterabilityInfo[y][x] != null) {
+                    right[x] = min(right[x], curRight)
+
+                    val currentArea = height[x] * (right[x] - left[x])
+                    if (currentArea > maxArea) {
+                        maxArea = currentArea
+                        area = Area(Vec2i(right[x] - left[x], height[x])) + Vec2i(left[x], y-height[x]+1)
+                    }
+                } else {
+                    right[x] = xSize
+                    curRight = x
+                }
         }
 
-        if (bestArea == Area()) return null
+        if (maxArea == 0)
+            return null
 
-        return createTask(bestArea)
-    }
-
-    private fun lowestIterableTiles(maxIteration: Int): LinkedHashSet<Vec2i>? {
-        val tilesAtIteration: HashMap<Int, LinkedHashSet<Vec2i>> = LinkedHashMap()
-
-        currentArea.innerPoints.forEach {
-            val iteration = data[it].iteration
-            tilesAtIteration.computeIfAbsent(iteration) { _ -> LinkedHashSet() }.add(it)
-        }
-
-        val sortedIterations = tilesAtIteration.keys.sorted()
-
-        var lowestIterable: LinkedHashSet<Vec2i>? = null
-        for (lowestIteration in sortedIterations) {
-            if (lowestIteration > maxIteration) return null
-
-            val currentCandidates = tilesAtIteration[lowestIteration]!!
-            if (hasIterable2x2Area(currentCandidates)) {
-                lowestIterable = currentCandidates
-                break
-            }
-        }
-
-        return lowestIterable
-    }
-
-    private fun hasIterable2x2Area(tiles: LinkedHashSet<Vec2i>) = tiles.any {
-        (it + Vec2i(1, 0)) in tiles &&
-        (it + Vec2i(0, 1)) in tiles &&
-        (it + Vec2i(1, 1)) in tiles &&
-        iterable(it)
-    }
-
-    private fun betterAreaFrom(startPos: Vec2i, bestArea: Area, allowedArea: Area, maxSurface: Int): Area? {
-        var betterArea = Area(startPos, 2)
-
-        if (betterArea !in allowedArea || !iterable(betterArea)) return null
-
-        val directions = booleanArrayOf(true, true, true, true)
-
-        var i = 0
-        while (directions.any { it }) {
-            if (betterArea.width == maxChunks.x) {
-                directions[0] = false
-                directions[2] = false
-            }
-            if (betterArea.height == maxChunks.y) {
-                directions[1] = false
-                directions[3] = false
-            }
-
-
-            if (!directions[i]) {
-                i = (i + 1) % 4
-                continue
-            }
-
-            val betterAreaTry = betterArea.increase(changes[i].x, changes[i].y, changes[i].z, changes[i].w)
-
-            if (betterAreaTry in allowedArea && (betterAreaTry * data.chunkSize).area < maxSurface && iterable(betterAreaTry))
-                betterArea = betterAreaTry
-            else directions[i] = false
-            i = (i + 1) % 4
-        }
-
-
-        if (betterArea.area > bestArea.area) return betterArea
-        return null
-    }
-
-    private fun iterable(area: Area): Boolean {
-        return area.increase(-1, -1, 0, 0) .innerPoints.all { iterable(it) }
-    }
-
-    private fun iterable(pos: Vec2i): Boolean {
-        val l = data[pos + Vec2i(0, 1)].horizontal
-        val r = data[pos + Vec2i(1, 1)].horizontal
-        val f = data[pos + Vec2i(1, 1)].vertical
-        val b = data[pos + Vec2i(1, 0)].vertical
-
-        if (l == -1 || r == 1 || f == 1 || b == -1) return false
-
-        val tl = data[pos + Vec2i(0, 1)].vertical == 0
-        val tr = data[pos + Vec2i(2, 1)].vertical == 0
-        val dl = data[pos + Vec2i(0, 0)].vertical == 0
-        val dr = data[pos + Vec2i(2, 0)].vertical == 0
-
-        return !(l == 0 && f == 0 && !tl || f == 0 && r == 0 && !tr || l == 0 && b == 0 && !dl || b == 0 && r == 0 && !dr)
+        return createTask(area.increase(1, 1, 0, 0) + currentArea.srcPos)
     }
 
     private fun iterabilityInfo(pos: Vec2i): IterabilityInfo? {
@@ -230,6 +167,7 @@ class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage
         setEdges(area.srcPos, length.x, false, b)
 
         increaseIteration(area, l, r, f, b)
+        iterabilityInfo = computeIterability()
     }
 
     private fun increaseIteration(area: Area, l: Int, r: Int, f: Int, b: Int) {
@@ -281,10 +219,5 @@ class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage
     
     fun delete() {
         eroder.delete()
-    }
-
-    companion object {
-        private val changes =
-            arrayOf(Vec4i(0, 0, 1, 0), Vec4i(0, 0, 0, 1), Vec4i(1, 0, 0, 0), Vec4i(0, 1, 0, 0))
     }
 }
