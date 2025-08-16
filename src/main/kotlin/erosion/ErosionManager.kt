@@ -84,7 +84,13 @@ class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage
 
         var maxArea = 0
         var minIteration = maxIteration-1
+        var maxNonZeroEdges = 0
+
         var area = Area()
+        var l = 0
+        var r = 0
+        var f = 0
+        var b = 0
 
         for (y in 0..<iterabilityInfo.size) {
             var curLeft = 0
@@ -105,12 +111,32 @@ class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage
                     right[x] = min(right[x], curRight)
 
                     val currentArea = height[x] * (right[x] - left[x])
+                    val currentL = iterabilityInfo[y][left[x]]!!.l
+                    val currentR = iterabilityInfo[y][right[x]-1]!!.r
+                    val currentF = iterabilityInfo[y][x]!!.f
+                    val currentB = iterabilityInfo[y-height[x]+1][x]!!.b
+                    val currentNonZeroEdges = (if (currentL == 0) 0 else 1) + (if (currentR == 0) 0 else 1) +
+                            (if (currentF == 0) 0 else 1) + (if (currentB == 0) 0 else 1)
                     val currentIteration = iterabilityInfo[y][x]!!.iteration
 
-                    if (isBetterArea(maxArea, currentArea, minIteration, currentIteration)) {
+                    if (isBetterArea(
+                            maxArea,
+                            currentArea,
+                            minIteration,
+                            currentIteration,
+                            maxNonZeroEdges,
+                            currentNonZeroEdges
+                        )
+                    ) {
                         maxArea = currentArea
                         minIteration = currentIteration
+                        maxNonZeroEdges = currentNonZeroEdges
+
                         area = Area(Vec2i(right[x] - left[x], height[x])) + Vec2i(left[x], y-height[x]+1)
+                        l = currentL
+                        r = currentR
+                        f = currentF
+                        b = currentB
                     }
                 } else {
                     right[x] = xSize
@@ -121,13 +147,16 @@ class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage
         if (maxArea == 0)
             return null
 
-        return createTask(area.increase(1, 1, 0, 0) + currentArea.srcPos)
+        return createTask(area.increase(1, 1, 0, 0) + currentArea.srcPos, l, r, f, b)
     }
 
     private fun isBetterArea(maxArea: Int, currentArea: Int,
-                             minIteration: Int, currentIteration: Int): Boolean {
+                             minIteration: Int, currentIteration: Int,
+                             maxNonZeroEdges: Int, currentNonZeroEdges: Int): Boolean {
         if (currentIteration != minIteration)
             return currentIteration < minIteration
+        if (currentNonZeroEdges != maxNonZeroEdges)
+            return currentNonZeroEdges > maxNonZeroEdges
         if (currentArea != maxArea)
             return currentArea > maxArea
         return false
@@ -154,14 +183,7 @@ class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage
 
     data class IterabilityInfo(val l: Int, val r: Int, val f: Int, val b: Int, val iteration: Int)
 
-    private fun createTask(area: Area): ErosionTask {
-        val length = area.size - 1
-
-        val l = getEdgesEqual(area.srcPos, length.y, true)
-        val r = getEdgesEqual(area.srcPos.plus(length.x, 0), length.y, true)
-        val f = getEdgesEqual(area.srcPos.plus(0, length.y), length.x, false)
-        val b = getEdgesEqual(area.srcPos, length.x, false)
-
+    private fun createTask(area: Area, l: Int, r: Int, f: Int, b: Int): ErosionTask {
         return ErosionTask(eroder, area * data.chunkSize, data.chunkSize, l, r, f, b)
     }
 
@@ -198,28 +220,6 @@ class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage
         if (l == 0 && f == 0) data[area.srcPos.plus(0, size.y)].iteration += data.chunkSize
         if (r == 0 && b == 0) data[area.srcPos.plus(size.x, 0)].iteration += data.chunkSize
         if (r == 0 && f == 0) data[inner.endPos].iteration += data.chunkSize
-    }
-
-    /**
-     *
-     * @param pos where to start checking for equality
-     * @param length how far to check for equality
-     * @param upwards whether to check for equality upwards or sideways
-     * @return -1, 0 or 1 if all are equal, else the length at which it isn't equal (larger than 1)
-     */
-    private fun getEdgesEqual(pos: Vec2i, length: Int, upwards: Boolean): Int {
-        val edge = getEdge(pos, 1, upwards)
-
-        for (i in 2..length) if (getEdge(pos, i, upwards) != edge) return i
-
-        return edge
-    }
-
-    private fun getEdge(pos: Vec2i, offset: Int, upwards: Boolean): Int {
-        return if (upwards)
-            data[Vec2i(pos).plus(0, offset)].horizontal
-        else
-            data[Vec2i(pos).plus(offset, 0)].vertical
     }
 
     private fun setEdges(pos: Vec2i, length: Int, upwards: Boolean, value: Int) {
