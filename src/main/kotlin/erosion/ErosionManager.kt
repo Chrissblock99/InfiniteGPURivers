@@ -15,7 +15,7 @@ class ErosionManager(pos: Vec2i, maxTextureSize: Vec2i, worldStorage: ErosionDat
             field = (value/data.chunkSize + 1) * data.chunkSize
         }
 
-    private var currentArea: Area = findNewArea(pos)
+    private var currentArea: Area = findNewArea(pos) ?: Area(maxChunks)
     private var iterabilityInfo: Array<Array<IterabilityInfo?>> = computeIterability(currentArea.srcPos)
     private var currentTask: ErosionTask? = null
 
@@ -29,7 +29,8 @@ class ErosionManager(pos: Vec2i, maxTextureSize: Vec2i, worldStorage: ErosionDat
         if (currentTask == null) {
             currentTask = findTask(iterations)
             if (currentTask == null) {
-                findAndUseNewArea(pos)
+                if (!findAndUseNewArea(pos))
+                    return false
                 currentTask = findTask(iterations)
                 if (currentTask == null)
                     return false
@@ -62,14 +63,16 @@ class ErosionManager(pos: Vec2i, maxTextureSize: Vec2i, worldStorage: ErosionDat
         eroder.downloadMap()
     }
 
-    private fun findNewArea(pos: Vec2i): Area {
-        return Area(maxChunks) + pos - (maxChunks / 2)
+    private fun findNewArea(pos: Vec2i): Area? {
+        val area = Area(maxChunks) + pos - (maxChunks / 2)
+        return if (anyIterable(computeIterability(area.srcPos))) area else null
     }
 
-    private fun findAndUseNewArea(pos: Vec2i) {
-        currentArea = findNewArea(pos)
+    private fun findAndUseNewArea(pos: Vec2i): Boolean {
+        currentArea = findNewArea(pos) ?: return false
         iterabilityInfo = computeIterability(currentArea.srcPos)
         eroder.usedArea = currentArea * data.chunkSize
+        return true
     }
 
     private fun computeIterability(pos: Vec2i): Array<Array<IterabilityInfo?>> {
