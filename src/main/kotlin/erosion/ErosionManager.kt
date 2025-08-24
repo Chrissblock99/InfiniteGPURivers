@@ -16,7 +16,7 @@ class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage
         }
 
     private var currentArea: Area = findNewArea(pos)
-    private var iterabilityInfo: Array<Array<IterabilityInfo?>> = computeIterability()
+    private var iterabilityInfo: Array<Array<IterabilityInfo?>> = computeIterability(currentArea.srcPos)
     private var currentTask: ErosionTask? = null
 
     private val eroder: GPUTerrainEroder = GPUTerrainEroder(worldStorage, maxTextureSize, currentArea * data.chunkSize)
@@ -68,14 +68,14 @@ class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage
 
     private fun findAndUseNewArea(pos: Vec2i) {
         currentArea = findNewArea(pos)
-        iterabilityInfo = computeIterability()
+        iterabilityInfo = computeIterability(currentArea.srcPos)
         eroder.usedArea = currentArea * data.chunkSize
     }
 
-    private fun computeIterability(): Array<Array<IterabilityInfo?>> {
+    private fun computeIterability(pos: Vec2i): Array<Array<IterabilityInfo?>> {
         return Array(maxChunks.y - 1) { y ->
             Array(maxChunks.x - 1) { x ->
-                iterabilityInfo(currentArea.srcPos + Vec2i(x, y))
+                iterabilityInfo(pos + Vec2i(x, y))
             }
         }
     }
@@ -207,7 +207,7 @@ class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage
         setEdges(area.srcPos, length.x, false, b)
 
         increaseIteration(area, l, r, f, b)
-        iterabilityInfo = computeIterability()
+        iterabilityInfo = computeIterability(currentArea.srcPos)
     }
 
     private fun increaseIteration(area: Area, l: Int, r: Int, f: Int, b: Int) {
