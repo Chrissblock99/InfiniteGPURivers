@@ -6,7 +6,7 @@ import me.chriss99.worldmanagement.ErosionDataStorage
 import kotlin.math.max
 import kotlin.math.min
 
-class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage: ErosionDataStorage, targetIteration: Int) {
+class ErosionManager(pos: Vec2i, maxTextureSize: Vec2i, worldStorage: ErosionDataStorage, targetIteration: Int) {
     private val data = worldStorage.iterationInfo
     private val maxChunks: Vec2i = maxTextureSize / data.chunkSize
 
@@ -63,7 +63,7 @@ class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage
     }
 
     private fun findNewArea(pos: Vec2i): Area {
-        return Area(maxTextureSize / data.chunkSize) + pos - (maxTextureSize / data.chunkSize / 2)
+        return Area(maxChunks) + pos - (maxChunks / 2)
     }
 
     private fun findAndUseNewArea(pos: Vec2i) {
