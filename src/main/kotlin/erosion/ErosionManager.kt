@@ -2,6 +2,7 @@ package me.chriss99.erosion
 
 import me.chriss99.Area
 import glm_.vec2.Vec2i
+import me.chriss99.util.Util
 import me.chriss99.worldmanagement.ErosionDataStorage
 import kotlin.math.max
 import kotlin.math.min
@@ -64,8 +65,19 @@ class ErosionManager(pos: Vec2i, maxTextureSize: Vec2i, worldStorage: ErosionDat
     }
 
     private fun findNewArea(pos: Vec2i): Area? {
-        val area = Area(maxChunks) + pos - (maxChunks / 2)
-        return if (anyIterable(computeIterability(area.srcPos))) area else null
+        val max = 1000
+        val scale = min(maxChunks.x, maxChunks.y)/2
+
+        lateinit var cPos: Vec2i
+        for (n in 0..max) {
+            cPos = Util.spiral(n, scale, pos)
+            if (anyIterable(computeIterability(cPos)))
+                break
+            if (n == max)
+                return null
+        }
+
+        return Area(maxChunks) + cPos
     }
 
     private fun findAndUseNewArea(pos: Vec2i): Boolean {
