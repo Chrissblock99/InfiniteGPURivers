@@ -80,6 +80,10 @@ class ErosionManager(pos: Vec2i, maxTextureSize: Vec2i, worldStorage: ErosionDat
         }
     }
 
+    private fun anyIterable(iterabilityInfo: Array<Array<IterabilityInfo?>>): Boolean {
+        return iterabilityInfo.any { arr -> arr.any { (it?.iteration ?: Int.MAX_VALUE) < targetIteration } }
+    }
+
     private fun findTask(maxSurface: Int): ErosionTask? {
         val xSize = iterabilityInfo[0].size
 
