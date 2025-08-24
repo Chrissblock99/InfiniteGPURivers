@@ -6,9 +6,14 @@ import me.chriss99.worldmanagement.ErosionDataStorage
 import kotlin.math.max
 import kotlin.math.min
 
-class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage: ErosionDataStorage, var maxIteration: Int) {
+class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage: ErosionDataStorage, targetIteration: Int) {
     private val data = worldStorage.iterationInfo
     private val maxChunks: Vec2i = maxTextureSize / data.chunkSize
+
+    var targetIteration = (targetIteration/data.chunkSize + 1) * data.chunkSize
+        set(value) {
+            field = (value/data.chunkSize + 1) * data.chunkSize
+        }
 
     private var currentArea: Area = findNewArea(pos)
     private var iterabilityInfo: Array<Array<IterabilityInfo?>> = computeIterability()
@@ -83,7 +88,7 @@ class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage
         val right = Array(xSize) { xSize }
 
         var maxArea = 0
-        var minIteration = maxIteration-1
+        var minIteration = targetIteration-1
         var maxNonZeroEdges = 0
 
         var area = Area()

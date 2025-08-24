@@ -15,14 +15,14 @@ class Main(
     worldName: String,
     chunkSize: Int, regionSize: Int, iterationChunkSize: Int, iterationRegionSize: Int,
     chunkRenderDistance: Int, iterationRenderDistance: Int,
-    maxErosionSize: Vec2i, maxIteration: Int
+    maxErosionSize: Vec2i, targetIteration: Int
 ) {
     val window = Window("InfiniteGPURivers")
     val cameraMatrix = CameraMatrix(aspectRatio = window.aspectRatio)
 
     val worldStorage = ErosionDataStorage(worldName, chunkSize, regionSize, iterationChunkSize, iterationRegionSize)
     var simulateErosion = false
-    val erosionManager = ErosionManager(Vec2i(cameraMatrix.position.xz), maxErosionSize, worldStorage, maxIteration)
+    val erosionManager = ErosionManager(Vec2i(cameraMatrix.position.xz), maxErosionSize, worldStorage, targetIteration)
 
     val vaoList = ArrayList<ColoredVAO>(listOf<ColoredVAO>()) //test case for rendering
     val vaoListProgram = ListRenderer(ColoredVAORenderer(cameraMatrix), vaoList)
