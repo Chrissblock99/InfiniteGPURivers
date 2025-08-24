@@ -15,14 +15,14 @@ class Main(
     worldName: String,
     chunkSize: Int, regionSize: Int, iterationChunkSize: Int, iterationRegionSize: Int,
     chunkRenderDistance: Int, iterationRenderDistance: Int,
-    maxErosionSize: Vec2i
+    maxErosionSize: Vec2i, maxIteration: Int
 ) {
     val window = Window("InfiniteGPURivers")
     val cameraMatrix = CameraMatrix(aspectRatio = window.aspectRatio)
 
     val worldStorage = ErosionDataStorage(worldName, chunkSize, regionSize, iterationChunkSize, iterationRegionSize)
     var simulateErosion = false
-    val erosionManager = ErosionManager(Vec2i(cameraMatrix.position.xz), maxErosionSize, worldStorage)
+    val erosionManager = ErosionManager(Vec2i(cameraMatrix.position.xz), maxErosionSize, worldStorage, maxIteration)
 
     val vaoList = ArrayList<ColoredVAO>(listOf<ColoredVAO>()) //test case for rendering
     val vaoListProgram = ListRenderer(ColoredVAORenderer(cameraMatrix), vaoList)
@@ -54,7 +54,7 @@ class Main(
 
     fun primitiveErosion() {
         val pos = Util.floorDiv(Vec2i(cameraMatrix.position.xz), worldStorage.chunkSize)
-        if (erosionManager.findIterate(pos, 2000, 100 * 1000 * 1000 / 60))
+        if (erosionManager.findIterate(pos, 100 * 1000 * 1000 / 60))
             iterationRenderer.reloadAll()
         else simulateErosion = false
         tessProgram.area = erosionManager.usedArea
@@ -125,7 +125,7 @@ class Main(
                 "test64",
                 64, 10, 64, 10,
                 7, 2,
-                Vec2i(60 * 64)
+                Vec2i(60 * 64), 2000
             )
 
             println("Started after: " + (GLFW.glfwGetTime() - start))

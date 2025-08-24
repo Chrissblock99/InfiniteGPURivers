@@ -6,7 +6,7 @@ import me.chriss99.worldmanagement.ErosionDataStorage
 import kotlin.math.max
 import kotlin.math.min
 
-class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage: ErosionDataStorage) {
+class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage: ErosionDataStorage, var maxIteration: Int) {
     private val data = worldStorage.iterationInfo
     private val maxChunks: Vec2i = maxTextureSize / data.chunkSize
 
@@ -20,12 +20,12 @@ class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage
     fun downloadMap() = eroder.downloadMap()
     val iterabilityInfoCopy get() = iterabilityInfo.copyOf()
 
-    fun findIterate(pos: Vec2i, maxIteration: Int, iterations: Int): Boolean {
+    fun findIterate(pos: Vec2i, iterations: Int): Boolean {
         if (currentTask == null) {
-            currentTask = findTask(maxIteration, iterations)
+            currentTask = findTask(iterations)
             if (currentTask == null) {
                 findAndUseNewArea(pos)
-                currentTask = findTask(maxIteration, iterations)
+                currentTask = findTask(iterations)
                 if (currentTask == null)
                     return false
             }
@@ -75,7 +75,7 @@ class ErosionManager(pos: Vec2i, private val maxTextureSize: Vec2i, worldStorage
         }
     }
 
-    private fun findTask(maxIteration: Int, maxSurface: Int): ErosionTask? {
+    private fun findTask(maxSurface: Int): ErosionTask? {
         val xSize = iterabilityInfo[0].size
 
         val height = Array(xSize) { 0 }
