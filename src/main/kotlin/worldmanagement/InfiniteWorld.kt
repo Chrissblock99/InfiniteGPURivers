@@ -17,5 +17,7 @@ open class InfiniteWorld<T>(
         return storage[Util.floorDiv(pos, regionSize)][pos, { generateChunk(it, chunkSize) }]
     }
 
+    fun manageLoad() = storage.manageLoad()
+
     fun unloadAllRegions() = storage.unloadAll()
 }

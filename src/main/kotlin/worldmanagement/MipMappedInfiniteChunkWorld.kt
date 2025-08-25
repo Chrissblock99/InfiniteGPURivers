@@ -34,5 +34,7 @@ class MipMappedInfiniteChunkWorld(
         return Chunk(mipMapFrom.mipMap())
     }
 
+    fun manageLoad() = mipmaps.forEach { it.value.manageLoad() }
+
     fun unloadAll() = mipmaps.values.forEach { it.unloadAllRegions() }
 }

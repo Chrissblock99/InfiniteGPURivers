@@ -93,6 +93,22 @@ class ErosionDataStorage(
         iterationInfo = IterableWorld("$worldName/iteration", iterationChunkSize, iterationRegionSize, tileLoadManager2)
     }
 
+    fun manageLoad() {
+        mipMappedTerrain.manageLoad()
+        mipMappedWater.manageLoad()
+
+        sediment.manageLoad()
+        hardness.manageLoad()
+
+        waterOutflow.manageLoad()
+        sedimentOutflow.manageLoad()
+
+        thermalOutflow1.manageLoad()
+        thermalOutflow2.manageLoad()
+
+        iterationInfo.manageLoad()
+    }
+
     fun unloadAll() {
         mipMappedTerrain.unloadAll()
         mipMappedWater.unloadAll()
