@@ -13,13 +13,13 @@ import kotlin.collections.ArrayList
 
 class Main(
     worldName: String,
-    chunkRenderDistance: Int, iterationRenderDistance: Int,
+    chunkRenderDistance: Int, val chunkLoadBufferDistance: Int, iterationRenderDistance: Int,
     maxErosionSize: Vec2i, targetIteration: Int
 ) {
     val window = Window("InfiniteGPURivers")
     val cameraMatrix = CameraMatrix(aspectRatio = window.aspectRatio)
 
-    val worldStorage = ErosionDataStorage(worldName)
+    val worldStorage = ErosionDataStorage(worldName, chunkRenderDistance, chunkLoadBufferDistance, iterationRenderDistance, Vec2i(cameraMatrix.position.xz))
     var simulateErosion = false
     val erosionManager = ErosionManager(Vec2i(cameraMatrix.position.xz), maxErosionSize, worldStorage, targetIteration)
 
@@ -69,6 +69,7 @@ class Main(
             playerCenteredRenderer.updateLoadedChunks(cameraMatrix.position, erosionManager.usedArea)
             if (renderIterations)
                 iterationRenderer.updateLoadedChunks(cameraMatrix.position / worldStorage.iterationInfo.chunkSize)
+            worldStorage.manageLoad(playerCenteredRenderer.chunkRenderDistance, chunkLoadBufferDistance, iterationRenderer.chunkRenderDistance, Vec2i(cameraMatrix.position.xz))
 
             window.clearBuffers()
 
@@ -122,7 +123,7 @@ class Main(
 
             main = Main(
                 "test64",
-                7, 2,
+                7, 4, 2,
                 Vec2i(60 * 64), 2000
             )
 
