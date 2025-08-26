@@ -5,13 +5,12 @@ import me.chriss99.worldmanagement.iteration.IterableWorld
 import me.chriss99.worldmanagement.iteration.IterationTile
 import glm_.vec2.Vec2i
 
-class ErosionDataStorage(
-    worldName: String,
-    val chunkSize: Int,
-    val regionSize: Int,
-    val iterationChunkSize: Int,
-    val iterationRegionSize: Int
-) {
+class ErosionDataStorage(worldName: String) {
+    val chunkSize = 64
+    val regionSize = 10
+    val iterationChunkSize = 64
+    val iterationRegionSize = 10
+
     private val terrainGenerator = TerrainGenerator(chunkSize)
 
     val mipMappedTerrain: MipMappedInfiniteChunkWorld
