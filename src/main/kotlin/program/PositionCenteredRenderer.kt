@@ -1,14 +1,13 @@
 package me.chriss99.program
 
-import glm_.func.common.floor
 import me.chriss99.Area
 import me.chriss99.ChunkVAO
 import me.chriss99.CutOutRectangleTLM
 import me.chriss99.worldmanagement.TileMap2D
-import glm_.vec2.Vec2
 import glm_.vec2.Vec2i
 import glm_.vec3.Vec3
 import glm_.vec3.swizzle.xz
+import me.chriss99.util.Util
 
 open class PositionCenteredRenderer<T : ChunkVAO>(
     renderProgram: RenderProgram<T>,
@@ -20,13 +19,13 @@ open class PositionCenteredRenderer<T : ChunkVAO>(
 ) {
     protected val renderProgram: RenderProgram<T> = renderProgram
     protected val chunkVaos: TileMap2D<T>
-    protected val loadManager = CutOutRectangleTLM<T>(chunkRenderDistance, position.xz, skipArea)
+    protected val loadManager = CutOutRectangleTLM<T>(chunkRenderDistance, Vec2i(position.xz), skipArea)
 
     val chunkSize: Int
     var chunkRenderDistance: Int
-        get() = loadManager.renderDistance
+        get() = loadManager.radius
         set(value) {
-            loadManager.renderDistance = value
+            loadManager.radius = value
             chunkVaos.manageLoad()
         }
 
@@ -51,7 +50,7 @@ open class PositionCenteredRenderer<T : ChunkVAO>(
     fun updateLoadedChunks(newPosition: Vec3) = updateLoadedChunks(newPosition, null)
 
     fun updateLoadedChunks(newPosition: Vec3, skipArea: Area?) {
-        loadManager.position = (newPosition.xz / chunkSize.toFloat()).let { Vec2(it.x.floor, it.y.floor) }
+        loadManager.center = Util.floorDiv(Vec2i(newPosition.xz), chunkSize)
         if (skipArea != null)
             loadManager.skipArea = skipArea / chunkSize
         chunkVaos.manageLoad()
