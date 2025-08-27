@@ -2,7 +2,7 @@ package me.chriss99.program
 
 import me.chriss99.Area
 import me.chriss99.CameraMatrix
-import me.chriss99.ColoredVAOGenerator.tesselationGridVertexesTest
+import me.chriss99.render.ColoredVAOGenerator.tesselationGridVertexesTest
 import me.chriss99.glabstractions.VAO
 import me.chriss99.glabstractions.VAOImpl
 import org.lwjgl.opengl.GL40.*

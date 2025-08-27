@@ -1,7 +1,7 @@
 package me.chriss99.program
 
 import me.chriss99.CameraMatrix
-import me.chriss99.TerrainVAO
+import me.chriss99.render.TerrainVAO
 import org.lwjgl.opengl.GL20.*
 import org.lwjgl.opengl.GL32.GL_GEOMETRY_SHADER
 import java.nio.FloatBuffer

@@ -1,10 +1,16 @@
-package me.chriss99
+package me.chriss99.render
 
 import me.chriss99.glabstractions.VAOImpl
 import glm_.vec2.Vec2i
 
-class IterationVAO(triangle: FloatArray, override val srcPos: Vec2i, override val width: Int) : ChunkVAO {
-    private val vao: VAOImpl = VAOImpl(null, 3, triangle)
+class TerrainVAO(
+    triangle: FloatArray, index: IntArray?,
+     override val srcPos: Vec2i,
+     override val width: Int,
+     val scale: Int
+) :
+    ChunkVAO {
+    private val vao: VAOImpl = VAOImpl(index, 2, triangle)
 
     fun updatePositions(positions: FloatArray) = vao.updateVertices(0, positions)
 

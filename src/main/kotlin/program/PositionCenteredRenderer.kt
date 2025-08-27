@@ -1,7 +1,7 @@
 package me.chriss99.program
 
 import me.chriss99.Area
-import me.chriss99.ChunkVAO
+import me.chriss99.render.ChunkVAO
 import me.chriss99.CutOutRectangleTLM
 import me.chriss99.worldmanagement.TileMap2D
 import glm_.vec2.Vec2i

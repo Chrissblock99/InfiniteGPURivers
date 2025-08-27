@@ -1,6 +1,6 @@
 package me.chriss99.program
 
-import me.chriss99.TerrainVAO
+import me.chriss99.render.TerrainVAO
 
 abstract class TerrainRenderer : RenderProgram<TerrainVAO>() {
     override fun render(vaos: Collection<TerrainVAO>) {

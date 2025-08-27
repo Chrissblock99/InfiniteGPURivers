@@ -1,9 +1,10 @@
-package me.chriss99
+package me.chriss99.render
 
 import me.chriss99.util.Util
 import glm_.vec2.Vec2d
 import glm_.vec2.Vec2i
 import glm_.vec3.Vec3d
+import me.chriss99.Area
 import me.chriss99.erosion.ErosionManager.IterabilityInfo
 import java.util.*
 

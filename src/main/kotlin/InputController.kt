@@ -3,7 +3,7 @@ package me.chriss99
 import glm_.vec2.Vec2d
 import me.chriss99.ImageWriter.writeImageHeightMap
 import glm_.vec3.Vec3
-import me.chriss99.program.ColoredVAORenderer
+import me.chriss99.render.ColoredVAOGenerator
 import org.lwjgl.glfw.GLFW
 import kotlin.math.*
 
@@ -71,7 +71,8 @@ class InputController(private val inputDeviceManager: InputDeviceManager, privat
         inputDeviceManager.addKeyReleaseCallback(GLFW.GLFW_KEY_R) { main.primitiveErosion() }
         inputDeviceManager.addKeyReleaseCallback(GLFW.GLFW_KEY_G) {
             val chunkSize = main.worldStorage.iterationInfo.chunkSize
-            main.vaoList.add(ColoredVAOGenerator.iterabilityInfoToCrossVAO(
+            main.vaoList.add(
+                ColoredVAOGenerator.iterabilityInfoToCrossVAO(
                 main.erosionManager.usedArea.srcPos / chunkSize, main.erosionManager.iterabilityInfoCopy, chunkSize))
         }
         inputDeviceManager.addKeyReleaseCallback(GLFW.GLFW_KEY_H) {

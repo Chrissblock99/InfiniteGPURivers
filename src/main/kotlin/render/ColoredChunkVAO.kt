@@ -1,4 +1,4 @@
-package me.chriss99
+package me.chriss99.render
 
 import glm_.vec2.Vec2i
 

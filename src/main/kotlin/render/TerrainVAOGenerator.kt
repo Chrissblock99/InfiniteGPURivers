@@ -1,7 +1,8 @@
-package me.chriss99
+package me.chriss99.render
 
 import me.chriss99.util.Util
 import glm_.vec2.Vec2i
+import me.chriss99.Float2DBufferWrapper
 
 object TerrainVAOGenerator {
     fun heightMapToSimpleVertexes(terrain: Float2DBufferWrapper, water: Float2DBufferWrapper): FloatArray {

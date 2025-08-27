@@ -1,7 +1,7 @@
 package me.chriss99.program
 
 import me.chriss99.CameraMatrix
-import me.chriss99.ColoredVAO
+import me.chriss99.render.ColoredVAO
 import org.lwjgl.opengl.GL20.*
 import java.nio.FloatBuffer
 

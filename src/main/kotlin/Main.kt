@@ -7,6 +7,9 @@ import me.chriss99.util.Util
 import me.chriss99.worldmanagement.ErosionDataStorage
 import glm_.vec2.Vec2i
 import glm_.vec3.swizzle.xz
+import me.chriss99.render.ColoredVAO
+import me.chriss99.render.IterationVAOGenerator
+import me.chriss99.render.TerrainVAOGenerator
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.opengl.*
 import kotlin.collections.ArrayList

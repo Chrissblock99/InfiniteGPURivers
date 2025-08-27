@@ -1,9 +1,10 @@
-package me.chriss99
+package me.chriss99.render
 
 import me.chriss99.util.FloatArrayList
 import me.chriss99.worldmanagement.iteration.IterableWorld
 import glm_.vec2.Vec2i
 import glm_.vec3.Vec3i
+import me.chriss99.IterationSurfaceType
 
 object IterationVAOGenerator {
     fun heightMapToIterationVAO(
