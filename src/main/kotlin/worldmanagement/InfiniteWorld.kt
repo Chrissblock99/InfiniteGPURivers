@@ -12,6 +12,7 @@ open class InfiniteWorld<T>(
 ) {
     private val storage: FileBackedTileMap2D<Region<T>> =
         FileBackedTileMap2D(regionFileManager::loadFile, regionFileManager, tileLoadManager)
+    val allTiles get() = storage.allTiles
 
     operator fun get(pos: Vec2i): T {
         return storage[Util.floorDiv(pos, regionSize)][pos, { generateChunk(it, chunkSize) }]
