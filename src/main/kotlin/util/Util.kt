@@ -4,7 +4,6 @@ import glm_.vec2.Vec2i
 import org.lwjgl.BufferUtils
 import java.nio.ByteBuffer
 import kotlin.math.ceil
-import kotlin.math.floor
 import kotlin.math.sqrt
 
 object Util {
@@ -37,6 +36,10 @@ object Util {
 
     fun indexOfXZFlattenedArray(x: Int, z: Int, xSize: Int): Int {
         return x + z * xSize
+    }
+
+    fun ceilDiv(a: Int, b: Int): Int {
+        return ceil(a.toDouble() / b.toDouble()).toInt()
     }
 
     fun floorDiv(a: Int, b: Int): Int {
