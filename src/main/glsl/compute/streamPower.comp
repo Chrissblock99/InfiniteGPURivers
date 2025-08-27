@@ -1,4 +1,5 @@
 #version 450 core
+layout(local_size_x = 1, local_size_y = 1) in;
 
 // In
 layout(binding = 0, r32f) readonly uniform image2D hf;
@@ -92,7 +93,6 @@ float WaterSteepest(ivec2 p) {
     return water;
 }
 
-layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 void main() {
     ivec2 p = ivec2(gl_GlobalInvocationID.xy);
 
