@@ -12,9 +12,6 @@ layout(binding = 4, r32f) readonly uniform image2D upliftBuffer;
 
 
 
-uniform int nx;
-uniform int ny;
-uniform vec2 b;
 
 // 0: Stream power
 // 1: Stream power + Hillslope (Laplacian)
