@@ -16,7 +16,6 @@ uniform int nx;
 uniform int ny;
 uniform vec2 a;
 uniform vec2 b;
-uniform vec2 cellDiag;
 
 // 0: Stream power
 // 1: Stream power + Hillslope (Laplacian)
@@ -40,7 +39,7 @@ float stream(ivec2 p) { return imageLoad(stream, p).x; }
 
 float uplift(ivec2 p) { return imageLoad(upliftBuffer, p).x; }
 
-vec2 ArrayPoint(ivec2 p) { return a.xy + vec2(p) * cellDiag; }
+vec2 ArrayPoint(ivec2 p) { return a.xy + vec2(p); }
 
 vec3 Point3D(ivec2 p) {
     return vec3(ArrayPoint(p), height(p));
@@ -71,9 +70,9 @@ float Laplacian(ivec2 p) {
     int i = p.x;
     int j = p.y;
 
-    lapl += (height(p + ivec2(1, 0)) - 2.0f * height(p) + height(p + ivec2(-1, 0))) / (cellDiag.x * cellDiag.x);
+    lapl += height(p + ivec2(1, 0)) - 2.0f * height(p) + height(p + ivec2(-1, 0));
 
-    lapl += (height(p + ivec2(0, 1)) - 2.0f * height(p) + height(p + ivec2(0, -1))) / (cellDiag.y * cellDiag.y);
+    lapl += height(p + ivec2(0, 1)) - 2.0f * height(p) + height(p + ivec2(0, -1));
 
     return lapl;
 }
