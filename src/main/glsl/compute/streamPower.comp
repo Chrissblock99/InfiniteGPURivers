@@ -30,63 +30,63 @@ uniform float dt = 50.0f;
 const ivec2 next8[8] = ivec2[8](ivec2(0, 1), ivec2(1, 1), ivec2(1, 0), ivec2(1, -1),
 ivec2(0, -1), ivec2(-1, -1), ivec2(-1, 0), ivec2(-1, 1));
 
-float height(ivec2 p) { return imageLoad(hf, p).x; }
+float height(ivec2 pos) { return imageLoad(hf, pos).x; }
 
-float stream(ivec2 p) { return imageLoad(stream, p).x; }
+float stream(ivec2 pos) { return imageLoad(stream, pos).x; }
 
-float uplift(ivec2 p) { return imageLoad(upliftBuffer, p).x; }
+float uplift(ivec2 pos) { return imageLoad(upliftBuffer, pos).x; }
 
-vec4 Read(ivec2 p) {
+vec4 Read(ivec2 pos) {
     vec4 ret;
-    ret.x = height(p);      // Bedrock elevation
-    ret.y = stream(p);      // Stream area
-    ret.z = uplift(p);      // Uplift factor
+    ret.x = height(pos);      // Bedrock elevation
+    ret.y = stream(pos);      // Stream area
+    ret.z = uplift(pos);      // Uplift factor
     return ret;
 }
 
-void Write(ivec2 p, vec4 data) {
-    imageStore(out_hf, p, data.x);
-    imageStore(out_stream, p, data.y);
+void Write(ivec2 pos, vec4 data) {
+    imageStore(out_hf, pos, data.x);
+    imageStore(out_stream, pos, data.y);
 }
 
 //slope (offset divided by distance) from p to q
-float Slope(ivec2 p, ivec2 q) {
-    float d = length(q - p);
-    return (height(q) - height(p)) / d;
+float Slope(ivec2 pos, ivec2 to) {
+    float d = length(to - pos);
+    return (height(to) - height(pos)) / d;
 }
 
 
-float Laplacian(ivec2 p) {
+float Laplacian(ivec2 pos) {
     float lapl = 0.0f;
 
-    lapl += height(p + ivec2(1, 0)) - 2.0f * height(p) + height(p + ivec2(-1, 0));
+    lapl += height(pos + ivec2(1, 0)) - 2.0f * height(pos) + height(pos + ivec2(-1, 0));
 
-    lapl += height(p + ivec2(0, 1)) - 2.0f * height(p) + height(p + ivec2(0, -1));
+    lapl += height(pos + ivec2(0, 1)) - 2.0f * height(pos) + height(pos + ivec2(0, -1));
 
     return lapl;
 }
 
 //direction of lowest point (slope based) from p
-ivec2 GetFlowSteepest(ivec2 p) {
+ivec2 GetFlowSteepest(ivec2 pos) {
     ivec2 d = ivec2(0, 0);
     float maxSlope = 0.0f;
     for (int i = 0; i < 8; i++) {
-        float ss = Slope(p, p + next8[i]);
+        float ss = Slope(pos, pos + next8[i]);
         if (ss < maxSlope) {
             maxSlope = ss;
-            d = p + next8[i];
+            d = pos + next8[i];
         }
     }
     return d;
 }
 
 //add together area of all neighbours where i am the most sloped down
-float WaterSteepest(ivec2 p) {
+float WaterSteepest(ivec2 pos) {
     float water = 0.0f;
     for (int i = 0; i < 8; i++) {
-        ivec2 q = p + next8[i];
+        ivec2 q = pos + next8[i];
         ivec2 fd = GetFlowSteepest(q);
-        if (fd == p) {
+        if (fd == pos) {
             water += stream(q);
         }
     }
@@ -94,18 +94,18 @@ float WaterSteepest(ivec2 p) {
 }
 
 void main() {
-    ivec2 p = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
 
-    vec4 data = Read(p);
+    vec4 data = Read(pos);
 
 
     // Flows accumulation at p
-    data.y = 1.0 + WaterSteepest(p);
+    data.y = 1.0 + WaterSteepest(pos);
 
     // Erosion at p (relative to steepest)
-    ivec2 d = GetFlowSteepest(p);
+    ivec2 d = GetFlowSteepest(pos);
     float receiverHeight = height(d);
-    float pslope = abs(Slope(d, p));
+    float pslope = abs(Slope(d, pos));
 
     float spe = k * pow(data.y, p_sa) * pow(pslope, p_sl);
 
@@ -113,12 +113,12 @@ void main() {
     if (erosionMode == 0)       // Stream power
         newH -= dt * (spe);
     else if (erosionMode == 1)  // Stream power + Hillslope erosion (Laplacian)
-        newH -= dt * (spe - k_h * Laplacian(p));
+        newH -= dt * (spe - k_h * Laplacian(pos));
     else if (erosionMode == 2)  // Stream power + Hillslope erosion (Laplacian) + Debris flow
-        newH -= dt * (spe - k_h * Laplacian(p) - k_d * pslope);
+        newH -= dt * (spe - k_h * Laplacian(pos) - k_d * pslope);
     newH = max(newH, receiverHeight);
     newH += dt * uplift * data.z;
 
     data.x = newH;
-    Write(p, data);
+    Write(pos, data);
 }
