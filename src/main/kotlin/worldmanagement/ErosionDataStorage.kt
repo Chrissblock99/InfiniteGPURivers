@@ -6,7 +6,7 @@ import me.chriss99.worldmanagement.iteration.IterationTile
 import glm_.vec2.Vec2i
 import me.chriss99.util.Util
 
-class ErosionDataStorage(worldName: String, chunkRenderDistance: Int, chunkLoadBufferDistance: Int, iterationRenderDistance: Int, playerPos: Vec2i) {
+class ErosionDataStorage(worldName: String, chunkRenderDistance: Int, chunkLoadBufferDistance: Int, playerPos: Vec2i) {
     val chunkSize = 64
     val regionSize = 10
     val iterationChunkSize = 64
@@ -30,8 +30,12 @@ class ErosionDataStorage(worldName: String, chunkRenderDistance: Int, chunkLoadB
 
     val iterationInfo: IterableWorld
 
-    val chunkLoadManager: OutsideSquareTLM<Region<Chunk>> = OutsideSquareTLM(chunkRenderDistance + chunkLoadBufferDistance, Util.floorDiv(playerPos, chunkSize))
-    val iterationLoadManager: OutsideSquareTLM<Region<IterationTile>> = OutsideSquareTLM(iterationRenderDistance, playerPos)
+    val chunkLoadManager = OutsideSquareTLM<Region<Chunk>>(
+        Util.ceilDiv(chunkRenderDistance, regionSize) +
+                Util.ceilDiv(chunkLoadBufferDistance, regionSize),
+        Util.floorDiv(playerPos, chunkSize))
+    val loadNothingLoadManager = OutsideSquareTLM<Region<Chunk>>(0, Vec2i(0))
+    val loadNothingLoadManager2 = OutsideSquareTLM<Region<IterationTile>>(0, Vec2i(0))
 
     init {
         mipMappedTerrain = MipMappedInfiniteChunkWorld(
@@ -50,14 +54,14 @@ class ErosionDataStorage(worldName: String, chunkRenderDistance: Int, chunkLoadB
             chunkSize,
             regionSize,
             { _, chunkSize -> Chunk(Float2DBufferWrapper(Vec2i(chunkSize))) },
-            chunkLoadManager
+            loadNothingLoadManager
         )
         hardness = InfiniteChunkWorld(
             "$worldName/hardness", Array2DBufferWrapper.Type.FLOAT,
             chunkSize,
             regionSize,
             { _, chunkSize -> Chunk(Float2DBufferWrapper(Vec2i(chunkSize), 1f)) },
-            chunkLoadManager
+            loadNothingLoadManager
         )
 
         waterOutflow = InfiniteChunkWorld(
@@ -65,14 +69,14 @@ class ErosionDataStorage(worldName: String, chunkRenderDistance: Int, chunkLoadB
             chunkSize,
             regionSize,
             { _, chunkSize -> Chunk(Vec4f2DBufferWrapper(Vec2i(chunkSize))) },
-            chunkLoadManager
+            loadNothingLoadManager
         )
         sedimentOutflow = InfiniteChunkWorld(
             "$worldName/sedimentOutflow", Array2DBufferWrapper.Type.VEC4F,
             chunkSize,
             regionSize,
             { _, chunkSize -> Chunk(Vec4f2DBufferWrapper(Vec2i(chunkSize))) },
-            chunkLoadManager
+            loadNothingLoadManager
         )
 
         thermalOutflow1 = InfiniteChunkWorld(
@@ -80,24 +84,23 @@ class ErosionDataStorage(worldName: String, chunkRenderDistance: Int, chunkLoadB
             chunkSize,
             regionSize,
             { _, chunkSize -> Chunk(Vec4f2DBufferWrapper(Vec2i(chunkSize))) },
-            chunkLoadManager
+            loadNothingLoadManager
         )
         thermalOutflow2 = InfiniteChunkWorld(
             "$worldName/thermalOutflow2", Array2DBufferWrapper.Type.VEC4F,
             chunkSize,
             regionSize,
             { _, chunkSize -> Chunk(Vec4f2DBufferWrapper(Vec2i(chunkSize))) },
-            chunkLoadManager
+            loadNothingLoadManager
         )
 
-        iterationInfo = IterableWorld("$worldName/iteration", iterationChunkSize, iterationRegionSize, iterationLoadManager)
+        iterationInfo = IterableWorld("$worldName/iteration", iterationChunkSize, iterationRegionSize, loadNothingLoadManager2)
     }
 
     fun manageLoad(chunkRenderDistance: Int, chunkLoadBufferDistance: Int, iterationRenderDistance: Int, playerPos: Vec2i) {
-        chunkLoadManager.radius = chunkRenderDistance + chunkLoadBufferDistance
-        chunkLoadManager.center = Util.floorDiv(playerPos, chunkSize)
-        iterationLoadManager.radius = iterationRenderDistance
-        iterationLoadManager.center = Util.floorDiv(playerPos, chunkSize*regionSize)
+        chunkLoadManager.radius = Util.ceilDiv(chunkRenderDistance, regionSize) +
+                    Util.ceilDiv(chunkLoadBufferDistance, regionSize)
+        chunkLoadManager.center = Util.floorDiv(playerPos, chunkSize*regionSize)
 
         mipMappedTerrain.manageLoad()
         mipMappedWater.manageLoad()

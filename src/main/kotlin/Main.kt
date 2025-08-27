@@ -19,7 +19,7 @@ class Main(
     val window = Window("InfiniteGPURivers")
     val cameraMatrix = CameraMatrix(aspectRatio = window.aspectRatio)
 
-    val worldStorage = ErosionDataStorage(worldName, chunkRenderDistance, chunkLoadBufferDistance, iterationRenderDistance, Vec2i(cameraMatrix.position.xz))
+    val worldStorage = ErosionDataStorage(worldName, chunkRenderDistance, chunkLoadBufferDistance, Vec2i(cameraMatrix.position.xz))
     var simulateErosion = false
     val erosionManager = ErosionManager(Vec2i(cameraMatrix.position.xz), maxErosionSize, worldStorage, targetIteration)
 
