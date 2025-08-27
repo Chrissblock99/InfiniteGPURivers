@@ -57,8 +57,6 @@ float Slope(ivec2 p, ivec2 q) {
 
 float Laplacian(ivec2 p) {
     float lapl = 0.0f;
-    int i = p.x;
-    int j = p.y;
 
     lapl += height(p + ivec2(1, 0)) - 2.0f * height(p) + height(p + ivec2(-1, 0));
 
@@ -106,19 +104,19 @@ void main() {
 
     // Erosion at p (relative to steepest)
     ivec2 d = GetFlowSteepest(p);
-    vec4 receiver = Read(d);
+    float receiverHeight = height(d);
     float pslope = abs(Slope(d, p));
 
     float spe = k * pow(data.y, p_sa) * pow(pslope, p_sl);
 
     float newH = data.x;
     if (erosionMode == 0)       // Stream power
-    newH -= dt * (spe);
+        newH -= dt * (spe);
     else if (erosionMode == 1)  // Stream power + Hillslope erosion (Laplacian)
-    newH -= dt * (spe - k_h * Laplacian(p));
+        newH -= dt * (spe - k_h * Laplacian(p));
     else if (erosionMode == 2)  // Stream power + Hillslope erosion (Laplacian) + Debris flow
-    newH -= dt * (spe - k_h * Laplacian(p) - k_d * pslope);
-    newH = max(newH, receiver.x);
+        newH -= dt * (spe - k_h * Laplacian(p) - k_d * pslope);
+    newH = max(newH, receiverHeight);
     newH += dt * uplift * data.z;
 
     data.x = newH;
