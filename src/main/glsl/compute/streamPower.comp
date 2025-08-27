@@ -41,10 +41,6 @@ float uplift(ivec2 p) { return imageLoad(upliftBuffer, p).x; }
 
 vec2 ArrayPoint(ivec2 p) { return a.xy + vec2(p); }
 
-vec3 Point3D(ivec2 p) {
-    return vec3(ArrayPoint(p), height(p));
-}
-
 vec4 Read(ivec2 p) {
     vec4 ret;
     ret.x = height(p);      // Bedrock elevation
