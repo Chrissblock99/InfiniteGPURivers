@@ -14,7 +14,6 @@ layout(binding = 4, r32f) readonly uniform image2D upliftBuffer;
 
 uniform int nx;
 uniform int ny;
-uniform vec2 a;
 uniform vec2 b;
 
 // 0: Stream power
@@ -39,8 +38,6 @@ float stream(ivec2 p) { return imageLoad(stream, p).x; }
 
 float uplift(ivec2 p) { return imageLoad(upliftBuffer, p).x; }
 
-vec2 ArrayPoint(ivec2 p) { return a.xy + vec2(p); }
-
 vec4 Read(ivec2 p) {
     vec4 ret;
     ret.x = height(p);      // Bedrock elevation
@@ -56,7 +53,7 @@ void Write(ivec2 p, vec4 data) {
 
 //slope (offset divided by distance) from p to q
 float Slope(ivec2 p, ivec2 q) {
-    float d = length(ArrayPoint(q) - ArrayPoint(p));
+    float d = length(q - p);
     return (height(q) - height(p)) / d;
 }
 
