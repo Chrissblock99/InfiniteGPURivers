@@ -74,7 +74,7 @@ float Laplacian(ivec2 pos) {
 
 //direction of lowest point (slope based) from p
 ivec2 GetFlowSteepest(ivec2 pos) {
-    ivec2 d = ivec2(0, 0);
+    ivec2 d = pos;
     float maxSlope = 0.0f;
     for (int i = 0; i < 8; i++) {
         float ss = fastSlope(pos, i);
