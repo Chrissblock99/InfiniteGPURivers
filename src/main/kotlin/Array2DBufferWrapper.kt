@@ -24,12 +24,14 @@ abstract class Array2DBufferWrapper(val buffer: ByteBuffer, val type: Type, val 
 
 
     enum class Type(val glFormat: Int, val glType: Int) {
+        BYTE(GL_RED, GL_BYTE),
         FLOAT(GL_RED, GL_FLOAT),
         VEC4F(GL_RGBA, GL_FLOAT);
 
         val elementSize: Int = sizeOf(glFormat, glType)
 
         private fun sizeOf(format: Int, type: Int) = when (type) {
+                GL_BYTE -> 1
                 GL_FLOAT, GL_INT -> 4
                 GL_DOUBLE -> 8
                 else -> throw IllegalArgumentException("Array2DBufferWrapper does not support type: $type")
@@ -42,6 +44,7 @@ abstract class Array2DBufferWrapper(val buffer: ByteBuffer, val type: Type, val 
 
     companion object {
         fun of(buffer: ByteBuffer, type: Type, size: Vec2i) = when (type) {
+                Type.BYTE -> Byte2DBufferWrapper(buffer, size)
                 Type.FLOAT -> Float2DBufferWrapper(buffer, size)
                 Type.VEC4F -> Vec4f2DBufferWrapper(buffer, size)
             }
