@@ -30,8 +30,8 @@ class Main(
     val vaoListProgram = ListRenderer(ColoredVAORenderer(cameraMatrix), vaoList)
     val playerCenteredRenderer = PositionCenteredRenderer(TerrainVAORenderer(cameraMatrix), { srcPos1, chunkSize1 ->
         val area = Area(srcPos1, chunkSize1 + 1)
-        val terrain = worldStorage.terrain.readArea(area) as Float2DBufferWrapper
-        val water = worldStorage.water.readArea(area) as Float2DBufferWrapper
+        val terrain = worldStorage.height.readArea(area) as Float2DBufferWrapper
+        val water = worldStorage.drainageArea.readArea(area) as Float2DBufferWrapper
         TerrainVAOGenerator.heightMapToSimpleVAO(terrain, water, srcPos1, 1)
     }, cameraMatrix.position, worldStorage.chunkSize, chunkRenderDistance, erosionManager.usedArea)
     val iterationRenderer = PositionCenteredRenderer(

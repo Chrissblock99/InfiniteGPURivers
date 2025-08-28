@@ -12,21 +12,19 @@ class ErosionDataStorage(worldName: String, chunkRenderDistance: Int, chunkLoadB
     val iterationChunkSize = 64
     val iterationRegionSize = 10
 
-    private val terrainGenerator = TerrainGenerator(chunkSize)
+    private val upliftGenerator = TerrainGenerator(chunkSize)
 
-    val mipMappedTerrain: MipMappedInfiniteChunkWorld
-    val mipMappedWater: MipMappedInfiniteChunkWorld
+    val mipMappedHeight: MipMappedInfiniteChunkWorld
+    val mipMappedDrainageArea: MipMappedInfiniteChunkWorld
 
-    val terrain: InfiniteChunkWorld
-    val water: InfiniteChunkWorld
-    val sediment: InfiniteChunkWorld
-    val hardness: InfiniteChunkWorld
+    val height: InfiniteChunkWorld
+    val drainageArea: InfiniteChunkWorld
 
-    val waterOutflow: InfiniteChunkWorld
-    val sedimentOutflow: InfiniteChunkWorld
+    val steepestNeighbourOffsetIndex: InfiniteChunkWorld
+    val receiverHeight: InfiniteChunkWorld
+    val drainageAreaCopy: InfiniteChunkWorld
 
-    val thermalOutflow1: InfiniteChunkWorld
-    val thermalOutflow2: InfiniteChunkWorld
+    val uplift: InfiniteChunkWorld
 
     val iterationInfo: IterableWorld
 
@@ -38,59 +36,45 @@ class ErosionDataStorage(worldName: String, chunkRenderDistance: Int, chunkLoadB
     val loadNothingLoadManager2 = OutsideSquareTLM<Region<IterationTile>>(0, Vec2i(0))
 
     init {
-        mipMappedTerrain = MipMappedInfiniteChunkWorld(
-            "$worldName/terrain", chunkSize, regionSize,
-            terrainGenerator::generateChunk,
-            { _ -> chunkLoadManager })
-        mipMappedWater = MipMappedInfiniteChunkWorld(
-            "$worldName/water", chunkSize, regionSize,
+        mipMappedHeight = MipMappedInfiniteChunkWorld(
+            "$worldName/height", chunkSize, regionSize,
             { _, chunkSize -> Chunk(Float2DBufferWrapper(Vec2i(chunkSize))) },
             { _ -> chunkLoadManager })
-
-        terrain = mipMappedTerrain.getMipMapLevel(0)
-        water = mipMappedWater.getMipMapLevel(0)
-        sediment = InfiniteChunkWorld(
-            "$worldName/sediment", Array2DBufferWrapper.Type.FLOAT,
-            chunkSize,
-            regionSize,
-            { _, chunkSize -> Chunk(Float2DBufferWrapper(Vec2i(chunkSize))) },
-            loadNothingLoadManager
-        )
-        hardness = InfiniteChunkWorld(
-            "$worldName/hardness", Array2DBufferWrapper.Type.FLOAT,
-            chunkSize,
-            regionSize,
+        mipMappedDrainageArea = MipMappedInfiniteChunkWorld(
+            "$worldName/drainageArea", chunkSize, regionSize,
             { _, chunkSize -> Chunk(Float2DBufferWrapper(Vec2i(chunkSize), 1f)) },
+            { _ -> chunkLoadManager })
+
+        height = mipMappedHeight.getMipMapLevel(0)
+        drainageArea = mipMappedDrainageArea.getMipMapLevel(0)
+
+        steepestNeighbourOffsetIndex = InfiniteChunkWorld(
+            "$worldName/steepestNeighbourOffsetIndex", Array2DBufferWrapper.Type.BYTE,
+            chunkSize,
+            regionSize,
+            { _, chunkSize -> Chunk(Byte2DBufferWrapper(Vec2i(chunkSize))) },
+            loadNothingLoadManager
+        )
+        receiverHeight = InfiniteChunkWorld(
+            "$worldName/receiverHeight", Array2DBufferWrapper.Type.FLOAT,
+            chunkSize,
+            regionSize,
+            { _, chunkSize -> Chunk(Float2DBufferWrapper(Vec2i(chunkSize))) },
+            loadNothingLoadManager
+        )
+        drainageAreaCopy = InfiniteChunkWorld(
+            "$worldName/drainageAreaCopy", Array2DBufferWrapper.Type.FLOAT,
+            chunkSize,
+            regionSize,
+            { _, chunkSize -> Chunk(Float2DBufferWrapper(Vec2i(chunkSize))) },
             loadNothingLoadManager
         )
 
-        waterOutflow = InfiniteChunkWorld(
-            "$worldName/waterOutflow", Array2DBufferWrapper.Type.VEC4F,
+        uplift = InfiniteChunkWorld(
+            "$worldName/uplift", Array2DBufferWrapper.Type.FLOAT,
             chunkSize,
             regionSize,
-            { _, chunkSize -> Chunk(Vec4f2DBufferWrapper(Vec2i(chunkSize))) },
-            loadNothingLoadManager
-        )
-        sedimentOutflow = InfiniteChunkWorld(
-            "$worldName/sedimentOutflow", Array2DBufferWrapper.Type.VEC4F,
-            chunkSize,
-            regionSize,
-            { _, chunkSize -> Chunk(Vec4f2DBufferWrapper(Vec2i(chunkSize))) },
-            loadNothingLoadManager
-        )
-
-        thermalOutflow1 = InfiniteChunkWorld(
-            "$worldName/thermalOutflow1", Array2DBufferWrapper.Type.VEC4F,
-            chunkSize,
-            regionSize,
-            { _, chunkSize -> Chunk(Vec4f2DBufferWrapper(Vec2i(chunkSize))) },
-            loadNothingLoadManager
-        )
-        thermalOutflow2 = InfiniteChunkWorld(
-            "$worldName/thermalOutflow2", Array2DBufferWrapper.Type.VEC4F,
-            chunkSize,
-            regionSize,
-            { _, chunkSize -> Chunk(Vec4f2DBufferWrapper(Vec2i(chunkSize))) },
+            upliftGenerator::generateChunk,
             loadNothingLoadManager
         )
 
@@ -102,36 +86,30 @@ class ErosionDataStorage(worldName: String, chunkRenderDistance: Int, chunkLoadB
                     Util.ceilDiv(chunkLoadBufferDistance, regionSize)
         chunkLoadManager.center = Util.floorDiv(playerPos, chunkSize*regionSize)
 
-        mipMappedTerrain.manageLoad()
-        mipMappedWater.manageLoad()
+        mipMappedHeight.manageLoad()
+        mipMappedDrainageArea.manageLoad()
 
-        sediment.manageLoad()
-        hardness.manageLoad()
+        steepestNeighbourOffsetIndex.manageLoad()
+        receiverHeight.manageLoad()
+        drainageAreaCopy.manageLoad()
 
-        waterOutflow.manageLoad()
-        sedimentOutflow.manageLoad()
-
-        thermalOutflow1.manageLoad()
-        thermalOutflow2.manageLoad()
+        uplift.manageLoad()
 
         iterationInfo.manageLoad()
     }
 
     fun unloadAll() {
-        mipMappedTerrain.unloadAll()
-        mipMappedWater.unloadAll()
+        mipMappedHeight.unloadAll()
+        mipMappedDrainageArea.unloadAll()
 
-        sediment.unloadAllRegions()
-        hardness.unloadAllRegions()
+        steepestNeighbourOffsetIndex.unloadAllRegions()
+        receiverHeight.unloadAllRegions()
+        drainageAreaCopy.unloadAllRegions()
 
-        waterOutflow.unloadAllRegions()
-        sedimentOutflow.unloadAllRegions()
-
-        thermalOutflow1.unloadAllRegions()
-        thermalOutflow2.unloadAllRegions()
+        uplift.unloadAllRegions()
 
         iterationInfo.unloadAllRegions()
     }
 
-    fun cleanGL() = terrainGenerator.delete()
+    fun cleanGL() = upliftGenerator.delete()
 }

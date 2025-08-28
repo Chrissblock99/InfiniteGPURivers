@@ -37,19 +37,17 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, val m
             uploadMap()
         }
 
-    private val terrainMap: Texture2D
+    private val heightMap: Texture2D
     private val waterMap: Texture2D
-    private val sedimentMap: Texture2D
-    private val hardnessMap: Texture2D
 
-    private val waterOutflowPipes: Texture2D
-    private val sedimentOutflowPipes: Texture2D
+    private val steepestNeighbourOffsetIndexMap: Texture2D
+    private val receiverHeightMap: Texture2D
+    private val drainageAreaCopyMap: Texture2D
 
-    private val thermalOutflowPipes1: Texture2D
-    private val thermalOutflowPipes2: Texture2D
+    private val upliftMap: Texture2D
 
-    private val calcOutflow: ComputeProgram
-    private val applyOutflowAndRest: ComputeProgram
+    private val calcSteepestAndCopy: ComputeProgram
+    private val calcDrainageAndErode: ComputeProgram
 
     private val srcPosUniform1: Int
     private val srcPosUniform2: Int
@@ -58,42 +56,35 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, val m
         //read buffer in all directions (avoids implicit out of bound reads when iterating near edges)
         val buffedMaxSize = maxTextureSize + 2
 
-        terrainMap = Texture2D(GL30.GL_R32F, buffedMaxSize)
+        heightMap = Texture2D(GL30.GL_R32F, buffedMaxSize)
         waterMap = Texture2D(GL30.GL_R32F, buffedMaxSize)
-        sedimentMap = Texture2D(GL30.GL_R32F, buffedMaxSize)
-        hardnessMap = Texture2D(GL30.GL_R32F, buffedMaxSize)
 
-        waterOutflowPipes = Texture2D(GL30.GL_RGBA32F, buffedMaxSize)
-        sedimentOutflowPipes = Texture2D(GL30.GL_RGBA32F, buffedMaxSize)
+        steepestNeighbourOffsetIndexMap = Texture2D(GL30.GL_R8I, buffedMaxSize)
+        receiverHeightMap = Texture2D(GL30.GL_R32F, buffedMaxSize)
+        drainageAreaCopyMap = Texture2D(GL30.GL_R32F, buffedMaxSize)
 
-        thermalOutflowPipes1 = Texture2D(GL30.GL_RGBA32F, buffedMaxSize)
-        thermalOutflowPipes2 = Texture2D(GL30.GL_RGBA32F, buffedMaxSize)
+        upliftMap = Texture2D(GL30.GL_R32F, buffedMaxSize)
 
 
-        calcOutflow = ComputeProgram("calcOutflow")
-        applyOutflowAndRest = ComputeProgram("applyOutflowAndRest")
+        calcSteepestAndCopy = ComputeProgram("calcSteepestAndCopy")
+        calcDrainageAndErode = ComputeProgram("calcDrainageAndErode")
 
-        srcPosUniform1 = calcOutflow.getUniform("srcPos")
-        srcPosUniform2 = applyOutflowAndRest.getUniform("srcPos")
+        srcPosUniform1 = calcSteepestAndCopy.getUniform("srcPos")
+        srcPosUniform2 = calcDrainageAndErode.getUniform("srcPos")
 
 
-        terrainMap.bindUniformImage(calcOutflow.program, 0, "terrainMap", GL15.GL_READ_ONLY)
-        waterMap.bindUniformImage(calcOutflow.program, 1, "waterMap", GL15.GL_READ_ONLY)
-        sedimentMap.bindUniformImage(calcOutflow.program, 2, "sedimentMap", GL15.GL_READ_ONLY)
-        hardnessMap.bindUniformImage(calcOutflow.program, 3, "hardnessMap", GL15.GL_READ_ONLY)
-        waterOutflowPipes.bindUniformImage(calcOutflow.program, 4, "waterOutflowPipes", GL15.GL_READ_WRITE)
-        sedimentOutflowPipes.bindUniformImage(calcOutflow.program, 5, "sedimentOutflowPipes", GL15.GL_WRITE_ONLY)
-        thermalOutflowPipes1.bindUniformImage(calcOutflow.program, 6, "thermalOutflowPipes1", GL15.GL_WRITE_ONLY)
-        thermalOutflowPipes2.bindUniformImage(calcOutflow.program, 7, "thermalOutflowPipes2", GL15.GL_WRITE_ONLY)
+        heightMap.bindUniformImage(calcSteepestAndCopy.program, 0, "heightMap", GL15.GL_READ_ONLY)
+        waterMap.bindUniformImage(calcSteepestAndCopy.program, 1, "waterMap", GL15.GL_READ_ONLY)
+        steepestNeighbourOffsetIndexMap.bindUniformImage(calcSteepestAndCopy.program, 2, "steepestNeighbourOffsetIndexMap", GL15.GL_WRITE_ONLY)
+        receiverHeightMap.bindUniformImage(calcSteepestAndCopy.program, 3, "receiverHeightMap", GL15.GL_WRITE_ONLY)
+        drainageAreaCopyMap.bindUniformImage(calcSteepestAndCopy.program, 4, "drainageAreaCopyMap", GL15.GL_WRITE_ONLY)
 
-        terrainMap.bindUniformImage(applyOutflowAndRest.program, 0, "terrainMap", GL15.GL_READ_WRITE)
-        waterMap.bindUniformImage(applyOutflowAndRest.program, 1, "waterMap", GL15.GL_READ_WRITE)
-        sedimentMap.bindUniformImage(applyOutflowAndRest.program, 2, "sedimentMap", GL15.GL_READ_WRITE)
-        hardnessMap.bindUniformImage(applyOutflowAndRest.program, 3, "hardnessMap", GL15.GL_READ_WRITE)
-        waterOutflowPipes.bindUniformImage(applyOutflowAndRest.program, 4, "waterOutflowPipes", GL15.GL_READ_ONLY)
-        sedimentOutflowPipes.bindUniformImage(applyOutflowAndRest.program, 5, "sedimentOutflowPipes", GL15.GL_READ_ONLY)
-        thermalOutflowPipes1.bindUniformImage(applyOutflowAndRest.program, 6, "thermalOutflowPipes1", GL15.GL_READ_ONLY)
-        thermalOutflowPipes2.bindUniformImage(applyOutflowAndRest.program, 7, "thermalOutflowPipes2", GL15.GL_READ_ONLY)
+        heightMap.bindUniformImage(calcDrainageAndErode.program, 0, "terrainMap", GL15.GL_READ_WRITE)
+        waterMap.bindUniformImage(calcDrainageAndErode.program, 1, "waterMap", GL15.GL_READ_WRITE)
+        steepestNeighbourOffsetIndexMap.bindUniformImage(calcDrainageAndErode.program, 2, "steepestNeighbourOffsetIndexMap", GL15.GL_READ_ONLY)
+        receiverHeightMap.bindUniformImage(calcDrainageAndErode.program, 3, "receiverHeightMap", GL15.GL_READ_ONLY)
+        drainageAreaCopyMap.bindUniformImage(calcDrainageAndErode.program, 4, "drainageAreaCopyMap", GL15.GL_READ_ONLY)
+        upliftMap.bindUniformImage(calcDrainageAndErode.program, 5, "upliftMap", GL15.GL_READ_ONLY)
 
 
 
@@ -110,8 +101,8 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, val m
 
         area -= usedArea.srcPos
 
-        execShader(calcOutflow, srcPosUniform1, area)
-        execShader(applyOutflowAndRest, srcPosUniform2, area)
+        execShader(calcSteepestAndCopy, srcPosUniform1, area)
+        execShader(calcDrainageAndErode, srcPosUniform2, area)
     }
 
     private fun execShader(program: ComputeProgram, srcPosUniform: Int, area: Area) {
@@ -126,16 +117,12 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, val m
     }
 
     fun downloadMap() {
-        downloadHelper(terrainMap, erosionDataStorage.terrain)
-        downloadHelper(waterMap, erosionDataStorage.water)
-        downloadHelper(sedimentMap, erosionDataStorage.sediment)
-        downloadHelper(hardnessMap, erosionDataStorage.hardness)
+        downloadHelper(heightMap, erosionDataStorage.height)
+        downloadHelper(waterMap, erosionDataStorage.drainageArea)
 
-        downloadHelper(waterOutflowPipes, erosionDataStorage.waterOutflow)
-        downloadHelper(sedimentOutflowPipes, erosionDataStorage.sedimentOutflow)
-
-        downloadHelper(thermalOutflowPipes1, erosionDataStorage.thermalOutflow1)
-        downloadHelper(thermalOutflowPipes2, erosionDataStorage.thermalOutflow2)
+        downloadHelper(steepestNeighbourOffsetIndexMap, erosionDataStorage.steepestNeighbourOffsetIndex)
+        downloadHelper(receiverHeightMap, erosionDataStorage.receiverHeight)
+        downloadHelper(drainageAreaCopyMap, erosionDataStorage.drainageAreaCopy)
     }
 
     private fun downloadHelper(download: Texture2D, write: InfiniteChunkWorld) {
@@ -148,31 +135,27 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, val m
         val area = usedArea.outset(1)
         val zero = Vec2i()
 
-        terrainMap.uploadData(zero, erosionDataStorage.terrain.readArea(area))
-        waterMap.uploadData(zero, erosionDataStorage.water.readArea(area))
-        sedimentMap.uploadData(zero, erosionDataStorage.sediment.readArea(area))
-        hardnessMap.uploadData(zero, erosionDataStorage.hardness.readArea(area))
+        heightMap.uploadData(zero, erosionDataStorage.height.readArea(area))
+        waterMap.uploadData(zero, erosionDataStorage.drainageArea.readArea(area))
 
-        waterOutflowPipes.uploadData(zero, erosionDataStorage.waterOutflow.readArea(area))
-        sedimentOutflowPipes.uploadData(zero, erosionDataStorage.sedimentOutflow.readArea(area))
+        steepestNeighbourOffsetIndexMap.uploadData(zero, erosionDataStorage.steepestNeighbourOffsetIndex.readArea(area))
+        receiverHeightMap.uploadData(zero, erosionDataStorage.receiverHeight.readArea(area))
+        drainageAreaCopyMap.uploadData(zero, erosionDataStorage.drainageAreaCopy.readArea(area))
 
-        thermalOutflowPipes1.uploadData(zero, erosionDataStorage.thermalOutflow1.readArea(area))
-        thermalOutflowPipes2.uploadData(zero, erosionDataStorage.thermalOutflow2.readArea(area))
+        upliftMap.uploadData(zero, erosionDataStorage.uplift.readArea(area))
     }
 
     fun delete() {
-        calcOutflow.delete()
-        applyOutflowAndRest.delete()
+        calcSteepestAndCopy.delete()
+        calcDrainageAndErode.delete()
 
-        terrainMap.delete()
+        heightMap.delete()
         waterMap.delete()
-        sedimentMap.delete()
-        hardnessMap.delete()
 
-        waterOutflowPipes.delete()
-        sedimentOutflowPipes.delete()
+        steepestNeighbourOffsetIndexMap.delete()
+        receiverHeightMap.delete()
+        drainageAreaCopyMap.delete()
 
-        thermalOutflowPipes1.delete()
-        thermalOutflowPipes2.delete()
+        upliftMap.delete()
     }
 }

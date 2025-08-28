@@ -82,12 +82,12 @@ class InputController(private val inputDeviceManager: InputDeviceManager, privat
         inputDeviceManager.addKeyReleaseCallback(GLFW.GLFW_KEY_F) {
             main.erosionManager.downloadMap()
             writeImageHeightMap(
-                main.worldStorage.terrain.readArea(main.erosionManager.usedArea) as Float2DBufferWrapper,
+                main.worldStorage.height.readArea(main.erosionManager.usedArea) as Float2DBufferWrapper,
                 "terrain",
                 true
             )
             writeImageHeightMap(
-                main.worldStorage.water.readArea(main.erosionManager.usedArea) as Float2DBufferWrapper,
+                main.worldStorage.drainageArea.readArea(main.erosionManager.usedArea) as Float2DBufferWrapper,
                 "water",
                 false
             )
