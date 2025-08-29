@@ -23,6 +23,7 @@ const float k_h = 2.0f;
 const float p_sa = 0.8f;
 const float p_sl = 2.0f;
 const float dt = 50.0f;
+const float cellSizeInverse = 1.0/5.0;
 
 const ivec2 mooreNeighbourhood[9] = ivec2[](
     ivec2( 0,  0),
@@ -49,7 +50,7 @@ const float inverseMooreNeighbourhoodDistances[9] = float[](
 );
 
 float slope(float height, float otherHeight, int offsetIndex) {
-    return (otherHeight - height) * inverseMooreNeighbourhoodDistances[offsetIndex];
+    return (otherHeight - height) * inverseMooreNeighbourhoodDistances[offsetIndex] * cellSizeInverse;
 }
 
 float accumulateDrainageArea(ivec2 pos) {

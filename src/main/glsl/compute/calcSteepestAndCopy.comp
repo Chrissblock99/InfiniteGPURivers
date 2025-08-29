@@ -14,6 +14,8 @@ uniform ivec2 srcPos;
 
 
 
+const float cellSizeInverse = 1.0/5.0;
+
 const ivec2 mooreNeighbourhood[9] = ivec2[](
     ivec2( 0,  0),
     ivec2(-1,  1),
@@ -39,7 +41,7 @@ const float inverseMooreNeighbourhoodDistances[9] = float[](
 );
 
 float slope(float height, float otherHeight, int offsetIndex) {
-    return (otherHeight - height) * inverseMooreNeighbourhoodDistances[offsetIndex];
+    return (otherHeight - height) * inverseMooreNeighbourhoodDistances[offsetIndex] * cellSizeInverse;
 }
 
 int steepest(float heights[9]) {
