@@ -48,7 +48,7 @@ const float inverseMooreNeighbourhoodDistances[9] = float[](
     1/sqrt(2)
 );
 
-float fastSlopeBothHeights(float height, float otherHeight, int offsetIndex) {
+float slope(float height, float otherHeight, int offsetIndex) {
     return (otherHeight - height) * inverseMooreNeighbourhoodDistances[offsetIndex];
 }
 
@@ -71,7 +71,7 @@ void main() {
     float height = imageLoad(heightMap, pos).x;
     int offsetIndex = imageLoad(steepestNeighbourOffsetIndexMap, pos).x;
     float receiverHeight = imageLoad(receiverHeightMap, pos).x;
-    float positiveSlope = abs(fastSlopeBothHeights(height, receiverHeight, offsetIndex));
+    float positiveSlope = abs(slope(height, receiverHeight, offsetIndex));
 
     float spe = k * pow(drainageArea, p_sa) * pow(positiveSlope, p_sl);
 

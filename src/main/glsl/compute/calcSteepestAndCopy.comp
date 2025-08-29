@@ -38,16 +38,16 @@ const float inverseMooreNeighbourhoodDistances[9] = float[](
     1/sqrt(2)
 );
 
-float fastSlope(ivec2 pos, float height, int offsetIndex) {
-    return (imageLoad(heightMap, pos + mooreNeighbourhood[offsetIndex]).x - height) * inverseMooreNeighbourhoodDistances[offsetIndex];
+float slope(float height, float otherHeight, int offsetIndex) {
+    return (otherHeight - height) * inverseMooreNeighbourhoodDistances[offsetIndex];
 }
 
-int steepest(ivec2 pos) {
-    float height = imageLoad(heightMap, pos).x;
+int steepest(float heights[9]) {
+    float height = heights[0];
     int index = 0;
     float minSlope = 0.0f;
     for (int i = 1; i < 9; i++) {
-        float currentSlope = fastSlope(pos, height, i);
+        float currentSlope = slope(height, heights[i], i);
         if (currentSlope < minSlope) {
             minSlope = currentSlope;
             index = i;
@@ -59,8 +59,12 @@ int steepest(ivec2 pos) {
 void main() {
     ivec2 pos = srcPos + ivec2(gl_GlobalInvocationID);
 
-    int index = steepest(pos);
+    float heights[9];
+    for (int i = 0; i < 9; i++)
+        heights[i] = imageLoad(heightMap, pos + mooreNeighbourhood[i]).x;
+
+    int index = steepest(heights);
     imageStore(steepestNeighbourOffsetIndexMap, pos, ivec4(index));
-    imageStore(receiverHeightMap, pos, imageLoad(heightMap, pos + mooreNeighbourhood[index])); //this imageLoad is doubled and could be optimized (steepest() already loads it)
+    imageStore(receiverHeightMap, pos, vec4(heights[index]));
     imageStore(drainageAreaCopyMap, pos, imageLoad(drainageAreaMap, pos));
 }
