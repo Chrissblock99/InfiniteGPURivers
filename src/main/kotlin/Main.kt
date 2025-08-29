@@ -24,7 +24,7 @@ class Main(
 
     val worldStorage = ErosionDataStorage(worldName, chunkRenderDistance, chunkLoadBufferDistance, Vec2i(cameraMatrix.position.xz))
     var simulateErosion = false
-    val erosionManager = ErosionManager(Vec2i(cameraMatrix.position.xz), maxErosionSize, worldStorage, targetIteration)
+    val erosionManager = ErosionManager(Util.floorDiv(Vec2i(cameraMatrix.position.xz), worldStorage.chunkSize), maxErosionSize, worldStorage, targetIteration)
 
     val vaoList = ArrayList<ColoredVAO>(listOf<ColoredVAO>()) //test case for rendering
     val vaoListProgram = ListRenderer(ColoredVAORenderer(cameraMatrix), vaoList)
