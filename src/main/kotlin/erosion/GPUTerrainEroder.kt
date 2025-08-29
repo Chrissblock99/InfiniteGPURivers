@@ -43,6 +43,7 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, val m
     private val steepestNeighbourOffsetIndexMap: Texture2D
     private val receiverHeightMap: Texture2D
     private val drainageAreaCopyMap: Texture2D
+    private val laplacianMap: Texture2D
 
     private val upliftMap: Texture2D
 
@@ -62,6 +63,7 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, val m
         steepestNeighbourOffsetIndexMap = Texture2D(GL30.GL_R8I, buffedMaxSize)
         receiverHeightMap = Texture2D(GL30.GL_R32F, buffedMaxSize)
         drainageAreaCopyMap = Texture2D(GL30.GL_R32F, buffedMaxSize)
+        laplacianMap = Texture2D(GL30.GL_R32F, buffedMaxSize)
 
         upliftMap = Texture2D(GL30.GL_R32F, buffedMaxSize)
 
@@ -78,13 +80,15 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, val m
         steepestNeighbourOffsetIndexMap.bindUniformImage(calcSteepestAndCopy.program, 2, "steepestNeighbourOffsetIndexMap", GL15.GL_WRITE_ONLY)
         receiverHeightMap.bindUniformImage(calcSteepestAndCopy.program, 3, "receiverHeightMap", GL15.GL_WRITE_ONLY)
         drainageAreaCopyMap.bindUniformImage(calcSteepestAndCopy.program, 4, "drainageAreaCopyMap", GL15.GL_WRITE_ONLY)
+        laplacianMap.bindUniformImage(calcSteepestAndCopy.program, 5, "laplacianMap", GL15.GL_WRITE_ONLY)
 
         heightMap.bindUniformImage(calcDrainageAndErode.program, 0, "terrainMap", GL15.GL_READ_WRITE)
         waterMap.bindUniformImage(calcDrainageAndErode.program, 1, "waterMap", GL15.GL_READ_WRITE)
         steepestNeighbourOffsetIndexMap.bindUniformImage(calcDrainageAndErode.program, 2, "steepestNeighbourOffsetIndexMap", GL15.GL_READ_ONLY)
         receiverHeightMap.bindUniformImage(calcDrainageAndErode.program, 3, "receiverHeightMap", GL15.GL_READ_ONLY)
         drainageAreaCopyMap.bindUniformImage(calcDrainageAndErode.program, 4, "drainageAreaCopyMap", GL15.GL_READ_ONLY)
-        upliftMap.bindUniformImage(calcDrainageAndErode.program, 5, "upliftMap", GL15.GL_READ_ONLY)
+        laplacianMap.bindUniformImage(calcSteepestAndCopy.program, 5, "laplacianMap", GL15.GL_READ_ONLY)
+        upliftMap.bindUniformImage(calcDrainageAndErode.program, 6, "upliftMap", GL15.GL_READ_ONLY)
 
 
 
@@ -123,6 +127,7 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, val m
         downloadHelper(steepestNeighbourOffsetIndexMap, erosionDataStorage.steepestNeighbourOffsetIndex)
         downloadHelper(receiverHeightMap, erosionDataStorage.receiverHeight)
         downloadHelper(drainageAreaCopyMap, erosionDataStorage.drainageAreaCopy)
+        downloadHelper(laplacianMap, erosionDataStorage.laplacian)
     }
 
     private fun downloadHelper(download: Texture2D, write: InfiniteChunkWorld) {
@@ -141,6 +146,7 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, val m
         steepestNeighbourOffsetIndexMap.uploadData(zero, erosionDataStorage.steepestNeighbourOffsetIndex.readArea(area))
         receiverHeightMap.uploadData(zero, erosionDataStorage.receiverHeight.readArea(area))
         drainageAreaCopyMap.uploadData(zero, erosionDataStorage.drainageAreaCopy.readArea(area))
+        laplacianMap.uploadData(zero, erosionDataStorage.laplacian.readArea(area))
 
         upliftMap.uploadData(zero, erosionDataStorage.uplift.readArea(area))
     }
@@ -155,6 +161,7 @@ class GPUTerrainEroder(private val erosionDataStorage: ErosionDataStorage, val m
         steepestNeighbourOffsetIndexMap.delete()
         receiverHeightMap.delete()
         drainageAreaCopyMap.delete()
+        laplacianMap.delete()
 
         upliftMap.delete()
     }

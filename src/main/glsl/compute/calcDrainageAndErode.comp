@@ -7,8 +7,9 @@ layout(binding = 1, r32f) uniform image2D drainageAreaMap;
 layout(binding = 2, r8i) readonly uniform iimage2D steepestNeighbourOffsetIndexMap;
 layout(binding = 3, r32f) readonly uniform image2D receiverHeightMap;
 layout(binding = 4, r32f) readonly uniform image2D drainageAreaCopyMap;
+layout(binding = 5, r32f) readonly uniform image2D laplacianMap;
 
-layout(binding = 5, r32f) readonly uniform image2D upliftMap;
+layout(binding = 6, r32f) readonly uniform image2D upliftMap;
 
 
 
@@ -23,7 +24,7 @@ const float k_h = 2.0f;
 const float p_sa = 0.8f;
 const float p_sl = 2.0f;
 const float dt = 50.0f;
-const float cellSizeInverse = 1.0/5.0;
+const float cellSizeInverse = 1.0/500.0;
 
 const ivec2 mooreNeighbourhood[9] = ivec2[](
     ivec2( 0,  0),
@@ -76,7 +77,7 @@ void main() {
 
     float spe = k * pow(drainageArea, p_sa) * pow(positiveSlope, p_sl);
 
-    height -= dt * (spe);
+    height -= dt * (spe - k_h * imageLoad(laplacianMap, pos).x - k_d * positiveSlope);
     height = max(height, receiverHeight);
     height += dt * uplift * imageLoad(upliftMap, pos).x;
 

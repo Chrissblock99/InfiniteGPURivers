@@ -23,6 +23,7 @@ class ErosionDataStorage(worldName: String, chunkRenderDistance: Int, chunkLoadB
     val steepestNeighbourOffsetIndex: InfiniteChunkWorld
     val receiverHeight: InfiniteChunkWorld
     val drainageAreaCopy: InfiniteChunkWorld
+    val laplacian: InfiniteChunkWorld
 
     val uplift: InfiniteChunkWorld
 
@@ -69,6 +70,13 @@ class ErosionDataStorage(worldName: String, chunkRenderDistance: Int, chunkLoadB
             { _, chunkSize -> Chunk(Float2DBufferWrapper(Vec2i(chunkSize))) },
             loadNothingLoadManager
         )
+        laplacian = InfiniteChunkWorld(
+            "$worldName/laplacian", Array2DBufferWrapper.Type.FLOAT,
+            chunkSize,
+            regionSize,
+            { _, chunkSize -> Chunk(Float2DBufferWrapper(Vec2i(chunkSize))) },
+            loadNothingLoadManager
+        )
 
         uplift = InfiniteChunkWorld(
             "$worldName/uplift", Array2DBufferWrapper.Type.FLOAT,
@@ -92,6 +100,7 @@ class ErosionDataStorage(worldName: String, chunkRenderDistance: Int, chunkLoadB
         steepestNeighbourOffsetIndex.manageLoad()
         receiverHeight.manageLoad()
         drainageAreaCopy.manageLoad()
+        laplacian.manageLoad()
 
         uplift.manageLoad()
 
@@ -105,6 +114,7 @@ class ErosionDataStorage(worldName: String, chunkRenderDistance: Int, chunkLoadB
         steepestNeighbourOffsetIndex.unloadAllRegions()
         receiverHeight.unloadAllRegions()
         drainageAreaCopy.unloadAllRegions()
+        laplacian.unloadAllRegions()
 
         uplift.unloadAllRegions()
 
