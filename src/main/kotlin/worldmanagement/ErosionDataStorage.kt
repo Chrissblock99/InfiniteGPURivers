@@ -83,7 +83,7 @@ class ErosionDataStorage(worldName: String, chunkRenderDistance: Int, chunkLoadB
         iterationInfo = IterableWorld("$worldName/iteration", iterationChunkSize, iterationRegionSize, loadNothingLoadManager2)
     }
 
-    fun manageLoad(chunkRenderDistance: Int, chunkLoadBufferDistance: Int, iterationRenderDistance: Int, playerPos: Vec2i) {
+    fun manageLoad(chunkRenderDistance: Int, chunkLoadBufferDistance: Int, playerPos: Vec2i) {
         chunkLoadManager.radius = Util.ceilDiv(chunkRenderDistance, regionSize) +
                     Util.ceilDiv(chunkLoadBufferDistance, regionSize)
         chunkLoadManager.center = Util.floorDiv(playerPos, chunkSize*regionSize)

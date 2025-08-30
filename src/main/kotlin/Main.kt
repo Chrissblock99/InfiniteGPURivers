@@ -72,7 +72,7 @@ class Main(
             playerCenteredRenderer.updateLoadedChunks(cameraMatrix.position, erosionManager.usedArea)
             if (renderIterations)
                 iterationRenderer.updateLoadedChunks(cameraMatrix.position / worldStorage.iterationInfo.chunkSize)
-            worldStorage.manageLoad(playerCenteredRenderer.chunkRenderDistance, chunkLoadBufferDistance, iterationRenderer.chunkRenderDistance, Vec2i(cameraMatrix.position.xz))
+            worldStorage.manageLoad(playerCenteredRenderer.chunkRenderDistance, chunkLoadBufferDistance, Vec2i(cameraMatrix.position.xz))
 
             window.clearBuffers()
 
