@@ -30,8 +30,7 @@ class ErosionDataStorage(worldName: String, chunkRenderDistance: Int, chunkLoadB
         Util.ceilDiv(chunkRenderDistance, regionSize) +
                 Util.ceilDiv(chunkLoadBufferDistance, regionSize),
         Util.floorDiv(playerPos, chunkSize))
-    val loadNothingLoadManager = OutsideSquareTLM<Region<Chunk>>(0, Vec2i(0))
-    val loadNothingLoadManager2 = OutsideSquareTLM<Region<IterationTile>>(0, Vec2i(0))
+    val nothingLoadManager = NothingTLM<Region<Chunk>>()
 
     init {
         height = InfiniteChunkWorld(
@@ -48,28 +47,28 @@ class ErosionDataStorage(worldName: String, chunkRenderDistance: Int, chunkLoadB
             chunkSize,
             regionSize,
             { _, chunkSize -> Chunk(Byte2DBufferWrapper(Vec2i(chunkSize))) },
-            loadNothingLoadManager
+            nothingLoadManager
         )
         receiverHeight = InfiniteChunkWorld(
             "$worldName/receiverHeight", Array2DBufferWrapper.Type.FLOAT,
             chunkSize,
             regionSize,
             { _, chunkSize -> Chunk(Float2DBufferWrapper(Vec2i(chunkSize))) },
-            loadNothingLoadManager
+            nothingLoadManager
         )
         drainageAreaCopy = InfiniteChunkWorld(
             "$worldName/drainageAreaCopy", Array2DBufferWrapper.Type.FLOAT,
             chunkSize,
             regionSize,
             { _, chunkSize -> Chunk(Float2DBufferWrapper(Vec2i(chunkSize))) },
-            loadNothingLoadManager
+            nothingLoadManager
         )
         laplacian = InfiniteChunkWorld(
             "$worldName/laplacian", Array2DBufferWrapper.Type.FLOAT,
             chunkSize,
             regionSize,
             { _, chunkSize -> Chunk(Float2DBufferWrapper(Vec2i(chunkSize))) },
-            loadNothingLoadManager
+            nothingLoadManager
         )
 
         uplift = InfiniteChunkWorld(
@@ -77,10 +76,10 @@ class ErosionDataStorage(worldName: String, chunkRenderDistance: Int, chunkLoadB
             chunkSize,
             regionSize,
             upliftGenerator::generateChunk,
-            loadNothingLoadManager
+            nothingLoadManager
         )
 
-        iterationInfo = IterableWorld("$worldName/iteration", iterationChunkSize, iterationRegionSize, loadNothingLoadManager2)
+        iterationInfo = IterableWorld("$worldName/iteration", iterationChunkSize, iterationRegionSize, NothingTLM<Region<IterationTile>>())
     }
 
     fun manageLoad(chunkRenderDistance: Int, chunkLoadBufferDistance: Int, playerPos: Vec2i) {
