@@ -14,9 +14,6 @@ class ErosionDataStorage(worldName: String, chunkRenderDistance: Int, chunkLoadB
 
     private val upliftGenerator = TerrainGenerator(chunkSize)
 
-    val mipMappedHeight: MipMappedInfiniteChunkWorld
-    val mipMappedDrainageArea: MipMappedInfiniteChunkWorld
-
     val height: InfiniteChunkWorld
     val drainageArea: InfiniteChunkWorld
 
@@ -37,17 +34,14 @@ class ErosionDataStorage(worldName: String, chunkRenderDistance: Int, chunkLoadB
     val loadNothingLoadManager2 = OutsideSquareTLM<Region<IterationTile>>(0, Vec2i(0))
 
     init {
-        mipMappedHeight = MipMappedInfiniteChunkWorld(
-            "$worldName/height", chunkSize, regionSize,
+        height = InfiniteChunkWorld(
+            "$worldName/height", Array2DBufferWrapper.Type.FLOAT, chunkSize, regionSize,
             { _, chunkSize -> Chunk(Float2DBufferWrapper(Vec2i(chunkSize))) },
-            { _ -> chunkLoadManager })
-        mipMappedDrainageArea = MipMappedInfiniteChunkWorld(
-            "$worldName/drainageArea", chunkSize, regionSize,
+            chunkLoadManager)
+        drainageArea = InfiniteChunkWorld(
+            "$worldName/drainageArea", Array2DBufferWrapper.Type.FLOAT, chunkSize, regionSize,
             { _, chunkSize -> Chunk(Float2DBufferWrapper(Vec2i(chunkSize), 1f)) },
-            { _ -> chunkLoadManager })
-
-        height = mipMappedHeight.getMipMapLevel(0)
-        drainageArea = mipMappedDrainageArea.getMipMapLevel(0)
+            chunkLoadManager)
 
         steepestNeighbourOffsetIndex = InfiniteChunkWorld(
             "$worldName/steepestNeighbourOffsetIndex", Array2DBufferWrapper.Type.BYTE,
@@ -94,8 +88,8 @@ class ErosionDataStorage(worldName: String, chunkRenderDistance: Int, chunkLoadB
                     Util.ceilDiv(chunkLoadBufferDistance, regionSize)
         chunkLoadManager.center = Util.floorDiv(playerPos, chunkSize*regionSize)
 
-        mipMappedHeight.manageLoad()
-        mipMappedDrainageArea.manageLoad()
+        height.manageLoad()
+        drainageArea.manageLoad()
 
         steepestNeighbourOffsetIndex.manageLoad()
         receiverHeight.manageLoad()
@@ -108,8 +102,8 @@ class ErosionDataStorage(worldName: String, chunkRenderDistance: Int, chunkLoadB
     }
 
     fun unloadAll() {
-        mipMappedHeight.unloadAll()
-        mipMappedDrainageArea.unloadAll()
+        height.unloadAllRegions()
+        drainageArea.unloadAllRegions()
 
         steepestNeighbourOffsetIndex.unloadAllRegions()
         receiverHeight.unloadAllRegions()
