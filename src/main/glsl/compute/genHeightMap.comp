@@ -320,12 +320,12 @@ void main() {
         simplexFBM(pos, seed+140, 1, freq, amp*3, 0, 0, false).z);
 
 
-    float height = simplexFBMPositive(warpedPos, seed, 1, freq, amp, 0, 0, false).z;
+    float height = simplexFBMPositive(warpedPos, seed, 1, freq, 1, 0, 0, false).z;
 
     float mul = simplexFBMPositive(strongWarpedPos, seed+1, 1, freq/4, 1, 0, 0, false).z;
-    height *= smoothstep(.3, .8, mul);
+    height *= smoothstep(.5, .9, mul);
 
 
 
-    imageStore(terrainMap, ivec2(gl_GlobalInvocationID.xy), vec4(height/100));
+    imageStore(terrainMap, ivec2(gl_GlobalInvocationID.xy), vec4(height));
 }
