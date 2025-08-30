@@ -77,7 +77,7 @@ void main() {
 
     float spe = k * pow(drainageArea, p_sa) * pow(positiveSlope, p_sl);
 
-    height -= dt * (spe - k_h * imageLoad(laplacianMap, pos).x - k_d * positiveSlope);
+    height -= dt * (spe - k_h * imageLoad(laplacianMap, pos).x + k_d * positiveSlope);
     height = max(height, receiverHeight);
     height += dt * uplift * imageLoad(upliftMap, pos).x;
 
