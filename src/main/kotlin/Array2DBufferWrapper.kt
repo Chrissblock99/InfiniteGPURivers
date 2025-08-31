@@ -2,7 +2,7 @@ package me.chriss99
 
 import glm_.vec2.Vec2i
 import org.lwjgl.BufferUtils
-import org.lwjgl.opengl.GL11.*
+import org.lwjgl.opengl.GL30.*
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -23,10 +23,10 @@ abstract class Array2DBufferWrapper(val buffer: ByteBuffer, val type: Type, val 
         )
 
 
-    enum class Type(val glFormat: Int, val glType: Int) {
-        BYTE(GL_RED, GL_BYTE),
-        FLOAT(GL_RED, GL_FLOAT),
-        VEC4F(GL_RGBA, GL_FLOAT);
+    enum class Type(val glFormat: Int, val glType: Int, val glInternalFormat: Int) {
+        BYTE(GL_RED, GL_BYTE, GL_R8I),
+        FLOAT(GL_RED, GL_FLOAT, GL_R32F),
+        VEC4F(GL_RGBA, GL_FLOAT, GL_RGBA32F);
 
         val elementSize: Int = sizeOf(glFormat, glType)
 
