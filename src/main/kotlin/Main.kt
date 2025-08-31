@@ -4,7 +4,6 @@ import me.chriss99.erosion.ErosionManager
 import me.chriss99.program.*
 import me.chriss99.util.FrameCounter
 import me.chriss99.util.Util
-import me.chriss99.worldmanagement.ErosionDataStorage
 import glm_.vec2.Vec2i
 import glm_.vec3.swizzle.xz
 import me.chriss99.render.ColoredVAO
@@ -22,28 +21,28 @@ class Main(
     val window = Window("InfiniteGPURivers")
     val cameraMatrix = CameraMatrix(aspectRatio = window.aspectRatio)
 
-    val worldStorage = ErosionDataStorage(worldName, chunkRenderDistance, chunkLoadBufferDistance, Vec2i(cameraMatrix.position.xz))
+    val gpuAlgorithm = StreamPower(worldName, maxErosionSize, chunkRenderDistance, chunkLoadBufferDistance, Vec2i(cameraMatrix.position.xz))
     var simulateErosion = false
-    val erosionManager = ErosionManager(Util.floorDiv(Vec2i(cameraMatrix.position.xz), worldStorage.chunkSize), maxErosionSize, worldStorage, targetIteration)
+    val erosionManager = ErosionManager(Util.floorDiv(Vec2i(cameraMatrix.position.xz), gpuAlgorithm.chunkSize), gpuAlgorithm, targetIteration)
 
     val vaoList = ArrayList<ColoredVAO>(listOf<ColoredVAO>()) //test case for rendering
     val vaoListProgram = ListRenderer(ColoredVAORenderer(cameraMatrix), vaoList)
     val playerCenteredRenderer = PositionCenteredRenderer(TerrainVAORenderer(cameraMatrix), { srcPos1, chunkSize1 ->
         val area = Area(srcPos1, chunkSize1 + 1)
-        val terrain = worldStorage.height.readArea(area) as Float2DBufferWrapper
+        val terrain = gpuAlgorithm.height.world.readArea(area) as Float2DBufferWrapper
         val water = Float2DBufferWrapper(area.size) //worldStorage.drainageArea.readArea(area) as Float2DBufferWrapper
         TerrainVAOGenerator.heightMapToSimpleVAO(terrain, water, srcPos1, 1)
-    }, cameraMatrix.position, worldStorage.chunkSize, chunkRenderDistance, erosionManager.usedArea)
+    }, cameraMatrix.position, gpuAlgorithm.chunkSize, chunkRenderDistance, erosionManager.usedArea)
     val iterationRenderer = PositionCenteredRenderer(
         IterationVAORenderer(cameraMatrix),
         { vec2i, chunkSize1 ->
             IterationVAOGenerator.heightMapToIterationVAO(
                 vec2i,
                 Vec2i(chunkSize1),
-                worldStorage.iterationInfo
+                gpuAlgorithm.iteration
             )
         },
-        cameraMatrix.position, worldStorage.iterationChunkSize, iterationRenderDistance
+        cameraMatrix.position, gpuAlgorithm.iterationChunkSize, iterationRenderDistance
     )
     var renderIterations = false
     val tessProgram = TessProgram(cameraMatrix, erosionManager.usedArea)
@@ -55,7 +54,7 @@ class Main(
 
 
     fun primitiveErosion() {
-        val pos = Util.floorDiv(Vec2i(cameraMatrix.position.xz), worldStorage.chunkSize)
+        val pos = Util.floorDiv(Vec2i(cameraMatrix.position.xz), gpuAlgorithm.chunkSize)
         if (erosionManager.findIterate(pos, 100 * 1000 * 1000 / 60))
             iterationRenderer.reloadAll()
         else simulateErosion = false
@@ -71,8 +70,8 @@ class Main(
 
             playerCenteredRenderer.updateLoadedChunks(cameraMatrix.position, erosionManager.usedArea)
             if (renderIterations)
-                iterationRenderer.updateLoadedChunks(cameraMatrix.position / worldStorage.iterationInfo.chunkSize)
-            worldStorage.manageLoad(playerCenteredRenderer.chunkRenderDistance, chunkLoadBufferDistance, Vec2i(cameraMatrix.position.xz))
+                iterationRenderer.updateLoadedChunks(cameraMatrix.position / gpuAlgorithm.iteration.chunkSize)
+            gpuAlgorithm.manageLoad(playerCenteredRenderer.chunkRenderDistance, chunkLoadBufferDistance, Vec2i(cameraMatrix.position.xz))
 
             window.clearBuffers()
 
@@ -102,7 +101,7 @@ class Main(
         lastTime = currentTime
 
         println("Saving world...")
-        worldStorage.unloadAll()
+        gpuAlgorithm.unloadAll()
         println("Saved world in " + (GLFW.glfwGetTime() - lastTime) + " seconds.")
     }
 
@@ -112,7 +111,6 @@ class Main(
         iterationRenderer.delete()
         tessProgram.delete()
 
-        worldStorage.cleanGL()
         erosionManager.delete()
     }
 

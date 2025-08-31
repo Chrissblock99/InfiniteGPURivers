@@ -3,13 +3,12 @@ package me.chriss99.erosion
 import me.chriss99.Area
 import glm_.vec2.Vec2i
 import me.chriss99.util.Util
-import me.chriss99.worldmanagement.ErosionDataStorage
 import kotlin.math.max
 import kotlin.math.min
 
-class ErosionManager(pos: Vec2i, maxTextureSize: Vec2i, worldStorage: ErosionDataStorage, targetIteration: Int) {
-    private val data = worldStorage.iterationInfo
-    private val maxChunks: Vec2i = maxTextureSize / data.chunkSize
+class ErosionManager(pos: Vec2i, val gpuAlgorithm: GPUAlgorithm, targetIteration: Int) {
+    private val data = gpuAlgorithm.iteration
+    private val maxChunks: Vec2i = gpuAlgorithm.maxTextureSize / data.chunkSize
 
     var targetIteration = (targetIteration/data.chunkSize + 1) * data.chunkSize
         set(value) {
@@ -20,7 +19,7 @@ class ErosionManager(pos: Vec2i, maxTextureSize: Vec2i, worldStorage: ErosionDat
     private var iterabilityInfo: Array<Array<IterabilityInfo?>> = computeIterability(currentArea.srcPos)
     private var currentTask: ErosionTask? = null
 
-    private val eroder: GPUTerrainEroder = GPUTerrainEroder(worldStorage, maxTextureSize, currentArea * data.chunkSize)
+    private val eroder: GPUTerrainEroder = GPUTerrainEroder(gpuAlgorithm, currentArea * data.chunkSize)
     val usedArea: Area get() = eroder.usedArea
 
     fun downloadMap() = eroder.downloadMap()
@@ -255,6 +254,6 @@ class ErosionManager(pos: Vec2i, maxTextureSize: Vec2i, worldStorage: ErosionDat
     }
 
     fun delete() {
-        eroder.delete()
+        gpuAlgorithm.delete()
     }
 }

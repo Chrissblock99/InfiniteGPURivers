@@ -70,7 +70,7 @@ class InputController(private val inputDeviceManager: InputDeviceManager, privat
         inputDeviceManager.addKeyReleaseCallback(GLFW.GLFW_KEY_I) { main.renderIterations = !main.renderIterations }
         inputDeviceManager.addKeyReleaseCallback(GLFW.GLFW_KEY_R) { main.primitiveErosion() }
         inputDeviceManager.addKeyReleaseCallback(GLFW.GLFW_KEY_G) {
-            val chunkSize = main.worldStorage.iterationInfo.chunkSize
+            val chunkSize = main.gpuAlgorithm.iteration.chunkSize
             main.vaoList.add(
                 ColoredVAOGenerator.iterabilityInfoToCrossVAO(
                 main.erosionManager.usedArea.srcPos / chunkSize, main.erosionManager.iterabilityInfoCopy, chunkSize))
@@ -82,12 +82,12 @@ class InputController(private val inputDeviceManager: InputDeviceManager, privat
         inputDeviceManager.addKeyReleaseCallback(GLFW.GLFW_KEY_F) {
             main.erosionManager.downloadMap()
             writeImageHeightMap(
-                main.worldStorage.height.readArea(main.erosionManager.usedArea) as Float2DBufferWrapper,
+                main.gpuAlgorithm.height.world.readArea(main.erosionManager.usedArea) as Float2DBufferWrapper,
                 "terrain",
                 true
             )
             writeImageHeightMap(
-                main.worldStorage.drainageArea.readArea(main.erosionManager.usedArea) as Float2DBufferWrapper,
+                main.gpuAlgorithm.drainageArea.world.readArea(main.erosionManager.usedArea) as Float2DBufferWrapper,
                 "water",
                 false
             )
