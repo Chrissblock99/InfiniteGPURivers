@@ -1,6 +1,7 @@
 This project aims to generate rivers on a procedurally generated terrain efficiently.
 To achieve this, the method described in [this research paper](http://www.cescg.org/CESCG-2011/papers/TUBudapest-Jako-Balazs.pdf) is implemented and adapted to be 3x3 bounded.
 Specifically, the sediment transportation algorithm has been adapted to use pipes like water and thermal processes. <br>
+[This paper](https://hal.science/hal-04049125v1) was also adapted to be 3x3 bounded and is currently implemented.
 Credit also goes to [Stefan Gustavson AKA stegu](https://github.com/stegu), for the simplex noise implementation, and [this opengl sample](http://forum.lwjgl.org/index.php?topic=6213.0), which I built all my code from. Of course, [LearnOpenGL](https://learnopengl.com) also had a massive influence on this project.
 
 # Executing
