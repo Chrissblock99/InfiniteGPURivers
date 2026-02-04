@@ -55,9 +55,9 @@ class Texture2D(private val internalFormat: Int, val size: Vec2i) : GLObject {
         )
     }
 
-    fun downloadFullData(format: Int, type: Int, buffer: ByteBuffer) {
+    fun downloadFullData(buffer: Array2DBufferWrapper) {
         bind()
-        glGetTexImage(GL_TEXTURE_2D, 0, format, type, buffer)
+        glGetTexImage(GL_TEXTURE_2D, 0, buffer.type.glFormat, buffer.type.glType, buffer.buffer)
     }
 
     override fun bind() = glBindTexture(GL_TEXTURE_2D, texture)

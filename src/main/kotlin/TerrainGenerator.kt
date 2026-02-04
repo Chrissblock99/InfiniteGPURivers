@@ -29,7 +29,7 @@ class TerrainGenerator(chunkSize: Int) : ComputeProgram("genHeightMap") {
 
 
         val buffer = Float2DBufferWrapper(Vec2i(chunkSize))
-        terrainMap.downloadFullData(GL_RED, GL_FLOAT, buffer.buffer)
+        terrainMap.downloadFullData(buffer)
 
         return Chunk(buffer)
     }
