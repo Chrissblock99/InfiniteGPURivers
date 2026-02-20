@@ -8,7 +8,13 @@ import me.chriss99.glabstractions.VAOImpl
 import org.lwjgl.opengl.GL40.*
 import java.nio.FloatBuffer
 
-class TessProgram(private val cameraMatrix: CameraMatrix, area: Area) : GLProgram() {
+class TessProgram(private val cameraMatrix: CameraMatrix, area: Area) : GLProgram("tesselation",
+    "passThrough.vert",
+    "constant.tesc",
+    "readSimulation.tese",
+    "normals.geom",
+    "colors.frag"
+) {
     private val vao: VAO
     var area: Area = area / 64
         set(value) {
@@ -24,18 +30,11 @@ class TessProgram(private val cameraMatrix: CameraMatrix, area: Area) : GLProgra
     init {
         this.vao = VAOImpl(null, 2, tesselationGridVertexesTest(maxSize.x, maxSize.y, 64.0))
 
-        addShader("tesselation/passThrough.vert", GL_VERTEX_SHADER)
-        addShader("tesselation/constant.tesc", GL_TESS_CONTROL_SHADER)
-        addShader("tesselation/readSimulation.tese", GL_TESS_EVALUATION_SHADER)
-        addShader("tesselation/normals.geom", GL_GEOMETRY_SHADER)
-        addShader("tesselation/colors.frag", GL_FRAGMENT_SHADER)
-
         glPatchParameteri(GL_PATCH_VERTICES, 4)
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
         bindAttribute(0, "position")
-        validate()
 
         transformMatrix = getUniform("transformMatrix")
         cameraPos = getUniform("cameraPos")

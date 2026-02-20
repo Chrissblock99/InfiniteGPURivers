@@ -2,38 +2,41 @@ package me.chriss99.program
 
 import org.lwjgl.opengl.GL45.*
 import java.io.File
-import java.util.*
+import java.io.FileNotFoundException
 
-open class GLProgram {
+open class GLProgram(folder: String = "", vararg fileNames: String) {
     val program: Int = glCreateProgram()
-    private val shaders = ArrayList<Pair<Int, String>>()
+    init {
+        fileNames.map { File("src/main/glsl/${ if (folder == "") "" else "$folder/" }$it") }.map {
+            if (!it.exists())
+                throw FileNotFoundException(it.path)
 
-    fun addShader(name: String, type: Int) {
-        val shader = loadShader(File("src/main/glsl/$name"), type)
-
-        shaders.add(shader to name)
-        glAttachShader(program, shader)
-    }
-
-    fun validate() {
-        for ((shader, name) in shaders) {
+            val shader = glCreateShader(typeFromFileExtension(it.name.split(".").last()))
+            glAttachShader(program, shader)
+            glShaderSource(shader, it.readText())
             glCompileShader(shader)
-            if (glGetShaderi(shader, GL_COMPILE_STATUS) != 1)
-                System.err.println("Shader $name did not compile!")
+
+            return@map shader
+        }.forEach {
+            if (glGetShaderi(it, GL_COMPILE_STATUS) == GL_TRUE)
+                return@forEach
+
+            System.err.println(glGetShaderInfoLog(it))
+            throw IllegalStateException("A shader did not compile!")
         }
+
+
         glLinkProgram(program)
+        if (glGetProgrami(program, GL_LINK_STATUS) == GL_FALSE) {
+            System.err.println(glGetProgramInfoLog(program))
+            throw IllegalStateException("A program did not link!")
+        }
+
         glValidateProgram(program)
-
-        val link: Int = glGetProgrami(program, GL_LINK_STATUS)
-        val validate: Int = glGetProgrami(program, GL_VALIDATE_STATUS)
-
-        if (link == 1 && validate == 1)
-            return
-
-        System.err.println("Program Linked: $link")
-        System.err.println("Program Validated: $validate")
-
-        throw IllegalStateException("A program broke!")
+        if (glGetProgrami(program, GL_VALIDATE_STATUS) == GL_FALSE) {
+            System.err.println(glGetProgramInfoLog(program))
+            throw IllegalStateException("A program did not validate!")
+        }
     }
 
     fun bindAttribute(index: Int, name: String) = glBindAttribLocation(program, index, name)
@@ -41,30 +44,29 @@ open class GLProgram {
     fun getUniform(name: String) = glGetUniformLocation(program, name)
 
     open fun delete() {
-        for ((shader, _) in shaders) {
-            glDetachShader(program, shader)
-            glDeleteShader(shader)
+        val shadersMax = glGetProgrami(program, GL_ATTACHED_SHADERS)
+
+        if (shadersMax > 0) {
+            val shaders = IntArray(shadersMax)
+            glGetAttachedShaders(program, intArrayOf(shadersMax), shaders)
+            shaders.forEach {
+                glDetachShader(program, it)
+                glDeleteShader(it)
+            }
         }
 
-        glUseProgram(0)
         glDeleteProgram(program)
     }
 
     companion object {
-        fun loadShader(file: File, type: Int): Int {
-            val sc = Scanner(file)
-            val data = StringBuilder()
-
-            if (file.exists()) {
-                while (sc.hasNextLine()) {
-                    data.append(sc.nextLine()).append("\n")
-                }
-
-                sc.close()
-            }
-            val id: Int = glCreateShader(type)
-            glShaderSource(id, data)
-            return id
+        fun typeFromFileExtension(ext: String) = when(ext) {
+            "vert" -> GL_VERTEX_SHADER
+            "frag" -> GL_FRAGMENT_SHADER
+            "geom" -> GL_GEOMETRY_SHADER
+            "tesc" -> GL_TESS_CONTROL_SHADER
+            "tese" -> GL_TESS_EVALUATION_SHADER
+            "comp" -> GL_COMPUTE_SHADER
+            else -> throw IllegalArgumentException("$ext is not a valid shader file extension!")
         }
     }
 }
