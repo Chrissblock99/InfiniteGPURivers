@@ -6,7 +6,11 @@ import org.lwjgl.opengl.GL20.*
 import org.lwjgl.opengl.GL32.GL_GEOMETRY_SHADER
 import java.nio.FloatBuffer
 
-class TerrainVAORenderer(protected val cameraMatrix: CameraMatrix) : TerrainRenderer() {
+class TerrainVAORenderer(protected val cameraMatrix: CameraMatrix) : TerrainRenderer("",
+    "terrain/passThrough.vert",
+    "tesselation/normals.geom",
+    "tesselation/colors.frag"
+) {
     private val transformMatrix: Int
     private val cameraPos: Int
     private val waterUniform: Int
@@ -15,13 +19,7 @@ class TerrainVAORenderer(protected val cameraMatrix: CameraMatrix) : TerrainRend
     private val scaleUniform: Int
 
     init {
-        addShader("terrain/passThrough.vert", GL_VERTEX_SHADER)
-        addShader("tesselation/normals.geom", GL_GEOMETRY_SHADER)
-        addShader("tesselation/colors.frag", GL_FRAGMENT_SHADER)
-
         bindAttribute(0, "position")
-
-        validate()
 
         transformMatrix = getUniform("transformMatrix")
         cameraPos = getUniform("cameraPos")

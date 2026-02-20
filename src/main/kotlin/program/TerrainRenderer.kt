@@ -2,7 +2,7 @@ package me.chriss99.program
 
 import me.chriss99.render.TerrainVAO
 
-abstract class TerrainRenderer : RenderProgram<TerrainVAO>() {
+abstract class TerrainRenderer(folder: String = "", vararg fileNames: String) : RenderProgram<TerrainVAO>(folder, * fileNames) {
     override fun render(vaos: Collection<TerrainVAO>) {
         renderTerrain(vaos)
         renderWater(vaos)

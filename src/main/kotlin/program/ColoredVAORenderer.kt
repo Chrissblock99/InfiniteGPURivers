@@ -5,17 +5,15 @@ import me.chriss99.render.ColoredVAO
 import org.lwjgl.opengl.GL20.*
 import java.nio.FloatBuffer
 
-class ColoredVAORenderer(private val cameraMatrix: CameraMatrix) : RenderProgram<ColoredVAO>() {
+class ColoredVAORenderer(private val cameraMatrix: CameraMatrix) : RenderProgram<ColoredVAO>("",
+    "shader.vert",
+    "shader.frag"
+) {
     private val transformMatrix: Int
 
     init {
-        addShader("shader.vert", GL_VERTEX_SHADER)
-        addShader("shader.frag", GL_FRAGMENT_SHADER)
-
         bindAttribute(0, "position")
         bindAttribute(1, "color")
-
-        validate()
 
         transformMatrix = getUniform("transformMatrix")
     }

@@ -6,20 +6,18 @@ import org.lwjgl.opengl.GL20.*
 import org.lwjgl.opengl.GL32.GL_GEOMETRY_SHADER
 import java.nio.FloatBuffer
 
-class IterationVAORenderer(protected val cameraMatrix: CameraMatrix) : RenderProgram<IterationVAO>() {
+class IterationVAORenderer(protected val cameraMatrix: CameraMatrix) : RenderProgram<IterationVAO>("iteration",
+    "passThrough.vert",
+    "normals.geom",
+    "lighting.frag"
+) {
     private val transformMatrix: Int
     private val cameraPos: Int
     private val srcPosUniform: Int
     private val widthUniform: Int
 
     init {
-        addShader("iteration/passThrough.vert", GL_VERTEX_SHADER)
-        addShader("iteration/normals.geom", GL_GEOMETRY_SHADER)
-        addShader("iteration/lighting.frag", GL_FRAGMENT_SHADER)
-
         bindAttribute(0, "position")
-
-        validate()
 
         transformMatrix = getUniform("transformMatrix")
         cameraPos = getUniform("cameraPos")
