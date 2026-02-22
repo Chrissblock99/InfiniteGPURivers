@@ -4,7 +4,6 @@ import me.chriss99.Area
 import me.chriss99.Array2DBufferWrapper
 import glm_.vec2.Vec2i
 import me.chriss99.erosion.GPUAlgorithm.Resource
-import org.lwjgl.opengl.*
 
 class GPUTerrainEroder(private val gpuAlgorithm: GPUAlgorithm, usedArea: Area) {
     init { verifyAreaSize(usedArea.size) }
@@ -29,18 +28,7 @@ class GPUTerrainEroder(private val gpuAlgorithm: GPUAlgorithm, usedArea: Area) {
 
         area -= usedArea.srcPos
 
-        gpuAlgorithm.computationStages.forEach { execComputationStage(it, area) }
-    }
-
-    private fun execComputationStage(computationStage: GPUAlgorithm.ComputationStage, area: Area) {
-        //correct for texture being one larger in all directions
-        var area = area
-        area += Vec2i(1)
-
-        computationStage.computeProgram.use()
-        GL20.glUniform2i(computationStage.srcPosUniform, area.srcPos.x, area.srcPos.y)
-        GL43.glDispatchCompute(area.width, area.height, 1)
-        GL42.glMemoryBarrier(GL42.GL_SHADER_IMAGE_ACCESS_BARRIER_BIT)
+        gpuAlgorithm.computationStages.forEach { it.exec(area) }
     }
 
     fun downloadMap() = gpuAlgorithm.resources.forEach(::downloadHelper)

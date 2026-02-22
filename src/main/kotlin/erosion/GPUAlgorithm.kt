@@ -1,6 +1,7 @@
 package me.chriss99.erosion
 
 import glm_.vec2.Vec2i
+import me.chriss99.Area
 import me.chriss99.Array2DBufferWrapper
 import me.chriss99.Byte2DBufferWrapper
 import me.chriss99.Float2DBufferWrapper
@@ -8,15 +9,16 @@ import me.chriss99.NothingTLM
 import me.chriss99.Texture2D
 import me.chriss99.Vec4f2DBufferWrapper
 import me.chriss99.program.ComputeProgram
+import me.chriss99.util.Util.ceilDiv
 import me.chriss99.worldmanagement.Chunk
 import me.chriss99.worldmanagement.InfiniteChunkWorld
 import me.chriss99.worldmanagement.Region
 import me.chriss99.worldmanagement.TileLoadManager
 import me.chriss99.worldmanagement.iteration.IterableWorld
-import org.lwjgl.opengl.GL15
+import org.lwjgl.opengl.GL45.*
 import java.util.LinkedList
 
-abstract class GPUAlgorithm(val worldName: String, val maxTextureSize: Vec2i) {
+abstract class GPUAlgorithm(val worldName: String, val maxTextureSize: Vec2i, val localSize: Int = 1) {
     val chunkSize = 64
     val regionSize = 10
     val iterationChunkSize = 64
@@ -59,9 +61,9 @@ abstract class GPUAlgorithm(val worldName: String, val maxTextureSize: Vec2i) {
 
 
     enum class Access(val glInt: Int) {
-        READ_ONLY(GL15.GL_READ_ONLY),
-        WRITE_ONLY(GL15.GL_WRITE_ONLY),
-        READ_WRITE(GL15.GL_READ_WRITE)
+        READ_ONLY(GL_READ_ONLY),
+        WRITE_ONLY(GL_WRITE_ONLY),
+        READ_WRITE(GL_READ_WRITE)
     }
 
     inner class Resource(val name: String, type: Array2DBufferWrapper.Type,
@@ -78,10 +80,23 @@ abstract class GPUAlgorithm(val worldName: String, val maxTextureSize: Vec2i) {
     inner class ComputationStage(shaderName: String, access: Map<Resource, Access>) {
         val computeProgram = ComputeProgram(shaderName)
         val srcPosUniform = computeProgram.getUniform("srcPos")
+        val sizeUniform = computeProgram.getUniform("size")
 
         init {
             access.forEach { (resource, value) -> resource.texture.bindUniformImage(computeProgram.program, resources.indexOf(resource), "${resource.name}Map", value.glInt) }
             computationStages.add(this)
+        }
+
+        fun exec(area: Area) {
+            //correct for texture being one larger in all directions
+            var area = area
+            area += Vec2i(1)
+
+            computeProgram.use()
+            glUniform2i(srcPosUniform, area.srcPos.x, area.srcPos.y)
+            glUniform2i(sizeUniform, area.width, area.height)
+            glDispatchCompute(area.width ceilDiv localSize, area.height ceilDiv localSize, 1)
+            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT)
         }
     }
 
