@@ -7,7 +7,7 @@ import me.chriss99.worldmanagement.TileMap2D
 import glm_.vec2.Vec2i
 import glm_.vec3.Vec3
 import glm_.vec3.swizzle.xz
-import me.chriss99.util.Util
+import me.chriss99.util.Util.floorDiv
 
 open class PositionCenteredRenderer<T : ChunkVAO>(
     renderProgram: RenderProgram<T>,
@@ -50,7 +50,7 @@ open class PositionCenteredRenderer<T : ChunkVAO>(
     fun updateLoadedChunks(newPosition: Vec3) = updateLoadedChunks(newPosition, null)
 
     fun updateLoadedChunks(newPosition: Vec3, skipArea: Area?) {
-        loadManager.center = Util.floorDiv(Vec2i(newPosition.xz), chunkSize)
+        loadManager.center = (Vec2i(newPosition.xz) floorDiv chunkSize)
         if (skipArea != null)
             loadManager.skipArea = skipArea / chunkSize
         chunkVaos.manageLoad()

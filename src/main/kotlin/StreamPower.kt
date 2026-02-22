@@ -2,7 +2,8 @@ package me.chriss99
 
 import glm_.vec2.Vec2i
 import me.chriss99.erosion.GPUAlgorithm
-import me.chriss99.util.Util
+import me.chriss99.util.Util.ceilDiv
+import me.chriss99.util.Util.floorDiv
 import me.chriss99.worldmanagement.Chunk
 import me.chriss99.worldmanagement.Region
 
@@ -11,9 +12,9 @@ class StreamPower(worldName: String, maxTextureSize: Vec2i, chunkRenderDistance:
 
 
     val chunkLoadManager = OutsideSquareTLM<Region<Chunk>>(
-        Util.ceilDiv(chunkRenderDistance, regionSize) +
-                Util.ceilDiv(chunkLoadBufferDistance, regionSize),
-        Util.floorDiv(playerPos, chunkSize))
+        (chunkRenderDistance ceilDiv regionSize) +
+                (chunkLoadBufferDistance ceilDiv regionSize),
+        (playerPos floorDiv chunkSize))
 
 
     val height = Resource("height", Array2DBufferWrapper.Type.FLOAT, chunkLoadManager)
@@ -48,9 +49,9 @@ class StreamPower(worldName: String, maxTextureSize: Vec2i, chunkRenderDistance:
     }
 
     override fun updateLoadManagers(chunkRenderDistance: Int, chunkLoadBufferDistance: Int, playerPos: Vec2i) {
-        chunkLoadManager.radius = Util.ceilDiv(chunkRenderDistance, regionSize) +
-                Util.ceilDiv(chunkLoadBufferDistance, regionSize)
-        chunkLoadManager.center = Util.floorDiv(playerPos, chunkSize*regionSize)
+        chunkLoadManager.radius = (chunkRenderDistance ceilDiv regionSize) +
+                (chunkLoadBufferDistance ceilDiv regionSize)
+        chunkLoadManager.center = (playerPos floorDiv (chunkSize*regionSize))
     }
 
     override fun cleanGL() {

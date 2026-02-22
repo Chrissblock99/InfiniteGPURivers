@@ -3,12 +3,12 @@ package me.chriss99
 import me.chriss99.erosion.ErosionManager
 import me.chriss99.program.*
 import me.chriss99.util.FrameCounter
-import me.chriss99.util.Util
 import glm_.vec2.Vec2i
 import glm_.vec3.swizzle.xz
 import me.chriss99.render.ColoredVAO
 import me.chriss99.render.IterationVAOGenerator
 import me.chriss99.render.TerrainVAOGenerator
+import me.chriss99.util.Util.floorDiv
 import org.lwjgl.glfw.GLFW
 import org.lwjgl.opengl.*
 import kotlin.collections.ArrayList
@@ -23,7 +23,7 @@ class Main(
 
     val gpuAlgorithm = StreamPower(worldName, maxErosionSize, chunkRenderDistance, chunkLoadBufferDistance, Vec2i(cameraMatrix.position.xz))
     var simulateErosion = false
-    val erosionManager = ErosionManager(Util.floorDiv(Vec2i(cameraMatrix.position.xz), gpuAlgorithm.chunkSize), gpuAlgorithm, targetIteration)
+    val erosionManager = ErosionManager((Vec2i(cameraMatrix.position.xz) floorDiv gpuAlgorithm.chunkSize), gpuAlgorithm, targetIteration)
 
     val vaoList = ArrayList<ColoredVAO>(listOf<ColoredVAO>()) //test case for rendering
     val vaoListProgram = ListRenderer(ColoredVAORenderer(cameraMatrix), vaoList)
@@ -54,7 +54,7 @@ class Main(
 
 
     fun primitiveErosion() {
-        val pos = Util.floorDiv(Vec2i(cameraMatrix.position.xz), gpuAlgorithm.chunkSize)
+        val pos = (Vec2i(cameraMatrix.position.xz) floorDiv gpuAlgorithm.chunkSize)
         if (erosionManager.findIterate(pos, 100 * 1000 * 1000 / 60))
             iterationRenderer.reloadAll()
         else simulateErosion = false

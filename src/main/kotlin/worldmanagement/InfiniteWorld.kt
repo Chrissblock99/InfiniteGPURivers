@@ -1,7 +1,7 @@
 package me.chriss99.worldmanagement
 
-import me.chriss99.util.Util
 import glm_.vec2.Vec2i
+import me.chriss99.util.Util.floorDiv
 
 open class InfiniteWorld<T>(
     val chunkSize: Int,
@@ -15,7 +15,7 @@ open class InfiniteWorld<T>(
     val allTiles get() = storage.allTiles
 
     operator fun get(pos: Vec2i): T {
-        return storage[Util.floorDiv(pos, regionSize)][pos, { generateChunk(it, chunkSize) }]
+        return storage[pos floorDiv regionSize][pos, { generateChunk(it, chunkSize) }]
     }
 
     fun manageLoad() = storage.manageLoad()

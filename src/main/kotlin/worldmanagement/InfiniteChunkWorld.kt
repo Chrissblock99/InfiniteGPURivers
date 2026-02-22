@@ -2,7 +2,7 @@ package me.chriss99.worldmanagement
 
 import me.chriss99.Area
 import me.chriss99.Array2DBufferWrapper
-import me.chriss99.util.Util
+import me.chriss99.util.Util.floorDiv
 import glm_.vec2.Vec2i
 import kotlin.math.max
 import kotlin.math.min
@@ -37,10 +37,10 @@ class InfiniteChunkWorld(
         val height: Int = data.size.y
 
 
-        val chunkX: Int = Util.floorDiv(x, chunkSize)
-        val chunkY: Int = Util.floorDiv(y, chunkSize)
-        val chunksX: Int = Util.floorDiv(x + width - 1, chunkSize) - chunkX + 1
-        val chunksY: Int = Util.floorDiv(y + height - 1, chunkSize) - chunkY + 1
+        val chunkX: Int = x floorDiv chunkSize
+        val chunkY: Int = y floorDiv chunkSize
+        val chunksX: Int = ((x + width - 1) floorDiv chunkSize) - chunkX + 1
+        val chunksY: Int = ((y + height - 1) floorDiv chunkSize) - chunkY + 1
 
         for (currentChunkX in chunkX..<chunkX + chunksX) for (currentChunkY in chunkY..<chunkY + chunksY) {
             val currentChunk: Chunk = get(Vec2i(currentChunkX, currentChunkY))

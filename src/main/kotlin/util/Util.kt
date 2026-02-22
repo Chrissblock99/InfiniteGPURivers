@@ -3,7 +3,9 @@ package me.chriss99.util
 import glm_.vec2.Vec2i
 import org.lwjgl.BufferUtils
 import java.nio.ByteBuffer
+import kotlin.math.absoluteValue
 import kotlin.math.ceil
+import kotlin.math.sign
 import kotlin.math.sqrt
 
 object Util {
@@ -38,20 +40,20 @@ object Util {
         return x + z * xSize
     }
 
-    fun ceilDiv(a: Int, b: Int): Int {
-        return ceil(a.toDouble() / b.toDouble()).toInt()
+    infix fun Int.ceilDiv(other: Int): Int {
+        return this.floorDiv(other) + this.rem(other).sign.absoluteValue
     }
 
-    fun floorDiv(a: Int, b: Int): Int {
-        return Math.floorDiv(a, b);
+    infix fun Int.floorDiv(other: Int): Int {
+        return Math.floorDiv(this, other)
     }
 
-    fun floorDiv(v: Vec2i, b: Int): Vec2i {
-        return Vec2i(floorDiv(v.x, b), floorDiv(v.y, b))
+    infix fun Vec2i.floorDiv(divider: Int): Vec2i {
+        return Vec2i(x floorDiv divider, y floorDiv  divider)
     }
 
     fun gridSrcOf(pos: Vec2i, scale: Int): Vec2i {
-        return floorDiv(pos, scale).times(scale)
+        return (pos floorDiv scale).times(scale)
     }
 
     fun spiral(n: Int, scale: Int, srcPos: Vec2i): Vec2i {
