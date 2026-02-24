@@ -1,0 +1,60 @@
+#version 450 core
+
+// In
+layout(binding = 2, r32f) readonly uniform image2D tempBedrockMap;
+
+layout(binding = 5, r8i) writeonly uniform iimage2D steepestMap;
+
+
+
+uniform ivec2 srcPos;
+uniform ivec2 size;
+
+// 0: Stream power
+// 1: Stream power + Hillslope (Laplacian)
+// 2: Stream power + Hillslope (Laplacian) + Debris slope
+uniform int erosionMode = 0;
+
+uniform float uplift = 0.01f;
+uniform float k = 0.0005f;
+uniform float k_d = 10.0f;
+uniform float k_h = 2.0f;
+uniform float p_sa = 0.8f;
+uniform float p_sl = 2.0f;
+uniform float dt = 100.0f;
+
+const ivec2 next9[9] = ivec2[9](ivec2(0, 1), ivec2(1, 1), ivec2(1, 0), ivec2(1, -1),
+                                ivec2(0, -1), ivec2(-1, -1), ivec2(-1, 0), ivec2(-1, 1),
+                                ivec2(0, 0));
+
+
+float cellSize = 1176.47;
+
+float slope(ivec2 p, ivec2 q) {
+    if (p == q) return 0.0;
+    float d = cellSize * length(vec2(p)-vec2(q));
+    return (imageLoad(tempBedrockMap, q).x - imageLoad(tempBedrockMap, p).x) / d;
+}
+
+int getOffsetToDownstream(ivec2 p) {
+    int index = 8;
+    float maxSlope = 0.0;
+    for (int i = 0; i < 8; i++) {
+        float ss = slope(p + next9[i], p);
+        if (ss > maxSlope) {
+            maxSlope = ss;
+            index = i;
+        }
+    }
+    return index;
+}
+
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+void main() {
+    ivec2 offset = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 p = srcPos + offset;
+    if (offset.x >= size.x || offset.y >= size.y) return;
+
+    int index = getOffsetToDownstream(p);
+    imageStore(steepestMap, p, ivec4(index));
+}

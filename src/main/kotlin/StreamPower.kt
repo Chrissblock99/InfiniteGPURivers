@@ -7,54 +7,61 @@ import me.chriss99.util.Util.floorDiv
 import me.chriss99.worldmanagement.Chunk
 import me.chriss99.worldmanagement.Region
 
-class StreamPower(worldName: String, maxTextureSize: Vec2i, chunkRenderDistance: Int, chunkLoadBufferDistance: Int, playerPos: Vec2i) : GPUAlgorithm(worldName, maxTextureSize) {
-    private val upliftGenerator = HeightMapGenerator("genHeightMap", 8, chunkSize)
+class StreamPower(worldName: String, maxTextureSize: Vec2i, chunkRenderDistance: Int, chunkLoadBufferDistance: Int, playerPos: Vec2i) : GPUAlgorithm(worldName, maxTextureSize, 8) {
+	val bedrockGenerator = HeightMapGenerator("bedrockInit", 10, 64)
+	val upliftGenerator = HeightMapGenerator("upliftInit", 11, 64)
 
+	val chunkLoadManager = OutsideSquareTLM<Region<Chunk>>(
+		(chunkRenderDistance ceilDiv regionSize) +
+				(chunkLoadBufferDistance ceilDiv regionSize),
+		(playerPos floorDiv chunkSize))
+	
+	val bedrock = Resource("bedrock", Array2DBufferWrapper.Type.FLOAT, chunkLoadManager, bedrockGenerator::generateChunk)
+	val tempBedrock = Resource("tempBedrock", Array2DBufferWrapper.Type.FLOAT)
 
-    val chunkLoadManager = OutsideSquareTLM<Region<Chunk>>(
-        (chunkRenderDistance ceilDiv regionSize) +
-                (chunkLoadBufferDistance ceilDiv regionSize),
-        (playerPos floorDiv chunkSize))
+	val stream = Resource("stream", Array2DBufferWrapper.Type.FLOAT)
+	val tempStream = Resource("tempStream", Array2DBufferWrapper.Type.FLOAT)
 
+	val uplift = Resource("uplift", Array2DBufferWrapper.Type.FLOAT, chunkGenerator = upliftGenerator::generateChunk)
 
-    val height = Resource("height", Array2DBufferWrapper.Type.FLOAT, chunkLoadManager)
-    val drainageArea = Resource("drainageArea", Array2DBufferWrapper.Type.FLOAT)
-    { _, chunkSize -> Chunk(Float2DBufferWrapper(Vec2i(chunkSize), 1f)) }
+	val steepest = Resource("steepest", Array2DBufferWrapper.Type.BYTE)
 
-    val steepestNeighbourOffsetIndex = Resource("steepestNeighbourOffsetIndex", Array2DBufferWrapper.Type.BYTE)
-    val receiverHeight = Resource("receiverHeight", Array2DBufferWrapper.Type.FLOAT)
-    val drainageAreaCopy = Resource("drainageAreaCopy", Array2DBufferWrapper.Type.FLOAT)
-    val laplacian = Resource("laplacian", Array2DBufferWrapper.Type.FLOAT)
+	init {
+		ComputationStage("spe_shader", mapOf(
+			bedrock to Access.READ_ONLY,
+			stream to Access.READ_ONLY,
+			tempBedrock to Access.WRITE_ONLY,
+			tempStream to Access.WRITE_ONLY,
+			uplift to Access.READ_ONLY,
+			steepest to Access.READ_ONLY
+		))
+		ComputationStage("spe_shader_precalc", mapOf(
+			bedrock to Access.READ_ONLY,
+			steepest to Access.WRITE_ONLY
+		))
+		// dual buffering
+		ComputationStage("spe_shader2", mapOf(
+			bedrock to Access.WRITE_ONLY,
+			stream to Access.WRITE_ONLY,
+			tempBedrock to Access.READ_ONLY,
+			tempStream to Access.READ_ONLY,
+			uplift to Access.READ_ONLY,
+			steepest to Access.READ_ONLY
+		))
+		ComputationStage("spe_shader_precalc2", mapOf(
+			tempBedrock to Access.READ_ONLY,
+			steepest to Access.WRITE_ONLY
+		))
+	}
 
-    val uplift = Resource("uplift", Array2DBufferWrapper.Type.FLOAT, chunkGenerator = upliftGenerator::generateChunk)
-
-    init {
-        ComputationStage("calcSteepestAndCopy", mapOf(
-            height to Access.READ_ONLY,
-            drainageArea to Access.READ_ONLY,
-            steepestNeighbourOffsetIndex to Access.WRITE_ONLY,
-            receiverHeight to Access.WRITE_ONLY,
-            drainageAreaCopy to Access.WRITE_ONLY,
-            laplacian to Access.WRITE_ONLY
-        ))
-        ComputationStage("calcDrainageAndErode", mapOf(
-            height to Access.READ_WRITE,
-            drainageArea to Access.READ_WRITE,
-            steepestNeighbourOffsetIndex to Access.READ_ONLY,
-            receiverHeight to Access.READ_ONLY,
-            drainageAreaCopy to Access.READ_ONLY,
-            laplacian to Access.READ_ONLY,
-            uplift to Access.READ_ONLY
-        ))
-    }
-
-    override fun updateLoadManagers(chunkRenderDistance: Int, chunkLoadBufferDistance: Int, playerPos: Vec2i) {
+	override fun updateLoadManagers(chunkRenderDistance: Int, chunkLoadBufferDistance: Int, playerPos: Vec2i) {
         chunkLoadManager.radius = (chunkRenderDistance ceilDiv regionSize) +
                 (chunkLoadBufferDistance ceilDiv regionSize)
         chunkLoadManager.center = (playerPos floorDiv (chunkSize*regionSize))
     }
 
-    override fun cleanGL() {
-        upliftGenerator.delete()
-    }
+	override fun cleanGL() {
+        bedrockGenerator.delete()
+		upliftGenerator.delete()
+	}
 }

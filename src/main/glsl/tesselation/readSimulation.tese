@@ -17,7 +17,7 @@ void main() {
     vec2 position = (p11 - p00) * uv + p00;
     ivec2 texPosition = ivec2(position)+1;
 
-    float height = imageLoad(terrainMap, texPosition).x;
+    float height = imageLoad(terrainMap, texPosition).x/1176.46;
     float otherHeight = height;
 
     float waterHeight = imageLoad(waterMap, texPosition).x - .03;
