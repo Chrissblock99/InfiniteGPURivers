@@ -8,7 +8,7 @@ import me.chriss99.worldmanagement.Chunk
 import me.chriss99.worldmanagement.Region
 
 class StreamPower(worldName: String, maxTextureSize: Vec2i, chunkRenderDistance: Int, chunkLoadBufferDistance: Int, playerPos: Vec2i) : GPUAlgorithm(worldName, maxTextureSize) {
-    private val upliftGenerator = TerrainGenerator(chunkSize)
+    private val upliftGenerator = HeightMapGenerator("genHeightMap", 8, chunkSize)
 
 
     val chunkLoadManager = OutsideSquareTLM<Region<Chunk>>(

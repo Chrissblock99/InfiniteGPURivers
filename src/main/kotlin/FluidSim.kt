@@ -8,7 +8,7 @@ import me.chriss99.worldmanagement.Chunk
 import me.chriss99.worldmanagement.Region
 
 class FluidSim(worldName: String, maxTextureSize: Vec2i, chunkRenderDistance: Int, chunkLoadBufferDistance: Int, playerPos: Vec2i) : GPUAlgorithm(worldName, maxTextureSize) {
-    private val terrainGenerator = TerrainGenerator(chunkSize)
+    private val terrainGenerator = HeightMapGenerator("genHeightMap", 8, chunkSize)
 
     val chunkLoadManager = OutsideSquareTLM<Region<Chunk>>(
         (chunkRenderDistance ceilDiv regionSize) +
