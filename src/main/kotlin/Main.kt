@@ -4,6 +4,7 @@ import me.chriss99.erosion.ErosionManager
 import me.chriss99.program.*
 import me.chriss99.util.FrameCounter
 import glm_.vec2.Vec2i
+import glm_.vec3.Vec3
 import glm_.vec3.swizzle.xz
 import me.chriss99.render.ColoredVAO
 import me.chriss99.render.IterationVAOGenerator
@@ -19,7 +20,7 @@ class Main(
     maxErosionSize: Vec2i, targetIteration: Int
 ) {
     val window = Window("InfiniteGPURivers")
-    val cameraMatrix = CameraMatrix(aspectRatio = window.aspectRatio)
+    val cameraMatrix = CameraMatrix(aspectRatio = window.aspectRatio, position = Vec3(-64, 100, -64))
 
     val gpuAlgorithm = StreamPower(worldName, maxErosionSize, chunkRenderDistance, chunkLoadBufferDistance, Vec2i(cameraMatrix.position.xz))
     var simulateErosion = false
