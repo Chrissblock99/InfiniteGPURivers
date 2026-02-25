@@ -2,13 +2,14 @@ package me.chriss99.program
 
 import me.chriss99.Area
 import me.chriss99.CameraMatrix
+import me.chriss99.Texture2D
 import me.chriss99.render.ColoredVAOGenerator.tesselationGridVertexesTest
 import me.chriss99.glabstractions.VAO
 import me.chriss99.glabstractions.VAOImpl
 import org.lwjgl.opengl.GL40.*
 import java.nio.FloatBuffer
 
-class TessProgram(private val cameraMatrix: CameraMatrix, area: Area) : GLProgram("tesselation",
+class TessProgram(private val cameraMatrix: CameraMatrix, area: Area, bedrockTexture: Texture2D, streamTexture: Texture2D) : GLProgram("tesselation",
     "passThrough.vert",
     "constant.tesc",
     "readSimulation.tese",
@@ -40,6 +41,9 @@ class TessProgram(private val cameraMatrix: CameraMatrix, area: Area) : GLProgra
         cameraPos = getUniform("cameraPos")
         waterUniform = getUniform("water")
         srcPosUniform = getUniform("srcPos")
+
+        bedrockTexture.bindUniformImage(program, 20, "bedrockMap", GL_READ_ONLY)
+        streamTexture.bindUniformImage(program, 21, "streamMap", GL_READ_ONLY)
     }
 
     fun renderTerrain() = render(false)

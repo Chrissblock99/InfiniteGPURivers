@@ -1,7 +1,7 @@
 #version 450 core
 layout (quads, equal_spacing, ccw) in;
-layout(binding = 0, r32f) restrict readonly uniform image2D bedrockMap;
-layout(binding = 1, r32f) restrict readonly uniform image2D streamMap;
+layout(binding = 20, r32f) readonly uniform image2D bedrockMap;
+layout(binding = 21, r32f) readonly uniform image2D streamMap;
 
 uniform bool water;
 uniform ivec2 srcPos;

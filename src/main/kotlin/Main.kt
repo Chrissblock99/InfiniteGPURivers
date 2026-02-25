@@ -46,7 +46,7 @@ class Main(
         cameraMatrix.position, gpuAlgorithm.iterationChunkSize, iterationRenderDistance
     )
     var renderIterations = false
-    val tessProgram = TessProgram(cameraMatrix, erosionManager.usedArea)
+    val tessProgram = TessProgram(cameraMatrix, erosionManager.usedArea, gpuAlgorithm.bedrock.texture, gpuAlgorithm.stream.texture)
 
     val inputController = InputController(window.inputDeviceManager, this)
     init { GLUtil.setupDebugMessageCallback() }
@@ -79,7 +79,7 @@ class Main(
             vaoListProgram.render()
             tessProgram.renderTerrain()
             playerCenteredRenderer.render()
-            //tessProgram.renderWater()
+            tessProgram.renderWater()
             if (renderIterations) iterationRenderer.render()
 
             window.swapBuffers()
