@@ -1,7 +1,7 @@
 #version 450 core
 layout (quads, equal_spacing, ccw) in;
-layout(binding = 0, r32f) restrict readonly uniform image2D terrainMap;
-layout(binding = 1, r32f) restrict readonly uniform image2D waterMap;
+layout(binding = 0, r32f) restrict readonly uniform image2D bedrockMap;
+layout(binding = 1, r32f) restrict readonly uniform image2D streamMap;
 
 uniform bool water;
 uniform ivec2 srcPos;
@@ -17,15 +17,13 @@ void main() {
     vec2 position = (p11 - p00) * uv + p00;
     ivec2 texPosition = ivec2(position)+1;
 
-    float height = imageLoad(terrainMap, texPosition).x/1176.46;
-    float otherHeight = height;
+    float height = imageLoad(bedrockMap, texPosition).x;
+    float waterHeight = imageLoad(streamMap, texPosition).x;
 
-    float waterHeight = imageLoad(waterMap, texPosition).x - .03;
+    vec2 heights = (vec2(0, max(-1, sqrt(waterHeight) - sqrt(1176.46*20))) + height)/1176.46;
     if (water)
-        height += waterHeight - ((waterHeight <= 0) ? .1 : 0);
-    else
-        otherHeight += waterHeight - ((waterHeight <= 0) ? .1 : 0);
+        heights = heights.yx;
 
-    gl_Position =  vec4(position.x + srcPos.x, height, position.y + srcPos.y, 1);
-    oHeight = otherHeight;
+    gl_Position =  vec4(position.x + srcPos.x, heights.x, position.y + srcPos.y, 1);
+    oHeight = heights.y;
 }

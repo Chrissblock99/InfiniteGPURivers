@@ -190,7 +190,7 @@ void main(void) {
         color = vec3(0.375);
     else if (pos.y > 75 + simplexFBM(pos.xz, seed, 4, freq, amp, lacunarity, persistence, false).z)
         color = vec3(0.8, 0.8, 0.9);
-    else if (pos.y > otherHeight)
+    else if (pos.y >= otherHeight)
         color = vec3(.31, .47, .22);
     else
         color = vec3(0.3, 0.2, 0.2);

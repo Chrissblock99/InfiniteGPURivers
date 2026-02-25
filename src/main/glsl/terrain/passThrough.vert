@@ -15,6 +15,10 @@ void main(void) {
     int x = i % width;
     int z = (i - x) / width;
 
-    gl_Position = vec4(x*scale + srcPos.x, water ? position.y : position.x, z*scale + srcPos.y, 1);
-    oHeight = water ? position.x : position.y;
+    vec2 heights = (vec2(0, max(-1, sqrt(position.y) - sqrt(1176.46*20))) + position.x)/1176.46;
+    if (water)
+        heights = heights.yx;
+
+    gl_Position = vec4(x*scale + srcPos.x, heights.x, z*scale + srcPos.y, 1);
+    oHeight = heights.y;
 }
