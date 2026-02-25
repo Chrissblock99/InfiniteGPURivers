@@ -307,6 +307,7 @@ const int seed = 0;
 
 const int octaves = 8;
 const float freq = 0.01;
+const float amp = 30;
 const float lacunarity = 2;
 const float persistence = .5;
 
@@ -315,8 +316,15 @@ void main() {
 
     float height = simplexFBMPositive(pos, seed, 4, freq, 1000, lacunarity, persistence, false).z;
 
-    if (pos.x < 1 || pos.x > 255 || pos.y < 1 || pos.y > 255)
+
+    vec2 strongWarpedPos = pos + vec2(simplexFBM(pos, seed+130, 1, freq, amp*3, 0, 0, false).z,
+    simplexFBM(pos, seed+140, 1, freq, amp*3, 0, 0, false).z);
+
+    float mul = simplexFBMPositive(strongWarpedPos, seed+1, 1, freq/4, 1, 0, 0, false).z;
+
+    if (mul < 0.6)
         height = 0;
+
 
     imageStore(heightMap, ivec2(gl_GlobalInvocationID.xy), vec4(height));
 }
