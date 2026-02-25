@@ -27,6 +27,10 @@ class StreamPower(worldName: String, maxTextureSize: Vec2i, chunkRenderDistance:
 	val steepest = Resource("steepest", Array2DBufferWrapper.Type.BYTE)
 
 	init {
+		ComputationStage("spe_shader_precalc", mapOf(
+			bedrock to Access.READ_ONLY,
+			steepest to Access.WRITE_ONLY
+		))
 		ComputationStage("spe_shader", mapOf(
 			bedrock to Access.READ_ONLY,
 			stream to Access.READ_ONLY,
@@ -35,11 +39,11 @@ class StreamPower(worldName: String, maxTextureSize: Vec2i, chunkRenderDistance:
 			uplift to Access.READ_ONLY,
 			steepest to Access.READ_ONLY
 		))
-		ComputationStage("spe_shader_precalc", mapOf(
-			bedrock to Access.READ_ONLY,
+		// dual buffering
+		ComputationStage("spe_shader_precalc2", mapOf(
+			tempBedrock to Access.READ_ONLY,
 			steepest to Access.WRITE_ONLY
 		))
-		// dual buffering
 		ComputationStage("spe_shader2", mapOf(
 			bedrock to Access.WRITE_ONLY,
 			stream to Access.WRITE_ONLY,
@@ -47,10 +51,6 @@ class StreamPower(worldName: String, maxTextureSize: Vec2i, chunkRenderDistance:
 			tempStream to Access.READ_ONLY,
 			uplift to Access.READ_ONLY,
 			steepest to Access.READ_ONLY
-		))
-		ComputationStage("spe_shader_precalc2", mapOf(
-			tempBedrock to Access.READ_ONLY,
-			steepest to Access.WRITE_ONLY
 		))
 	}
 
