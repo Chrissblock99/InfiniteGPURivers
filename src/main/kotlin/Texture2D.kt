@@ -3,13 +3,17 @@ package me.chriss99
 import me.chriss99.glabstractions.GLObject
 import glm_.vec2.Vec2i
 import org.lwjgl.opengl.GL45.*
-import java.nio.ByteBuffer
 
 class Texture2D(private val internalFormat: Int, val size: Vec2i) : GLObject {
-    private val texture: Int
+    init {
+        val maxSize = glGetInteger(GL_MAX_TEXTURE_SIZE)
+        if (size.anyGreaterThan(maxSize))
+            throw RuntimeException("Max texture size is $maxSize, but a texture of size $size was requested!")
+    }
+
+    private val texture: Int = glGenTextures()
 
     init {
-        texture = glGenTextures()
         bind()
         glTexStorage2D(GL_TEXTURE_2D, 1, internalFormat, size.x, size.y)
     }
