@@ -16,6 +16,9 @@ void main(void) {
     int z = (i - x) / width;
 
     vec2 heights = (vec2(0, max(-1, sqrt(position.y) - sqrt(1176.46*20))) + position.x)/1176.46;
+    if (heights.x == 0)
+        heights.x = -10;
+
     if (water)
         heights = heights.yx;
 
