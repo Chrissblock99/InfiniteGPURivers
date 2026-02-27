@@ -20,7 +20,7 @@ class ErosionTask(
         if (isDone)
             return true
 
-        eroder.erode(currentArea)
+        eroder.erode(currentArea, 0 + currentStep) //TODO THIS SHOULD NOT DEFAULT TO 0!!!!!!!!!!
         currentArea = currentArea.increase(
             if (r == 0) -1 else 1,
             if (f == 0) -1 else 1,

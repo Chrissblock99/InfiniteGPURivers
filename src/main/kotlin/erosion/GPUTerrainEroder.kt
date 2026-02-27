@@ -21,13 +21,13 @@ class GPUTerrainEroder(private val gpuAlgorithm: GPUAlgorithm, usedArea: Area) {
         require(size.allLessThanEqual(gpuAlgorithm.maxTextureSize)) { "Area cannot exceed maxTextureSize!" }
     }
 
-    fun erode(area: Area) {
+    fun erode(area: Area, iteration: Int) {
         var area = area
         require(area in usedArea) { "Area exceeds usedArea! area: $area, usedArea:$usedArea" }
 
         area -= usedArea.srcPos
 
-        gpuAlgorithm.computationStages.forEach { it.exec(area) }
+        gpuAlgorithm.stageAt(iteration).exec(area)
     }
 
     fun downloadMap() = gpuAlgorithm.resources.forEach(::downloadHelper)
