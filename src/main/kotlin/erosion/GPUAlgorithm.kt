@@ -55,6 +55,8 @@ abstract class GPUAlgorithm(val worldName: String, val maxTextureSize: Vec2i, va
         cleanGL()
     }
 
+    open fun stageAt(iteration: Int) = computationStages[iteration % computationStages.size]
+
     protected abstract fun cleanGL()
 
 

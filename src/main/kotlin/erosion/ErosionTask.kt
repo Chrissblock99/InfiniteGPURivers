@@ -3,7 +3,7 @@ package me.chriss99.erosion
 import me.chriss99.Area
 
 class ErosionTask(
-    val eroder: GPUTerrainEroder, val area: Area, val steps: Int,
+    val eroder: GPUTerrainEroder, val area: Area, val iteration: Int, val steps: Int,
     val l: Int, val r: Int, val f: Int, val b: Int
 ) {
     var currentArea = area.increase(
@@ -20,7 +20,7 @@ class ErosionTask(
         if (isDone)
             return true
 
-        eroder.erode(currentArea)
+        eroder.erode(currentArea, iteration + currentStep)
         currentArea = currentArea.increase(
             if (r == 0) -1 else 1,
             if (f == 0) -1 else 1,

@@ -207,7 +207,7 @@ class ErosionManager(pos: Vec2i, val gpuAlgorithm: GPUAlgorithm, targetIteration
     data class IterabilityInfo(val l: Int, val r: Int, val f: Int, val b: Int, val iteration: Int)
 
     private fun createTask(area: Area, l: Int, r: Int, f: Int, b: Int): ErosionTask {
-        return ErosionTask(eroder, area * data.chunkSize, data.chunkSize, l, r, f, b)
+        return ErosionTask(eroder, area * data.chunkSize, data[area.srcPos].iteration, data.chunkSize, l, r, f, b)
     }
 
     private fun taskFinished(task: ErosionTask) {

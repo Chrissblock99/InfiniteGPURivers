@@ -126,7 +126,7 @@ class Main(
             main = Main(
                 "test64",
                 7, 4, 2,
-                Vec2i(60 * 64), 2000
+                Vec2i(90 * 64), 40000
             )
 
             println("Started after: " + (GLFW.glfwGetTime() - start))
