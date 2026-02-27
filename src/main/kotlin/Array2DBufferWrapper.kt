@@ -24,7 +24,7 @@ abstract class Array2DBufferWrapper(val buffer: ByteBuffer, val type: Type, val 
 
 
     enum class Type(val glFormat: Int, val glType: Int, val glInternalFormat: Int) {
-        BYTE(GL_RED, GL_BYTE, GL_R8I),
+        BYTE(GL_RED_INTEGER, GL_BYTE, GL_R8I),
         FLOAT(GL_RED, GL_FLOAT, GL_R32F),
         VEC4F(GL_RGBA, GL_FLOAT, GL_RGBA32F);
 
@@ -36,6 +36,7 @@ abstract class Array2DBufferWrapper(val buffer: ByteBuffer, val type: Type, val 
                 GL_DOUBLE -> 8
                 else -> throw IllegalArgumentException("Array2DBufferWrapper does not support type: $type")
             } * when (format) {
+                GL_RED_INTEGER -> 1
                 GL_RED -> 1
                 GL_RGBA -> 4
                 else -> throw IllegalArgumentException("Array2DBufferWrapper does not support format: $format")
