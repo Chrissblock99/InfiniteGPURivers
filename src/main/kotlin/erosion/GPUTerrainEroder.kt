@@ -1,7 +1,6 @@
 package me.chriss99.erosion
 
 import me.chriss99.Area
-import me.chriss99.Array2DBufferWrapper
 import glm_.vec2.Vec2i
 import me.chriss99.erosion.GPUAlgorithm.Resource
 
@@ -34,9 +33,7 @@ class GPUTerrainEroder(private val gpuAlgorithm: GPUAlgorithm, usedArea: Area) {
     fun downloadMap() = gpuAlgorithm.resources.forEach(::downloadHelper)
 
     private fun downloadHelper(resource: Resource) {
-        val bufferWrapper = Array2DBufferWrapper.of(resource.world.type, usedArea.size)
-        resource.texture.downloadData(Vec2i(1), bufferWrapper)
-        resource.world.writeArea(usedArea.srcPos, bufferWrapper)
+        resource.world.writeArea(usedArea.srcPos, resource.texture.downloadData(Area(usedArea.size) + Vec2i(1)))
     }
 
     fun uploadMap() {

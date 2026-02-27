@@ -4,7 +4,7 @@ import me.chriss99.glabstractions.GLObject
 import glm_.vec2.Vec2i
 import org.lwjgl.opengl.GL45.*
 
-class Texture2D(private val internalFormat: Int, val size: Vec2i) : GLObject {
+class Texture2D(val type: Array2DBufferWrapper.Type, val size: Vec2i) : GLObject {
     init {
         val maxSize = glGetInteger(GL_MAX_TEXTURE_SIZE)
         if (size.anyGreaterThan(maxSize))
@@ -15,18 +15,21 @@ class Texture2D(private val internalFormat: Int, val size: Vec2i) : GLObject {
 
     init {
         bind()
-        glTexStorage2D(GL_TEXTURE_2D, 1, internalFormat, size.x, size.y)
+        glTexStorage2D(GL_TEXTURE_2D, 1, type.glInternalFormat, size.x, size.y)
     }
 
     fun bindUniformImage(program: Int, bindingUnit: Int, name: String, access: Int) {
         glUseProgram(program)
 
-        glBindImageTexture(bindingUnit, texture, 0, false, 0, access, internalFormat)
+        glBindImageTexture(bindingUnit, texture, 0, false, 0, access, type.glInternalFormat)
         val location: Int = glGetUniformLocation(program, name)
         glUniform1i(location, bindingUnit)
     }
 
     fun uploadData(offset: Vec2i, data: Array2DBufferWrapper) {
+        if (data.type != type)
+            throw IllegalArgumentException("Tried to upload data with incorrect type! Should be $type but is ${data.type}.")
+
         bind()
         glTexSubImage2D(
             GL_TEXTURE_2D,
@@ -41,22 +44,24 @@ class Texture2D(private val internalFormat: Int, val size: Vec2i) : GLObject {
         )
     }
 
-    fun downloadData(offset: Vec2i, writeTo: Array2DBufferWrapper) {
+    fun downloadData(area: Area): Array2DBufferWrapper {
+        val bufferWrapper = Array2DBufferWrapper.of(type, area.size)
         bind()
         //excuse me the docs say that I have to use "GL_TEXTURE_2D" instead of "texture"
         glGetTextureSubImage(
             texture,
             0,
-            offset.x,
-            offset.y,
+            area.srcPos.x,
+            area.srcPos.y,
             0,
-            writeTo.size.x,
-            writeTo.size.y,
+            area.size.x,
+            area.size.y,
             1,
-            writeTo.type.glFormat,
-            writeTo.type.glType,
-            writeTo.buffer
+            type.glFormat,
+            type.glType,
+            bufferWrapper.buffer
         )
+        return bufferWrapper
     }
 
     fun downloadFullData(buffer: Array2DBufferWrapper) {

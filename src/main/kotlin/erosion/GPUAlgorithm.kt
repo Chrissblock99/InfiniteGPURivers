@@ -70,7 +70,7 @@ abstract class GPUAlgorithm(val worldName: String, val maxTextureSize: Vec2i, va
                          tileLoadManager: TileLoadManager<Region<Chunk>> = nothingLoadManager,
                          chunkGenerator: (pos: Vec2i, size: Int) -> Chunk = bufferOfTypeConstructor(type)) {
         val world = InfiniteChunkWorld("$worldName/$name", type, chunkSize, regionSize, chunkGenerator, tileLoadManager)
-        val texture: Texture2D = Texture2D(type.glInternalFormat, maxTextureSize+2) //the plus 2 is a read buffer in all directions (avoids implicit out of bound reads when iterating near edges)
+        val texture: Texture2D = Texture2D(type, maxTextureSize+2) //the plus 2 is a read buffer in all directions (avoids implicit out of bound reads when iterating near edges)
         init { resources.add(this) }
 
         fun manageLoad() = world.manageLoad()
