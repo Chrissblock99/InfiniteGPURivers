@@ -1,9 +1,10 @@
 package me.chriss99
 
 import glm_.vec2.Vec2d
+import glm_.vec2.Vec2i
 import me.chriss99.ImageWriter.writeImageHeightMap
 import glm_.vec3.Vec3
-import me.chriss99.render.ColoredVAOGenerator
+import glm_.vec3.swizzle.xz
 import org.lwjgl.glfw.GLFW
 import kotlin.math.*
 
@@ -70,10 +71,12 @@ class InputController(private val inputDeviceManager: InputDeviceManager, privat
         inputDeviceManager.addKeyReleaseCallback(GLFW.GLFW_KEY_I) { main.renderIterations = !main.renderIterations }
         inputDeviceManager.addKeyReleaseCallback(GLFW.GLFW_KEY_R) { main.primitiveErosion() }
         inputDeviceManager.addKeyReleaseCallback(GLFW.GLFW_KEY_G) {
-            val chunkSize = main.gpuAlgorithm.iteration.chunkSize
-            main.vaoList.add(
-                ColoredVAOGenerator.iterabilityInfoToCrossVAO(
-                main.erosionManager.usedArea.srcPos / chunkSize, main.erosionManager.iterabilityInfoCopy, chunkSize))
+            val world = main.gpuAlgorithm.steepest.world
+            val texture = main.gpuAlgorithm.steepest.texture
+            val usedArea = main.erosionManager.usedArea
+            world.writeArea(usedArea.srcPos, texture.downloadData(Area(usedArea.size) + Vec2i(1)))
+
+            println((world.readArea(Area(1) + Vec2i(main.cameraMatrix.position.xz)) as Byte2DBufferWrapper).getByte(0, 0))
         }
         inputDeviceManager.addKeyReleaseCallback(GLFW.GLFW_KEY_H) {
             main.vaoList.forEach { it.delete() }
