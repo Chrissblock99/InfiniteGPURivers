@@ -307,6 +307,7 @@ const int seed = 0;
 
 const int octaves = 8;
 const float freq = 0.01;
+const float voroniFreq = 200;
 const float amp = 30;
 const float lacunarity = 2;
 const float persistence = .5;
@@ -317,12 +318,9 @@ void main() {
     float height = simplexFBMPositive(pos, seed, 4, freq, 1000, lacunarity, persistence, false).z;
 
 
-    vec2 strongWarpedPos = pos + vec2(simplexFBM(pos, seed+130, 1, freq, amp*3, 0, 0, false).z,
-    simplexFBM(pos, seed+140, 1, freq, amp*3, 0, 0, false).z);
+    float mul = random0to1(ivec2(fbmVoroni(pos, seed+1, 4, voroniFreq, 0.25)), seed+2);
 
-    float mul = simplexFBMPositive(strongWarpedPos, seed+1, 1, freq/4, 1, 0, 0, false).z;
-
-    if (mul < 0.6)
+    if (mul < 0.8)
         height = 0;
 
 

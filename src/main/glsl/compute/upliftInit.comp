@@ -307,6 +307,7 @@ const int seed = 0;
 
 const int octaves = 8;
 const float freq = 0.01;
+const float voroniFreq = 200;
 const float amp = 30;
 const float lacunarity = 2;
 const float persistence = .5;
@@ -323,16 +324,24 @@ void main() {
 
     float uplift = sum*10;
 
+
+    vec2 strongWarpedPos = pos + vec2(simplexFBM(pos, seed+130, 1, freq, amp*2, 0, 0, false).z,
+    simplexFBM(pos, seed+140, 1, freq, amp*2, 0, 0, false).z);
+
+    float mountainMul = sqrt(voroniDist(strongWarpedPos, seed+1, voroniFreq).distSqToBorder)/8;
+    mountainMul = smoothstep(0.3, 0.15, mountainMul);
+
+    uplift *= mountainMul;
+
+
+
     uplift += 0.2;
 
 
-    vec2 strongWarpedPos = pos + vec2(simplexFBM(pos, seed+130, 1, freq, amp*3, 0, 0, false).z,
-    simplexFBM(pos, seed+140, 1, freq, amp*3, 0, 0, false).z);
+    float mul = random0to1(ivec2(fbmVoroni(pos, seed+1, 4, voroniFreq, 0.25)), seed+2);
 
-    float mul = simplexFBMPositive(strongWarpedPos, seed+1, 1, freq/4, 1, 0, 0, false).z;
-
-    if (mul < 0.6)
-            uplift = 0;
+    if (mul < 0.8)
+        uplift = 0;
 
 
     imageStore(heightMap, ivec2(gl_GlobalInvocationID.xy), vec4(uplift));
