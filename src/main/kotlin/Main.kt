@@ -56,7 +56,7 @@ class Main(
 
     fun primitiveErosion() {
         val pos = (Vec2i(cameraMatrix.position.xz) floorDiv gpuAlgorithm.chunkSize)
-        if (erosionManager.findIterate(pos, 100 * 1000 * 1000 / 60))
+        if (erosionManager.findIterate(Vec2i(0)/*pos*/, 1000))
             iterationRenderer.reloadAll()
         else simulateErosion = false
         tessProgram.area = erosionManager.usedArea
@@ -126,7 +126,7 @@ class Main(
             main = Main(
                 "test64",
                 7, 4, 2,
-                Vec2i(60 * 64), 2000
+                Vec2i(2 * 64), 63
             )
 
             println("Started after: " + (GLFW.glfwGetTime() - start))
