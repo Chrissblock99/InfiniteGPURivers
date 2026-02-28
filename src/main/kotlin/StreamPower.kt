@@ -7,7 +7,7 @@ import me.chriss99.util.Util.floorDiv
 import me.chriss99.worldmanagement.Chunk
 import me.chriss99.worldmanagement.Region
 
-class StreamPower(worldName: String, maxTextureSize: Vec2i, chunkRenderDistance: Int, chunkLoadBufferDistance: Int, playerPos: Vec2i) : GPUAlgorithm(worldName, maxTextureSize, 8) {
+class StreamPower(worldName: String, maxTextureSize: Vec2i, chunkRenderDistance: Int, chunkLoadBufferDistance: Int, playerPos: Vec2i) : GPUAlgorithm(worldName, maxTextureSize, 1) {
 	val bedrockGenerator = HeightMapGenerator("bedrockInit", 10, 64)
 	val upliftGenerator = HeightMapGenerator("upliftInit", 11, 64)
 
