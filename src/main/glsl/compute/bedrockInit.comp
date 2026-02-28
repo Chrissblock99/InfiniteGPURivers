@@ -322,7 +322,7 @@ void main() {
 
     float mul = simplexFBMPositive(strongWarpedPos, seed+1, 1, freq/4, 1, 0, 0, false).z;
 
-    if (mul < 0.6)
+    if (mul < 0.3)
         height = 0;
 
 
